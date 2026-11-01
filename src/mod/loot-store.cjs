@@ -35,6 +35,7 @@ function createLootStore(userData) {
   }
   function savePreset(payload) {
     const cache = read(), old = Rules.cleanState(cache.loot), name = Rules.presetName(payload.name);
+    if (payload.revision !== old.revision) throw fail('Настройки изменились в другом окне. Откройте их заново.', 409);
     if (!name) throw fail('Введите имя фильтра.');
     if (old.presets.length >= Rules.MAX_PRESETS) throw fail('Сохранено слишком много фильтров.');
     if (old.presets.some(p => p.name.toLocaleLowerCase() === name.toLocaleLowerCase())) throw fail('Фильтр с таким именем уже существует.', 409);

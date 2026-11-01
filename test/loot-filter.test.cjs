@@ -1,6 +1,7 @@
 'use strict';
 const {test}=require('node:test'), assert=require('node:assert/strict');
 const fs=require('node:fs'), os=require('node:os'), path=require('node:path');
+const {flatCollider}=require('./helpers/loot-geometry.cjs');
 const R=require('../src/mod/page/dfo_loot_rules.js');
 const {createSession,controller}=require('../src/mod/page/dfo_loot.js');
 const {createClient}=require('../src/mod/page/dfo_loot_ui.js');
@@ -15,7 +16,7 @@ const tools={
     else{from.splice(from.indexOf(it),1);to.push(it);}
   },
 };
-const host=(lists, entity={items:[],capacity:100},open=()=>({done:false}))=>({kind:'exterior',entity,feet:()=>[0,0,0],blocked:()=>false,open,
+const host=(lists, entity={items:[],capacity:100},open=()=>({done:false}))=>({kind:'exterior',entity,collider:()=>flatCollider,feet:()=>[0,0,0],blocked:()=>false,open,
   sources:()=>lists.map((items,i)=>({key:'loot:'+i,pos:[i,0,0],items:()=>items,visit:fn=>fn(items)}))});
 
 test('white/black lists use ANY selected tag, across axes, and have explicit empty-list semantics',()=>{
@@ -85,7 +86,7 @@ test('cache storage preserves city data; map replacement preserves all loot sett
     const s=createLootStore(dir);s.replaceCityCache({v:1,towns:{abc:{name:'Town'}},asked:{who:3}});
     const first=s.saveSettings({...R.cleanSettings({filter:{mode:'white',tags:['rarity:rare']}}),revision:0});
     assert.equal(first.revision,1);
-    const result=s.savePreset({name:'Мой фильтр',filter:first.filter});
+    const result=s.savePreset({name:'Мой фильтр',filter:first.filter,revision:first.revision});
     const file=JSON.parse(fs.readFileSync(path.join(dir,result.file),'utf8'));
     assert.equal(file.format,'dfo-loot-filter');assert.equal(file.name,'Мой фильтр');assert.deepEqual(file.filter,first.filter);
     assert.equal(s.read().towns.abc.name,'Town');
@@ -93,7 +94,7 @@ test('cache storage preserves city data; map replacement preserves all loot sett
     assert.deepEqual(s.state().presets,result.state.presets);assert.deepEqual(s.state().filter,first.filter);
     assert.equal(s.read().towns.def.name,'New');assert.equal(s.read().asked,undefined);
     assert.throws(()=>s.saveSettings({...R.cleanSettings(),revision:0}),{status:409});
-    assert.throws(()=>s.savePreset({name:'мой фильтр'}),{status:409});
+    assert.throws(()=>s.savePreset({name:'мой фильтр',revision:s.state().revision}),{status:409});
     assert.equal(fs.readdirSync(path.join(dir,'dfo-mod-loot-presets')).length,1);
   }finally{fs.rmSync(dir,{recursive:true,force:true});}
 });
@@ -161,4 +162,97 @@ test('registered custom templates without a declared group match by their global
   assert.equal(R.automatic(it,rule,tools),true);assert.equal(R.compileAuto(rule,tools)(it),true);
   assert.equal(R.automatic({...it,templateIndex:1881},rule,tools),false);
   assert.equal(R.visible(it,{mode:'white',tags:['type:*:1880']},tools),true);
+});
+
+test('failed settings writes restore authoritative cache and local storage; later successful edits still persist',async()=>{
+  const dir=fs.mkdtempSync(path.join(os.tmpdir(),'dfo-loot-write-error-')), memory=new Map(), events=[];
+  try{
+    const handle=wrap(async()=>new Response('not found',{status:404}),{app:{getPath:()=>dir}});
+    let fail=false;
+    const request=(url,init={})=>fail&&init.method==='POST'
+      ? Promise.resolve(new Response(JSON.stringify({error:'Диск недоступен'}),{status:500}))
+      : handle(new Request('dagger://game'+url,init));
+    const client=createClient({request,storage:{getItem:k=>memory.get(k),setItem:(k,v)=>memory.set(k,v)}});
+    client.subscribe((_s,reason)=>events.push(reason));await client.load();
+    await client.update({filter:{mode:'white',tags:['rarity:rare']}});
+    fail=true;await assert.rejects(client.update({filter:{mode:'black',tags:['group:Weapons']}}),{status:500});
+    assert.deepEqual(client.get().filter,{mode:'white',tags:['rarity:rare']});assert.ok(events.includes('rollback'));
+    assert.deepEqual(JSON.parse(memory.get('dfoMod.nearbyLoot')).filter,client.get().filter);
+    assert.deepEqual(createLootStore(dir).state().filter,client.get().filter);
+    fail=false;await client.update({autoLoot:{enabled:true,items:['type:Weapons:131']}});await client.flush();
+    const restarted=createClient({request});await restarted.load();assert.deepEqual(restarted.get(),client.get());
+  }finally{fs.rmSync(dir,{recursive:true,force:true});}
+});
+
+test('a failed in-flight write never rolls back a newer queued checkbox edit',async()=>{
+  let disk=R.cleanState(), release, started;
+  const sent=new Promise(r=>started=r), pending=new Promise(r=>release=r);let posts=0;
+  const request=async(_url,init={})=>{
+    if(init.method==='POST'){
+      const body=JSON.parse(init.body);posts++;
+      if(posts===1){started();await pending;return new Response(JSON.stringify({error:'temporary'}),{status:500});}
+      assert.equal(body.revision,disk.revision);disk={...R.cleanState(body),revision:disk.revision+1};
+    }
+    return new Response(JSON.stringify(disk));
+  };
+  const c=createClient({request});await c.load();
+  const first=c.update({filter:{mode:'white',tags:['rarity:rare']}});await sent;
+  const second=c.update({filter:{mode:'black',tags:['group:Weapons']}});release();
+  const result=await Promise.allSettled([first,second]);assert.equal(result[0].status,'rejected');assert.equal(result[1].status,'fulfilled');
+  assert.deepEqual(c.get().filter,{mode:'black',tags:['group:Weapons']});assert.deepEqual(c.get(),disk);
+});
+
+test('explicit preset Save retries a transient pending settings error and preserves the same active filter after restart',async()=>{
+  const dir=fs.mkdtempSync(path.join(os.tmpdir(),'dfo-loot-preset-retry-'));
+  try{
+    const handle=wrap(async()=>new Response('not found',{status:404}),{app:{getPath:()=>dir}});let fail=true;
+    const request=(url,init={})=>{
+      if(url.endsWith('loot-settings')&&init.method==='POST'&&fail){fail=false;return Promise.resolve(new Response(JSON.stringify({error:'temporary'}),{status:500}));}
+      return handle(new Request('dagger://game'+url,init));
+    };
+    const c=createClient({request});await c.load();
+    const edit=c.update({filter:{mode:'white',tags:['rarity:rare']}}), save=c.savePreset('Повтор');
+    const [a,b]=await Promise.allSettled([edit,save]);assert.equal(a.status,'rejected');assert.equal(b.status,'fulfilled');
+    assert.deepEqual(c.get().filter,b.value.preset.filter);
+    const restarted=createClient({request});await restarted.load();assert.deepEqual(restarted.get(),c.get());
+  }finally{fs.rmSync(dir,{recursive:true,force:true});}
+});
+
+test('a stale preset Save cannot accept a new revision while keeping obsolete active settings',async()=>{
+  const dir=fs.mkdtempSync(path.join(os.tmpdir(),'dfo-loot-preset-conflict-'));
+  try{
+    const handle=wrap(async()=>new Response('not found',{status:404}),{app:{getPath:()=>dir}}), request=(url,init={})=>handle(new Request('dagger://game'+url,init));
+    const a=createClient({request}),b=createClient({request});await a.load();await b.load();
+    await a.update({filter:{mode:'white',tags:['rarity:rare']}});
+    await assert.rejects(b.savePreset('Устаревший'),{status:409});assert.deepEqual(b.get(),a.get());
+    assert.equal(fs.existsSync(path.join(dir,'dfo-mod-loot-presets')),false);
+    const result=await b.savePreset('Текущий');assert.deepEqual(result.preset.filter,a.get().filter);
+  }finally{fs.rmSync(dir,{recursive:true,force:true});}
+});
+
+test('a preset file is rolled back when the shared cache write fails, without losing previously saved presets',()=>{
+  const dir=fs.mkdtempSync(path.join(os.tmpdir(),'dfo-loot-preset-atomic-'));
+  try{
+    const store=createLootStore(dir), first=store.savePreset({name:'Первый',revision:0});
+    fs.mkdirSync(path.join(dir,'dfo-mod-cache.json.tmp'));
+    assert.throws(()=>store.savePreset({name:'Второй',revision:1}));
+    assert.deepEqual(store.state(),first.state);
+    assert.deepEqual(fs.readdirSync(path.join(dir,'dfo-mod-loot-presets')),[first.preset.id+'.json']);
+  }finally{fs.rmSync(dir,{recursive:true,force:true});}
+});
+
+test('collect all rechecks capacity per transfer, takes partial stacks, attempts lighter later items, and preserves filtered-out loot',()=>{
+  const arrows=mk('Arrow','Weapons',131,{stackCount:10}),heavy=mk('Heavy','Armor',102),light=mk('Light'),hidden=mk('Hidden');
+  const h=host([[arrows,heavy],[light,hidden]]),loot=createSession(h,{tools:()=>({
+    planTake(it,{entity}){
+      const used=entity.items.reduce((n,it)=>n+(it.stackCount??1),0),amount=Math.min(it.stackCount??1,5-used);
+      return {ok:amount>0&&it!==heavy,amount,refusal:amount<=0||it===heavy?{reason:'cannotCarry',text:'Native: cannot carry'}:null};
+    },applyTransfer:tools.applyTransfer,
+  })});
+  const result=loot.takeAll([arrows,heavy]);assert.deepEqual(result,{taken:1,failed:2,refusal:'Native: cannot carry'});
+  assert.equal(arrows.stackCount,5);assert.equal(h.entity.items[0].stackCount,5);assert.equal(loot.items().length,4);
+  assert.equal(loot.takeAll([arrows]).taken,0);assert.equal(h.entity.items[0].stackCount,5);
+  h.entity.items.length=0;
+  const again=loot.takeAll([heavy,light]);assert.deepEqual(again,{taken:1,failed:1,refusal:'Native: cannot carry'});
+  assert.deepEqual(h.entity.items,[light]);assert.ok(loot.items().includes(hidden),'a hidden/search-excluded row was not selected');
 });

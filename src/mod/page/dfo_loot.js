@@ -1,4 +1,4 @@
-// Nearby loot uses the game's inventory door and transfers, never a second UI or an auto-pickup loop.
+// Nearby loot references original sources and uses the game's inventory door and transfers.
 (function (root) {
   'use strict';
   const Rules = typeof module === 'object' && module.exports ? require('./dfo_loot_rules.js') : root.__dfoLootRules;
@@ -10,6 +10,52 @@
     (target.aabb.min[0] + target.aabb.max[0]) / 2, target.aabb.min[1],
     (target.aabb.min[2] + target.aabb.max[2]) / 2,
   ]);
+  const MAX_VERTICAL = 1.25, STEP = 0.5, BODY_RADIUS = 0.35;
+  // A direct, supported walking corridor in the LIVE collision world. Sight alone would
+  // admit loot through windows, across pits and in an open stairwell on another storey.
+  function canReach(feet, target, collider) {
+    if (!Array.isArray(feet) || feet.length !== 3 || !Array.isArray(target) || target.length !== 3
+      || !feet.every(Number.isFinite) || !target.every(Number.isFinite)
+      || distance(feet, target) > RADIUS || Math.abs(feet[1] - target[1]) > MAX_VERTICAL
+      || typeof collider?.raycast !== 'function') return false;
+    try {
+      const horizontal = Math.hypot(target[0] - feet[0], target[2] - feet[2]);
+      const steps = Math.max(1, Math.ceil(horizontal / 0.75)), path = [];
+      const filter = { bodies: true };
+      for (let i = 0; i <= steps; i++) {
+        const t = i / steps, p = feet.map((v, j) => v + (target[j] - v) * t);
+        const origin = [p[0], p[1] + STEP + 0.05, p[2]];
+        // surfaceHit also reads the outdoor terrain; raycast alone only sees mesh floors.
+        const hit = collider.surfaceHit?.(origin, [0, -1, 0], 1.35, filter)
+          ?? { dist: collider.raycast(origin, [0, -1, 0], 1.35, filter) };
+        if (!Number.isFinite(hit.dist) || hit.dist < 0 || hit.dist > 1.35 || (hit.normal && hit.normal[1] < 0.6)) return false;
+        p[1] = origin[1] - hit.dist;
+        if (path.length && Math.abs(p[1] - path.at(-1)[1]) > STEP + 0.01) return false;
+        const ceiling = collider.raycast([p[0], p[1] + 0.05, p[2]], [0, 1, 0], 1.75, filter);
+        if (ceiling !== Infinity && !(Number.isFinite(ceiling) && ceiling >= 1.74)) return false;
+        path.push(p);
+      }
+      // Merge level/linear terrain spans: flat rooms cost one corridor check per source,
+      // regardless of how many item stacks they contain.
+      const runs = []; let start = 0;
+      for (let i = 2; i < path.length; i++) {
+        const slope = (path[i][1] - path[start][1]) / (i - start);
+        if (Math.abs(path[i - 1][1] - (path[start][1] + slope * (i - 1 - start))) > 0.025) {
+          runs.push([path[start], path[i - 1]]); start = i - 1;
+        }
+      }
+      runs.push([path[start], path.at(-1)]);
+      const side = horizontal > 0.001 ? [-(target[2] - feet[2]) / horizontal, 0, (target[0] - feet[0]) / horizontal] : [1, 0, 0];
+      for (const [a, b] of runs) for (const height of [0.51, 1.0, 1.65]) for (const width of [-BODY_RADIUS, 0, BODY_RADIUS]) {
+        const origin = a.map((v, j) => v + side[j] * width + (j === 1 ? height : 0));
+        const delta = b.map((v, j) => v - a[j]), length = Math.hypot(...delta);
+        if (length < 0.001) continue;
+        const hit = collider.raycast(origin, delta.map(v => v / length), length, filter);
+        if (hit !== Infinity && !(Number.isFinite(hit) && hit >= length - 0.0001)) return false;
+      }
+      return true;
+    } catch { return false; } // Never fall back to distance-only access after a geometry failure.
+  }
   // Only drawn ground piles, never the hidden backing lists of searchables, coffers or furniture.
   const groundPile = (p) => p && !p.dead && !p.inactive && p.drawn !== false && !p.owner && !p.wild && !p.wildBody;
 
@@ -54,8 +100,15 @@
   function createSession(host, { tools = () => root.__dfoLootTools, settings = () => DEFAULT_SETTINGS, onClose = () => {} } = {}) {
     const view = [], all = [], owners = new Map(), remembered = new WeakMap();
     let lastFilter, show = () => true;
-    let closed = false, moving = false, sorted = false;
-    const inRange = (s) => distance(host.feet(), position(s)) <= RADIUS;
+    let closed = false, moving = false, sorted = false, lastRefusal = null;
+    const accessCache = new Map();
+    const inRange = (s, fresh = false) => {
+      const feet = host.feet(), pos = position(s), collider = host.collider?.(), now = Date.now();
+      const stamp = JSON.stringify([feet, pos]), old = accessCache.get(s.key);
+      if (!fresh && old?.stamp === stamp && old.collider === collider && now - old.at < 150) return old.ok;
+      const ok = canReach(feet, pos, collider);
+      accessCache.set(s.key, { stamp, collider, at: now, ok }); return ok;
+    };
     const refresh = () => {
       if (closed || moving) return;
       const next = new Map();
@@ -83,6 +136,22 @@
         return view;
       },
       rawItems() { refresh(); return all; },
+      takeAll(rows = this.items()) {
+        const wanted = [...new Set(rows)]; let taken = 0, failed = 0, refusal = null;
+        for (const it of wanted) {
+          if (closed) break;
+          const t = tools(), source = owners.get(it) || remembered.get(it), live = source && actualItem(source.items(), it);
+          if (!live || !t?.planTake) { failed++; continue; }
+          const planFor = item => t.planTake(item, { bag: host.entity.items ?? [], entity: host.entity, mode: 'remove', getQuest: host.getQuest });
+          const plan = planFor(live), before = live.stackCount ?? 1;
+          if (!plan.ok || plan.claimsChoice) { failed++; refusal ??= plan.refusal?.text; continue; }
+          if (this.commit('take', it, plan.amount)) {
+            taken++;
+            if (plan.amount < before) { failed++; refusal ??= lastRefusal; }
+          } else { failed++; refusal ??= lastRefusal || planFor(live).refusal?.text; }
+        }
+        return { taken, failed, refusal };
+      },
       autoLoot(rule) {
         refresh(); const selected = Rules.compileAuto(rule, tools());
         let taken = 0, failed = 0;
@@ -101,10 +170,11 @@
       // FROM the display array; deliberately do not call it. Transfer from the LIVE source
       // with the game's own planTake/applyTransfer, then rebuild only the display references.
       commit(dir, item, amount) {
+        lastRefusal = null;
         if (closed || moving || dir !== 'take') return false;
         const previous = owners.get(item) || remembered.get(item), t = tools();
         const source = previous && sources(host).find(s => s.key === previous.key);
-        if (!source || !inRange(source) || !actualItem(source.items(), item)
+        if (!source || !inRange(source, true) || !actualItem(source.items(), item)
           || typeof t?.planTake !== 'function' || typeof t?.applyTransfer !== 'function') { refresh(); return false; }
         let moved = false;
         moving = true;
@@ -113,18 +183,20 @@
         try {
           source.visit((actual) => {
             const live = actualItem(actual, item);
-            if (closed || !live || !inRange(source)) return false;
+            if (closed || !live || !inRange(source, true)) return false;
             const plan = t.planTake(live, { bag: host.entity.items ?? [], entity: host.entity, mode: 'remove', getQuest: host.getQuest });
+            lastRefusal = plan.refusal?.text ?? null;
             if (!plan.ok || !Number.isFinite(amount) || amount <= 0 || amount > plan.amount) return false;
             const before = live.stackCount ?? 1;
             t.applyTransfer(live, { ...plan, amount }, actual, host.entity.items ??= [], { entity: host.entity, toPlayer: true });
             moved = !actual.includes(live) || (live.stackCount ?? 1) < before;
+            if (moved && actual.includes(live)) lastRefusal = t.planTake(live, { bag: host.entity.items ?? [], entity: host.entity, mode: 'remove', getQuest: host.getQuest }).refusal?.text ?? null;
             return moved;
           });
           return moved;
         } finally { root.__dfoLootVisiting = wasVisiting; moving = false; refresh(); }
       },
-      closed() { if (closed) return; closed = true; view.length = 0; all.length = 0; owners.clear(); onClose(); },
+      closed() { if (closed) return; closed = true; view.length = 0; all.length = 0; owners.clear(); accessCache.clear(); onClose(); },
     };
     return loot;
   }
@@ -190,7 +262,7 @@
   }
 
   if (typeof module === 'object' && module.exports) {
-    module.exports = { RADIUS, allowed, distance, position, groundPile, sources, actualItem, createSession, controller };
+    module.exports = { RADIUS, MAX_VERTICAL, canReach, allowed, distance, position, groundPile, sources, actualItem, createSession, controller };
     return;
   }
   if (root.__dfoLoot) return;

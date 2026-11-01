@@ -21,7 +21,7 @@ import (
 	"unsafe"
 )
 
-const appVersion = "1.11.0"
+const appVersion = "1.11.1"
 
 var exeNames = []string{"DFO Online.exe", "Daggerfall Online.exe", "DaggerfallOnline.exe"}
 

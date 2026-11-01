@@ -12,11 +12,12 @@ function outdoor(text, kind) {
   const modes = need(slice, rx(`usingRightHand:\\(\\)=>\\((${ID})\\?\\.liveArm`))[1];
   const talk = need(text.slice(inv.index, start), rx(`say:(${ID})=>(${ID})\\.say\\(\\1\\)`))[2];
   const feet = need(text, rx(`(${ID})=\\(\\)=>\\{let (${ID})=(${ID})\\?\\[\\.\\.\\.(${ID})\\.pos\\]`));
+  const collider = need(text.slice(feet.index, feet.index + 400), rx(`(${ID})\\.raycast\\(${feet[2]},\\[0,-1,0\\],10\\)`))[1];
   const paused = need(text, rx(`blocked:(${ID})\\(\\),entity:${inv[4]},onTap:`))[1];
   const quest = need(text.slice(pool.index, pool.index + 750), rx(`getQuest:(${ID}=>[^,]{1,150}),took:`))[1];
   const bonus = kind === 'world' ? need(text, rx(`(${ID})&&(${ID})\\(\`pile\`,\\1\\)`))[2] : null;
   const pileTaken = bonus ? `pileTaken:p=>${bonus}("pile",p),` : '';
-  const code = `globalThis.__dfoLoot?.register(${JSON.stringify(kind)},{kind:"exterior",entity:${inv[4]},feet:()=>${feet[3]}?${feet[4]}.pos:null,blocked:()=>${paused}(),resolve:()=>${modes}?.mode&&${modes}.mode!=="exterior"?(${modes}.dfoNearbyLoot??false):null,${pileTaken}getQuest:${quest},pools:()=>[${pool[3]},${pool[4]}],dropped:()=>${drop},say:s=>${talk}.say(s),open:loot=>{const w=${inv[1]}({loot});if(w)${talk}.showOverlay(w);return w}})`;
+  const code = `globalThis.__dfoLoot?.register(${JSON.stringify(kind)},{kind:"exterior",entity:${inv[4]},feet:()=>${feet[3]}?${feet[4]}.pos:null,collider:()=>${collider},blocked:()=>${paused}(),resolve:()=>${modes}?.mode&&${modes}.mode!=="exterior"?(${modes}.dfoNearbyLoot??false):null,${pileTaken}getQuest:${quest},pools:()=>[${pool[3]},${pool[4]}],dropped:()=>${drop},say:s=>${talk}.say(s),open:loot=>{const w=${inv[1]}({loot});if(w)${talk}.showOverlay(w);return w}})`;
   return text.slice(0, pool.index) + text.slice(pool.index).replace(pool[0], `${pool[1]}=(${code},${pool[2]}=>${pool[2]}.startsWith(\`foeCorpse:\`)?${pool[3]}:${pool[4]})`);
 }
 
@@ -32,10 +33,11 @@ function modes(text) {
   const drops = need(text, rx(`droppedPool\\(\\)\\{return ${door[3]}===\`dungeon\`\\?${door[4]}\\?\\.droppedPool\\?\\.\\(\\)\\?\\?null:${door[3]}===\`interior\`\\?(${ID}):null\\}`))[1];
   const paused = need(text, rx(`get uiOverlayActive\\(\\)\\{return (${ID})\\(\\)\\}`))[1];
   const transitioning = need(text, rx(`get transitioning\\(\\)\\{return (${ID})\\}`))[1];
+  const interior = need(text.slice(door.index, door.index + 500), rx(`${door[3]}!==\`interior\`\\|\\|!(${ID})`))[1];
   const talk = need(tail, rx(`\\.takeLoot\\(${body[2]},${ID}=>(${ID})\\(`))[1];
   const pileKey = need(text, rx(`(${ID})\\.containerKey\\?\`int:\\$\\{(${ID})\\((${ID})\\)\\}:\\$\\{\\3\\?\\.buildingKey\\?\\?\`\`\\}:\\$\\{\\1\\.containerKey\\}\`:\\1`));
   const bonus = need(text, rx(`(${ID})&&(${ID})\\(\`pile\`,\\1\\)`))[2];
-  const code = `get dfoNearbyLoot(){if(${door[3]}==="dungeon")return ${door[4]}?.dfoNearbyLoot;if(${door[3]}!=="interior")return null;return {kind:"interior",entity:${who},feet:()=>${feet}.pos,blocked:()=>${paused}()||${transitioning},pileTaken:p=>${bonus}("pile",p.containerKey?\`int:\${${pileKey[2]}(${pileKey[3]})}:\${${pileKey[3]}?.buildingKey??""}:\${p.containerKey}\`:p),pools:()=>[${body[6]},${body[7]}],dropped:()=>${drops},say:s=>${talk}(s),getQuest:uid=>${entity[2]}?.machine.getQuest(uid)??null,open:loot=>{const w=${factory[1]}({loot});${factory[4]}(w);return w}}},`;
+  const code = `get dfoNearbyLoot(){if(${door[3]}==="dungeon")return ${door[4]}?.dfoNearbyLoot;if(${door[3]}!=="interior")return null;return {kind:"interior",entity:${who},feet:()=>${feet}.pos,collider:()=>${interior}?.collider,blocked:()=>${paused}()||${transitioning},pileTaken:p=>${bonus}("pile",p.containerKey?\`int:\${${pileKey[2]}(${pileKey[3]})}:\${${pileKey[3]}?.buildingKey??""}:\${p.containerKey}\`:p),pools:()=>[${body[6]},${body[7]}],dropped:()=>${drops},say:s=>${talk}(s),getQuest:uid=>${entity[2]}?.machine.getQuest(uid)??null,open:loot=>{const w=${factory[1]}({loot});${factory[4]}(w);return w}}},`;
   return text.slice(0, door.index) + code + text.slice(door.index);
 }
 
@@ -58,7 +60,7 @@ function dungeon(text) {
   if (!body.includes(quick)) throw new Error('missing dungeon quick door');
   body = body.replace(quick, insertion + quick);
   const quest = need(body, rx(`getQuest:(${ID}=>[^,]{1,150}),took:`))[1];
-  const getter = `get dfoNearbyLoot(){const api=this;return {kind:"dungeon",entity:${f[1]},getQuest:${quest},feet:()=>${near},blocked:()=>api.uiOverlayActive,sources:()=>api.lootTargets().filter(t=>/^(loot|corpse|droppedLoot):/.test(t.key)&&!t.key.startsWith("droppedLoot:pi")).filter(t=>!t.key.startsWith("droppedLoot:")||globalThis.__dfoLootGround(${drop}.pileFor(t.key))).map(t=>({...t,items:()=>api.lootContents(t.key),visit:fn=>api.takeLoot(t.key,"grab",[],fn)})),open:loot=>{if(!api.openLootList(loot.items(),loot))return null;return api.overlayWindow()}}},`;
+  const getter = `get dfoNearbyLoot(){const api=this;return {kind:"dungeon",entity:${f[1]},getQuest:${quest},feet:()=>${near},collider:()=>api.collider,blocked:()=>api.uiOverlayActive,sources:()=>api.lootTargets().filter(t=>/^(loot|corpse|droppedLoot):/.test(t.key)&&!t.key.startsWith("droppedLoot:pi")).filter(t=>!t.key.startsWith("droppedLoot:")||globalThis.__dfoLootGround(${drop}.pileFor(t.key))).map(t=>({...t,items:()=>api.lootContents(t.key),visit:fn=>api.takeLoot(t.key,"grab",[],fn)})),open:loot=>{if(!api.openLootList(loot.items(),loot))return null;return api.overlayWindow()}}},`;
   return text.slice(0, start.index) + getter + body + text.slice(end);
 }
 
@@ -78,10 +80,13 @@ function inventory(text) {
   out = out.replace(/([\w$]+)\(`inventory.store.chestShut`,`The chest stays shut\.`\)/g,
     all => `(${gate[5]}.loot?.nearby?"Лут уже недоступен или превышен допустимый вес.":${all})`);
   const update = need(text, rx(`\\.then\\(\\(\\)=>\\{${ID}\\.delete\\(${ID}\\),(${ID})\\(\\),(${ID})\\(\\)\\}`));
+  const take = need(text, rx(`if\\((${ID})\\.has\\((${ID})\\.kind\\)\\)\\{let (${ID})=${ID}\\(\`button\`,\`act\`,${ID}\\(\`inventory.store.takeAll\`,\`Take all\`\\)\\);\\3\\.onclick=\\(\\)=>(${ID})\\(\`take\`\\)`));
+  const shown = need(text, rx(`function ${take[4]}\\((${ID})\\)\\{${notice}=null;let (${ID})=\\1===\`take\`,${ID}=\\2\\?(${ID})\\(${take[2]}\\.items,(${ID})\\(\\),(${ID})\\)`));
+  out = out.replace(take[0], take[0].replace('if(', `if(!${gate[5]}.loot?.nearby&&`));
   const acts = need(out, rx(`let (${ID})=${ID}\\(\`div\`,\`remoteacts\`\\)`))[1];
   const head = rx(`(${ID})\\.append\\(${acts}\\),(${ID})\\.append\\(\\1\\)`);
   need(out, head);
-  out = out.replace(head, (all, h, col) => `${h}.append(${acts}),globalThis.__dfoLootUI?.toolbar(${h},${gate[5]}.loot,()=>{${update[1]}();${update[2]}()}),${col}.append(${h})`);
+  out = out.replace(head, (all, h, col) => `${h}.append(${acts}),globalThis.__dfoLootUI?.toolbar(${h},${gate[5]}.loot,()=>{${update[1]}();${update[2]}()},{shown:()=>${shown[3]}(${gate[5]}.loot.items(),${shown[4]}(),${shown[5]}),close:()=>${gate[5]}.onExit?.(),notice:text=>{${notice}=text;${picked}=null;${update[1]}();${update[2]}()}}),${col}.append(${h})`);
   return out + `\n;globalThis.__dfoLootTools={...globalThis.__dfoLootTools,planTake:${plan[1]},sort:${sort[1]},nameOf:${sort[2]}};\n`;
 }
 

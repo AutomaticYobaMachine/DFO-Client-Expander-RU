@@ -3,9 +3,9 @@
   const Rules = typeof module === 'object' && module.exports ? require('./dfo_loot_rules.js') : root.__dfoLootRules;
   const STATE_KEY = 'dfoMod.nearbyLoot';
   function createClient({ request = (...a) => root.fetch(...a), storage = null } = {}) {
-    let state = Rules.cleanState(), remoteRevision = 0, generation = 0, version = 0, sequence = 0, queue = Promise.resolve(), loaded;
+    let state = Rules.cleanState(), confirmed = state, remoteRevision = 0, generation = 0, version = 0, sequence = 0, queue = Promise.resolve(), loaded;
     const listeners = new Set();
-    const notify = () => { version++; for (const fn of listeners) fn(state); };
+    const notify = (reason, error) => { version++; for (const fn of listeners) fn(state, reason, error); };
     const local = () => { try { storage?.setItem(STATE_KEY, JSON.stringify(state)); } catch { /* disk cache remains authoritative */ } };
     try { state = Rules.cleanState(JSON.parse(storage?.getItem(STATE_KEY) || 'null')); } catch { /* defaults */ }
     async function json(url, body) {
@@ -16,7 +16,19 @@
     }
     async function read() {
       const next = Rules.cleanState(await json('/dfo-mod/loot-settings'));
-      remoteRevision = next.revision; state = next; local(); notify(); return state;
+      remoteRevision = next.revision; confirmed = state = next; local(); notify('read'); return state;
+    }
+    async function recover(error, seq = sequence) {
+      if (error.status === 409) generation++;
+      if (error.status === 409 || seq === sequence) {
+        try { await read(); } catch { state = confirmed; local(); }
+      }
+      notify('rollback', error);
+    }
+    async function persist(settings, seq) {
+      const saved = Rules.cleanState(await json('/dfo-mod/loot-settings', { ...settings, revision: remoteRevision }));
+      confirmed = saved; remoteRevision = saved.revision;
+      state = seq === sequence ? saved : { ...state, revision: saved.revision, presets: saved.presets }; local(); notify('saved'); return saved;
     }
     const serial = work => {
       const gen = generation;
@@ -31,25 +43,28 @@
       flush: () => queue,
       update(patch) {
         const seq = ++sequence;
-        const next = Rules.cleanSettings({ ...state, ...patch }); state = { ...state, ...next }; local(); notify();
+        const next = Rules.cleanSettings({ ...state, ...patch }); state = { ...state, ...next }; local(); notify('update');
         return serial(async () => {
           if (seq !== sequence) return state; // coalesce rapid checkbox edits before disk writes
           try {
-            const saved = Rules.cleanState(await json('/dfo-mod/loot-settings', { ...next, revision: remoteRevision }));
-            remoteRevision = saved.revision;
-            state = { ...state, revision: saved.revision, presets: saved.presets }; local(); return saved;
+            return await persist(next, seq);
           } catch (e) {
-            if (e.status === 409) { generation++; await read(); }
+            await recover(e, seq);
             throw e;
           }
         });
       },
       savePreset(name) {
-        const filter = Rules.cleanFilter(state.filter);
+        const snapshot = Rules.cleanSettings(state), seq = sequence;
         return serial(async () => {
-          const result = await json('/dfo-mod/loot-presets', { name, filter });
-          const saved = Rules.cleanState(result.state); remoteRevision = saved.revision;
-          state = { ...state, revision: saved.revision, presets: saved.presets }; local(); notify(); return result;
+          try {
+            // A transient failed checkbox write must not produce a preset whose active
+            // filter differs from the disk cache after restart. Retry the explicit Save.
+            if (JSON.stringify(Rules.cleanSettings(confirmed)) !== JSON.stringify(snapshot)) await persist(snapshot, seq);
+            const result = await json('/dfo-mod/loot-presets', { name, filter: snapshot.filter, revision: remoteRevision });
+            const saved = Rules.cleanState(result.state); confirmed = saved; remoteRevision = saved.revision;
+            state = { ...state, revision: saved.revision, presets: saved.presets }; local(); notify('preset'); return result;
+          } catch (e) { await recover(e, seq); throw e; }
         });
       },
     };
@@ -59,6 +74,21 @@
   function createUI({ client, tools = () => root.__dfoLootTools } = {}) {
     const doc = root.document, stack = [];
     let activeLoot = null, repaint = null;
+    let lastError = '';
+    client.subscribe((state, reason, error) => {
+      if (reason === 'rollback') lastError = errorOf(error);
+      else if (['update', 'read', 'preset'].includes(reason)) lastError = '';
+      for (const m of stack) {
+        m.sync?.();
+        if (reason === 'rollback') m.message(lastError, true);
+        else if (['update', 'read', 'preset'].includes(reason)) m.message('');
+      }
+      for (const bar of doc.querySelectorAll('.dfo-loot-actions')) {
+        bar.querySelector('[data-auto-button]')?.setAttribute('aria-pressed', String(state.autoLoot.enabled));
+        const status = bar.querySelector('[role="status"]'); if (status) status.textContent = lastError;
+      }
+      if ((reason === 'rollback' || reason === 'read') && !stack.length && !activeLoot?.isClosed?.()) repaint?.();
+    });
     const el = (tag, cls, text) => {
       const n = doc.createElement(tag); if (cls) n.className = cls; if (text !== undefined) n.textContent = text; return n;
     };
@@ -87,15 +117,20 @@
       node.addEventListener('cancel', e => { e.preventDefault(); e.stopPropagation(); state.close(); });
       node.addEventListener('click', e => e.stopPropagation());
       node.addEventListener('pointerdown', e => e.stopPropagation());
+      node.addEventListener('mousedown', e => e.stopPropagation());
+      node.addEventListener('mouseup', e => e.stopPropagation());
       node.append(status); (doc.getElementById('enhanced-inventory') || doc.body).append(node);
       stack.push(state); node.showModal();
-      return { ...state, content: n => node.insertBefore(n, status) };
+      state.content = n => node.insertBefore(n, status);
+      if (lastError) state.message(lastError, true);
+      return state;
     }
     // Our page scripts run before the game's capture handlers. Dialog keys must never reach the inventory or J.
     root.addEventListener('keydown', e => {
       const top = stack.at(-1); if (!top) return;
       e.stopImmediatePropagation();
-      if (e.key === 'Escape') { e.preventDefault(); top.close(); }
+      // Keep the browser's default action: Escape first dismisses an open native
+      // select menu, then the top dialog via its cancel event. Do not close both.
     }, true);
     const footer = (...buttons) => { const n = el('div', 'dfo-loot-footer'); n.append(...buttons); return n; };
     const checkbox = (text, checked, change, key) => {
@@ -106,7 +141,7 @@
     function tagPicker(selected, changed) {
       const all = Rules.catalog(tools()), picked = new Set(selected), host = el('fieldset'), controls = el('div', 'dfo-loot-tag-controls');
       const known = new Set(all.map(t => t.id));
-      for (const id of selected) if (!known.has(id)) all.push({ id, axis: 'saved', group: 'Сохранённые', label: `Недоступный тег: ${id}` });
+      for (const id of selected) if (!known.has(id)) { known.add(id); all.push({ id, axis: 'saved', group: 'Сохранённые', label: `Недоступный тег: ${id}` }); }
       host.append(el('legend', null, 'Теги предметов'));
       const axis = el('select'); axis.setAttribute('aria-label', 'Группа тегов');
       for (const [id, name] of [['all', 'Все теги'], ...new Map(all.map(t => [t.axis, t.group])).entries()]) {
@@ -128,6 +163,17 @@
       };
       const updateCount = () => { count.textContent = `Выбрано: ${picked.size}. Совпадение хотя бы одного тега. Ряды можно прокручивать колесом.`; };
       grid.addEventListener('wheel', e => { if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return; const was = grid.scrollLeft; grid.scrollLeft += e.deltaY; if (grid.scrollLeft !== was) { e.preventDefault(); e.stopPropagation(); } }, { passive: false });
+      host.sync = tags => {
+        picked.clear(); for (const tag of tags) picked.add(tag);
+        let added = false;
+        for (const id of tags) if (!known.has(id)) { known.add(id); all.push({ id, axis: 'saved', group: 'Сохранённые', label: `Недоступный тег: ${id}` }); added = true; }
+        if (added) {
+          if (![...axis.options].some(o => o.value === 'saved')) { const o = el('option', null, 'Сохранённые'); o.value = 'saved'; axis.append(o); }
+          render();
+        }
+        for (const input of grid.querySelectorAll('input[data-tag]')) input.checked = picked.has(input.dataset.tag);
+        updateCount();
+      };
       axis.onchange = render; search.oninput = render; render(); updateCount(); return host;
     }
     function download(result) {
@@ -142,19 +188,24 @@
       const save = button('Сохранить', null); save.type = 'submit';
       form.append(footer(save, button('Отмена', m.close)));
       form.onsubmit = async e => {
-        e.preventDefault(); save.disabled = true;
-        try { const result = await client.savePreset(input.value); download(result); parent.message(`Пресет «${result.preset.name}» сохранён в файл и кеш.`); m.close(); }
+        e.preventDefault(); if (save.disabled) return; save.disabled = true;
+        try {
+          const result = await client.savePreset(input.value);
+          try { download(result); parent.message(`Пресет «${result.preset.name}» сохранён в файл и кеш.`); }
+          catch { parent.message(`Пресет «${result.preset.name}» сохранён в кеш и файл клиента; браузерный экспорт не удался.`, true); }
+          m.close();
+        }
         catch (err) { m.message(errorOf(err), true); } finally { save.disabled = false; }
       };
       m.content(form); input.focus();
     }
-    async function loadDialog(parent, renderParent) {
+    async function loadDialog(parent) {
       const m = modal('Загрузить фильтр', { small: true });
       let chosen = null;
       const list = el('div', 'dfo-loot-list'); list.setAttribute('role', 'listbox'); list.setAttribute('aria-label', 'Сохранённые фильтры');
       const load = button('Загрузить', async () => {
-        if (!chosen) return; load.disabled = true;
-        try { await client.update({ filter: chosen.filter }); renderParent(); parent.message(`Загружен фильтр «${chosen.name}».`); m.close(); }
+        if (!chosen || load.disabled) return; load.disabled = true;
+        try { await client.update({ filter: chosen.filter }); parent.sync?.(); parent.message(`Загружен фильтр «${chosen.name}».`); m.close(); }
         catch (e) { m.message(errorOf(e), true); } finally { load.disabled = false; }
       }); load.disabled = true;
       m.content(list); m.content(footer(load, button('Отмена', m.close)));
@@ -172,16 +223,19 @@
       if (stack.length) return;
       const m = modal('Лутфильтр', { onClose: () => { if (!activeLoot?.isClosed?.()) repaint?.(); } }), body = el('div'); m.content(body);
       const update = patch => { client.update(patch).catch(e => m.message(errorOf(e), true)); };
-      const render = () => {
-        body.replaceChildren(); const f = client.get().filter, modes = el('div', 'dfo-loot-modes');
-        for (const [id, word] of [['white', 'Белый список'], ['black', 'Чёрный список']]) {
-          const b = button(word, () => { if (f.mode !== id) { update({ filter: { ...client.get().filter, mode: id } }); render(); } });
-          b.setAttribute('aria-pressed', String(f.mode === id)); modes.append(b);
-        }
-        body.append(modes, el('p', 'dfo-loot-note', 'Белый список показывает совпавшее. Чёрный список скрывает совпавшее. Без отмеченных тегов белый список пуст, чёрный показывает всё.'));
-        body.append(tagPicker(f.tags, tags => update({ filter: { ...client.get().filter, tags } })));
+      const modes = el('div', 'dfo-loot-modes'), buttons = new Map();
+      for (const [id, word] of [['white', 'Белый список'], ['black', 'Чёрный список']]) {
+        const b = button(word, () => { if (client.get().filter.mode !== id) update({ filter: { ...client.get().filter, mode: id } }); });
+        buttons.set(id, b); modes.append(b);
+      }
+      const picker = tagPicker(client.get().filter.tags, tags => update({ filter: { ...client.get().filter, tags } }));
+      body.append(modes, el('p', 'dfo-loot-note', 'Белый список показывает совпавшее. Чёрный список скрывает совпавшее. Без отмеченных тегов белый список пуст, чёрный показывает всё.'), picker);
+      m.sync = () => {
+        const f = client.get().filter;
+        for (const [id, b] of buttons) b.setAttribute('aria-pressed', String(f.mode === id));
+        picker.sync(f.tags);
       };
-      render(); m.content(footer(button('Сохранить', () => saveDialog(m)), button('Загрузить', () => loadDialog(m, render)), button('Закрыть', m.close)));
+      m.sync(); m.content(footer(button('Сохранить', () => saveDialog(m)), button('Загрузить', () => loadDialog(m)), button('Закрыть', m.close)));
     }
     function autoDialog() {
       if (stack.length) return;
@@ -189,7 +243,7 @@
       const note = el('p', 'dfo-loot-note', 'Подбирает выбранное до открытия списка. Лутфильтр и поиск окна на автолут не влияют. Без правил ничего не подбирается.'); m.content(note);
       const update = auto => client.update({ autoLoot: auto }).catch(e => m.message(errorOf(e), true));
       const enabled = checkbox('Автолут включён', client.get().autoLoot.enabled, yes => update({ ...client.get().autoLoot, enabled: yes })); enabled.querySelector('input').dataset.autolootEnabled = 'true'; m.content(enabled);
-      m.content(tagPicker(client.get().autoLoot.tags, tags => update({ ...client.get().autoLoot, tags })));
+      const picker = tagPicker(client.get().autoLoot.tags, tags => update({ ...client.get().autoLoot, tags })); m.content(picker);
       const host = el('fieldset'); host.append(el('legend', null, 'Конкретные предметы'));
       const search = el('input'); search.type = 'search'; search.placeholder = 'Найти предмет'; search.setAttribute('aria-label', 'Поиск конкретного предмета'); host.append(search);
       const list = el('div', 'dfo-loot-item-picker'); host.append(list); const info = el('p', 'dfo-loot-note'); host.append(info);
@@ -212,18 +266,39 @@
         if (found.length > limit) list.append(button('Показать ещё', () => { limit += 40; render(); }));
         updateInfo();
       };
+      m.sync = () => {
+        const a = client.get().autoLoot;
+        enabled.querySelector('input').checked = a.enabled; picker.sync(a.tags);
+        for (const input of list.querySelectorAll('input[data-item-key]')) input.checked = a.items.includes(input.dataset.itemKey);
+        updateInfo();
+      };
       search.oninput = () => { limit = 40; render(); }; render(); m.content(host); m.content(footer(button('Закрыть', m.close)));
     }
-    function toolbar(parent, loot, refresh) {
+    function toolbar(parent, loot, refresh, options = {}) {
       if (!loot?.nearby) return;
       styles(); activeLoot = loot; repaint = refresh;
       const bar = el('div', 'dfo-loot-actions');
-      const auto = button('Автолут', autoDialog); auto.setAttribute('aria-pressed', String(client.get().autoLoot.enabled));
-      bar.append(button('Лутфильтр', lootFilter), auto); parent.append(bar); return bar;
+      for (const type of ['click', 'pointerdown', 'mousedown', 'mouseup']) bar.addEventListener(type, e => e.stopPropagation());
+      const auto = button('Автолут', autoDialog); auto.dataset.autoButton = 'true'; auto.setAttribute('aria-pressed', String(client.get().autoLoot.enabled));
+      const status = el('span', 'dfo-loot-status', lastError); status.setAttribute('role', 'status');
+      const take = button('Забрать все', () => {
+        if (take.disabled || stack.length || loot.isClosed()) return;
+        take.disabled = true;
+        try {
+          const shown = () => options.shown?.() ?? loot.items(), result = loot.takeAll(shown());
+          if (!result.failed && !shown().length && options.close) { options.close(); return; }
+          const text = result.refusal || (result.failed ? 'Часть лута не удалось подобрать: предмет недоступен или не помещается в инвентарь.' : '');
+          if (options.notice) options.notice(text); else { status.textContent = text; refresh?.(); }
+        } catch (e) { if (options.notice) options.notice(errorOf(e)); else status.textContent = errorOf(e); }
+        finally { take.disabled = false; }
+      }); take.dataset.takeAll = 'true';
+      bar.append(take, button('Лутфильтр', lootFilter), auto, status); parent.append(bar); return bar;
     }
     function classic(win, loot) {
       if (!win?.hooks || !loot.nearby) return () => {};
-      styles(); const bar = el('div', 'dfo-loot-classicbar'); toolbar(bar, loot, () => {}); doc.body.append(bar);
+      styles(); const bar = el('div', 'dfo-loot-classicbar'); toolbar(bar, loot, () => { win._clampScroll?.(); win._clearInfo?.(); }, {
+        close: () => win._close(), notice: text => { if (text) win.boxes.push({ rows: [{ text, center: true }] }); win._clampScroll?.(); win._clearInfo?.(); },
+      }); doc.body.append(bar);
       return () => { closeAll(); bar.remove(); };
     }
     const closeAll = () => { for (const m of [...stack].reverse()) m.close(); };

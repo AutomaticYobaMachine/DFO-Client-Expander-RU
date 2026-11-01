@@ -3,12 +3,13 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
+const { flatCollider } = require('./helpers/loot-geometry.cjs');
 const { createSession, controller, sources, groundPile } = require('../src/mod/page/dfo_loot.js');
 const { transformAsset, injectPage, EXPECTED } = require('../src/mod/transforms.cjs');
 
 function fixture(records = []) {
   const entity = { items: [], capacity: 20 }, at = [0, 0, 0];
-  const events = [], host = { entity, feet: () => at, blocked: () => false, sources: () => records };
+  const events = [], host = { entity, collider: () => flatCollider, feet: () => at, blocked: () => false, sources: () => records };
   const tools = {
     planTake: it => ({ ok: entity.items.length < entity.capacity, amount: it.stackCount ?? 1 }),
     applyTransfer(item, {amount:n}, list, to) {
@@ -29,7 +30,7 @@ const pile = (key, items, pos = [0, 0, 0]) => ({ key, pos, items: () => items, v
 test('15 m is inclusive and spherical; searchables, graves, chests and invalid coordinates are excluded', () => {
   const f = fixture([
     pile('corpse:1', [item('body')], [9, 0, 12]),
-    pile('loot:0', [item('floor')], [0, 15, 0]),
+    pile('loot:0', [item('floor')], [0, 0, 15]),
     pile('droppedLoot:2', [item('drop')], [14, 0, 0]),
     pile('corpse:2', [item('far')], [15.001, 0, 0]),
     pile('loot:3', [item('other floor')], [12, 10, 0]),
@@ -140,7 +141,7 @@ test('real upstream transfers: gold, partial stacks, sorting and live capacity c
   const entity={name:'Check',stats:{strength:50,endurance:50},items:[],goldPieces:0};
   const records=[pile('corpse:0',first),pile('loot:1',second)];
   const seen=[];
-  const loot=createSession({entity,feet:()=>[0,0,0],sources:()=>records},{tools:()=>({planTake,sort:sortInPlace,nameOf:it=>itemNameParts(it).name,
+  const loot=createSession({entity,collider:()=>flatCollider,feet:()=>[0,0,0],sources:()=>records},{tools:()=>({planTake,sort:sortInPlace,nameOf:it=>itemNameParts(it).name,
     applyTransfer(it,plan,from,to,opts){assert.ok(from===first||from===second);seen.push(from);return applyTransfer(it,plan,from,to,opts);}})});
   const never=()=>assert.fail('not a storage: never use the inventory UI transfer callback');
   assert.equal(loot.items().length,2);
@@ -163,7 +164,7 @@ test('real upstream multiplayer: concurrent detector takes conserve the owner bo
   try {
     const s=await h.scene('street',['mac-0001','eve-0003']);
     await h.runLive(s.net,3500);
-    const sessions=s.them.map(p=>createSession({entity:p.entity,feet:()=>p.feet,pools:()=>[p.pool()],say:()=>{}},{tools:()=>tools}));
+    const sessions=s.them.map(p=>createSession({entity:p.entity,collider:()=>flatCollider,feet:()=>p.feet,pools:()=>[p.pool()],say:()=>{}},{tools:()=>tools}));
     const chosen=sessions.map(l=>l.items().find(it=>h.pieceOf(it)===h.SHORTSWORD));
     assert.ok(chosen.every(Boolean),'both readers have the native authoritative view of the body');
     chosen.forEach((it,i)=>assert.equal(sessions[i].commit('take',it,it.stackCount??1,()=>assert.fail('detector is not storage')),true));
@@ -186,7 +187,7 @@ test('real upstream multiplayer auto-loot: empty whitelist never blocks automati
     const s=await h.scene('building',['mac-0001','eve-0003']);await h.runLive(s.net,3500);
     const type=Rules.typeKey(s.body.find(it=>h.pieceOf(it)===h.SHORTSWORD));
     const settings=Rules.cleanSettings({filter:{mode:'white',tags:[]},autoLoot:{enabled:true,items:[type]}});
-    const sessions=s.them.map(p=>createSession({entity:p.entity,feet:()=>p.feet,pools:()=>[p.pool()],say:()=>{}},{tools:()=>tools,settings:()=>settings}));
+    const sessions=s.them.map(p=>createSession({entity:p.entity,collider:()=>flatCollider,feet:()=>p.feet,pools:()=>[p.pool()],say:()=>{}},{tools:()=>tools,settings:()=>settings}));
     for(const loot of sessions){assert.deepEqual(loot.items(),[]);assert.equal(loot.autoLoot(settings.autoLoot).taken,1);}
     h.run(s.net,h.SETTLED_MS);
     assert.deepEqual(h.misplaced(s),[]);const at=h.census(s).get(h.SHORTSWORD);assert.equal(at.length,1);assert.equal(at[0][1],1);

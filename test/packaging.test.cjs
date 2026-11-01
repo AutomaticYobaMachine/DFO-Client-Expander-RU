@@ -24,7 +24,7 @@ test('distribution installer: install, reinstall and uninstall preserve original
     for(let i=0;i<2;i++){
       run('install');
       const a=openAsar(asar),files=listFiles(a.header);
-      for(const file of ['nearby-loot-transform.cjs','page/dfo_loot.js','transforms.cjs']){
+      for(const file of ['nearby-loot-transform.cjs','loot-tags-transform.cjs','loot-store.cjs','page/dfo_loot_rules.js','page/dfo_loot_ui.js','page/dfo_loot.js','transforms.cjs']){
         assert.ok(files.has('dfo-mod/'+file));assert.deepEqual(readFile(a,'dfo-mod/'+file),fs.readFileSync(path.join(dist,'mod',file)));
       }
       assert.match(readFile(a,'main.cjs').toString(),/dfo-mod\/hook.cjs/);

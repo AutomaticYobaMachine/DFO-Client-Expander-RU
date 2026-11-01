@@ -12,6 +12,7 @@
 const fs = require('node:fs');          // Electron's: reads inside app.asar, where this payload lives
 const path = require('node:path');
 const { transformAsset, injectPage, EXPECTED } = require('./transforms.cjs');
+const { createLootStore } = require('./loot-store.cjs');
 
 const VERSION = (() => { try { return JSON.parse(fs.readFileSync(path.join(__dirname, 'version.json'), 'utf8')).version; } catch { return '?'; } })();
 const DEFAULTS = Object.freeze({
@@ -20,7 +21,7 @@ const DEFAULTS = Object.freeze({
   marksOptions: { onlyVisited: true, markRadiusM: 1200, nameRadiusM: 300, maxMarks: 60 },
 });
 const OWN = Object.freeze({   // served at dagger://game/dfo-mod/<name>
-  'dfo_loot.js': 'page/dfo_loot.js', 'dfo_marks.js': 'page/dfo_marks.js', 'dfo_town.js': 'page/dfo_town.js', 'ru_dict.js': 'page/ru_dict.js', 'ru_i18n.js': 'page/ru_i18n.js',
+  'dfo_loot_rules.js': 'page/dfo_loot_rules.js', 'dfo_loot_ui.js': 'page/dfo_loot_ui.js', 'dfo_loot.js': 'page/dfo_loot.js', 'dfo_marks.js': 'page/dfo_marks.js', 'dfo_town.js': 'page/dfo_town.js', 'ru_dict.js': 'page/ru_dict.js', 'ru_i18n.js': 'page/ru_i18n.js',
   'ru_locale.js': 'page/ru_locale.js', 'ru_items.js': 'page/ru_items.js',
 });
 /** The town map's cache, as the page keeps it (dfo_town.js): <userData>/dfo-mod-cache.json - readable JSON. */
@@ -112,6 +113,7 @@ function wrap(handleDagger, { app = null } = {}) {
   /** THE TOWN MAP'S CACHE: towns' owners, players' guilds, guilds' names - read once at the page's start, written as the
    *  page says (a new file beside, then put in place: a crash mid-write never leaves half a cache). */
   const cacheFile = userData && path.join(userData, 'dfo-mod-cache.json');
+  const lootStore = createLootStore(userData);
   const readCache = () => {
     try { return cacheFile && fs.existsSync(cacheFile) ? fs.readFileSync(cacheFile) : Buffer.from('{}'); } catch (e) { log(`cache read: ${e?.message ?? e}`); return Buffer.from('{}'); }
   };
@@ -119,13 +121,10 @@ function wrap(handleDagger, { app = null } = {}) {
     if (!cacheFile) return 500;
     const text = String(body);
     if (text.length > CACHE_MAX) return 413;
-    try { JSON.parse(text); } catch { return 400; }
-    try {
-      const tmp = `${cacheFile}.tmp`;
-      fs.writeFileSync(tmp, text);
-      fs.renameSync(tmp, cacheFile);
-      return 204;
-    } catch (e) { log(`cache write: ${e?.message ?? e}`); return 500; }
+    let data;
+    try { data = JSON.parse(text); } catch { return 400; }
+    try { lootStore.replaceCityCache(data); return 204; }
+    catch (e) { log(`cache write: ${e?.message ?? e}`); return e.status || 500; }
   }
 
   const serveOwn = (name) => {
@@ -146,6 +145,18 @@ function wrap(handleDagger, { app = null } = {}) {
     if (rel === 'dfo-mod/cache') {
       if (req.method === 'POST') return new Response(null, { status: writeCache(await req.text()) });
       return new Response(readCache(), { headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' } });
+    }
+    if (rel === 'dfo-mod/loot-settings' || rel === 'dfo-mod/loot-presets') {
+      const json = (body, status = 200) => new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' } });
+      try {
+        if (req.method === 'GET') return json(lootStore.state());
+        if (req.method !== 'POST') return json({ error: 'Метод не поддерживается.' }, 405);
+        const body = await req.text();
+        if (Buffer.byteLength(body) > 2 * 1024 * 1024) return json({ error: 'Слишком большой пресет.' }, 413);
+        let data; try { data = JSON.parse(body); } catch { return json({ error: 'Некорректный JSON.' }, 400); }
+        if (!data || typeof data !== 'object' || Array.isArray(data)) return json({ error: 'Некорректные настройки.' }, 400);
+        return json(rel.endsWith('loot-presets') ? lootStore.savePreset(data) : lootStore.saveSettings(data));
+      } catch (e) { log(`loot settings: ${e?.message ?? e}`); return json({ error: e.message || 'Не удалось сохранить настройки.' }, e.status || 500); }
     }
     const packFile = /^(?:play\/)?dfo-mod\/ru-pack\/((?:Text\/(?:(?:Quests|Books)\/)?)?[\w$.-]+\.(?:csv|txt|json))$/.exec(rel);
     if (packFile) {

@@ -102,14 +102,15 @@ test('opening/repeating/reentering an existing window creates exactly one overla
   assert.equal(c.open(), true); assert.equal(n, 2);
 });
 
-test('hotkey ignores chat, search, selects, modifiers and repeats; filters never mount another window', () => {
+test('hotkey ignores chat, search, selects, modifiers and repeats; filters never mount another window', async () => {
   const handlers = [], cfg = { nearbyLoot: { keyCode: 'KeyJ' } };
   const ctx = { __DFO_MOD_CFG__: cfg, console, addEventListener: (type, fn) => handlers.push(fn) };
+  vm.runInNewContext(fs.readFileSync(require.resolve('../src/mod/page/dfo_loot_rules.js'), 'utf8'), ctx);
   vm.runInNewContext(fs.readFileSync(require.resolve('../src/mod/page/dfo_loot.js'), 'utf8'), ctx);
   let mounts=0; ctx.__dfoLoot.register('world', { feet: () => [0,0,0], blocked: () => false, entity: {}, sources: () => [], open: () => { mounts++; return { done: false }; } });
   const key = (extra={}) => ({ code: 'KeyJ', preventDefault(){}, stopImmediatePropagation(){}, ...extra });
   for (const event of [key({repeat:true}), key({target:{closest:()=>({})}}), key({ctrlKey:true}), key({code:'KeyV'})]) handlers[0](event);
-  assert.equal(mounts,0); handlers[0](key());
+  assert.equal(mounts,0); handlers[0](key()); await new Promise(setImmediate);
   for(let i=0;i<30;i++) { handlers[0](key({repeat:true})); handlers[0](key({target:{closest:()=>({})}})); }
   assert.equal(mounts,1);
 });
@@ -173,4 +174,22 @@ test('real upstream multiplayer: concurrent detector takes conserve the owner bo
     assert.notEqual(holders[0][0],"the owner's body");
     sessions.forEach(l=>l.closed());
   } finally {h.restoreRandom();}
+});
+
+test('real upstream multiplayer auto-loot: empty whitelist never blocks automatic takes or duplicates a contested piece',
+  { skip: !process.env.DFO_UPSTREAM_DIR }, async () => {
+  const path=require('node:path'),{pathToFileURL}=require('node:url');
+  const load=file=>import(pathToFileURL(path.join(process.env.DFO_UPSTREAM_DIR,file)).href);
+  const h=await load('test/net/bodyLootHarness.mjs'),tools=await load('src/systems/item/itemTransfer.js');
+  const Rules=require('../src/mod/page/dfo_loot_rules.js');
+  try{
+    const s=await h.scene('building',['mac-0001','eve-0003']);await h.runLive(s.net,3500);
+    const type=Rules.typeKey(s.body.find(it=>h.pieceOf(it)===h.SHORTSWORD));
+    const settings=Rules.cleanSettings({filter:{mode:'white',tags:[]},autoLoot:{enabled:true,items:[type]}});
+    const sessions=s.them.map(p=>createSession({entity:p.entity,feet:()=>p.feet,pools:()=>[p.pool()],say:()=>{}},{tools:()=>tools,settings:()=>settings}));
+    for(const loot of sessions){assert.deepEqual(loot.items(),[]);assert.equal(loot.autoLoot(settings.autoLoot).taken,1);}
+    h.run(s.net,h.SETTLED_MS);
+    assert.deepEqual(h.misplaced(s),[]);const at=h.census(s).get(h.SHORTSWORD);assert.equal(at.length,1);assert.equal(at[0][1],1);
+    sessions.forEach(loot=>{assert.equal(loot.autoLoot(settings.autoLoot).taken,0);loot.closed();});
+  }finally{h.restoreRandom();}
 });

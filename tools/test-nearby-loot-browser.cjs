@@ -3,6 +3,10 @@
 // node tools/test-nearby-loot-browser.cjs /path/to/daggerfall-js-source
 const fs = require('node:fs'), path = require('node:path'), http = require('node:http');
 const assert = require('node:assert/strict');
+const os = require('node:os');
+const { wrap } = require('../src/mod/hook.cjs');
+const userData = fs.mkdtempSync(path.join(os.tmpdir(), 'dfo-browser-'));
+const handle = wrap(async () => new Response('not found', {status:404}), { app: {getPath:()=>userData} });
 const { transformAsset } = require('../src/mod/transforms.cjs');
 const upstream = path.resolve(process.argv[2] || '.');
 const { chromium } = require(path.join(upstream, 'node_modules/playwright'));
@@ -10,7 +14,7 @@ const dist = process.argv[3] ? path.resolve(process.argv[3]) : path.join(upstrea
 const entry = fs.readdirSync(path.join(dist, 'assets')).find(f => f.startsWith('enhancedInventory-') && fs.readFileSync(path.join(dist, 'assets', f), 'utf8').includes('as mountEnhancedInventory'));
 assert(entry, 'Build upstream with Vite before running this check');
 const cache = new Map();
-const html = `<!doctype html><html><head><meta charset="utf-8"><script>window.__DFO_MOD_CFG__={nearbyLoot:{keyCode:'KeyJ'}};</script><script src="/dfo_loot.js"></script></head><body><canvas></canvas><script type="module">
+const html = `<!doctype html><html><head><meta charset="utf-8"><script>window.__DFO_MOD_CFG__={nearbyLoot:{keyCode:'KeyJ'}};</script><script src="/dfo_loot_rules.js"></script><script src="/dfo_loot_ui.js"></script><script src="/dfo_loot.js"></script></head><body><canvas></canvas><script type="module">
 import {mountEnhancedInventory} from '/assets/${entry}';
 const mk=(name,templateIndex,extra={})=>({name,templateIndex,group:'Weapons',stackCount:1,currentCondition:50,maxCondition:50,...extra});
 const rare=mk('Longsword',120,{rarity:'rare'}),plain=mk('Dagger',113),arrows=mk('Arrow',131,{stackCount:10});
@@ -28,11 +32,16 @@ __dfoLoot.register('test',{entity,feet:()=>[0,0,0],blocked:()=>!!win&&!win.done,
 }});
 window.ready=true;
 </script></body></html>`;
-const server = http.createServer((req, res) => {
+const server = http.createServer(async (req, res) => {
   try {
     const url = new URL(req.url, 'http://localhost');
+    if (url.pathname.startsWith('/dfo-mod/loot-') || url.pathname === '/dfo-mod/cache') {
+      const chunks=[]; for await(const c of req) chunks.push(c);
+      const response=await handle(new Request('dagger://game'+url.pathname,{method:req.method,...(req.method==='POST'?{body:Buffer.concat(chunks)}:{})}));
+      res.statusCode=response.status;response.headers.forEach((v,k)=>res.setHeader(k,v));return res.end(Buffer.from(await response.arrayBuffer()));
+    }
     if (url.pathname === '/') { res.setHeader('Content-Type', 'text/html; charset=utf-8'); return res.end(html); }
-    if (url.pathname === '/dfo_loot.js') { res.setHeader('Content-Type', 'text/javascript'); return res.end(fs.readFileSync(path.join(__dirname, '../src/mod/page/dfo_loot.js'))); }
+    if (['/dfo_loot.js','/dfo_loot_rules.js','/dfo_loot_ui.js'].includes(url.pathname)) { res.setHeader('Content-Type', 'text/javascript'); return res.end(fs.readFileSync(path.join(__dirname, '../src/mod/page',url.pathname.slice(1)))); }
     const file = path.resolve(dist, '.' + url.pathname);
     if (!file.startsWith(dist + path.sep)) { res.statusCode=403;return res.end(); }
     let body=fs.readFileSync(file);
@@ -97,7 +106,81 @@ const server = http.createServer((req, res) => {
     await scroller.evaluate(el=>{el.scrollTop=el.scrollHeight;el.dispatchEvent(new Event('scroll'));});
     assert.ok(await page.locator('.loot-win .itemrow').count()<100,'the native list virtualizes 1200+ items');
     assert.equal(await page.evaluate(()=>fixture.mounts),1);
+    const actualTags=await page.evaluate(()=>__dfoLootRules.tagsOf(fixture.rare,__dfoLootTools));
+    for(const expected of ['group:Weapons','page:weapons','rarity:rare','kind:Weapons','material:Iron','state:identified']) assert.ok(actualTags.includes(expected),expected);
+    const hiddenTags=await page.evaluate(()=>__dfoLootRules.tagsOf({...fixture.rare,rarity:'magic',isIdentified:false,enchantments:[{type:0,param:0}],affixes:[{id:'damage',value:10}]},__dfoLootTools));
+    assert.ok(hiddenTags.includes('state:unidentified'));assert.ok(!hiddenTags.includes('material:Iron'));assert.ok(!hiddenTags.includes('affix:damage'));
+    const catalogIds=await page.evaluate(()=>__dfoLootRules.catalog(__dfoLootTools).map(t=>t.id));
+    assert.ok(catalogIds.some(id=>id.startsWith('type:*:')),'custom template definitions without groups are included');
+    for(const expected of ['group:PlantIngredients1','kind:Arrows','rarity:artifact','rarity:aetheric','rarity:gilded','material:Daedric','type:Armor:102','affix:damage','affix:stat:strength','affix:skill:34']) assert.ok(catalogIds.includes(expected),expected);
+    // New controls use the same overlay and actual disk-backed settings endpoint.
+    assert.equal(await page.locator('.loot-win').getByRole('button',{name:'Лутфильтр',exact:true}).count(),1);
+    await page.locator('.loot-win').getByRole('button',{name:'Лутфильтр',exact:true}).click();
+    let filter=page.getByRole('dialog',{name:'Лутфильтр',exact:true});
+    assert.equal(await filter.count(),1);
+    const black=filter.getByRole('button',{name:'Чёрный список',exact:true}),white=filter.getByRole('button',{name:'Белый список',exact:true});
+    assert.equal(await black.getAttribute('aria-pressed'),'true');
+    await white.click();assert.equal(await white.getAttribute('aria-pressed'),'true');assert.equal(await black.getAttribute('aria-pressed'),'false');
+    assert.equal(await white.evaluate(n=>getComputedStyle(n).backgroundColor),'rgb(216, 179, 79)');
+    await black.click();
+    await filter.locator('input[data-tag="type:Weapons:131"]').check();
+    assert.equal(await filter.locator('.dfo-loot-tags').evaluate(n=>getComputedStyle(n).gridTemplateRows.split(' ').length),2);
+    assert.ok(await page.evaluate(()=>__dfoLootRules.catalog(__dfoLootTools).length)>300,'catalog is game-wide, not just nearby drops');
+    if(process.env.DFO_SCREENSHOT_DIR){fs.mkdirSync(process.env.DFO_SCREENSHOT_DIR,{recursive:true});await page.screenshot({path:path.join(process.env.DFO_SCREENSHOT_DIR,'loot-filter.png')});}
+    assert.deepEqual(await page.evaluate(()=>fixture.a.length),1201,'changing a display filter moved no loot');
+    await filter.getByRole('button',{name:'Сохранить',exact:true}).click();
+    let nameDialog=page.getByRole('dialog',{name:'Имя сохранённого фильтра',exact:true});
+    await nameDialog.getByRole('textbox').fill('Лут J');
+    const downloadWait=page.waitForEvent('download');
+    await nameDialog.getByRole('button',{name:'Сохранить',exact:true}).click();
+    const savedDownload=await downloadWait;
+    assert.equal(savedDownload.suggestedFilename(),'Лут J.json');
+    await nameDialog.waitFor({state:'hidden'});
+    const persisted=JSON.parse(fs.readFileSync(path.join(userData,'dfo-mod-cache.json'),'utf8'));
+    assert.equal(persisted.loot.presets[0].name,'Лут J');
+    const presetFile=path.join(userData,'dfo-mod-loot-presets',persisted.loot.presets[0].id+'.json');
+    assert.equal(JSON.parse(fs.readFileSync(presetFile,'utf8')).format,'dfo-loot-filter');
+    await filter.getByRole('button',{name:'Сохранить',exact:true}).click();
+    nameDialog=page.getByRole('dialog',{name:'Имя сохранённого фильтра',exact:true});
+    await nameDialog.getByRole('textbox').fill('Отмена ');await page.keyboard.press('j');assert.equal(await nameDialog.getByRole('textbox').inputValue(),'Отмена j');await page.keyboard.press('Escape');
+    await nameDialog.waitFor({state:'hidden'});assert.equal(await filter.count(),1);assert.equal(await page.evaluate(()=>fixture.mounts),1);
+    await white.click();
+    await filter.getByRole('button',{name:'Загрузить',exact:true}).click();
+    let loadDialog=page.getByRole('dialog',{name:'Загрузить фильтр',exact:true});
+    await loadDialog.getByRole('option',{name:/Лут J/}).click();
+    await loadDialog.getByRole('button',{name:'Отмена',exact:true}).click();
+    assert.equal(await filter.getByRole('button',{name:'Белый список',exact:true}).getAttribute('aria-pressed'),'true','cancel does not apply the selected preset');
+    await filter.getByRole('button',{name:'Загрузить',exact:true}).click();
+    loadDialog=page.getByRole('dialog',{name:'Загрузить фильтр',exact:true});
+    await loadDialog.getByRole('option',{name:/Лут J/}).click();
+    await loadDialog.getByRole('button',{name:'Загрузить',exact:true}).click();
+    await loadDialog.waitFor({state:'hidden'});
+    assert.equal(await filter.getByRole('button',{name:'Чёрный список',exact:true}).getAttribute('aria-pressed'),'true');
+    await filter.getByRole('button',{name:'Закрыть',exact:true}).click();
+    await page.keyboard.press('Escape');await page.locator('#enhanced-inventory').waitFor({state:'hidden'});
+    await page.reload();await page.waitForFunction(()=>window.ready);
+    await page.keyboard.press('j');await page.waitForSelector('.loot-win');
+    assert.equal(await page.locator('.loot-win .itemrow').count(),2,'saved filter hides only Arrow after a reload');
+    assert.equal(await page.evaluate(()=>fixture.b.length),2,'hidden loot remains at its source');
+    await page.locator('.loot-win').getByRole('button',{name:'Автолут',exact:true}).click();
+    const auto=page.getByRole('dialog',{name:'Автолут по J',exact:true});
+    await auto.locator('input[data-autoloot-enabled]').check();
+    await auto.getByRole('searchbox',{name:'Поиск конкретного предмета'}).fill('Arrow');
+    await auto.locator('input[data-item-key="type:Weapons:131"]').check();
+    assert.match(await auto.locator('p.dfo-loot-note').last().innerText(),/Правил: 1/);
+    if(process.env.DFO_SCREENSHOT_DIR)await page.screenshot({path:path.join(process.env.DFO_SCREENSHOT_DIR,'auto-loot.png')});
+    await auto.getByRole('button',{name:'Закрыть',exact:true}).click();
+    await page.evaluate(()=>__dfoLootSettings.flush());
+    assert.equal(await page.evaluate(()=>fixture.entity.items.length),0,'configuring auto-loot alone never picks up items');
+    await page.keyboard.press('Escape');await page.locator('#enhanced-inventory').waitFor({state:'hidden'});
+    await page.keyboard.press('j');await page.waitForSelector('.loot-win');
+    assert.equal(await page.evaluate(()=>fixture.entity.items.find(x=>x.templateIndex===131)?.stackCount),10,'auto-loot bypasses blacklist');
+    assert.equal(await page.evaluate(()=>fixture.b.filter(x=>x.templateIndex===131).length),0);
+    assert.equal(await page.locator('#enhanced-inventory').count(),1);
+    await page.reload();await page.waitForFunction(()=>window.ready);await page.keyboard.press('j');await page.waitForSelector('.loot-win');
+    assert.equal(await page.evaluate(()=>fixture.entity.items.find(x=>x.templateIndex===131)?.stackCount),10,'auto-loot rules survive a restart');
+    assert.equal(await page.locator('.loot-win .itemrow').count(),2);
     assert.deepEqual(errors,[]);
-    console.log('PASS: actual upstream inventory: sort, search, category filters, correct sources, filtered Take all, one overlay, virtualized 1200+ items, no page errors');
-  } finally { await browser?.close();server.close(); }
+    console.log('PASS: actual upstream inventory: sort, search, category filters, correct sources, filtered Take all, one overlay, virtualized 1200+ items, rule dialogs, disk/export presets, restart and filter-independent auto-loot, no page errors');
+  } finally { await browser?.close();server.close();fs.rmSync(userData,{recursive:true,force:true}); }
 })().catch(e=>{console.error(e);process.exitCode=1});

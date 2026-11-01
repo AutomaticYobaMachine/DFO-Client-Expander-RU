@@ -1,6 +1,8 @@
 // Nearby loot uses the game's inventory door and transfers, never a second UI or an auto-pickup loop.
 (function (root) {
   'use strict';
+  const Rules = typeof module === 'object' && module.exports ? require('./dfo_loot_rules.js') : root.__dfoLootRules;
+  const DEFAULT_SETTINGS = Rules.cleanSettings();
   const RADIUS = 15;
   const allowed = (key) => /^(?:loot|corpse|foeCorpse|guardCorpse|droppedLoot):/.test(key);
   const distance = (a, b) => a?.length === 3 && b?.length === 3 ? Math.hypot(...a.map((v, i) => v - b[i])) : Infinity;
@@ -49,8 +51,9 @@
     } catch { return null; }
   }
 
-  function createSession(host, { tools = () => root.__dfoLootTools, onClose = () => {} } = {}) {
-    const view = [], owners = new Map();
+  function createSession(host, { tools = () => root.__dfoLootTools, settings = () => DEFAULT_SETTINGS, onClose = () => {} } = {}) {
+    const view = [], all = [], owners = new Map(), remembered = new WeakMap();
+    let lastFilter, show = () => true;
     let closed = false, moving = false, sorted = false;
     const inRange = (s) => distance(host.feet(), position(s)) <= RADIUS;
     const refresh = () => {
@@ -60,11 +63,15 @@
         if (!allowed(s.key) || !inRange(s)) continue;
         for (const it of s.items() ?? []) if (it && !next.has(it)) next.set(it, s);
       }
+      const filter = settings().filter;
+      if (filter !== lastFilter) { lastFilter = filter; show = Rules.compileFilter(filter, tools()); sorted = false; }
+      const shown = new Set([...next.keys()].filter(show));
+      all.length = 0; all.push(...next.keys());
       // Preserve the user's sort order; source indices are never used to identify a clicked item.
-      for (let i = view.length - 1; i >= 0; i--) if (!next.has(view[i])) view.splice(i, 1);
+      for (let i = view.length - 1; i >= 0; i--) if (!shown.has(view[i])) view.splice(i, 1);
       const kept = new Set(view);
-      for (const it of next.keys()) if (!kept.has(it)) view.push(it);
-      owners.clear(); for (const [it, s] of next) owners.set(it, s);
+      for (const it of shown) if (!kept.has(it)) view.push(it);
+      owners.clear(); for (const [it, s] of next) { owners.set(it, s); remembered.set(it, s); }
     };
     refresh();
     const loot = {
@@ -75,12 +82,27 @@
         if (!sorted && t?.sort && t?.nameOf) { t.sort(view, { nameOf: t.nameOf }); sorted = true; }
         return view;
       },
+      rawItems() { refresh(); return all; },
+      autoLoot(rule) {
+        refresh(); const selected = Rules.compileAuto(rule, tools());
+        let taken = 0, failed = 0;
+        for (const it of [...all].filter(selected)) {
+          if (closed) break;
+          const t = tools(), source = owners.get(it) || remembered.get(it);
+          const live = source && actualItem(source.items(), it);
+          if (!live || !t?.planTake) { failed++; continue; }
+          const plan = t.planTake(live, { bag: host.entity.items ?? [], entity: host.entity, mode: 'remove', getQuest: host.getQuest });
+          if (plan.ok && this.commit('take', it, plan.amount)) taken++; else failed++;
+        }
+        return { taken, failed };
+      },
+      isClosed: () => closed,
       // This is a detector, not a storage collection. The UI's callback would transfer
       // FROM the display array; deliberately do not call it. Transfer from the LIVE source
       // with the game's own planTake/applyTransfer, then rebuild only the display references.
       commit(dir, item, amount) {
         if (closed || moving || dir !== 'take') return false;
-        const previous = owners.get(item), t = tools();
+        const previous = owners.get(item) || remembered.get(item), t = tools();
         const source = previous && sources(host).find(s => s.key === previous.key);
         if (!source || !inRange(source) || !actualItem(source.items(), item)
           || typeof t?.planTake !== 'function' || typeof t?.applyTransfer !== 'function') { refresh(); return false; }
@@ -102,40 +124,66 @@
           return moved;
         } finally { root.__dfoLootVisiting = wasVisiting; moving = false; refresh(); }
       },
-      closed() { if (closed) return; closed = true; view.length = 0; owners.clear(); onClose(); },
+      closed() { if (closed) return; closed = true; view.length = 0; all.length = 0; owners.clear(); onClose(); },
     };
     return loot;
   }
 
-  function controller() {
+  function controller({ client = root.__dfoLootSettings, prepare = () => root.__dfoLootPrepare?.() } = {}) {
     const hosts = new Map();
     let current = null, opening = false;
+    const settings = () => client?.get() ?? DEFAULT_SETTINGS;
+    function hostNow() {
+      const base = [...hosts.values()].reverse().find(h => h.feet());
+      if (!base || base.blocked()) return null;
+      const resolved = base.resolve?.();
+      if (resolved === false) return null;
+      const host = resolved ?? base;
+      return host.feet() && !host.blocked() ? host : null;
+    }
+    function run(host, auto) {
+      const state = { window: null, loot: null, dispose: null };
+      try {
+        const loot = createSession(host, { settings, onClose: () => {
+          state.dispose?.(); root.__dfoLootUI?.closeAll(); if (current === state) current = null;
+        } });
+        state.loot = loot; current = state;
+        if (auto) {
+          const result = loot.autoLoot(settings().autoLoot);
+          if (result.taken) host.say?.(`Автолут: подобрано стопок — ${result.taken}.`);
+          if (result.taken && !loot.rawItems().length) { loot.closed(); return true; }
+        }
+        state.window = host.open(loot);
+        if (!state.window) { loot.closed(); return false; }
+        state.dispose = root.__dfoLootUI?.classic(state.window, loot);
+        return true;
+      } catch (e) {
+        state.loot?.closed(); current = null; console.warn('[dfo-mod] nearby loot:', e); return false;
+      }
+    }
     const api = {
       register(id, host) { hosts.set(id, host); },
+      canOpen: () => !opening && !(current && !current.window?.done) && !!hostNow(),
       open() {
-        if (opening || (current && !current.window?.done)) return false;
-        current = null;
-        const base = [...hosts.values()].reverse().find((h) => h.feet());
-        if (!base) return false;
-        if (base.blocked()) return false;
-        const resolved = base.resolve?.();
-        if (resolved === false) return false;
-        const host = resolved ?? base;
-        if (!host.feet() || host.blocked()) return false;
-        opening = true;
-        const state = { window: null, loot: null };
+        if (!api.canOpen()) return false;
+        const host = hostNow(); opening = true;
+        try { return run(host, false); } finally { opening = false; }
+      },
+      async activate() {
+        if (!api.canOpen()) return false;
+        const initial = hostNow(); opening = true;
         try {
-          const loot = createSession(host, { onClose: () => { if (current === state) current = null; } });
-          state.loot = loot; current = state;
-          state.window = host.open(loot);
-          if (!state.window) { loot.closed(); return false; }
-          return true;
+          await client?.load(); await client?.flush(); await prepare();
+          const host = hostNow();
+          const focused = root.document?.activeElement;
+          if (!host || host.kind !== initial.kind || host.entity !== initial.entity || focused?.closest?.('input,textarea,select,[contenteditable]:not([contenteditable="false"]),[role="textbox"]')) return false;
+          return run(host, true);
         } catch (e) {
-          state.loot?.closed(); current = null;
-          console.warn('[dfo-mod] nearby loot:', e);
-          return false;
+          initial.say?.('Не удалось загрузить настройки лута. Повторите нажатие J.');
+          console.warn('[dfo-mod] loot settings:', e); return false;
         } finally { opening = false; }
       },
+      isOpening: () => opening,
       isOpen: () => !!current && !current.window?.done,
     };
     return api;
@@ -154,7 +202,8 @@
     if (e.defaultPrevented || e.code !== (cfg.keyCode || 'KeyJ') || e.ctrlKey || e.altKey || e.metaKey || e.shiftKey) return;
     if (e.target?.closest?.('input,textarea,select,[contenteditable]:not([contenteditable="false"]),[role="textbox"]')) return;
     if (api.isOpen()) { e.preventDefault(); e.stopImmediatePropagation(); return; }
-    if (e.repeat || !api.open()) return;
-    e.preventDefault(); e.stopImmediatePropagation();
+    if (api.isOpening()) { e.preventDefault(); e.stopImmediatePropagation(); return; }
+    if (e.repeat || !api.canOpen()) return;
+    e.preventDefault(); e.stopImmediatePropagation(); void api.activate();
   }, true);
 })(globalThis);

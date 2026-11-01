@@ -8,6 +8,7 @@
 // abandoned DFO_RU patcher, its hooks rewritten to survive new builds).
 'use strict';
 const { transformNearby } = require('./nearby-loot-transform.cjs');
+const { transformTags } = require('./loot-tags-transform.cjs');
 
 /** Translate `v` in place when the RU runtime is loaded - a statement. */
 const TR = (v) => `if(typeof globalThis.__translate=="function"&&typeof ${v}=="string"&&${v})${v}=globalThis.__translate(${v});`;
@@ -435,7 +436,7 @@ function transformAsset(rel, text, ctx) {
     if (!tr.on(t, rel)) continue;
     try { t = tr.run(t, log, ctx, rel); } catch (err) { log.push([`${tr.id}!error ${err?.message ?? err}`, 0]); }
   }
-  if (ctx.nearbyLoot !== false) t = transformNearby(rel, t, log);
+  if (ctx.nearbyLoot !== false) t = transformTags(rel, transformNearby(rel, t, log), log);
   return { text: t, log };
 }
 
@@ -447,7 +448,7 @@ function injectPage(html, prefix, ctx) {
   if (ctx.ru && !html.includes('ru_dict.js')) tags.push(`<script src="${prefix}dfo-mod/ru_dict.js"></script>`, `<script src="${prefix}dfo-mod/ru_i18n.js"></script>`);
   tags.push(`<script src="${prefix}dfo-mod/ru_locale.js"></script>`, `<script src="${prefix}dfo-mod/ru_items.js"></script>`);
   tags.push(`<script src="${prefix}dfo-mod/dfo_marks.js"></script>`, `<script src="${prefix}dfo-mod/dfo_town.js"></script>`);
-  if (ctx.nearbyLoot !== false) tags.push(`<script src="${prefix}dfo-mod/dfo_loot.js"></script>`);
+  if (ctx.nearbyLoot !== false) tags.push(...['dfo_loot_rules.js', 'dfo_loot_ui.js', 'dfo_loot.js'].map(f => `<script src="${prefix}dfo-mod/${f}"></script>`));
   const at = html.indexOf('<script type="module"');
   if (at < 0) return html.replace('</head>', `${tags.join('\n  ')}\n</head>`);
   return `${html.slice(0, at)}${tags.join('\n  ')}\n  ${html.slice(at)}`;
@@ -456,7 +457,7 @@ function injectPage(html, prefix, ctx) {
 /** The hooks a working install finds somewhere in the game's files - one missing from every file means that feature is
  *  off in this version of the game (the log says which). The other ids are older shapes of the same places. */
 const EXPECTED = Object.freeze({
-  nearbyLoot: ['loot.world', 'loot.exterior', 'loot.modes', 'loot.dungeon', 'loot.inventory', 'loot.transfer', 'loot.arrows'],
+  nearbyLoot: ['loot.tags', 'loot.types', 'loot.kinds', 'loot.identified', 'loot.bound', 'loot.bootstrap', 'loot.world', 'loot.exterior', 'loot.modes', 'loot.dungeon', 'loot.inventory', 'loot.transfer', 'loot.arrows'],
   marks: ['marks.world', 'marks.townSources', 'marks.list', 'marks.look', 'marks.glyph', 'marks.groups', 'marks.words', 'marks.group', 'marks.discovery',
     'prices.shopAdj', 'prices.skills', 'prices.cost', 'prices.trade', 'prices.noGuild',
     'town.charter', 'town.frame', 'town.markFilter', 'town.camera', 'town.cameraTurn', 'town.names', 'town.host', 'town.econ', 'town.doors', 'town.found', 'town.sessions', 'town.tag', 'town.armsSeen', 'town.armsOf'],

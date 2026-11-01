@@ -77,6 +77,11 @@ function inventory(text) {
   out = out.replace(held, (all) => all.replace('then(()=>{', `then(_dfoOk=>{if(${gate[5]}.loot?.nearby){${picked}=null;if(_dfoOk===false)${notice}="Лут уже недоступен или превышен допустимый вес.";}`));
   out = out.replace(/([\w$]+)\(`inventory.store.chestShut`,`The chest stays shut\.`\)/g,
     all => `(${gate[5]}.loot?.nearby?"Лут уже недоступен или превышен допустимый вес.":${all})`);
+  const update = need(text, rx(`\\.then\\(\\(\\)=>\\{${ID}\\.delete\\(${ID}\\),(${ID})\\(\\),(${ID})\\(\\)\\}`));
+  const acts = need(out, rx(`let (${ID})=${ID}\\(\`div\`,\`remoteacts\`\\)`))[1];
+  const head = rx(`(${ID})\\.append\\(${acts}\\),(${ID})\\.append\\(\\1\\)`);
+  need(out, head);
+  out = out.replace(head, (all, h, col) => `${h}.append(${acts}),globalThis.__dfoLootUI?.toolbar(${h},${gate[5]}.loot,()=>{${update[1]}();${update[2]}()}),${col}.append(${h})`);
   return out + `\n;globalThis.__dfoLootTools={...globalThis.__dfoLootTools,planTake:${plan[1]},sort:${sort[1]},nameOf:${sort[2]}};\n`;
 }
 

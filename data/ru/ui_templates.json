@@ -1,0 +1,3222 @@
+[
+{
+"re": "^The\\ chapter's\\ health,\\ from\\ (.*?)\\ to\\ (.*?),\\ starting\\ at\\ (.*?)\\.\\ The\\ week's\\ mark\\ is\\ (.*?)\\ Merit\\ for\\ every\\ 100\\ active\\ players\\ \\(at\\ least\\ (.*?)\\)\\.\\ At\\ each\\ Turning\\ \\(Sunday\\ 18:00\\ UTC\\),\\ Strength\\ rises\\ 1\\ for\\ each\\ mark\\ its\\ members'\\ Merit\\ reached\\ that\\ week,\\ up\\ to\\ (.*?)\\.\\ A\\ week\\ below\\ the\\ mark\\ moves\\ a\\ chapter\\ above\\ (.*?)\\ back\\ (.*?)\\ toward\\ it\\.\\ A\\ week\\ with\\ no\\ Merit\\ costs\\ (.*?)\\.\\ A\\ Failing\\ chapter\\ loses\\ (.*?)\\ more\\ unless\\ its\\ Merit\\ reaches\\ (.*?)\\ the\\ mark\\.\\ A\\ Rivalry's\\ winner\\ takes\\ (.*?)\\ from\\ the\\ loser,\\ and\\ a\\ Season's\\ end\\ moves\\ every\\ chapter\\ halfway\\ back\\ to\\ (.*?)\\.$",
+"rep": "Состояние отделения — от $1 до $2, начальное $3. Недельная планка — $4 заслуг на каждые 100 активных игроков (не меньше $5). На каждом Повороте (воскресенье, 18:00 UTC) Сила растёт на 1 за каждую планку, которой достигли заслуги членов за неделю, до $6. Неделя ниже планки сдвигает отделение выше $7 на $8 назад к ней. Неделя без заслуг стоит $9. Угасающее отделение теряет ещё $10, если его заслуги не достигнут $11 планки. Победитель Соперничества забирает $12 у проигравшего, а конец Сезона возвращает каждое отделение на полпути к $13."
+},
+{
+"re": "^When\\ one\\ of\\ the\\ house\\ dies\\ for\\ good,\\ their\\ best\\ weapon\\ or\\ armor\\ may\\ stay\\ where\\ they\\ fell\\ as\\ an\\ heirloom,\\ with\\ their\\ remains\\ and\\ (.*?)\\ of\\ their\\ purse\\ \\(at\\ most\\ (.*?)\\)\\.\\ The\\ next\\ of\\ the\\ line\\ gets\\ a\\ quest\\ to\\ bring\\ them\\ home\\.\\ An\\ heirloom\\ grows\\ a\\ step\\ each\\ time\\ it\\ is\\ laid\\ to\\ rest\\ beside\\ the\\ remains\\ of\\ the\\ one\\ who\\ carried\\ it\\ \\(\\+(.*?)%\\ damage\\ or\\ \\+(.*?)\\ armor\\ a\\ step,\\ up\\ to\\ (.*?)\\)\\.\\ Laying\\ the\\ remains\\ to\\ rest\\ also\\ gives\\ \\+(.*?)\\ to\\ the\\ fallen's\\ best\\ skill\\ \\(at\\ most\\ \\+(.*?)\\ on\\ one\\ skill\\)\\.$",
+"rep": "Когда кто-то из дома умирает навсегда, его лучшее оружие или доспех может остаться там, где он пал, как реликвия — вместе с останками и $1 его кошелька (не больше $2). Следующий в роду получает задание вернуть их домой. Реликвия растёт на ступень всякий раз, когда её упокоивают рядом с останками того, кто её носил (+$3% урона или +$4 брони за ступень, до $5). Упокоение останков также даёт +$6 к лучшему навыку павшего (не больше +$7 к одному навыку)."
+},
+{
+"re": "^Your\\ work\\ for\\ a\\ chapter\\ this\\ week\\.\\ You\\ earn\\ (.*?)\\ for\\ filling\\ your\\ own\\ chapter\\ writ\\ \\(one\\ a\\ day,\\ and\\ bought\\ goods\\ earn\\ none\\),\\ and\\ a\\ share\\ of\\ (.*?)\\ for\\ each\\ Dagon's\\ Breach\\ closed\\ or\\ raided\\ town\\ defended\\ in\\ the\\ region\\.\\ It\\ counts\\ after\\ (.*?)\\ real\\ days\\ in\\ the\\ guild,\\ at\\ most\\ (.*?)\\ an\\ account\\ a\\ week\\ in\\ each\\ chapter,\\ and\\ in\\ only\\ one\\ chapter\\ of\\ each\\ guild\\ a\\ week\\.$",
+"rep": "Ваш вклад в отделение на этой неделе. Вы получаете $1 за выполнение собственного заказа отделения (один в день; купленные товары не засчитываются) и долю от $2 за каждый закрытый Прорыв Дагона или отбитый налёт на город в регионе. Засчитывается после $3 реальных дней в гильдии, не больше $4 на аккаунт в неделю в каждом отделении и только в одном отделении каждой гильдии в неделю."
+},
+{
+"re": "^Rank\\ (.*?)\\ \\(the\\ Master\\)\\ and\\ rank\\ (.*?)\\ \\((.*?)\\ council\\ chairs\\)\\ go\\ at\\ each\\ Turning\\ to\\ the\\ members\\ with\\ the\\ most\\ Merit\\ over\\ the\\ last\\ (.*?)\\ weeks\\.\\ A\\ member\\ needs\\ (.*?)\\ real\\ days\\ in\\ the\\ guild,\\ enough\\ standing\\ for\\ rank\\ (.*?)\\ and\\ an\\ account\\ (.*?)\\ real\\ days\\ old\\.\\ The\\ Master\\ picks\\ the\\ week's\\ Focus:\\ the\\ goods\\ the\\ chapter\\ writs\\ ask\\ for\\.$",
+"rep": "Ранг $1 (Мастер) и ранг $2 ($3 мест в совете) на каждом Повороте получают члены с наибольшими заслугами за последние $4 нед. Нужно $5 реальных дней в гильдии, репутация, достаточная для ранга $6, и аккаунт не моложе $7 реальных дней. Мастер выбирает Фокус недели — товары, которые просят заказы отделения."
+},
+{
+"re": "^A\\ player\\ guild's\\ Guildmaster\\ can\\ bid\\ silver\\ \\(at\\ least\\ (.*?)\\)\\ to\\ be\\ a\\ chapter's\\ patron\\ next\\ Season\\.\\ The\\ highest\\ bid\\ is\\ spent\\ and\\ the\\ others\\ are\\ returned\\.\\ The\\ patron's\\ members\\ pay\\ (.*?)\\ prices\\ for\\ training\\ and\\ spells\\ in\\ its\\ halls,\\ or\\ the\\ chapter's\\ own\\ prices\\ if\\ lower\\.$",
+"rep": "Глава гильдии игроков может поставить серебро (не меньше $1), чтобы стать покровителем отделения в следующем Сезоне. Высшая ставка тратится, остальные возвращаются. Члены гильдии-покровителя платят в его залах за обучение и заклинания по ценам «$2» или по ценам отделения, если они ниже."
+},
+{
+"re": "^Whoever\\ carries\\ the\\ line\\ on\\ receives\\ the\\ estate:\\ (.*?)\\ of\\ the\\ gold\\ the\\ fallen\\ carried,\\ at\\ most\\ (.*?)\\.\\ A\\ newborn\\ is\\ also\\ born\\ with\\ the\\ blood\\ \\(up\\ to\\ \\+(.*?)\\ on\\ each\\ stat,\\ from\\ the\\ better\\ parent's\\)\\ and\\ the\\ hearth\\ \\(up\\ to\\ \\+(.*?)\\ on\\ each\\ of\\ a\\ parent's\\ primary\\ and\\ major\\ skills\\)\\.$",
+"rep": "Продолжатель рода получает наследство: $1 золота, что было у павшего, но не больше $2. Новорождённый также рождается с кровью (до +$3 к каждой характеристике, от лучшего из родителей) и очагом (до +$4 к каждому основному и главному навыку родителя)."
+},
+{
+"re": "^In\\ an\\ Enduring\\ house\\ a\\ death\\ is\\ not\\ the\\ end,\\ but\\ it\\ costs\\ years:\\ Arkay's\\ toll\\ takes\\ (.*?)\\ of\\ your\\ race's\\ lifespan\\ each\\ time\\ \\(vampires\\ and\\ werebeasts\\ pay\\ none\\)\\.\\ From\\ (.*?)\\ of\\ your\\ lifespan\\ you\\ are\\ an\\ Elder,\\ and\\ once\\ it\\ is\\ spent,\\ your\\ next\\ death\\ is\\ final\\.$",
+"rep": "В доме Неугасающего рода смерть — не конец, но она стоит лет: дань Аркею каждый раз забирает $1 срока жизни вашей расы (вампиры и оборотни не платят). С $2 срока жизни вы Старейшина, а когда он исчерпан, следующая смерть окончательна."
+},
+{
+"re": "^A\\ held\\ Charter\\ is\\ challenged\\ by\\ beating\\ the\\ holder's\\ defense\\ with\\ at\\ least\\ (.*?):\\ the\\ strongest\\ challenger\\ wins\\ a\\ Right\\ of\\ Siege,\\ fought\\ in\\ the\\ holder's\\ battle\\ window\\.\\ Sign\\ for\\ your\\ side\\ on\\ this\\ tab\\.$",
+"rep": "Удерживаемую Хартию оспаривают, превзойдя оборону держателя не меньше чем на $1: сильнейший претендент получает Право осады, и битва идёт в окне сражений держателя. Записывайтесь за свою сторону на этой вкладке."
+},
+{
+"re": "^A\\ bell\\ rings\\ where\\ there\\ is\\ no\\ bell\\.\\ A\\ column\\ of\\ brass\\-gold\\ light\\ stands\\ over\\ it\\ somewhere\\ in\\ (.*?),\\ and\\ the\\ taverns\\ of\\ the\\ nearest\\ city\\ speak\\ of\\ it\\.\\ No\\ map\\ shows\\ it\\ until\\ someone\\ reaches\\ its\\ door\\.$",
+"rep": "Звонит колокол там, где колокола нет. Где-то в $1 над ним стоит столп латунно-золотого света, и о нём говорят в тавернах ближайшего города. Ни одна карта не покажет его, пока кто-нибудь не дойдёт до его двери."
+},
+{
+"re": "^HUD\\ unlocked\\.\\ Free\\ the\\ mouse\\ \\((.*?)\\)\\ and\\ drag\\ any\\ outlined\\ piece\\.\\ Drag\\ this\\ text\\ to\\ move\\ this\\ box\\.\\ Corner\\ square:\\ size\\.\\ Edge\\ bar:\\ length\\.\\ ✕:\\ hide\\ or\\ show\\.\\ Double\\-click:\\ reset\\.\\ Alt\\+U:\\ lock\\.$",
+"rep": "Интерфейс разблокирован. Освободите мышь ($1) и перетаскивайте любой обведённый элемент. Перетащите этот текст, чтобы сдвинуть это окно. Квадрат в углу — размер. Полоса у края — длина. ✕ — скрыть или показать. Двойной щелчок — сброс. Alt+U — заблокировать."
+},
+{
+"re": "^(.*?)\\ opens\\ your\\ spellbook\\.\\ Choose\\ a\\ spell,\\ then\\ aim\\ and\\ cast\\ it\\ with\\ (.*?)\\.\\ With\\ a\\ one\\-handed\\ weapon\\ drawn\\ and\\ your\\ other\\ hand\\ empty,\\ the\\ spell\\ waits\\ in\\ that\\ hand\\ and\\ (.*?)\\ still\\ swings\\ the\\ weapon\\.$",
+"rep": "$1 открывает книгу заклинаний. Выберите заклинание, затем прицельтесь и сотворите его клавишей $2. Если в руке одноручное оружие, а другая рука свободна, заклинание ждёт в ней, а $3 по-прежнему бьёт оружием."
+},
+{
+"re": "^The\\ guild's\\ treasury\\ holds\\ less\\ than\\ (.*?)\\ gold\\.\\ Put\\ gold\\ in\\ at\\ the\\ Guild\\ tab's\\ Treasury\\ \\(Social,\\ then\\ Guild\\),\\ up\\ to\\ (.*?)\\ at\\ a\\ time\\.\\ Gold\\ in\\ a\\ bank\\ account\\ does\\ not\\ pay\\ for\\ a\\ hall\\.$",
+"rep": "В казне гильдии меньше $1 зол. Внесите золото в «Казну» на вкладке «Гильдия» («Общение», затем «Гильдия»), не более $2 за раз. Золотом с банковского счёта за зал не заплатить."
+},
+{
+"re": "^The\\ treasury\\ holds\\ less\\ than\\ (.*?)\\ gold\\ put\\ in\\ by\\ realm\\ characters,\\ and\\ only\\ that\\ gold\\ buys\\ a\\ hall\\.\\ Older\\ gold,\\ or\\ gold\\ from\\ characters\\ outside\\ the\\ realm,\\ does\\ not\\ count\\.$",
+"rep": "В казне меньше $1 зол., внесённых персонажами мира, а зал покупается только на это золото. Старое золото или золото персонажей вне мира не в счёт."
+},
+{
+"re": "^Won\\ at\\ the\\ Turning\\ by\\ the\\ strongest\\ challenger\\ past\\ the\\ defense\\ \\(and\\ at\\ least\\ (.*?)\\ influence\\):\\ a\\ battle\\ with\\ the\\ holder\\ for\\ the\\ Charter,\\ in\\ the\\ holder's\\ battle\\ window\\.$",
+"rep": "Достаётся на Повороте сильнейшему претенденту, превзошедшему оборону (и не меньше $1 влияния): битва с держателем за Хартию в окне сражений держателя."
+},
+{
+"re": "^Sailing\\ under\\ (.*?)'s\\ letter\\ of\\ marque\\ \\((.*?)\\ (.*?)\\ left\\)\\.\\ (.*?)\\ counts\\ its\\ rivals'\\ ships\\ as\\ lawful\\ prizes,\\ though\\ their\\ own\\ crowns\\ still\\ call\\ it\\ piracy\\.\\ (.*?)'s\\ own\\ ships\\ are\\ not\\ prizes\\.$",
+"rep": "Вы ходите под каперским свидетельством $1 (осталось: $2 $3). $4 считает корабли своих соперников законными призами, хотя их собственные короны по-прежнему называют это пиратством. Корабли самого $5 призами не являются."
+},
+{
+"re": "^How\\ the\\ town\\ feels\\ about\\ its\\ holder,\\ from\\ 0\\ to\\ 100\\.\\ A\\ new\\ Charter\\ starts\\ at\\ (.*?)\\.\\ Under\\ (.*?)\\ the\\ town\\ is\\ in\\ Unrest\\ and\\ challengers\\ earn\\ (.*?)%\\ more\\ influence\\.\\ At\\ 0\\ it\\ revolts\\.$",
+"rep": "Как город относится к держателю, от 0 до 100. Новая Хартия начинается с $1. Ниже $2 в городе Волнения, и претенденты получают на $3% больше влияния. При 0 город восстаёт."
+},
+{
+"re": "^Look\\ at\\ a\\ player\\ and\\ press\\ (.*?)\\ to\\ befriend\\ them,\\ invite\\ them\\ to\\ your\\ party,\\ trade\\ with\\ them\\ or\\ inspect\\ them\\.\\ With\\ no\\ one\\ before\\ you,\\ it\\ opens\\ your\\ list\\ of\\ friends\\.$",
+"rep": "Посмотрите на игрока и нажмите $1, чтобы подружиться, пригласить в группу, начать обмен или осмотреть его. Если перед вами никого нет, откроется список друзей."
+},
+{
+"re": "^A\\ gray\\-haired\\ huntsman\\ whistles\\ low\\ at\\ the\\ carnage\\.\\ \"The\\ town\\ will\\ sleep\\ easier,\"\\ he\\ says,\\ tossing\\ you\\ a\\ purse\\ of\\ (.*?)\\ gold\\ pieces\\ and\\ (.*?),\\ and\\ walks\\ off\\ whistling\\.$",
+"rep": "Седой охотник тихо присвистывает при виде побоища. «Город будет спать спокойнее», — говорит он, бросает вам кошель с $1 золотыми и $2 и уходит, насвистывая."
+},
+{
+"re": "^(.*?)\\ mounts\\ and\\ dismounts\\.\\ Your\\ horse\\ walks;\\ hold\\ (.*?)\\ to\\ gallop\\.\\ Do\\ not\\ gallop\\ into\\ people\\ in\\ town:\\ trampling\\ them\\ is\\ a\\ crime\\.\\ (.*?)\\ calls\\ your\\ horse\\ and\\ wagon\\ to\\ you\\.$",
+"rep": "$1 — сесть в седло и спешиться. Лошадь идёт шагом; удерживайте $2, чтобы скакать галопом. Не врезайтесь галопом в людей в городе: топтать их — преступление. $3 подзывает к вам лошадь и повозку."
+},
+{
+"re": "^The\\ Sky\\-Ketch\\ has\\ been\\ sighted\\ east\\ of\\ (.*?)\\.\\ When\\ it\\ arrives,\\ its\\ anchor\\-lift\\ comes\\ down\\ in\\ the\\ fields\\ east\\ of\\ the\\ city\\.\\ Take\\ your\\ party\\ up,\\ (.*?)\\ players\\ at\\ most\\.$",
+"rep": "Небесную шхуну заметили к востоку от $1. Когда она прибудет, её якорный подъёмник опустится в поля к востоку от города. Поднимайтесь группой, не больше $2 игроков."
+},
+{
+"re": "^With\\ the\\ right\\ tool\\ you\\ can\\ gather\\ herbs,\\ ore,\\ wood,\\ fish\\ and\\ game\\.\\ Look\\ at\\ something\\ that\\ can\\ be\\ gathered\\ and\\ choose\\ what\\ to\\ do\\.\\ (.*?)\\ changes\\ the\\ choice\\.$",
+"rep": "С подходящим инструментом можно собирать травы, руду, древесину, рыбу и дичь. Посмотрите на то, что можно собрать, и выберите действие. $1 меняет выбор."
+},
+{
+"re": "^When\\ a\\ hit\\ drops\\ you\\ below\\ (.*?)%\\ health,\\ a\\ Flame\\ Nova\\ deals\\ (.*?)\\ damage\\ to\\ every\\ enemy\\ within\\ (.*?)\\ m,\\ and\\ your\\ weapon\\ deals\\ (.*?)%\\ more\\ damage\\ for\\ (.*?)\\ s\\.\\ Recovers\\ in\\ (.*?)\\ s$",
+"rep": "Когда удар опускает ваше здоровье ниже $1%, Огненная вспышка наносит $2 ед. урона всем врагам в радиусе $3 м, а ваше оружие $5 с наносит на $4% больше урона. Перезарядка $6 с"
+},
+{
+"re": "^Online,\\ gathering,\\ crafting\\ and\\ selling\\ improve\\ your\\ professions\\.\\ (.*?)\\ opens\\ them,\\ and\\ your\\ stored\\ goods\\ are\\ under\\ Holdings\\ >\\ Stores\\ in\\ the\\ same\\ window\\.$",
+"rep": "Онлайн сбор, ремесло и торговля развивают ваши профессии. $1 открывает их, а сложенные товары — во вкладке Владения > Хранилище того же окна."
+},
+{
+"re": "^The\\ realm\\ is\\ reviewing\\ this\\ character:\\ it\\ carries\\ a\\ (.*?)\\ the\\ game\\ could\\ not\\ have\\ made\\.\\ Its\\ trading,\\ gathering\\ and\\ crafting\\ are\\ frozen\\ until\\ it\\ is\\ gone\\.$",
+"rep": "Мир проверяет этого персонажа: у него $1, которого игра не могла создать. Торговля, сбор и ремесло заморожены, пока предмет не исчезнет."
+},
+{
+"re": "^Bells\\ ring\\ in\\ the\\ harbors\\.\\ (.*?),\\ (.*?),\\ hunts\\ until\\ it\\ dives,\\ and\\ every\\ ship\\ may\\ join\\ until\\ then\\.\\ One\\ ship\\ alone\\ cannot\\ bring\\ it\\ down:\\ sail\\ out\\ together\\.$",
+"rep": "В гаванях звонят колокола. $1, $2, охотится, пока не уйдёт на глубину, и до тех пор присоединиться может любой корабль. Одному кораблю его не одолеть: выходите вместе."
+},
+{
+"re": "^(.*?)\\ rises\\ against\\ (.*?):\\ a\\ Rebel\\ Captain\\ and\\ (.*?)\\ rebels\\ hold\\ its\\ palace\\ door\\.\\ The\\ revolt\\ begins\\ (.*?)(.*?):\\ fell\\ the\\ Captain\\ within\\ two\\ hours,\\ or\\ the\\ Charter\\ lapses\\.$",
+"rep": "$1 восстаёт против $2: Капитан мятежников и $3 мятежников держат двери дворца. Восстание начинается $4$5: сразите Капитана за два часа, иначе Хартия утратит силу."
+},
+{
+"re": "^Each\\ Season\\ a\\ chapter\\ draws\\ one\\ event:\\ (.*?)\\ or\\ (.*?)\\.\\ A\\ Schism\\ or\\ a\\ Succession\\ asks\\ members\\ to\\ back\\ a\\ side\\.\\ The\\ card\\ says\\ what\\ this\\ Season's\\ event\\ does\\.$",
+"rep": "Каждый Сезон отделению выпадает одно событие: $1 или $2. Раскол или Наследование просит членов поддержать одну из сторон. На карточке сказано, что делает событие этого Сезона."
+},
+{
+"re": "^Alchemy\\ is\\ brewed\\ at\\ an\\ alchemy\\ station:\\ an\\ Alchemist's\\ or\\ a\\ Mages\\ Guild\\ hall\\ \\((.*?)\\ gold\\ a\\ brew\\),\\ or\\ your\\ own\\ home's\\.\\ Your\\ potions\\ go\\ to\\ your\\ pack\\.$",
+"rep": "Алхимия варится у алхимического стола: у алхимика или в зале гильдии магов ($1 золотых за варку) либо у вас дома. Зелья попадают в рюкзак."
+},
+{
+"re": "^When\\ a\\ hit\\ drops\\ you\\ below\\ (.*?)%\\ health,\\ you\\ gain\\ a\\ shield\\ worth\\ (.*?)%\\ of\\ your\\ max\\ health\\ for\\ (.*?)\\ s,\\ and\\ allies\\ within\\ (.*?)\\ m\\ get\\ half\\ of\\ it\\.\\ Recovers\\ in\\ (.*?)\\ s$",
+"rep": "Когда удар опускает ваше здоровье ниже $1%, вы получаете щит на $2% от максимального здоровья на $3 с, а союзники в радиусе $4 м — половину его. Перезарядка $5 с"
+},
+{
+"re": "^Strength's\\ name:\\ (.*?)\\.\\ The\\ band\\ sets\\ the\\ halls'\\ prices,\\ what\\ they\\ stock\\ and\\ how\\ many\\ chapter\\ writs\\ they\\ post\\.\\ Each\\ card\\ says\\ what\\ its\\ band\\ does\\.$",
+"rep": "Название уровня Силы: $1. Уровень определяет цены в залах, их ассортимент и сколько заказов отделения они вывешивают. На каждой карточке сказано, что даёт её уровень."
+},
+{
+"re": "^Casting\\ a\\ spell\\ adds\\ its\\ element\\ to\\ your\\ next\\ weapon\\ hit\\ for\\ (.*?)%\\ more\\ damage\\.\\ Each\\ weapon\\ hit\\ restores\\ (.*?)%\\ of\\ your\\ last\\ spell's\\ cost\\ as\\ magicka$",
+"rep": "Сотворённое заклинание добавляет свою стихию к следующему удару оружием: на $1% больше урона. Каждый удар оружием восполняет $2% стоимости последнего заклинания в виде маны"
+},
+{
+"re": "^Each\\ weapon\\ hit\\ on\\ an\\ enemy\\ adds\\ (.*?)%\\ weapon\\ damage\\ against\\ it,\\ up\\ to\\ (.*?)\\ times,\\ lasting\\ (.*?)\\ s\\ after\\ your\\ last\\ hit\\.\\ Each\\ enemy\\ keeps\\ its\\ own\\ count$",
+"rep": "Каждый удар оружием по врагу добавляет $1% к урону оружия по нему, до $2 раз; эффект длится $3 с после последнего удара. У каждого врага свой счётчик"
+},
+{
+"re": "^In\\ an\\ Enduring\\ family\\ you\\ rise\\ again\\ after\\ death\\.\\ In\\ a\\ Bloodline\\ family\\ death\\ is\\ final\\ and\\ your\\ heir\\ carries\\ on\\.\\ (.*?)\\ opens\\ your\\ family\\ tree\\.$",
+"rep": "В Неугасающем роду после смерти вы восстаёте снова. В Кровной линии смерть окончательна, и род продолжает наследник. $1 открывает семейное древо."
+},
+{
+"re": "^Turn\\ broadside\\ to\\ a\\ ship,\\ hold\\ (.*?)\\ to\\ aim\\ and\\ let\\ go\\ to\\ fire\\.\\ Batter\\ a\\ ship\\ until\\ it\\ strikes\\ its\\ colors,\\ then\\ board\\ it\\ and\\ take\\ its\\ cargo\\.$",
+"rep": "Развернитесь к кораблю бортом, удерживайте $1, чтобы прицелиться, и отпустите для выстрела. Бейте корабль, пока он не спустит флаг, затем берите его на абордаж и забирайте груз."
+},
+{
+"re": "^The\\ guild's\\ silver\\ goes\\ to\\ you\\ when\\ it\\ is\\ disbanded,\\ but\\ your\\ account\\ cannot\\ hold\\ it\\ \\(the\\ most\\ is\\ (.*?)\\ silver\\)\\.\\ Spend\\ some\\ of\\ yours\\ first\\.$",
+"rep": "При роспуске серебро гильдии переходит к вам, но ваш аккаунт столько не вместит (максимум $1 серебра). Сначала потратьте часть своего."
+},
+{
+"re": "^Guild\\ deeds\\ today:\\ (.*?)\\ of\\ (.*?)\\.\\ When\\ (.*?)\\ members\\ who\\ joined\\ at\\ least\\ (.*?)\\ days\\ ago\\ defend\\ the\\ same\\ town\\ or\\ close\\ the\\ same\\ gate,\\ the\\ treasury\\ earns\\ (.*?)\\.$",
+"rep": "Подвигов гильдии сегодня: $1 из $2. Когда $3 членов, вступивших не меньше $4 дней назад, защищают один город или закрывают одни врата, казна получает $5."
+},
+{
+"re": "^The\\ last\\ patrol\\ sent\\ into\\ (.*?)\\ did\\ not\\ come\\ back\\.\\ The\\ one\\ survivor\\ found\\ crawling\\ out\\ speaks\\ of\\ (.*?),\\ (.*?)\\ of\\ them,\\ deep\\ inside\\.\\ Clear\\ the\\ place\\.$",
+"rep": "Последний патруль, посланный в $1, не вернулся. Единственный выживший, выползший наружу, говорит о $2 — их $3, глубоко внутри. Зачистите это место."
+},
+{
+"re": "^(.*?)\\ opens\\ your\\ inventory\\.\\ Place\\ items\\ on\\ your\\ figure\\ to\\ equip\\ them\\.\\ Wear\\ armor\\ wherever\\ you\\ can\\ and\\ carry\\ a\\ weapon\\ you\\ are\\ skilled\\ with\\.$",
+"rep": "$1 открывает инвентарь. Перетащите предметы на фигуру, чтобы надеть их. Носите доспехи везде, где можно, и держите при себе оружие, которым владеете."
+},
+{
+"re": "^(.*?)\\ is\\ on\\ every\\ map\\ now\\.\\ Fight\\ through\\ to\\ the\\ Rift\\ at\\ its\\ end\\ and\\ break\\ the\\ Shattered\\ Hour\\ before\\ it\\ fades\\.\\ Each\\ fighter\\ has\\ one\\ life\\.$",
+"rep": "$1 теперь на всех картах. Пробейтесь к Разлому в его конце и сломите Разбитый Час, пока он не исчез. У каждого бойца одна жизнь."
+},
+{
+"re": "^A\\ new\\ name\\ or\\ tag\\ costs\\ (.*?)\\ from\\ the\\ silver\\ treasury\\.\\ You\\ can\\ rename\\ again\\ after\\ two\\ weeks\\.\\ The\\ old\\ name\\ is\\ free\\ for\\ anyone\\ at\\ once\\.$",
+"rep": "Новое название или тег стоит $1 из серебряной казны. Переименовать снова можно через две недели. Старое название сразу становится свободным для всех."
+},
+{
+"re": "^(.*?)\\ will\\ not\\ break:\\ its\\ magic\\ is\\ the\\ classic\\ kind\\ the\\ guilds\\ sell\\ and\\ make\\.\\ Welkynd\\ Shards\\ come\\ only\\ from\\ loot\\ with\\ a\\ rarity\\ grade\\.$",
+"rep": "«$1» не разобрать: его магия — классическая, из тех, что продают и делают гильдии. Осколки велкинда дают только трофеи со степенью редкости."
+},
+{
+"re": "^(.*?)'s\\ house(.*?)\\ is\\ waiting\\ for\\ you,\\ but\\ you\\ already\\ own\\ (.*?)\\ houses\\ in\\ that\\ region,\\ as\\ many\\ as\\ the\\ bank\\ allows\\.\\ Sell\\ one\\ there\\ to\\ take\\ it\\.$",
+"rep": "Дом $1$2 ждёт вас, но у вас уже $3 домов в этом регионе — столько, сколько позволяет банк. Продайте там один, чтобы забрать его."
+},
+{
+"re": "^(.*?)\\ opens\\ the\\ map\\ of\\ the\\ whole\\ land\\.\\ Choose\\ a\\ place\\ to\\ travel\\ there\\.\\ The\\ journey\\ takes\\ days\\ in\\ the\\ game\\ but\\ only\\ a\\ moment\\ for\\ you\\.$",
+"rep": "$1 открывает карту всей страны. Выберите место, чтобы отправиться туда. Путь занимает дни игрового времени, а для вас — лишь мгновение."
+},
+{
+"re": "^A\\ reward\\ is\\ offered\\ to\\ any\\ blade\\ willing\\ to\\ stand\\ watch\\ at\\ (.*?),\\ (.*?)\\ of\\ (.*?),\\ and\\ slay\\ the\\ (.*?)\\ haunting\\ it,\\ (.*?)\\ strong\\ by\\ the\\ sexton's\\ count\\.$",
+"rep": "Награда тому клинку, кто решится нести дозор у $1, $2 от $3, и перебить бродящих там $4 — по подсчётам пономаря, их $5."
+},
+{
+"re": "^Three\\ days\\ out\\ of\\ sight\\ of\\ land,\\ and\\ then\\ the\\ stars\\ came\\ down\\ to\\ meet\\ the\\ sea\\.\\ You\\ have\\ crossed\\ into\\ (.*?)\\.\\ Veilhaven\\ lies\\ ahead\\.$",
+"rep": "Три дня вдали от земли — и вот звёзды спустились навстречу морю. Вы перешли в $1. Впереди — Veilhaven."
+},
+{
+"re": "^No\\ silver\\ for\\ this\\ serpent\\.\\ You\\ can\\ earn\\ at\\ most\\ (.*?)\\ a\\ day\\ from\\ breaches,\\ town\\ defenses,\\ serpents,\\ Redoubts\\ and\\ fallen\\ stars\\.$",
+"rep": "За этого змея серебра нет. В день можно заработать не больше $1 за прорывы, оборону городов, змеев, Редуты и упавшие звёзды."
+},
+{
+"re": "^No\\ silver\\ for\\ this\\ Redoubt\\.\\ You\\ can\\ earn\\ at\\ most\\ (.*?)\\ a\\ day\\ from\\ breaches,\\ town\\ defenses,\\ serpents,\\ Redoubts\\ and\\ fallen\\ stars\\.$",
+"rep": "За этот Редут серебра нет. В день можно заработать не больше $1 за прорывы, оборону городов, змеев, Редуты и упавшие звёзды."
+},
+{
+"re": "^No\\ silver\\ for\\ this\\ breach\\.\\ You\\ can\\ earn\\ at\\ most\\ (.*?)\\ a\\ day\\ from\\ breaches,\\ town\\ defenses,\\ serpents,\\ Redoubts\\ and\\ fallen\\ stars\\.$",
+"rep": "За этот прорыв серебра нет. В день можно заработать не больше $1 за прорывы, оборону городов, змеев, Редуты и упавшие звёзды."
+},
+{
+"re": "^Up\\ to\\ (.*?)\\ of\\ your\\ screenshots\\ are\\ kept\\ under\\ Screenshots\\ in\\ the\\ menu,\\ and\\ can\\ appear\\ on\\ this\\ screen\\ while\\ the\\ world\\ loads\\.$",
+"rep": "До $1 ваших снимков хранятся в меню в разделе «Снимки экрана» и могут появляться на этом экране, пока загружается мир."
+},
+{
+"re": "^No\\ silver\\ for\\ this\\ town\\.\\ You\\ can\\ earn\\ at\\ most\\ (.*?)\\ a\\ day\\ from\\ breaches,\\ town\\ defenses,\\ serpents,\\ Redoubts\\ and\\ fallen\\ stars\\.$",
+"rep": "За этот город серебра нет. В день можно заработать не больше $1 за прорывы, оборону городов, змеев, Редуты и упавшие звёзды."
+},
+{
+"re": "^(.*?)'s\\ letter\\ of\\ marque\\ is\\ yours\\ for\\ (.*?)\\.\\ (.*?)\\ counts\\ its\\ rivals'\\ ships\\ as\\ fair\\ prizes,\\ but\\ their\\ own\\ crowns\\ still\\ call\\ it\\ piracy\\.$",
+"rep": "Каперское свидетельство $1 ваше на $2. $3 считает корабли своих соперников законными призами, но их собственные короны по-прежнему называют это пиратством."
+},
+{
+"re": "^Fishing\\ is\\ done\\ in\\ water:\\ stand\\ or\\ swim\\ in\\ it,\\ or\\ be\\ at\\ sea,\\ until\\ its\\ acts\\ show,\\ then\\ press\\ (.*?)\\ \\(or\\ use\\ the\\ Fishing\\-Net\\)\\.$",
+"rep": "Рыбачат в воде: стойте или плывите в ней либо выйдите в море, пока не появятся действия, затем нажмите $1 (или используйте рыболовную сеть)."
+},
+{
+"re": "^Carry\\ a\\ torch\\ or\\ lantern\\ in\\ your\\ off\\ hand\\ to\\ see\\ in\\ the\\ dark\\.\\ (.*?)\\ lights\\ it\\ or\\ puts\\ it\\ out,\\ (.*?)\\ drops\\ it\\ and\\ (.*?)\\ throws\\ a\\ torch\\.$",
+"rep": "Держите факел или фонарь во второй руке, чтобы видеть в темноте. $1 зажигает или гасит его, $2 бросает на землю, $3 швыряет факел."
+},
+{
+"re": "^A\\ reward\\ is\\ offered\\ to\\ any\\ blade\\ willing\\ to\\ enter\\ (.*?),\\ (.*?)\\ of\\ (.*?),\\ and\\ slay\\ the\\ (.*?)\\ nesting\\ there,\\ (.*?)\\ strong\\ by\\ the\\ trappers'\\ count\\.$",
+"rep": "Награда тому клинку, кто решится войти в $1, $2 от $3, и перебить гнездящихся там $4 — по подсчётам охотников, их $5."
+},
+{
+"re": "^no\\ ARENA2\\ files\\ in\\ that\\ selection\\ \\((.*?)\\ files,\\ none\\ of\\ them\\ Daggerfall’s\\)\\.\\ Pick\\ the\\ ARENA2\\ folder\\ itself,\\ or\\ a\\ \\.zip\\ of\\ it\\.$",
+"rep": "в выбранном нет файлов ARENA2 (файлов: $1, ни одного из Daggerfall). Выберите саму папку ARENA2 или её .zip."
+},
+{
+"re": "^(.*?)\\ and\\ the\\ Quests\\ tab\\ of\\ the\\ menu\\ keep\\ track\\ of\\ your\\ quests\\.\\ Read\\ them\\ carefully:\\ they\\ tell\\ you\\ whom\\ to\\ find\\ and\\ where\\.$",
+"rep": "$1 и вкладка «Задания» в меню отслеживают ваши квесты. Читайте внимательно: там сказано, кого и где искать."
+},
+{
+"re": "^Your\\ family\\ owns\\ no\\ house,\\ so\\ its\\ members\\ live\\ among\\ the\\ townsfolk\\ of\\ (.*?)\\.\\ Buy\\ a\\ house\\ at\\ a\\ bank\\ and\\ they\\ will\\ move\\ in\\.$",
+"rep": "У вашей семьи нет дома, поэтому её члены живут среди горожан $1. Купите дом в банке, и они переедут."
+},
+{
+"re": "^(.*?)\\ lets\\ you\\ rest\\ to\\ recover,\\ or\\ wait\\ until\\ a\\ set\\ hour,\\ such\\ as\\ when\\ a\\ shop\\ opens\\.\\ You\\ cannot\\ rest\\ with\\ enemies\\ nearby\\.$",
+"rep": "$1 позволяет отдохнуть и восстановиться или подождать до нужного часа, например до открытия лавки. Отдыхать рядом с врагами нельзя."
+},
+{
+"re": "^(.*?)\\ shows\\ a\\ map\\ of\\ your\\ surroundings:\\ the\\ parts\\ of\\ a\\ dungeon\\ you\\ have\\ explored,\\ or\\ the\\ streets\\ and\\ buildings\\ of\\ a\\ town\\.$",
+"rep": "$1 показывает карту окрестностей: исследованные части подземелья или улицы и здания города."
+},
+{
+"re": "^The\\ silver\\ your\\ Officers\\ may\\ spend\\ on\\ guild\\ writs\\ each\\ week,\\ from\\ the\\ silver\\ treasury(.*?)\\.\\ Your\\ own\\ writs\\ do\\ not\\ count\\.$",
+"rep": "Серебро, которое ваши офицеры могут тратить на заказы гильдии каждую неделю, из серебряной казны$1. Ваши собственные заказы не считаются."
+},
+{
+"re": "^Hold\\ (.*?)\\ and\\ move\\ the\\ mouse\\ to\\ swing\\.\\ The\\ direction\\ you\\ move\\ picks\\ the\\ attack\\.\\ Holding\\ it\\ without\\ moving\\ does\\ nothing\\.$",
+"rep": "Удерживайте $1 и двигайте мышью, чтобы ударить. Направление движения выбирает атаку. Удержание без движения ничего не делает."
+},
+{
+"re": "^A\\ loose\\ texture\\ pack\\ \\(a\\ folder\\ of\\ pictures\\)\\ is\\ attached\\.\\ Remove\\ it\\ on\\ the\\ Replacement\\ packs\\ card\\ \\((.*?)\\)\\ to\\ use\\ Classic\\.$",
+"rep": "Подключён свободный пакет текстур (папка с изображениями). Удалите его на карточке «Пакеты замен» ($1), чтобы использовать «Классический»."
+},
+{
+"re": "^Our\\ dead\\ will\\ not\\ stay\\ buried\\.\\ The\\ gravediggers\\ fled\\ when\\ (.*?)\\ came\\ up\\ out\\ of\\ the\\ ground\\ (.*?)\\ of\\ town,\\ (.*?)\\ of\\ them\\.\\ End\\ this\\.$",
+"rep": "Наши мёртвые не желают лежать в земле. Могильщики сбежали, когда $2 от города из-под земли полезли $1, — их $3. Покончите с этим."
+},
+{
+"re": "^Look\\ at\\ a\\ door,\\ chest,\\ lever\\ or\\ person\\ and\\ press\\ (.*?)\\ or\\ (.*?)\\.\\ The\\ words\\ beneath\\ your\\ crosshair\\ tell\\ you\\ what\\ will\\ happen\\.$",
+"rep": "Посмотрите на дверь, сундук, рычаг или человека и нажмите $1 или $2. Надпись под прицелом подскажет, что произойдёт."
+},
+{
+"re": "^Your\\ guild\\ has\\ no\\ hall\\.\\ The\\ guildmaster\\ can\\ buy\\ one\\ at\\ any\\ house's\\ door\\ with\\ treasury\\ gold,\\ for\\ its\\ price\\ plus\\ (.*?)%\\.$",
+"rep": "У вашей гильдии нет зала. Глава гильдии может купить его у двери любого дома на золото казны — по его цене плюс $1%."
+},
+{
+"re": "^(.*?)\\ taken\\.\\ Choose\\ a\\ Vestige\\.\\ The\\ way\\ home\\ stands\\ at\\ the\\ Court's\\ center,\\ and\\ the\\ stair\\ down\\ opens\\ when\\ the\\ rest\\ ends\\.$",
+"rep": "$1 взят. Выберите Остаток. Путь домой — в центре Двора, а лестница вниз откроется, когда закончится отдых."
+},
+{
+"re": "^Hunting\\ is\\ done\\ at\\ a\\ body\\ you\\ killed:\\ walk\\ up\\ to\\ it\\ until\\ its\\ acts\\ show,\\ then\\ press\\ (.*?)\\ \\(or\\ use\\ the\\ Skinning\\ Knife\\)\\.$",
+"rep": "Охотятся у тела убитого вами существа: подойдите к нему, пока не появятся действия, затем нажмите $1 (или используйте нож для свежевания)."
+},
+{
+"re": "^Travelers\\ on\\ the\\ road\\ (.*?)\\ of\\ (.*?)\\ come\\ back\\ bitten\\ and\\ feverish\\.\\ Some\\ (.*?)\\ (.*?)\\ have\\ taken\\ the\\ ditches\\ there\\.\\ Put\\ an\\ end\\ to\\ it\\.$",
+"rep": "Путники с дороги $1 от $2 возвращаются искусанными и в лихорадке. Канавы там заняли $4 — около $3. Положите этому конец."
+},
+{
+"re": "^Players\\ may\\ fight\\ one\\ another\\ in\\ Cyrodiil\\ and\\ on\\ the\\ open\\ (.*?)\\ Ocean,\\ where\\ monsters\\ are\\ tougher\\ and\\ spoils\\ richer\\.$",
+"rep": "Игроки могут сражаться друг с другом в Сиродиле и в открытом океане $1, где чудовища сильнее, а добыча богаче."
+},
+{
+"re": "^Every\\ (.*?)th\\ weapon\\ hit\\ on\\ the\\ same\\ enemy\\ deals\\ (.*?)%\\ more\\ damage\\.\\ The\\ count\\ falls\\ away\\ (.*?)\\ s\\ after\\ your\\ last\\ hit\\ on\\ it$",
+"rep": "Каждый $1-й удар оружием по одному врагу наносит на $2% больше урона. Счётчик сбрасывается через $3 с после последнего удара по нему"
+},
+{
+"re": "^Custom:\\ a\\ loose\\ texture\\ pack\\ \\(a\\ folder\\ of\\ pictures\\)\\ is\\ attached\\.\\ Remove\\ it\\ on\\ the\\ Replacement\\ packs\\ card\\ \\((.*?)\\)\\.$",
+"rep": "Свой: подключён свободный пакет текстур (папка с изображениями). Удалите его на карточке «Пакеты замен» ($1)."
+},
+{
+"re": "^The\\ realm\\ is\\ reviewing\\ the\\ other\\ character\\ in\\ this\\ trade,\\ and\\ its\\ trading\\ is\\ frozen\\.\\ Nothing\\ changed\\ hands\\.(.*?)$",
+"rep": "Мир проверяет второго персонажа в этом обмене, и его торговля заморожена. Ничего не перешло из рук в руки.$1"
+},
+{
+"re": "^(.*?)\\ opens\\ chat\\.\\ The\\ tabs\\ choose\\ who\\ hears\\ you:\\ World,\\ Region,\\ Local,\\ and\\ Party\\ or\\ Guild\\ if\\ you\\ belong\\ to\\ one\\.$",
+"rep": "$1 открывает чат. Вкладки определяют, кто вас слышит: «Мир», «Регион», «Местный», а также «Группа» или «Гильдия», если вы в них состоите."
+},
+{
+"re": "^Destruction\\ spells\\ that\\ hit\\ you\\ have\\ a\\ (.*?)%\\ chance\\ to\\ be\\ absorbed,\\ giving\\ you\\ their\\ magicka\\ if\\ you\\ have\\ room$",
+"rep": "Заклинания Разрушения, попавшие в вас, с шансом $1% поглощаются и восполняют вашу ману, если есть куда"
+},
+{
+"re": "^(.*?)\\ pieces\\ of\\ furniture\\ will\\ be\\ delivered\\.\\ Place\\ them\\ from\\ the\\ Decorate\\ panel\\ in\\ any\\ room\\ you\\ can\\ decorate\\.$",
+"rep": "Предметов мебели к доставке: $1. Расставьте их через панель «Украсить» в любой комнате, которую можно обустраивать."
+},
+{
+"re": "^They\\ say\\ the\\ air\\ goes\\ brass\\-colored\\ past\\ the\\ walls\\ of\\ (.*?)\\ at\\ dusk,\\ and\\ a\\ bell\\ rings\\ where\\ there\\ is\\ no\\ bell\\.$",
+"rep": "Говорят, в сумерках за стенами $1 воздух становится цвета латуни, а там, где нет колокола, звонит колокол."
+},
+{
+"re": "^(.*?)\\ already\\ (.*?)\\ while\\ you\\ swim\\ or\\ levitate,\\ so\\ this\\ key\\ already\\ does\\ both\\ without\\ (.*?)\\.\\ Answer\\ No\\ to\\ keep\\ it\\ on\\ (.*?)(.*?)\\.$",
+"rep": "$1 уже $2 во время плавания или левитации, так что эта клавиша и так делает оба действия без $3. Ответьте «Нет», чтобы оставить её на $4$5."
+},
+{
+"re": "^(.*?)\\ \\-\\ a\\ freeport\\ of\\ (.*?),\\ in\\ (.*?)\\.\\ No\\ crown's\\ writ\\ runs\\ past\\ the\\ Veil,\\ and\\ no\\ crown's\\ favors\\.\\ Your\\ charts\\ hold\\ (.*?)\\ (.*?)\\.$",
+"rep": "$1 — вольный порт $2, $3. За Завесой не действует ни одна корона — ни её указы, ни её милости. На ваших картах: $4 $5."
+},
+{
+"re": "^Work\\ on\\ the\\ (.*?)\\ at\\ (.*?)\\ is\\ begun\\ toward\\ grade\\ (.*?):\\ (.*?)\\ silver\\ from\\ the\\ treasury\\.\\ Seat\\ writs\\ deliver\\ what\\ they\\ need\\.$",
+"rep": "Работы над «$1» в $2 начаты до ступени $3: $4 серебра из казны. Нужное доставят заказы резиденции."
+},
+{
+"re": "^The\\ realm\\ has\\ (.*?)'s\\ goods,\\ but\\ your\\ game\\ could\\ not\\ receive\\ them\\.\\ Rejoin\\ to\\ load\\ the\\ trade\\ from\\ the\\ realm\\.$",
+"rep": "Товары $1 у мира, но ваша игра не смогла их получить. Войдите снова, чтобы загрузить обмен из мира."
+},
+{
+"re": "^(.*?)\\ casts\\ your\\ last\\ spell\\ again\\ and\\ (.*?)\\ lets\\ it\\ go\\.\\ The\\ Mages\\ Guild\\ sells\\ spells\\ and\\ lets\\ you\\ make\\ your\\ own\\.$",
+"rep": "$1 повторяет последнее заклинание, $2 отменяет его. Гильдия магов продаёт заклинания и позволяет создавать свои."
+},
+{
+"re": "^The\\ surveyors\\ report\\ a\\ Motherlode\\ of\\ (.*?)\\ will\\ break\\ ground\\ in\\ (.*?)\\ in\\ (.*?)\\ minutes\\.\\ Look\\ for\\ it\\ on\\ your\\ compass\\.$",
+"rep": "Разведчики сообщают: Богатая жила ($1) выйдет на поверхность в $2 через $3 мин. Ищите её на компасе."
+},
+{
+"re": "^Every\\ town\\ has\\ a\\ stable\\ that\\ sells\\ horses\\.\\ (.*?)\\ chooses\\ how\\ you\\ travel:\\ on\\ foot,\\ on\\ horseback\\ or\\ by\\ cart\\.$",
+"rep": "В каждом городе есть конюшня, где продают лошадей. $1 выбирает способ передвижения: пешком, верхом или на повозке."
+},
+{
+"re": "^Refined\\ first:\\ (.*?)(.*?)\\.\\ The\\ refining\\ earns\\ its\\ own\\ experience,\\ and\\ anything\\ left\\ over\\ stays\\ in\\ your\\ Stores\\.$",
+"rep": "Сначала переработано: $1$2. Переработка приносит свой опыт, а всё оставшееся остаётся на складе."
+},
+{
+"re": "^A\\ storm\\ breaks\\ over\\ (.*?)'s\\ waters\\ off\\ (.*?),\\ but\\ every\\ ship\\ may\\ still\\ join\\ the\\ fight\\.\\ It\\ dives\\ at\\ (.*?)\\ your\\ time\\.$",
+"rep": "Над водами $1 у $2 разразилась буря, но присоединиться к бою всё ещё может любой корабль. Змей уйдёт на глубину в $3 по вашему времени."
+},
+{
+"re": "^Your\\ guild\\ has\\ pledged\\ in\\ (.*?)\\ regions\\ this\\ week,\\ the\\ most\\ it\\ can\\.\\ Take\\ one\\ pledge\\ down\\ to\\ pledge\\ here\\.$",
+"rep": "На этой неделе ваша гильдия уже дала обязательства в $1 регионах — это максимум. Снимите одно, чтобы дать его здесь."
+},
+{
+"re": "^Loading\\ screens\\ show\\ the\\ night\\ sky\\.\\ Choose\\ Your\\ screenshots\\ under\\ Loading\\ screens\\ \\((.*?)\\)\\ to\\ show\\ these\\.$",
+"rep": "На экранах загрузки сейчас ночное небо. Выберите «Ваши снимки» в разделе «Экраны загрузки» ($1), чтобы показывать эти."
+},
+{
+"re": "^Merchants\\ will\\ not\\ use\\ the\\ road\\ (.*?)\\ of\\ (.*?)\\ since\\ the\\ (.*?)\\ took\\ it,\\ (.*?)\\ blades\\ at\\ the\\ last\\ count\\.\\ Clear\\ the\\ road\\.$",
+"rep": "Торговцы не ездят по дороге $1 от $2 с тех пор, как её заняли $3 — по последним подсчётам, $4 клинков. Очистите дорогу."
+},
+{
+"re": "^(.*?)(.*?),\\ to\\ (.*?)'s\\ harbormaster\\ within\\ (.*?)\\ days\\.\\ It\\ goes\\ in\\ your\\ hold\\.\\ If\\ you\\ lose\\ your\\ ship,\\ you\\ lose\\ the\\ cargo\\.$",
+"rep": "$1$2 — начальнику порта $3 за $4 дн. Груз идёт в ваш трюм. Потеряете корабль — потеряете и груз."
+},
+{
+"re": "^(.*?)'s\\ offer\\ has\\ an\\ item\\ your\\ game\\ does\\ not\\ recognize\\.\\ Reload\\ for\\ the\\ newest\\ version\\.\\ The\\ trade\\ is\\ off$",
+"rep": "В предложении $1 есть предмет, который ваша игра не знает. Перезагрузитесь, чтобы получить новую версию. Обмен отменён"
+},
+{
+"re": "^You\\ already\\ took\\ Redoubt\\ (.*?)\\ this\\ week\\.\\ You\\ get\\ its\\ gold,\\ and\\ each\\ of\\ its\\ Reliquaries\\ gives\\ 20\\ lumen\\.$",
+"rep": "Вы уже брали Редут $1 на этой неделе. Вы получаете его золото, а каждый его Реликварий даёт 20 люменов."
+},
+{
+"re": "^Your\\ room\\ is\\ paid\\ for\\ (.*?)\\ days\\ ahead,\\ the\\ most\\ allowed\\.\\ Renew\\ it\\ once\\ some\\ of\\ those\\ days\\ have\\ passed\\.$",
+"rep": "Ваша комната оплачена на $1 дн. вперёд — это максимум. Продлите её, когда часть этих дней пройдёт."
+},
+{
+"re": "^A\\ hit\\ that\\ would\\ kill\\ you\\ leaves\\ you\\ at\\ 1\\ health,\\ and\\ you\\ take\\ half\\ damage\\ for\\ (.*?)\\ s\\.\\ Recovers\\ in\\ (.*?)\\ s$",
+"rep": "Удар, который убил бы вас, оставляет вам 1 ед. здоровья, и $1 с вы получаете вдвое меньше урона. Перезарядка $2 с"
+},
+{
+"re": "^When\\ a\\ hit\\ drops\\ you\\ below\\ (.*?)%\\ health,\\ you\\ shed\\ your\\ skin\\ and\\ heal\\ (.*?)%\\ of\\ your\\ health\\.\\ Recovers\\ in\\ (.*?)\\ s$",
+"rep": "Когда удар опускает ваше здоровье ниже $1%, вы сбрасываете кожу и восстанавливаете $2% здоровья. Перезарядка $3 с"
+},
+{
+"re": "^It\\ leads\\ into\\ (.*?),\\ an\\ open\\ PvP\\ zone\\.\\ Other\\ players\\ may\\ kill\\ you\\ there\\ and\\ take\\ a\\ worn\\ piece\\ or\\ gold\\.$",
+"rep": "Путь ведёт в $1 — открытую PvP-зону. Другие игроки могут убить вас там и забрать надетую вещь или золото."
+},
+{
+"re": "^A\\ hone\\ costs\\ (.*?)\\.\\ The\\ price\\ doubles\\ with\\ each\\ hone,\\ and\\ a\\ line\\ at\\ its\\ highest\\ value\\ can't\\ be\\ honed\\.$",
+"rep": "Заточка стоит $1. Цена удваивается с каждой заточкой, а строку на максимальном значении заточить нельзя."
+},
+{
+"re": "^(.*?)\\ of\\ the\\ treasury's\\ (.*?)\\ gold\\ was\\ put\\ in\\ by\\ realm\\ characters\\ and\\ can\\ (.*?)\\.\\ Gold\\ in\\ a\\ bank\\ account\\ cannot\\.$",
+"rep": "$1 из $2 золотых казны внесены персонажами мира и могут $3. Золото на банковском счёте — нет."
+},
+{
+"re": "^(.*?)\\ stays\\ with\\ you\\ online,\\ because\\ anyone\\ can\\ take\\ from\\ a\\ chest\\ or\\ a\\ body\\.\\ Hand\\ it\\ over\\ in\\ a\\ trade\\.$",
+"rep": "Онлайн «$1» остаётся у вас: из сундука или с тела забрать может кто угодно. Передайте предмет через обмен."
+},
+{
+"re": "^Your\\ melee\\ hits\\ also\\ strike\\ the\\ nearest\\ other\\ enemy\\ within\\ (.*?)\\ m\\ of\\ your\\ target\\ for\\ (.*?)%\\ of\\ the\\ damage$",
+"rep": "Ваши удары в ближнем бою также задевают ближайшего другого врага в радиусе $1 м от цели на $2% урона"
+},
+{
+"re": "^No\\ longer\\ in\\ your\\ party\\.\\ In\\ (.*?)\\ you\\ and\\ they\\ cannot\\ fight\\ for\\ ten\\ minutes\\.\\ Then\\ you\\ are\\ strangers\\.$",
+"rep": "Больше не в вашей группе. В $1 вы десять минут не можете сражаться друг с другом. Потом вы чужие."
+},
+{
+"re": "^Armor\\ (.*?):\\ the\\ average\\ armor\\ a\\ blow\\ meets,\\ with\\ each\\ part\\ weighted\\ by\\ how\\ often\\ it\\ is\\ hit\\ \\((.*?)\\ in\\ (.*?)\\)$",
+"rep": "Броня $1: средняя броня, которую встречает удар, где каждая часть тела учтена по тому, как часто по ней бьют ($2 из $3)"
+},
+{
+"re": "^Press\\ (.*?)\\ anywhere\\ in\\ the\\ world\\.\\ Up\\ to\\ (.*?)\\ shots\\ are\\ kept\\ here\\ and\\ can\\ be\\ shown\\ on\\ loading\\ screens\\.$",
+"rep": "Нажмите $1 в любом месте мира. Здесь хранится до $2 снимков, и их можно показывать на экранах загрузки."
+},
+{
+"re": "^(.*?)'s\\ first\\ day\\ could\\ not\\ be\\ saved\\ here\\.\\ Reload\\ to\\ start\\ it\\ again\\.\\ Nothing\\ of\\ the\\ house\\ is\\ lost\\.$",
+"rep": "Первый день $1 не удалось здесь сохранить. Перезагрузитесь, чтобы начать его снова. Ничего из дома не потеряно."
+},
+{
+"re": "^Nothing\\ is\\ saved\\ until\\ you\\ press\\ (.*?),\\ including\\ Defaults\\.\\ Leaving\\ this\\ page\\ drops\\ your\\ changes\\.$",
+"rep": "Ничего не сохраняется, пока вы не нажмёте $1, включая «По умолчанию». Если покинуть страницу, изменения пропадут."
+},
+{
+"re": "^Founding\\ a\\ guild\\ costs\\ (.*?)\\ gold\\ \\(from\\ your\\ purse,\\ then\\ this\\ region's\\ bank\\ account\\)\\ and\\ Renown\\ (.*?)\\.$",
+"rep": "Основание гильдии стоит $1 золотых (из кошелька, затем со счёта в банке этого региона) и требует Известности $2."
+},
+{
+"re": "^A\\ kill\\ marks\\ the\\ nearest\\ other\\ enemy\\ within\\ (.*?)\\ m\\ for\\ (.*?)\\ s\\.\\ Your\\ weapon\\ deals\\ (.*?)%\\ more\\ damage\\ to\\ it$",
+"rep": "Убийство метит ближайшего другого врага в радиусе $1 м на $2 с. Ваше оружие наносит ему на $3% больше урона"
+},
+{
+"re": "^Fee\\ (.*?),\\ kept\\ if\\ you\\ cancel\\.\\ Up\\ for\\ 72\\ hours\\ on\\ every\\ board\\.\\ If\\ it\\ all\\ sells\\ you\\ get\\ (.*?),\\ after\\ (.*?)(.*?)\\.$",
+"rep": "Сбор $1, при отмене не возвращается. Лот висит 72 часа на всех досках. Если всё продастся, вы получите $2 за вычетом $3$4."
+},
+{
+"re": "^(.*?)\\ is\\ out\\.\\ Download\\ it\\ from\\ the\\ File\\ menu\\ when\\ you\\ are\\ ready\\.\\ Your\\ saves\\ stay\\ where\\ they\\ are\\.$",
+"rep": "Вышла $1. Скачайте её из меню «Файл», когда будете готовы. Ваши сохранения останутся на месте."
+},
+{
+"re": "^Your\\ family\\ lives\\ in\\ the\\ Living\\ World’s\\ towns\\.\\ Turn\\ on\\ Living\\ world\\ \\((.*?)\\)\\ to\\ meet\\ them\\ there\\.$",
+"rep": "Ваша семья живёт в городах Живого мира. Включите Живой мир ($1), чтобы встречать их там."
+},
+{
+"re": "^Study\\ (.*?)\\ ships\\ in\\ (.*?)'s\\ waters\\ through\\ your\\ spyglass\\ \\(their\\ guns,\\ crew\\ and\\ holds\\)\\ within\\ (.*?)\\ days\\.$",
+"rep": "Изучите в подзорную трубу корабли ($1) в водах $2 — их пушки, команду и трюмы — за $3 дн."
+},
+{
+"re": "^Some\\ enchanted\\ items\\ work\\ while\\ you\\ wear\\ them\\.\\ Others\\ must\\ be\\ used:\\ press\\ (.*?)\\ and\\ choose\\ one\\.$",
+"rep": "Одни зачарованные предметы действуют, пока надеты. Другие нужно использовать: нажмите $1 и выберите предмет."
+},
+{
+"re": "^The\\ Sky\\-Ketch\\ has\\ arrived\\ over\\ (.*?)\\.\\ Its\\ anchor\\-lift\\ is\\ down\\ in\\ the\\ fields\\ east\\ of\\ the\\ city\\.$",
+"rep": "Небесная шхуна прибыла к $1. Её якорный подъёмник опущен в поля к востоку от города."
+},
+{
+"re": "^(.*?)(.*?)\\ (.*?)\\ ranks\\ 8\\ and\\ 9\\ for\\ (.*?)\\ chapters'\\ Masters\\ and\\ councils,\\ won\\ by\\ Merit\\.\\ Your\\ rank\\ there\\ is\\ 7\\.$",
+"rep": "$1$2 $3 ранги 8 и 9 — для Мастеров и советов отделений $4, их получают за заслуги. Ваш ранг там — 7."
+},
+{
+"re": "^When\\ a\\ hit\\ drops\\ you\\ below\\ (.*?)%\\ health,\\ the\\ web\\ hides\\ you\\.\\ Chameleon\\ for\\ (.*?)\\ s\\.\\ Recovers\\ in\\ (.*?)\\ s$",
+"rep": "Когда удар опускает ваше здоровье ниже $1%, паутина скрывает вас. Хамелеон на $2 с. Перезарядка $3 с"
+},
+{
+"re": "^Improved\\ Interior\\ Lighting\\ attached\\.\\ Choose\\ On\\ or\\ With\\ shadows\\ under\\ Modded\\ lighting\\ \\((.*?)\\)\\.$",
+"rep": "Improved Interior Lighting подключён. Выберите «Вкл.» или «С тенями» в разделе «Освещение модов» ($1)."
+},
+{
+"re": "^This\\ house\\ is\\ now\\ the\\ hall\\ of\\ (.*?)\\.\\ Its\\ members\\ can\\ enter,\\ and\\ its\\ Officers\\ can\\ furnish\\ it\\.$",
+"rep": "Теперь этот дом — зал гильдии $1. Её члены могут входить, а Офицеры — обставлять его."
+},
+{
+"re": "^Online,\\ stand\\ at\\ a\\ station\\ and\\ press\\ (.*?):\\ the\\ Crafting\\ page\\ opens\\ on\\ it\\.\\ Cook\\ at\\ any\\ fire\\.$",
+"rep": "Онлайн встаньте у ремесленного стола и нажмите $1: откроется страница «Ремесло» для него. Готовить можно у любого костра."
+},
+{
+"re": "^(.*?)\\ sets\\ out\\ for\\ the\\ first\\ time\\ from\\ the\\ family\\ seat\\.\\ Your\\ game\\ is\\ saved\\ where\\ you\\ stand\\.$",
+"rep": "$1 впервые отправляется в путь из родового гнезда. Игра сохранена там, где вы стоите."
+},
+{
+"re": "^Waypoint\\ \"(.*?)\"\\ saved,\\ but\\ it\\ could\\ not\\ be\\ sent\\ to\\ your\\ (.*?)\\ right\\ now\\.\\ Use\\ Share\\ again\\ later\\.$",
+"rep": "Путевая точка «$1» сохранена, но сейчас её не удалось отправить вашей $2. Нажмите «Поделиться» позже."
+},
+{
+"re": "^The\\ (.*?)\\ will\\ be\\ delivered\\.\\ Place\\ it\\ from\\ the\\ Decorate\\ panel\\ in\\ any\\ room\\ you\\ can\\ decorate\\.$",
+"rep": "«$1» доставят. Поставьте предмет через панель «Украсить» в любой комнате, которую можно обустраивать."
+},
+{
+"re": "^(.*?)\\ counts\\ you\\ a\\ friend\\ now\\.\\ You\\ can\\ court\\ them:\\ ask\\ about\\ Courtship\\ under\\ Tell\\ me\\ about\\.$",
+"rep": "$1 теперь считает вас другом. Можно ухаживать: спросите об ухаживании в разделе «Расскажите о»."
+},
+{
+"re": "^To\\ win\\ a\\ Right\\ of\\ Siege:\\ more\\ than\\ the\\ holder's\\ defense\\ of\\ (.*?),\\ and\\ at\\ least\\ (.*?)\\ influence\\.$",
+"rep": "Чтобы получить Право осады: больше, чем оборона держателя ($1), и не меньше $2 влияния."
+},
+{
+"re": "^Your\\ (.*?)\\ rises\\ and\\ opens\\ in\\ (.*?)\\.\\ Step\\ through\\ the\\ arch,\\ or\\ answer\\ the\\ call\\ where\\ you\\ stand\\.$",
+"rep": "Ваш $1 поднимается и откроется через $2. Пройдите через арку или ответьте на зов там, где стоите."
+},
+{
+"re": "^In\\ (.*?)\\ you\\ can\\ teleport\\ only\\ to\\ or\\ from\\ a\\ city,\\ town\\ or\\ village\\.\\ Walk\\ or\\ ride\\ its\\ roads\\.$",
+"rep": "В $1 телепортироваться можно только в город, посёлок или деревню или оттуда. Ходите или ездите по её дорогам."
+},
+{
+"re": "^A\\ hit\\ that\\ would\\ kill\\ you\\ leaves\\ you\\ alive\\ and\\ heals\\ (.*?)%\\ of\\ your\\ health\\.\\ Recovers\\ in\\ (.*?)\\ s$",
+"rep": "Удар, который убил бы вас, оставляет вас в живых и восстанавливает $1% здоровья. Перезарядка $2 с"
+},
+{
+"re": "^Your\\ first\\ arrow\\ from\\ beyond\\ 12\\ m\\ marks\\ a\\ foe,\\ and\\ the\\ company\\ deals\\ \\+(.*?)\\ damage\\ to\\ it\\.$",
+"rep": "Ваша первая стрела с расстояния больше 12 м метит врага, и отряд наносит ему +$1 урона."
+},
+{
+"re": "^You\\ find\\ tracks\\ leading\\ away\\ from\\ the\\ bodies:\\ the\\ rest\\ of\\ the\\ (.*?)\\ fled\\ (.*?)\\ meters\\ to\\ the\\ (.*?)\\.$",
+"rep": "Вы находите следы, ведущие от тел: остальные $1 бежали на $2 м к $3."
+},
+{
+"re": "^Your\\ rest\\ supplies\\ (.*?)\\ with\\ your\\ offline\\ character\\.\\ They\\ are\\ not\\ yet\\ sold\\ in\\ the\\ realm\\.$",
+"rep": "Ваши припасы для отдыха ($1) остаются у офлайн-персонажа. В мире они пока не продаются."
+},
+{
+"re": "^Gathering\\ nodes\\ come\\ back\\.\\ Daily\\ limits\\ reset\\ for\\ rare\\ hides,\\ silver\\ and\\ Court\\ writs(.*?)$",
+"rep": "Точки сбора восстанавливаются. Дневные лимиты на редкие шкуры, серебро и приказы Двора сбрасываются$1"
+},
+{
+"re": "^storage\\ failed\\ \\((.*?)\\)\\.\\ Your\\ device\\ may\\ be\\ low\\ on\\ space\\.\\ Clear\\ some\\ space\\ and\\ pick\\ again\\.$",
+"rep": "не удалось сохранить ($1). Возможно, на устройстве мало места. Освободите место и выберите снова."
+},
+{
+"re": "^\\ (.*?)\\ of\\ the\\ materials\\ went\\ into\\ your\\ Stores\\ first\\.\\ Your\\ next\\ try\\ uses\\ them\\ from\\ there\\.$",
+"rep": " $1 материалов сначала ушли на склад. Следующая попытка возьмёт их оттуда."
+},
+{
+"re": "^Others\\ see\\ the\\ name\\ of\\ the\\ character\\ you\\ play\\ online,\\ or\\ (.*?)\\ where\\ it\\ cannot\\ be\\ shown\\.$",
+"rep": "Другие видят имя персонажа, которым вы играете онлайн, или $1, если его нельзя показать."
+},
+{
+"re": "^\\ (.*?)\\ of\\ the\\ materials\\ went\\ into\\ your\\ Stores\\ first\\.\\ Your\\ next\\ try\\ uses\\ them\\ from\\ there\\.$",
+"rep": " Сначала материалы ($1) отправились на ваш склад. Следующая попытка возьмёт их оттуда."
+},
+{
+"re": "^Look\\ at\\ a\\ marked\\ doorway\\ to\\ hang\\ the\\ door\\ \\((.*?)\\ free\\)\\.\\ Turn\\ to\\ swing\\ it\\ the\\ other\\ way\\.$",
+"rep": "Посмотрите на отмеченный проём, чтобы повесить дверь (свободно: $1). Поворачивайте, чтобы она открывалась в другую сторону."
+},
+{
+"re": "^(.*?)\\ was\\ already\\ disenchanted\\.\\ Its\\ Essence\\ is\\ in\\ your\\ Stores,\\ and\\ it\\ leaves\\ your\\ pack(.*?)\\.$",
+"rep": "С предмета «$1» уже снято зачарование. Его эссенция на складе, а сам он покидает рюкзак$2."
+},
+{
+"re": "^(.*?)\\ has\\ fallen\\ at\\ Dagon's\\ Breach\\ in\\ the\\ wilds,\\ struck\\ down\\ by\\ (.*?)\\.\\ The\\ breach\\ collapses\\.$",
+"rep": "$1 пал у Разлома Дагона в глуши; его сразили: $2. Разлом схлопывается."
+},
+{
+"re": "^Your\\ weapon\\ deals\\ (.*?)%\\ more\\ damage\\ in\\ the\\ open\\ (.*?)\\ Ocean,\\ and\\ half\\ of\\ that\\ anywhere\\ else$",
+"rep": "Ваше оружие наносит на $1% больше урона в открытом океане $2, а в любом другом месте — вдвое меньше прибавки"
+},
+{
+"re": "^Your\\ ship's\\ guns\\ deal\\ (.*?)%\\ more\\ damage,\\ and\\ your\\ ship\\ takes\\ (.*?)%\\ less\\ from\\ guns\\ and\\ rams$",
+"rep": "Пушки вашего корабля наносят на $1% больше урона, а сам корабль получает на $2% меньше урона от пушек и таранов"
+},
+{
+"re": "^members'\\ jewelry\\ here\\ (.*?)\\ better,\\ their\\ dishes\\ (.*?)\\ the\\ XP,\\ their\\ brews\\ \\+(.*?)%\\ Potent\\ chance$",
+"rep": "украшения членов здесь на $1 лучше, их блюда дают $2 опыта, их зелья +$3% к шансу Усиленного"
+},
+{
+"re": "^Bells\\ ring\\ in\\ the\\ harbors:\\ a\\ great\\ serpent\\ is\\ sighted\\ off\\ (.*?)\\.\\ (.*?)\\ rises\\ at\\ (.*?)\\ your\\ time\\.$",
+"rep": "В гаванях звонят колокола: у $1 замечен великий змей. $2 всплывёт в $3 по вашему времени."
+},
+{
+"re": "^Hold\\ (.*?)\\ to\\ choose\\ Steal,\\ Grab,\\ Info\\ or\\ Talk\\.\\ Info\\ names\\ a\\ building\\ from\\ a\\ distance\\.$",
+"rep": "Удерживайте $1, чтобы выбрать «Украсть», «Взять», «Инфо» или «Говорить». «Инфо» называет здание издалека."
+},
+{
+"re": "^Some\\ weapons\\ have\\ a\\ technique\\ on\\ (.*?),\\ which\\ costs\\ fatigue\\ and\\ takes\\ time\\ to\\ recover\\.$",
+"rep": "У некоторого оружия есть приём на $1: он тратит выносливость и требует времени на восстановление."
+},
+{
+"re": "^No\\ fast\\ travel\\ into\\ (.*?)\\.\\ Cross\\ its\\ edge\\ on\\ foot\\ or\\ on\\ horseback\\ \\(the\\ Overworld\\ map\\)\\.$",
+"rep": "В $1 нельзя быстро переместиться. Пересеките границу пешком или верхом (карта «Внешний мир»)."
+},
+{
+"re": "^(.*?)\\ is\\ (.*?)\\ and\\ now\\ an\\ elder\\ of\\ the\\ house\\.\\ The\\ years\\ ahead\\ are\\ fewer\\ than\\ those\\ behind\\.$",
+"rep": "$1 уже $2, и теперь это старейшина дома. Лет впереди меньше, чем позади."
+},
+{
+"re": "^(.*?)\\ (.*?)\\ (.*?)\\ (.*?)\\ move\\ you\\ and\\ the\\ mouse\\ turns\\ your\\ head\\.\\ Hold\\ (.*?)\\ to\\ run\\.\\ (.*?)\\ jumps\\ and\\ (.*?)\\ crouches\\.$",
+"rep": "$1 $2 $3 $4 — движение, мышь поворачивает голову. Удерживайте $5, чтобы бежать. $6 — прыжок, $7 — присесть."
+},
+{
+"re": "^A\\ rough\\ night\\ left\\ you\\ stiff:\\ Speed\\ and\\ Agility\\ are\\ (.*?)\\ lower\\ until\\ it\\ wears\\ off\\.$",
+"rep": "После тяжёлой ночи всё затекло: Скорость и Ловкость ниже на $1, пока это не пройдёт."
+},
+{
+"re": "^No\\ Iliac\\ Champion\\ yet\\.\\ The\\ top\\ player\\ needs\\ (.*?)\\ games\\ against\\ (.*?)\\ different\\ players\\.$",
+"rep": "Чемпиона Илиака пока нет. Лучшему игроку нужно $1 партий против $2 разных игроков."
+},
+{
+"re": "^(.*?)\\ \\-\\ (.*?)'s\\ harbormaster\\.\\ Your\\ notoriety\\ in\\ these\\ waters\\ is\\ too\\ high\\ for\\ any\\ favors\\.$",
+"rep": "$1 — начальник порта $2. Ваша дурная слава в этих водах слишком велика для любых услуг."
+},
+{
+"re": "^The\\ crew\\ are\\ handed\\ in\\ irons\\ to\\ the\\ crown\\ of\\ (.*?),\\ and\\ the\\ crown\\ will\\ remember\\ it\\.$",
+"rep": "Команду в кандалах передают короне $1, и корона это запомнит."
+},
+{
+"re": "^The\\ party\\ went\\ on\\ without\\ you\\.\\ Travel\\ to\\ (.*?)\\ from\\ the\\ Party\\ tab,\\ or\\ type\\ /leader\\.$",
+"rep": "Группа ушла без вас. Отправьтесь в $1 с вкладки «Группа» или введите /leader."
+},
+{
+"re": "^Your\\ weapon\\ and\\ arrows\\ deal\\ (.*?)%\\ more\\ damage\\ to\\ enemies\\ that\\ have\\ not\\ noticed\\ you$",
+"rep": "Ваше оружие и стрелы наносят на $1% больше урона врагам, которые вас не заметили"
+},
+{
+"re": "^A\\ Wagon\\ Yard\\ repairs\\ it\\ fully\\ for\\ (.*?)\\ gold,\\ or\\ (.*?)\\ if\\ its\\ wright\\ must\\ travel\\ to\\ it\\.$",
+"rep": "Каретный двор полностью починит её за $1 золотых или за $2, если мастеру придётся ехать к ней."
+},
+{
+"re": "^(.*?)\\ is\\ a\\ seat:\\ one\\ player\\ guild\\ at\\ a\\ time\\ holds\\ its\\ Charter\\ and\\ rules\\ the\\ town\\.\\ $",
+"rep": "$1 — резиденция: одна гильдия игроков за раз держит её Хартию и правит городом. "
+},
+{
+"re": "^A\\ guild's\\ name\\ and\\ tag\\ may\\ not\\ contain\\ \"(.*?)\"\\.\\ That\\ word\\ is\\ not\\ allowed\\ in\\ names\\.$",
+"rep": "Название и тег гильдии не могут содержать «$1». Это слово запрещено в названиях."
+},
+{
+"re": "^(.*?)We've\\ repaired\\ what\\ we\\ can,\\ Captain\\.\\ We\\ need\\ carpenter's\\ stores\\ for\\ the\\ rest\\.(.*?)$",
+"rep": "$1Починили, что смогли, капитан. На остальное нужны плотницкие припасы.$2"
+},
+{
+"re": "^(.*?)\\ rested\\ a\\ night\\ without\\ you\\.\\ Come\\ within\\ 15\\ m\\ of\\ them\\ to\\ rest\\ with\\ the\\ party\\.$",
+"rep": "$1 провёл ночь на отдыхе без вас. Подойдите ближе чем на 15 м, чтобы отдыхать с группой."
+},
+{
+"re": "^A\\ kill\\ gives\\ you\\ a\\ ward\\ that\\ blocks\\ the\\ next\\ (.*?)\\ damage\\ you\\ take\\.\\ Recovers\\ in\\ (.*?)\\ s$",
+"rep": "Убийство даёт вам оберег, блокирующий следующие $1 ед. урона. Перезарядка $2 с"
+},
+{
+"re": "^You\\ have\\ (.*?)\\ listings\\ up,\\ the\\ most\\ allowed\\ here\\.\\ Cancel\\ one\\ or\\ wait\\ for\\ a\\ sale\\.$",
+"rep": "У вас выставлено лотов: $1 — это максимум здесь. Отмените один или дождитесь продажи."
+},
+{
+"re": "^Gathered\\ goods\\ go\\ straight\\ to\\ your\\ Stores,\\ under\\ Holdings\\ in\\ the\\ pause\\ menu\\.(.*?)$",
+"rep": "Собранное попадает прямо на склад — он в разделе «Владения» меню паузы.$1"
+},
+{
+"re": "^At\\ the\\ helm,\\ (.*?)\\ raises\\ or\\ lowers\\ the\\ sail\\ and\\ (.*?)\\ and\\ (.*?)\\ trim\\ it\\.\\ (.*?)\\ leaves\\ the\\ helm\\.$",
+"rep": "У штурвала $1 поднимает или опускает парус, а $2 и $3 регулируют его. $4 — отойти от штурвала."
+},
+{
+"re": "^(.*?)\\ you\\ hold\\ (.*?)\\ made\\ by\\ another\\ player,\\ and\\ only\\ the\\ maker\\ can\\ sell\\ (.*?)\\ as\\ crafted\\.(.*?)$",
+"rep": "$1 у вас — $2: сделано другим игроком, и продать это как изделие может только мастер.$4"
+},
+{
+"re": "^it\\ loses\\ (.*?)\\ Strength\\ more\\ each\\ week\\ its\\ members'\\ Merit\\ lifts\\ it\\ by\\ less\\ than\\ (.*?)$",
+"rep": "оно теряет ещё $1 Силы каждую неделю, когда заслуги членов поднимают его меньше чем на $2"
+},
+{
+"re": "^The\\ realm\\ refused\\ your\\ family's\\ record\\.\\ (.*?)\\ It\\ is\\ kept\\ on\\ this\\ device\\ instead\\.$",
+"rep": "Мир отклонил запись вашей семьи. $1 Вместо этого она хранится на этом устройстве."
+},
+{
+"re": "^You\\ cannot\\ use\\ /unstuck\\ with\\ another\\ player\\ within\\ (.*?)\\ m\\ in\\ the\\ open\\ PvP\\ zone\\.$",
+"rep": "В открытой PvP-зоне нельзя использовать /unstuck, если другой игрок ближе $1 м."
+},
+{
+"re": "^(.*?)\\ has\\ fallen\\ at\\ Dagon's\\ Breach\\ near\\ (.*?),\\ struck\\ down\\ by\\ (.*?)\\.\\ The\\ breach\\ collapses\\.$",
+"rep": "$1 пал у Разлома Дагона близ $2; его сразили: $3. Разлом схлопывается."
+},
+{
+"re": "^Your\\ weapon\\ deals\\ (.*?)%\\ more\\ damage\\ to\\ the\\ undead,\\ the\\ Daedra\\ and\\ the\\ atronachs$",
+"rep": "Ваше оружие наносит на $1% больше урона нежити, даэдра и атронахам"
+},
+{
+"re": "^Hold\\ (.*?)\\ to\\ aim\\ and\\ release\\ to\\ strike\\.\\ Tap\\ it\\ to\\ strike\\ where\\ you're\\ looking\\.$",
+"rep": "Удерживайте $1, чтобы прицелиться, и отпустите для удара. Короткое нажатие — удар туда, куда вы смотрите."
+},
+{
+"re": "^A\\ deed\\ for\\ (.*?):\\ three\\ of\\ its\\ members\\ fought\\ together\\.\\ (.*?)\\ added\\ to\\ its\\ treasury\\.$",
+"rep": "Подвиг для $1: трое её членов сражались вместе. В казну добавлено $2."
+},
+{
+"re": "^Room\\ (.*?)\\ is\\ still\\ rented\\.\\ It\\ will\\ not\\ be\\ offered\\ again\\ once\\ its\\ days\\ run\\ out\\.$",
+"rep": "Комната $1 ещё сдана. Когда её дни истекут, её больше не будут предлагать."
+},
+{
+"re": "^(.*?)\\ has\\ fallen\\ by\\ your\\ hand\\.\\ Search\\ the\\ body\\ to\\ take\\ one\\ piece\\ of\\ their\\ gear\\.$",
+"rep": "$1 пал от вашей руки. Обыщите тело, чтобы забрать одну вещь из снаряжения."
+},
+{
+"re": "^Your\\ weapon\\ deals\\ (.*?)%\\ more\\ damage,\\ or\\ (.*?)%\\ more\\ while\\ you\\ are\\ below\\ half\\ health$",
+"rep": "Ваше оружие наносит на $1% больше урона, или на $2% больше, пока у вас меньше половины здоровья"
+},
+{
+"re": "^When\\ an\\ enemy\\ hits\\ you,\\ your\\ next\\ weapon\\ hit\\ within\\ (.*?)\\ s\\ deals\\ (.*?)%\\ more\\ damage$",
+"rep": "Когда враг бьёт вас, ваш следующий удар оружием в течение $1 с наносит на $2% больше урона"
+},
+{
+"re": "^(.*?)\\ draws\\ your\\ weapon\\ and\\ (.*?)\\ attacks\\.\\ How\\ you\\ move\\ the\\ mouse\\ decides\\ the\\ swing\\.$",
+"rep": "$1 достаёт оружие, $2 — атака. Движение мыши определяет замах."
+},
+{
+"re": "^(.*?)\\ challenges\\ you\\ to\\ a\\ bout\\.\\ Challenge\\ them\\ back\\ from\\ their\\ card\\ to\\ accept\\.$",
+"rep": "$1 вызывает вас на бой. Чтобы принять, вызовите его в ответ с его карточки."
+},
+{
+"re": "^The\\ town\\ rises\\ against\\ (.*?)\\ this\\ week\\.\\ A\\ Rebel\\ Captain\\ holds\\ the\\ palace\\ door\\.$",
+"rep": "На этой неделе город восстаёт против $1. Двери дворца держит Капитан мятежников."
+},
+{
+"re": "^Your\\ traders\\ already\\ hold\\ (.*?)\\ items\\.\\ Take\\ one\\ back,\\ or\\ wait\\ for\\ one\\ to\\ sell\\.$",
+"rep": "У ваших торговцев уже $1 предметов. Заберите один или дождитесь продажи."
+},
+{
+"re": "^/(.*?)\\ takes\\ dice\\ like\\ 2d6\\+3,\\ d20\\ or\\ 100,\\ with\\ at\\ most\\ (.*?)\\ dice\\ of\\ up\\ to\\ (.*?)\\ sides\\.$",
+"rep": "/$1 принимает кости вида 2d6+3, d20 или 100 — не больше $2 костей, до $3 граней."
+},
+{
+"re": "^The\\ sigil\\ on\\ your\\ (.*?)\\ brightens:\\ (.*?)\\.\\ Your\\ Renown\\ limits\\ it\\ to\\ (.*?)\\ until\\ Renown\\ (.*?)\\.$",
+"rep": "Сигил на предмете «$1» разгорается ярче: $2. Ваша Слава ограничивает его стадией «$3» до Славы $4."
+},
+{
+"re": "^No\\ town\\ of\\ this\\ region\\ is\\ on\\ the\\ halls'\\ audit\\ list\\ \\((.*?)\\ accounts\\ ignored\\)\\.$",
+"rep": "Ни одного города этого региона нет в списке проверки залов (аккаунтов не учтено: $1)."
+},
+{
+"re": "^(.*?)\\ has\\ won\\ the\\ Right\\ of\\ Siege\\ at\\ (.*?)\\.\\ (.*?)\\ holds\\ its\\ Charter\\.\\ Battle\\ is\\ joined\\ (.*?)(.*?)\\.$",
+"rep": "$1 получил Право осады в $2. Хартию держит $3. Битва начинается $4$5."
+},
+{
+"re": "^(.*?)\\ opens\\ the\\ menu\\.\\ Saving,\\ loading\\ and\\ settings\\ are\\ under\\ the\\ System\\ tab\\.$",
+"rep": "$1 открывает меню. Сохранение, загрузка и настройки — на вкладке «Система»."
+},
+{
+"re": "^Healing\\ an\\ ally\\ under\\ 30%\\ health\\ makes\\ them\\ take\\ (.*?)\\ less\\ damage\\ for\\ 3\\ s\\.$",
+"rep": "Лечение союзника с здоровьем ниже 30% снижает получаемый им урон на $1 на 3 с."
+},
+{
+"re": "^Among\\ the\\ ship's\\ papers\\ is\\ a\\ chart\\ of\\ these\\ waters:\\ (.*?)\\ (.*?)\\ marked\\ on\\ yours\\.$",
+"rep": "Среди бумаг корабля есть карта этих вод: на вашей отмечено $1 $2."
+},
+{
+"re": "^You\\ burn\\ the\\ ship's\\ papers\\.\\ No\\ one\\ is\\ left\\ to\\ report\\ you\\ in\\ (.*?)'s\\ waters\\.$",
+"rep": "Вы сжигаете бумаги корабля. Донести на вас в водах $1 некому."
+},
+{
+"re": "^Your\\ weapon\\ and\\ arrows\\ deal\\ (.*?)%\\ more\\ damage\\ to\\ enemies\\ below\\ half\\ health$",
+"rep": "Ваше оружие и стрелы наносят на $1% больше урона врагам, у которых меньше половины здоровья"
+},
+{
+"re": "^Witnessed\\ once\\ (.*?)\\ players\\ with\\ accounts\\ at\\ least\\ a\\ week\\ old\\ gather\\ here$",
+"rep": "Засвидетельствовано, когда здесь соберут ресурсы $1 игроков с аккаунтами не моложе недели"
+},
+{
+"re": "^Go\\ to\\ (.*?)\\ to\\ enter\\ the\\ Royal\\ Tourney\\.\\ Its\\ ring\\ stands\\ before\\ the\\ castle\\.$",
+"rep": "Отправляйтесь в $1, чтобы участвовать в Королевском турнире. Его ристалище стоит перед замком."
+},
+{
+"re": "^You\\ deal\\ Iliac\\ Hand\\ with\\ (.*?),\\ playing\\ for\\ a\\ card\\.\\ Your\\ (.*?)\\ is\\ on\\ the\\ table\\.$",
+"rep": "Вы раздаёте «Илиакскую раздачу» с $1, играя на карту. Ваша $2 на столе."
+},
+{
+"re": "^Enemies\\ that\\ hit\\ you\\ take\\ (.*?)%\\ of\\ the\\ damage\\ back\\.\\ This\\ never\\ kills\\ them$",
+"rep": "Враги, ударившие вас, получают $1% урона обратно. Это никогда их не убивает"
+},
+{
+"re": "^They\\ say\\ the\\ air\\ goes\\ brass\\-colored\\ past\\ the\\ walls\\ of\\ (.*?)\\ at\\ dusk,\\ and\\ (.*?)\\.$",
+"rep": "Говорят, в сумерках за стенами $1 воздух становится цвета латуни, и $2."
+},
+{
+"re": "^A\\ rank's\\ name\\ may\\ not\\ contain\\ \"(.*?)\"\\.\\ That\\ word\\ is\\ not\\ allowed\\ in\\ names\\.$",
+"rep": "Название ранга не может содержать «$1». Это слово запрещено в названиях."
+},
+{
+"re": "^(.*?)\\ challenges\\ you\\ to\\ a\\ duel\\.\\ Answer\\ on\\ the\\ prompt,\\ or\\ press\\ F\\ on\\ them\\.$",
+"rep": "$1 вызывает вас на поединок. Ответьте в окне или нажмите F, глядя на него."
+},
+{
+"re": "^(.*?)\\ asks\\ for\\ your\\ hand\\.\\ Answer\\ on\\ the\\ prompt,\\ or\\ on\\ their\\ Inspect\\ card\\.$",
+"rep": "$1 просит вашей руки. Ответьте в окне или на его карточке осмотра."
+},
+{
+"re": "^The\\ harbormaster\\ unrolls\\ a\\ chart\\ of\\ these\\ waters:\\ (.*?)\\ (.*?)\\ marked\\ on\\ yours\\.$",
+"rep": "Начальник порта разворачивает карту этих вод: на вашей отмечено $1 $2."
+},
+{
+"re": "^Sworn\\ to\\ you\\.\\ Your\\ companions\\ are\\ full,\\ so\\ (.*?)\\ waits\\ until\\ you\\ call\\ it\\.$",
+"rep": "Присягнул вам. Спутников уже достаточно, поэтому $1 ждёт, пока вы его не позовёте."
+},
+{
+"re": "^The\\ carriages\\ of\\ (.*?)\\ run\\ every\\ ten\\ minutes\\.\\ The\\ next\\ leaves\\ in\\ (.*?)\\ minute(.*?)\\.$",
+"rep": "Кареты $1 ходят каждые десять минут. Следующая отправится через $2 мин."
+},
+{
+"re": "^Online,\\ resting\\ does\\ not\\ move\\ the\\ sun\\.\\ Night\\ falls\\ in\\ about\\ (.*?)\\ minute(.*?)\\.$",
+"rep": "Онлайн отдых не сдвигает солнце. Ночь наступит примерно через $1 мин."
+},
+{
+"re": "^You\\ leave\\ your\\ deck\\ to\\ them\\.\\ The\\ pirates\\ fall\\ back\\ to\\ (.*?)\\ and\\ cast\\ off\\.$",
+"rep": "Вы оставляете им свою палубу. Пираты отходят к $1 и отчаливают."
+},
+{
+"re": "^Your\\ character's\\ name\\ cannot\\ be\\ shown\\ online:\\ (.*?)\\.\\ Others\\ see\\ you\\ as\\ (.*?)\\.$",
+"rep": "Имя вашего персонажа нельзя показывать в сети: $1. Другие видят вас как $2."
+},
+{
+"re": "^(.*?)\\ is\\ still\\ a\\ child\\.\\ They\\ come\\ of\\ age\\ when\\ the\\ mantle\\ passes\\ to\\ them\\.$",
+"rep": "$1 ещё ребёнок. Он повзрослеет, когда к нему перейдёт мантия."
+},
+{
+"re": "^You\\ are\\ ready\\ to\\ rest\\ \\((.*?)/(.*?)\\ ready\\)\\.\\ Everyone\\ can\\ /ready\\ or\\ press\\ Rest\\.$",
+"rep": "Вы готовы к отдыху (готовы $1/$2). Каждый может набрать /ready или нажать «Отдых»."
+},
+{
+"re": "^Quit\\ (.*?)\\?\\ Your\\ points\\ stay\\ with\\ them,\\ and\\ you\\ wait\\ a\\ season\\ to\\ switch\\.$",
+"rep": "Покинуть $1? Ваши очки останутся у них, а сменить сторону можно будет через сезон."
+},
+{
+"re": "^(.*?)\\ picks\\ up\\ where\\ they\\ left\\ off\\.\\ Your\\ game\\ is\\ saved\\ where\\ you\\ stand\\.$",
+"rep": "$1 продолжает с того места, где остановился. Игра сохранена там, где вы стоите."
+},
+{
+"re": "^For\\ (.*?)\\ gold\\ the\\ temple\\ will\\ do\\ penance\\ on\\ your\\ behalf\\.\\ Will\\ you\\ pay\\?$",
+"rep": "За $1 золотых храм принесёт за вас покаяние. Заплатите?"
+},
+{
+"re": "^(.*?)\\ things\\ stored\\ in\\ pieces\\ that\\ are\\ gone\\ were\\ set\\ down\\ at\\ your\\ feet\\.$",
+"rep": "Вещи, хранившиеся в исчезнувших предметах, сложены у ваших ног: $1."
+},
+{
+"re": "^Iliac\\ Hand:\\ the\\ game\\ is\\ on\\ the\\ season's\\ board\\.\\ Your\\ rating\\ is\\ (.*?)\\ \\((.*?)(.*?)\\)\\.$",
+"rep": "Илиакская раздача: партия засчитана в сезонную таблицу. Ваш рейтинг — $1 ($2$3)."
+},
+{
+"re": "^The\\ sky\\ burns\\ near\\ (.*?)\\.\\ Dagon's\\ faithful\\ open\\ a\\ breach\\ at\\ (.*?)\\ your\\ time\\.$",
+"rep": "Небо горит возле $1. Верные Дагону откроют разлом в $2 по вашему времени."
+},
+{
+"re": "^(.*?)\\ has\\ fallen\\ at\\ Dagon's\\ Breach\\ in\\ the\\ wilds\\.\\ The\\ breach\\ collapses\\.$",
+"rep": "$1 пал у Разлома Дагона в глуши. Разлом схлопывается."
+},
+{
+"re": "^Your\\ Memento\\ lies\\ in\\ Hall\\ (.*?)\\.\\ You\\ will\\ be\\ called\\ back\\ at\\ Redoubt\\ (.*?)\\.$",
+"rep": "Ваш Памятный знак лежит в зале $1. Вас вернут у Редута $2."
+},
+{
+"re": "^Crumbling\\ ground\\ holds\\ (.*?)\\ s\\ longer\\ under\\ you,\\ and\\ falls\\ cost\\ less\\.$",
+"rep": "Осыпающаяся земля держит вас на $1 с дольше, а падения обходятся дешевле."
+},
+{
+"re": "^the\\ holder\\ is\\ warned\\ when\\ a\\ challenger\\ gets\\ past\\ (.*?)\\ of\\ its\\ defense$",
+"rep": "держателя предупреждают, когда претендент преодолевает $1 его обороны"
+},
+{
+"re": "^Go\\ to\\ (.*?)\\ to\\ fight\\ for\\ it\\.\\ The\\ battle\\ is\\ fought\\ in\\ the\\ town\\ itself\\.$",
+"rep": "Отправляйтесь в $1, чтобы сражаться за него. Битва идёт в самом городе."
+},
+{
+"re": "^(.*?)\\ gold\\ for\\ your\\ catalog\\ pieces\\ was\\ refunded\\ to\\ your\\ bank\\ account\\.$",
+"rep": "$1 золотых за ваши вещи из каталога возвращено на банковский счёт."
+},
+{
+"re": "^(.*?)\\ challenges\\ you\\.\\ Challenge\\ them\\ back\\ from\\ their\\ card\\ to\\ accept\\.$",
+"rep": "$1 бросает вам вызов. Чтобы принять, вызовите его в ответ с его карточки."
+},
+{
+"re": "^(.*?)'s\\ answer\\ never\\ reached\\ the\\ temple\\.\\ The\\ wedding\\ did\\ not\\ happen\\.$",
+"rep": "Ответ $1 так и не дошёл до храма. Свадьба не состоялась."
+},
+{
+"re": "^(.*?)\\ of\\ your\\ things\\ were\\ no\\ longer\\ here\\ and\\ went\\ back\\ to\\ your\\ pack\\.$",
+"rep": "Ваших вещей, которых здесь уже не было и которые вернулись в рюкзак: $1."
+},
+{
+"re": "^\\+(.*?)\\ fire\\ resistance,\\ and\\ your\\ weapon\\ hits\\ deal\\ (.*?)\\ extra\\ fire\\ damage$",
+"rep": "+$1 к сопротивлению огню, а удары вашим оружием наносят дополнительно $2 ед. урона огнём"
+},
+{
+"re": "^Each\\ enemy\\ hit\\ on\\ you\\ adds\\ (.*?)%\\ weapon\\ damage\\ for\\ (.*?)\\ s,\\ up\\ to\\ (.*?)\\ times$",
+"rep": "Каждый удар врага по вам добавляет $1% к урону оружия на $2 с, до $3 раз"
+},
+{
+"re": "^You\\ made\\ (.*?)\\.\\ It\\ waits\\ in\\ your\\ things\\ until\\ you\\ place\\ it\\ in\\ a\\ room$",
+"rep": "Вы изготовили: $1. Это лежит среди ваших вещей, пока вы не поставите его в комнате"
+},
+{
+"re": "^For\\ (.*?)\\ gold\\ the\\ temple\\ will\\ plead\\ for\\ your\\ pardon\\.\\ Will\\ you\\ pay\\?$",
+"rep": "За $1 золотых храм будет просить о вашем помиловании. Заплатите?"
+},
+{
+"re": "^A\\ piece\\ stays\\ with\\ a\\ trader\\ for\\ (.*?)\\ days,\\ then\\ comes\\ back\\ to\\ you\\.$",
+"rep": "Вещь остаётся у торговца $1 дн., затем возвращается к вам."
+},
+{
+"re": "^Too\\ high\\.\\ Yard\\ decorations\\ can\\ be\\ at\\ most\\ (.*?)\\ m\\ above\\ the\\ ground\\.$",
+"rep": "Слишком высоко. Украшения двора могут быть не выше $1 м над землёй."
+},
+{
+"re": "^(.*?)'s\\ goods\\ never\\ arrived\\.\\ The\\ trade\\ may\\ not\\ have\\ been\\ completed\\.$",
+"rep": "Товары $1 так и не пришли. Возможно, обмен не завершился."
+},
+{
+"re": "^(.*?)\\ did\\ not\\ accept\\ within\\ (.*?)\\ seconds\\.\\ The\\ trade\\ offer\\ is\\ withdrawn\\.$",
+"rep": "$1 не принял предложение за $2 с. Предложение обмена отозвано."
+},
+{
+"re": "^The\\ first\\ group\\ is\\ dead,\\ but\\ (.*?)\\ (.*?)\\ got\\ away\\.\\ Look\\ for\\ their\\ trail\\.$",
+"rep": "Первая группа мертва, но $1 $2 ушли. Ищите их след."
+},
+{
+"re": "^(.*?)\\ takes\\ everything\\ from\\ a\\ body\\ or\\ pile\\.\\ (.*?)\\ opens\\ the\\ full\\ window\\.$",
+"rep": "$1 забирает всё с тела или из кучи. $2 открывает полное окно."
+},
+{
+"re": "^The\\ late\\ (.*?)'s\\ deed,\\ which\\ passes\\ to\\ whoever\\ carries\\ on\\ the\\ line$",
+"rep": "Купчая покойного $1, которая переходит к тому, кто продолжит род"
+},
+{
+"re": "^The\\ guild\\ was\\ renamed\\ recently\\.\\ It\\ can\\ be\\ renamed\\ again\\ in\\ (.*?)\\ (.*?)\\.$",
+"rep": "Гильдию недавно переименовали. Снова переименовать её можно через $1 $2."
+},
+{
+"re": "^You\\ hear\\ (.*?)\\ somewhere\\ deeper\\ in\\ (.*?):\\ (.*?)\\ of\\ them,\\ about\\ (.*?)\\ meters\\ away\\.$",
+"rep": "Вы слышите $1 где-то в глубине $2: их $3, примерно в $4 м."
+},
+{
+"re": "^(.*?)\\ fell\\ at\\ (.*?)(.*?)\\.\\ Their\\ remains\\ still\\ lie\\ there,\\ marked\\ on\\ your\\ map\\.$",
+"rep": "$1 пал в $2$3. Останки всё ещё лежат там, они отмечены на вашей карте."
+},
+{
+"re": "^The\\ next\\ enemy\\ hit\\ on\\ you\\ deals\\ (.*?)%\\ less\\ damage\\.\\ Recovers\\ in\\ (.*?)\\ s$",
+"rep": "Следующий удар врага по вам наносит на $1% меньше урона. Перезарядка $2 с"
+},
+{
+"re": "^No\\ fast\\ travel\\ out\\ of\\ (.*?)\\.\\ Walk\\ or\\ ride\\ out\\ \\(the\\ Overworld\\ map\\)\\.$",
+"rep": "Из $1 нельзя быстро переместиться. Уходите пешком или верхом (карта «Внешний мир»)."
+},
+{
+"re": "^Release\\ (.*?)\\?\\ It\\ is\\ freed\\ from\\ its\\ oath\\ and\\ leaves\\ you\\ for\\ good(.*?)\\.$",
+"rep": "Отпустить $1? Он освободится от клятвы и навсегда покинет вас$2."
+},
+{
+"re": "^The\\ boarders\\ are\\ thrown\\ back,\\ but\\ (.*?)\\ sends\\ more\\ over\\ the\\ rail!$",
+"rep": "Абордажников отбросили, но $1 шлёт через борт новых!"
+},
+{
+"re": "^You\\ already\\ hold\\ (.*?)'s\\ letter\\.\\ You\\ can\\ only\\ hold\\ one\\ at\\ a\\ time\\.$",
+"rep": "Письмо ($1) у вас уже есть. Одновременно можно держать только одно."
+},
+{
+"re": "^(.*?)\\ is\\ at\\ (.*?)\\.\\ Travel\\ to\\ them\\ from\\ the\\ Party\\ tab,\\ or\\ type\\ /leader\\.$",
+"rep": "$1 сейчас в $2. Отправьтесь к нему с вкладки «Группа» или введите /leader."
+},
+{
+"re": "^(.*?)\\ are\\ in\\ your\\ pack\\.\\ Use\\ them\\ by\\ the\\ water\\ to\\ launch\\ the\\ ship\\.$",
+"rep": "$1 — в вашем рюкзаке. Используйте у воды, чтобы спустить корабль."
+},
+{
+"re": "^A\\ kill\\ restores\\ (.*?)%\\ of\\ your\\ health\\ and\\ magicka\\.\\ Recovers\\ in\\ (.*?)\\ s$",
+"rep": "Убийство восстанавливает $1% здоровья и маны. Перезарядка $2 с"
+},
+{
+"re": "^A\\ deck\\ can\\ hold\\ only\\ one\\ (.*?)\\ because\\ it\\ is\\ Legendary\\ or\\ rarer\\.$",
+"rep": "В колоде может быть только одна карта «$1», потому что она Легендарная или реже."
+},
+{
+"re": "^(.*?)\\ skills\\ are\\ ready\\.\\ Choose\\ No,\\ then\\ press\\ M\\ to\\ see\\ the\\ next\\.$",
+"rep": "Готово навыков: $1. Выберите «Нет», затем нажмите M, чтобы увидеть следующий."
+},
+{
+"re": "^Loaded\\.\\ (.*?)\\ special\\ pick(.*?)\\ this\\ screen\\ could\\ not\\ take\\ (.*?)\\ left\\ out\\.$",
+"rep": "Загружено. Особые выборы, которые этот экран не принял, пропущены: $1."
+},
+{
+"re": "^(.*?)\\ (.*?)\\ A\\ house's\\ model\\ is\\ chosen\\ once,\\ when\\ its\\ founder\\ is\\ made\\.$",
+"rep": "$1 $2 Устройство дома выбирается один раз — при создании основателя."
+},
+{
+"re": "^Festering:\\ (.*?)\\ of\\ (.*?)\\.\\ It\\ grows\\ stronger\\ the\\ longer\\ you\\ leave\\ it\\.$",
+"rep": "Гниёт: $1 из $2. Чем дольше вы его не трогаете, тем он сильнее."
+},
+{
+"re": "^This\\ page\\ is\\ too\\ long\\ to\\ show\\.\\ A\\ page\\ holds\\ at\\ most\\ (.*?)\\ lines\\.$",
+"rep": "Эта страница слишком длинная. На странице помещается не больше $1 строк."
+},
+{
+"re": "^(.*?)\\ wants\\ the\\ party\\ to\\ travel\\ to\\ (.*?)\\.\\ Type\\ /travel\\ to\\ come\\ along\\.$",
+"rep": "$1 предлагает группе отправиться в $2. Введите /travel, чтобы присоединиться."
+},
+{
+"re": "^Its\\ lair:\\ (.*?),\\ (.*?)\\ to\\ the\\ (.*?),\\ marked\\ on\\ your\\ map\\ with\\ a\\ red\\ circle\\.$",
+"rep": "Его логово: $1 ($2, направление — $3), отмечено на вашей карте красным кругом."
+},
+{
+"re": "^(.*?)\\ frees\\ the\\ cursor\\.\\ Press\\ it\\ again\\ to\\ look\\ around\\ once\\ more\\.$",
+"rep": "$1 освобождает курсор. Нажмите ещё раз, чтобы снова осматриваться."
+},
+{
+"re": "^What\\ your\\ killer\\ took\\ when\\ you\\ died\\ in\\ (.*?)\\ has\\ left\\ your\\ pack\\.$",
+"rep": "То, что забрал ваш убийца, когда вы погибли в $1, исчезло из вашего рюкзака."
+},
+{
+"re": "^delivered,\\ free\\ to\\ set\\ down(.*?),\\ and\\ back\\ here\\ when\\ taken\\ down$",
+"rep": "доставлено, ставится бесплатно$1; если снять — вернётся сюда"
+},
+{
+"re": "^Home\\ of\\ the\\ (.*?)\\.\\ Click\\ to\\ read\\ what\\ it\\ means\\ to\\ be\\ born\\ here\\.$",
+"rep": "Родина народа «$1». Нажмите, чтобы прочесть, что значит родиться здесь."
+},
+{
+"re": "^(.*?)\\ holds\\ a\\ gem\\.\\ Extract\\ it\\ at\\ the\\ Reforge\\ or\\ unset\\ it\\ first\\.$",
+"rep": "В предмете «$1» есть камень. Сначала извлеките его на Перековке или выньте."
+},
+{
+"re": "^Their\\ card\\ is\\ not\\ available\\ yet\\.\\ This\\ is\\ what\\ (.*?)\\ is\\ wearing\\.$",
+"rep": "Карточка пока недоступна. Вот что надето на $1."
+},
+{
+"re": "^(.*?)\\ removed\\ from\\ the\\ seat:\\ the\\ clock\\ passed\\ (.*?)\\ (.*?)\\ turns\\ in\\ a\\ row\\.$",
+"rep": "$1 убран с места: часы пропустили $2 $3 ходов подряд."
+},
+{
+"re": "^You\\ attacked\\ a\\ ship\\ of\\ (.*?)\\.\\ Your\\ letter\\ of\\ marque\\ is\\ revoked\\.$",
+"rep": "Вы напали на корабль $1. Ваше каперское свидетельство отозвано."
+},
+{
+"re": "^(.*?)We're\\ in\\ port,\\ Captain\\.\\ The\\ shipwright\\ can\\ do\\ the\\ repairs\\.$",
+"rep": "$1Мы в порту, капитан. Ремонт может сделать корабел."
+},
+{
+"re": "^(.*?)\\ has\\ fallen\\ at\\ Dagon's\\ Breach\\ near\\ (.*?)\\.\\ The\\ breach\\ collapses\\.$",
+"rep": "$1 пал у Разлома Дагона близ $2. Разлом схлопывается."
+},
+{
+"re": "^(.*?)\\ saves\\ your\\ game\\ at\\ once\\ and\\ (.*?)\\ loads\\ that\\ save\\.\\ Save\\ often\\.$",
+"rep": "$1 мгновенно сохраняет игру, $2 загружает это сохранение. Сохраняйтесь почаще."
+},
+{
+"re": "^The\\ hall's\\ head\\ steps\\ down\\ this\\ Season:\\ (.*?)\\ stand\\ to\\ follow\\.$",
+"rep": "Глава зала уходит в этом Сезоне: в преемники выдвигаются $1."
+},
+{
+"re": "^Mends\\ (.*?)%\\ of\\ a\\ weapon's\\ or\\ armor's\\ condition,\\ up\\ to\\ (.*?)%,\\ once$",
+"rep": "Однократно восстанавливает $1% состояния оружия или доспеха, до $2%"
+},
+{
+"re": "^Your\\ pages\\ of\\ the\\ Annals:\\ (.*?)\\.\\ /breach\\ annals\\ N\\ to\\ read\\ one\\.$",
+"rep": "Ваши страницы Летописи: $1. /breach annals N — прочесть одну."
+},
+{
+"re": "^Born\\ of\\ the\\ blood\\ and\\ raised\\ in\\ (.*?),\\ a\\ new\\ heir\\ comes\\ of\\ age$",
+"rep": "Рождённый от крови и выросший в $1, новый наследник входит в возраст"
+},
+{
+"re": "^(.*?)\\ carpenter's\\ (.*?)\\ too\\ heavy\\ to\\ carry\\ and\\ (.*?)\\ down\\ with\\ the\\ wreck$",
+"rep": "Плотницкие припасы ($1) слишком тяжелы, чтобы унести, и ушли на дно вместе с обломками"
+},
+{
+"re": "^Melee\\ hits\\ splash\\ (.*?)\\ of\\ their\\ damage\\ onto\\ adds\\ within\\ 3\\ m\\.$",
+"rep": "Удары в ближнем бою передают $1 своего урона прислужникам в радиусе 3 м."
+},
+{
+"re": "^When\\ an\\ ally\\ falls,\\ the\\ rest\\ deal\\ \\+(.*?)\\ damage\\ for\\ the\\ hall\\.$",
+"rep": "Когда союзник падает, остальные наносят +$1 урона до конца зала."
+},
+{
+"re": "^gave\\ the\\ Master's\\ chair\\ of\\ (.*?)\\ up,\\ and\\ kept\\ a\\ council\\ chair$",
+"rep": "оставил кресло Мастера $1, сохранив место в совете"
+},
+{
+"re": "^(.*?)\\ is\\ knocked\\ out\\.\\ Your\\ crew\\ carries\\ (.*?)\\ back\\ aboard\\ to\\ rest\\.$",
+"rep": "$1 без сознания. Ваша команда относит $2 на борт отдохнуть."
+},
+{
+"re": "^The\\ estate\\ of\\ (.*?)\\ gold\\ passes\\ to\\ whoever\\ takes\\ up\\ the\\ name\\.$",
+"rep": "Наследство в $1 золотых переходит к тому, кто примет имя."
+},
+{
+"re": "^The\\ leader\\ wants\\ to\\ rest\\.\\ Press\\ R\\ to\\ be\\ ready!\\ \\((.*?)/(.*?)\\ ready\\)$",
+"rep": "Лидер хочет отдохнуть. Нажмите R, чтобы быть готовым! (готовы $1/$2)"
+},
+{
+"re": "^(.*?)\\ is\\ paid\\ off\\ and\\ leaves\\ (.*?)\\.\\ (.*?)\\ takes\\ the\\ open\\ place\\ on\\ deck\\.$",
+"rep": "$1 получает расчёт и покидает $2. $3 занимает освободившееся место на палубе."
+},
+{
+"re": "^You\\ rent\\ a\\ room\\ here,\\ with\\ (.*?)\\ day(.*?)\\ left\\.\\ You\\ can\\ rest\\ here\\.$",
+"rep": "Вы снимаете здесь комнату, осталось дней: $1. Здесь можно отдыхать."
+},
+{
+"re": "^Sink\\ or\\ capture\\ (.*?)\\ pirate\\ ships\\ in\\ (.*?)'s\\ waters\\ within\\ (.*?)\\ days\\.$",
+"rep": "Потопите или захватите пиратские корабли ($1) в водах $2 за $3 дн."
+},
+{
+"re": "^It\\ stays\\ open\\ for\\ (.*?)\\ seconds,\\ and\\ anyone\\ can\\ step\\ through\\.$",
+"rep": "Он остаётся открытым $1 с, и пройти может любой."
+},
+{
+"re": "^(.*?)\\ weigh\\ more\\ than\\ you\\ can\\ carry\\.\\ Lighten\\ your\\ pack\\ first\\.$",
+"rep": "$1 весят больше, чем вы можете унести. Сначала облегчите рюкзак."
+},
+{
+"re": "^(.*?)\\ changes\\ hands,\\ or\\ which\\ hand\\ leads\\ when\\ both\\ are\\ armed\\.$",
+"rep": "$1 меняет руку или ведущую руку, когда вооружены обе."
+},
+{
+"re": "^(.*?),\\ (.*?),\\ (.*?),\\ (.*?)\\ and\\ (.*?)\\ to\\ (.*?)\\ use\\ the\\ items\\ and\\ spells\\ on\\ your\\ hotbar\\.$",
+"rep": "$1, $2, $3, $4 и с $5 по $6 используют предметы и заклинания с панели быстрого доступа."
+},
+{
+"re": "^Your\\ (.*?)\\ needs\\ (.*?)\\ to\\ pull\\ it\\.\\ Buy\\ another\\ at\\ a\\ town's\\ Stable\\.$",
+"rep": "Для «$1» нужно в упряжке: $2. Купите ещё в городской конюшне."
+},
+{
+"re": "^(.*?)\\ rises\\ off\\ (.*?)\\.\\ It\\ dives\\ in\\ (.*?)\\.\\ Sail\\ out\\ and\\ join\\ the\\ fight\\.$",
+"rep": "$1 всплывает у $2. Уйдёт на глубину через $3. Выходите в море и вступайте в бой."
+},
+{
+"re": "^(.*?)\\ is\\ bound\\ to\\ you\\.\\ It\\ cannot\\ be\\ dropped,\\ traded\\ or\\ sold\\.$",
+"rep": "«$1» привязан(а) к вам. Это нельзя выбросить, обменять или продать."
+},
+{
+"re": "^Battlemage's\\ Reprieve!\\ A\\ (.*?)\\-point\\ shield,\\ and\\ (.*?)\\ (.*?)\\ shielded\\.$",
+"rep": "Передышка боевого мага! Щит на $1 ед.; под защитой союзников: $2."
+},
+{
+"re": "^While\\ you\\ are\\ below\\ half\\ health,\\ you\\ take\\ (.*?)%\\ less\\ damage$",
+"rep": "Пока у вас меньше половины здоровья, вы получаете на $1% меньше урона"
+},
+{
+"re": "^The\\ chapter\\ is\\ split\\ this\\ Season:\\ (.*?)\\ stands\\ for\\ (.*?),\\ (.*?)\\ for\\ (.*?)\\.$",
+"rep": "В этом Сезоне отделение расколото: $1 за $2, $3 за $4."
+},
+{
+"re": "^(.*?)'s\\ schism\\ ended,\\ and\\ it\\ holds\\ to\\ (.*?)\\ for\\ the\\ Season\\ after$",
+"rep": "раскол $1 завершился, и в следующем Сезоне оно придерживается $2"
+},
+{
+"re": "^(.*?)\\ is\\ slain(.*?)(.*?)\\.\\ Its\\ hoard\\ goes\\ to\\ the\\ ships\\ that\\ fought\\ it\\.$",
+"rep": "$1 убит$2$3. Его сокровища достаются кораблям, что с ним сражались."
+},
+{
+"re": "^Where:\\ (.*?),\\ (.*?)\\ of\\ (.*?)\\.\\ Marked\\ on\\ your\\ map\\ with\\ a\\ black\\ circle\\.$",
+"rep": "Где: $1, $2 от $3. Отмечено на карте чёрным кругом."
+},
+{
+"re": "^Your\\ (.*?)\\ Reliquaries\\ open:\\ their\\ spoils\\ are\\ in\\ your\\ pack\\.$",
+"rep": "Ваши Реликварии открываются ($1): добыча — в вашем рюкзаке."
+},
+{
+"re": "^(.*?)\\ rests\\ here,\\ and\\ you\\ rest\\ with\\ them\\ through\\ the\\ night\\.$",
+"rep": "$1 отдыхает здесь, и вы отдыхаете вместе до утра."
+},
+{
+"re": "^You\\ choose\\ (.*?)\\ from\\ (.*?)\\.\\ It\\ comes\\ to\\ you\\ from\\ their\\ remains\\.$",
+"rep": "Вы выбираете «$1» у $2. Вещь переходит к вам с останков."
+},
+{
+"re": "^That\\ is\\ not\\ a\\ complete\\ ARENA2\\ folder\\.\\ It\\ is\\ missing\\ (.*?)\\.\\ $",
+"rep": "Это неполная папка ARENA2. В ней не хватает: $1. "
+},
+{
+"re": "^(.*?)'s\\ exchange\\.\\ The\\ hold\\ carries\\ (.*?)\\ kg\\ of\\ goods(.*?)\\.\\ You\\ have\\ (.*?)\\.$",
+"rep": "Биржа: $1. В трюме $2 кг товаров$3. У вас $4."
+},
+{
+"re": "^Where:\\ (.*?)\\ (.*?)\\ of\\ (.*?)\\.\\ Marked\\ on\\ your\\ map\\ with\\ a\\ black\\ circle\\.$",
+"rep": "Где: $1 $2 от $3. Отмечено на карте чёрным кругом."
+},
+{
+"re": "^(.*?)\\ (.*?)\\ lost\\ the\\ connection\\.\\ The\\ seat\\ is\\ held\\ for\\ a\\ moment\\.$",
+"rep": "$1 $2 потерял связь. Место ненадолго придерживается."
+},
+{
+"re": "^Savor\\ this,\\ (.*?)\\.\\ It\\ is\\ the\\ last\\ time\\ you'll\\ see\\ my\\ back\\.$",
+"rep": "Насладись этим, $1. Ты в последний раз видишь мою спину."
+},
+{
+"re": "^How\\ fast\\ a\\ journey\\ runs\\ \\(×(.*?)\\ on\\ roads\\ only,\\ ×(.*?)\\ off\\ them\\)$",
+"rep": "Скорость путешествия (×$1 только по дорогам, ×$2 вне их)"
+},
+{
+"re": "^(.*?)\\ may\\ take\\ one\\ uninsured\\ worn\\ piece\\ of\\ yours,\\ or\\ gold\\.$",
+"rep": "$1 может забрать одну вашу незастрахованную надетую вещь или золото."
+},
+{
+"re": "^Votes:\\ (.*?)\\.\\ (.*?)\\ decorations\\ are\\ hidden\\ from\\ other\\ players\\.$",
+"rep": "Голосов: $1. Украшения ($2) скрыты от других игроков."
+},
+{
+"re": "^The\\ first\\ group\\ is\\ dead\\.\\ (.*?)\\ (.*?)\\ fled\\.\\ Follow\\ their\\ trail\\.$",
+"rep": "Первая группа мертва. $1 $2 бежали. Идите по их следу."
+},
+{
+"re": "^(.*?):\\ the\\ Covenant\\ has\\ spoken\\.\\ This\\ Redoubt\\ is\\ the\\ last\\.$",
+"rep": "$1: Завет сказал своё слово. Этот Редут — последний."
+},
+{
+"re": "^(.*?)\\ rests\\ here,\\ but\\ you\\ are\\ too\\ busy\\ to\\ rest\\ with\\ them\\.$",
+"rep": "$1 отдыхает здесь, но вы слишком заняты, чтобы присоединиться."
+},
+{
+"re": "^Buy\\ (.*?)\\ for\\ (.*?)(.*?)\\?\\ From\\ your\\ purse,\\ then\\ your\\ account\\ here\\.$",
+"rep": "Купить $1 за $2$3? Сначала из кошелька, потом с вашего счёта здесь."
+},
+{
+"re": "^You\\ are\\ more\\ than\\ (.*?)\\ m\\ apart\\.\\ The\\ duel\\ is\\ called\\ off\\.$",
+"rep": "Между вами больше $1 м. Поединок отменён."
+},
+{
+"re": "^move\\ (.*?)\\ to\\ the\\ next\\ holding\\ round\\ the\\ table\\ with\\ room$",
+"rep": "переместить $1 во владение по кругу стола, где есть место"
+},
+{
+"re": "^Your\\ Merit\\ with\\ the\\ (.*?)\\ this\\ week\\ is\\ another\\ chapter's$",
+"rep": "Ваши заслуги перед $1 на этой неделе принадлежат другому отделению"
+},
+{
+"re": "^a\\ crackdown\\ shut\\ the\\ halls\\ of\\ (.*?)\\ for\\ the\\ Season\\ after$",
+"rep": "облава закрыла залы $1 на следующий Сезон"
+},
+{
+"re": "^(.*?)\\ You\\ play\\ friendly\\ games\\ at\\ this\\ table\\ from\\ now\\ on\\.$",
+"rep": "$1 Отныне за этим столом вы играете дружеские партии."
+},
+{
+"re": "^Grappling\\ hooks!\\ (.*?)\\ coming\\ alongside\\.\\ Repel\\ boarders!$",
+"rep": "Абордажные крючья! $1 подходит к борту. Отразить абордаж!"
+},
+{
+"re": "^(.*?)\\ breaks\\ the\\ coil!\\ (.*?)\\ reels,\\ stunned\\.\\ Strike\\ its\\ head!$",
+"rep": "$1 разрывает кольцо! $2 шатается, оглушённый. Бейте в голову!"
+},
+{
+"re": "^And\\ (.*?)\\ is\\ still\\ walking\\.\\ The\\ gods\\ favor\\ the\\ stubborn\\.$",
+"rep": "А $1 всё ещё на ногах. Боги благоволят упрямым."
+},
+{
+"re": "^Sigil\\ \\(Dormant:\\ works\\ online\\ only\\):\\ \\+(.*?)%\\ at\\ Ascendant$",
+"rep": "Сигил (спит: действует только онлайн): +$1% на стадии «Восходящий»"
+},
+{
+"re": "^Each\\ kill\\ adds\\ (.*?)%\\ weapon\\ damage\\ for\\ (.*?)\\ s,\\ up\\ to\\ (.*?)\\ times$",
+"rep": "Каждое убийство добавляет $1% к урону оружия на $2 с, до $3 раз"
+},
+{
+"re": "^Each\\ hit\\ on\\ one\\ target\\ adds\\ (.*?)\\ damage,\\ up\\ to\\ (.*?)\\ times\\.$",
+"rep": "Каждый удар по одной цели добавляет $1 урона, до $2 раз."
+},
+{
+"re": "^(.*?)'s\\ goods\\ did\\ not\\ match\\ the\\ offer\\ and\\ were\\ refused\\.$",
+"rep": "Товары $1 не совпали с предложением и отклонены."
+},
+{
+"re": "^The\\ Honor\\ Horn\\ calls\\ (.*?)\\ into\\ the\\ ring\\.\\ Answer\\ alone!$",
+"rep": "Рог чести зовёт $1 на ристалище. Отвечайте в одиночку!"
+},
+{
+"re": "^(.*?)\\ married\\ into\\ the\\ house\\ and\\ cannot\\ carry\\ the\\ line\\.$",
+"rep": "$1 вошёл в дом через брак и не может продолжать род."
+},
+{
+"re": "^(.*?)\\ felled\\ (.*?)\\.\\ It\\ is\\ rank\\ (.*?)\\ now,\\ and\\ will\\ remember\\ this\\.$",
+"rep": "$1 сразил: $2. Теперь у него ранг $3, и он это запомнит."
+},
+{
+"re": "^(.*?)\\ is\\ dead\\ by\\ your\\ hand\\.\\ The\\ house\\ will\\ remember\\ it\\.$",
+"rep": "$1 погиб от вашей руки. Род это запомнит."
+},
+{
+"re": "^The\\ gallery\\ is\\ full\\ at\\ (.*?)\\.\\ Delete\\ some\\ to\\ add\\ more\\.$",
+"rep": "Галерея заполнена ($1). Удалите лишние, чтобы добавить новые."
+},
+{
+"re": "^More\\ confirmed\\ towns\\ of\\ this\\ region:\\ /town\\ audit\\ (.*?)$",
+"rep": "Ещё подтверждённые города этого региона: /town audit $1"
+},
+{
+"re": "^(.*?)\\ fought\\ with\\ honor\\.\\ The\\ crowd\\ throws\\ Reliquaries!$",
+"rep": "$1 сражался с честью. Толпа бросает Реликварии!"
+},
+{
+"re": "^(.*?)\\ is\\ ashore\\ with\\ you\\.\\ Send\\ them\\ back\\ aboard\\ first\\.$",
+"rep": "$1 на берегу вместе с вами. Сначала отправьте его обратно на борт."
+},
+{
+"re": "^Its\\ lair:\\ (.*?),\\ marked\\ on\\ your\\ map\\ with\\ a\\ red\\ circle\\.$",
+"rep": "Его логово: $1, отмечено на вашей карте красным кругом."
+},
+{
+"re": "^The\\ shipmaster\\ asks\\ (.*?)\\ gold\\.\\ You\\ don't\\ have\\ enough\\.$",
+"rep": "Корабельщик просит $1 зол. У вас не хватает денег."
+},
+{
+"re": "^A\\ kill\\ gives\\ you\\ Chameleon\\ for\\ (.*?)\\ s\\.\\ Recovers\\ in\\ (.*?)\\ s$",
+"rep": "Убийство даёт вам Хамелеона на $1 с. Перезарядка $2 с"
+},
+{
+"re": "^You\\ hold\\ (.*?)\\ \\(your\\ pack\\ and\\ the\\ ship's\\ hold\\),\\ and\\ (.*?)\\.$",
+"rep": "У вас $1 (рюкзак и трюм корабля) и $2."
+},
+{
+"re": "^(.*?)'s\\ exchange\\.\\ Trade\\ from\\ the\\ helm,\\ into\\ the\\ hold\\.$",
+"rep": "Биржа $1. Торгуйте от штурвала, прямо в трюм."
+},
+{
+"re": "^After\\ you\\ strike,\\ adds\\ lose\\ track\\ of\\ you\\ for\\ (.*?)\\ s\\.$",
+"rep": "После вашего удара прислужники теряют вас из виду на $1 с."
+},
+{
+"re": "^The\\ company\\ sees\\ blows\\ aimed\\ near\\ you\\ (.*?)\\ s\\ sooner\\.$",
+"rep": "Отряд видит удары, нацеленные рядом с вами, на $1 с раньше."
+},
+{
+"re": "^With\\ 3\\ allies\\ within\\ 8\\ m,\\ you\\ take\\ (.*?)\\ less\\ damage\\.$",
+"rep": "Если в радиусе 8 м трое союзников, вы получаете на $1 меньше урона."
+},
+{
+"re": "^(.*?)\\ holds\\ out\\ a\\ page\\ of\\ their\\ journal:\\ (.*?)\\ to\\ read\\ it\\.$",
+"rep": "$1 протягивает страницу своего дневника: $2, чтобы прочесть."
+},
+{
+"re": "^standing\\ each\\ time,\\ more\\ for\\ the\\ day's\\ first\\ of\\ (.*?)$",
+"rep": "репутации за раз, больше — за первое за день $1"
+},
+{
+"re": "^The\\ sea\\ will\\ remember\\ (.*?)'s\\ fall\\.\\ Serpents\\ slain:\\ (.*?)\\.(.*?)$",
+"rep": "Море запомнит падение $1. Убито змеев: $2.$3"
+},
+{
+"re": "^(.*?)\\ and\\ (.*?)\\ meet\\ in\\ a\\ Tourney\\ for\\ (.*?)\\.\\ Battle\\ is\\ joined\\ (.*?)(.*?)\\.$",
+"rep": "$1 и $2 сходятся в Турнире за $3. Битва начинается $4$5."
+},
+{
+"re": "^(.*?)'s\\ game\\ refused\\ the\\ trade\\.\\ Nothing\\ changed\\ hands$",
+"rep": "Игра $1 отклонила обмен. Ничего не перешло из рук в руки"
+},
+{
+"re": "^(.*?)\\ taken\\ down\\.\\ Set\\ it\\ down\\ again\\ from\\ Your\\ things\\.$",
+"rep": "$1 снято. Поставить снова можно из раздела «Ваши вещи»."
+},
+{
+"re": "^The\\ heir\\ could\\ not\\ be\\ born:\\ (.*?)\\.\\ The\\ house\\ waits\\.\\ (.*?)\\.$",
+"rep": "Наследник не смог родиться: $1. Дом ждёт. $2."
+},
+{
+"re": "^(.*?)\\ is\\ (.*?)\\.\\ Come\\ within\\ (.*?)\\ m\\ of\\ them\\ to\\ (.*?)\\ with\\ the\\ party\\.$",
+"rep": "$1: $2. Подойдите ближе $3 м, чтобы $4 вместе с группой."
+},
+{
+"re": "^Cyrodiil\\ holds\\ every\\ province's\\ ores\\ and\\ metals(.*?)$",
+"rep": "В Сиродиле есть руды и металлы всех провинций$1"
+},
+{
+"re": "^(.*?)\\ did\\ not\\ answer\\.\\ This\\ is\\ what\\ they\\ are\\ wearing\\.$",
+"rep": "$1 не ответил. Вот что на нём надето."
+},
+{
+"re": "^(.*?)\\ of\\ your\\ damage\\ spells\\ repeat\\ at\\ half\\ strength\\.$",
+"rep": "$1 ваших атакующих заклинаний повторяются вполсилы."
+},
+{
+"re": "^Your\\ guild\\ bids\\ (.*?)\\ for\\ the\\ patronage\\ of\\ the\\ (.*?)\\ in\\ (.*?)\\.$",
+"rep": "Ваша гильдия ставит $1 за покровительство над $2 в $3."
+},
+{
+"re": "^An\\ Abyss\\ Dungeon\\ has\\ risen\\.\\ Unfound,\\ it\\ fades\\ (.*?)\\.$",
+"rep": "Поднялось подземелье Бездны. Если его не найдут, оно исчезнет $1."
+},
+{
+"re": "^(.*?)\\ falls\\.\\ Bring\\ down\\ the\\ other\\ within\\ 15\\ seconds!$",
+"rep": "$1 падает. Сразите второго за 15 секунд!"
+},
+{
+"re": "^The\\ (.*?)\\ runs\\ empty\\ to\\ every\\ horizon,\\ and\\ the\\ stars$",
+"rep": "$1 пустынно до самого горизонта, а звёзды"
+},
+{
+"re": "^(.*?)\\ rests\\ here,\\ but\\ it\\ is\\ illegal\\ to\\ camp\\ in\\ town\\.$",
+"rep": "$1 отдыхает здесь, но разбивать лагерь в городе запрещено."
+},
+{
+"re": "^No\\ picture\\ for\\ this\\ one\\ yet\\ \\(TEXTURE\\.(.*?)\\ record\\ (.*?)\\)\\.$",
+"rep": "Для этого пока нет изображения (TEXTURE.$1, запись $2)."
+},
+{
+"re": "^The\\ deck\\ is\\ full\\ \\((.*?)\\ cards\\)\\.\\ Take\\ one\\ out\\ first\\.$",
+"rep": "Колода полна (карт: $1). Сначала уберите одну."
+},
+{
+"re": "^You\\ cannot\\ carry\\ any\\ of\\ it\\.\\ (.*?)\\ stay\\ in\\ the\\ hold\\.$",
+"rep": "Вы ничего из этого не унесёте. В трюме остаётся: $1."
+},
+{
+"re": "^Your\\ threat\\ x(.*?),\\ and\\ lords'\\ blows\\ hurt\\ you\\ less\\.$",
+"rep": "Ваша угроза ×$1, а удары владык ранят вас меньше."
+},
+{
+"re": "^The\\ Watchtowers\\ of\\ (.*?)\\ see\\ (.*?)\\ past\\ (.*?)\\ of\\ our\\ defense\\.$",
+"rep": "Сторожевые башни $1 видят, что $2 прошли $3 нашей обороны."
+},
+{
+"re": "^(.*?)\\ takes\\ a\\ Reliquary\\ from\\ the\\ High\\ Road's\\ cache\\.$",
+"rep": "$1 берёт Реликварий из тайника Высокой дороги."
+},
+{
+"re": "^Your\\ companions\\ are\\ full\\.\\ (.*?)\\ steps\\ away\\ to\\ wait\\.$",
+"rep": "Спутников уже максимум. $1 отходит в сторону ждать."
+},
+{
+"re": "^No\\ one\\ else\\ is\\ coming\\.\\ You\\ set\\ out\\ for\\ (.*?)\\ alone\\.$",
+"rep": "Больше никто не идёт. Вы отправляетесь в $1 в одиночку."
+},
+{
+"re": "^Once\\ a\\ hall,\\ falling\\ under\\ (.*?)\\ health\\ heals\\ you\\ (.*?)\\.$",
+"rep": "Раз за зал: при падении здоровья ниже $1 вы восстанавливаете $2."
+},
+{
+"re": "^(.*?)\\ (.*?)\\ already\\ on\\ this\\ hunt\\.\\ Take\\ it\\ to\\ join\\ them\\.$",
+"rep": "$1 $2 уже на этой охоте. Возьмите её, чтобы присоединиться."
+},
+{
+"re": "^(.*?)\\ \\-\\ (.*?)'s\\ harbormaster\\.\\ You\\ are\\ (.*?)\\ of\\ (.*?)\\ \\(standing\\ (.*?)\\)\\.$",
+"rep": "$1 — начальник порта $2. Вы — $3 $4 (репутация $5)."
+},
+{
+"re": "^Scried:\\ (.*?),\\ a\\ haunt\\ of\\ (.*?)\\.\\ It\\ is\\ on\\ your\\ map\\ now\\.$",
+"rep": "Найдено прозрением: $1, логово $2. Теперь оно на вашей карте."
+},
+{
+"re": "^\\+(.*?)%\\ rolled(.*?)\\ on\\ its\\ (.*?)\\ base\\ hit:\\ (.*?)\\ of\\ a\\ normal\\ hit\\.$",
+"rep": "+$1% выпало$2 к базовому удару $3: $4 от обычного удара."
+},
+{
+"re": "^Slaying\\ a\\ foe\\ restores\\ (.*?)%\\ of\\ your\\ Spell\\ Points$",
+"rep": "Убийство врага восполняет $1% вашей маны"
+},
+{
+"re": "^Your\\ guild\\ has\\ not\\ bid\\ for\\ its\\ patronage\\ in\\ (.*?)\\.$",
+"rep": "Ваша гильдия не делала ставку за покровительство в $1."
+},
+{
+"re": "^Tribute\\ paid\\ to\\ (.*?):\\ (.*?)\\ silver\\ burned,\\ (.*?)\\ influence\\.$",
+"rep": "Дань уплачена $1: сожжено $2 серебра, $3 влияния."
+},
+{
+"re": "^(.*?)\\ has\\ broken\\ its\\ Pact\\ of\\ non\\-aggression\\ with\\ (.*?)\\.$",
+"rep": "$1 нарушил Пакт о ненападении с $2."
+},
+{
+"re": "^(.*?)\\ removed\\.\\ (.*?)\\ gold\\ back\\ to\\ the\\ guild's\\ treasury\\.$",
+"rep": "$1 убрано. $2 золотых возвращено в казну гильдии."
+},
+{
+"re": "^A\\ pack\\ costs\\ (.*?)\\ gold,\\ and\\ you\\ cannot\\ afford\\ it\\.$",
+"rep": "Набор стоит $1 золотых, а у вас столько нет."
+},
+{
+"re": "^Crows\\ gather\\ over\\ (.*?)(.*?)\\.\\ Someone\\ has\\ fallen\\ there\\.$",
+"rep": "Над $1$2 собираются вороны. Там кто-то пал."
+},
+{
+"re": "^/unstuck\\ failed:\\ another\\ player\\ is\\ within\\ (.*?)\\ m\\.$",
+"rep": "/unstuck не сработал: другой игрок ближе $1 м."
+},
+{
+"re": "^Repairs\\ (.*?)%\\ of\\ a\\ wagon,\\ up\\ to\\ (.*?)%\\.\\ Takes\\ an\\ hour\\.$",
+"rep": "Чинит $1% повозки, до $2%. Занимает час."
+},
+{
+"re": "^Set\\ a\\ course\\ into\\ the\\ open\\ sea\\?\\ \\((.*?)\\.\\ Your\\ ship,$",
+"rep": "Взять курс в открытое море? ($1. Ваш корабль,"
+},
+{
+"re": "^The\\ wright\\ asks\\ (.*?)\\ gold\\.\\ You\\ don't\\ have\\ enough\\.$",
+"rep": "Мастер просит $1 зол. У вас не хватает денег."
+},
+{
+"re": "^Your\\ Honor:\\ (.*?),\\ (.*?)\\ Renown,\\ one\\ Spoils\\ of\\ War\\ roll$",
+"rep": "Ваша Честь: $1, Слава: $2, одна попытка Военной добычи"
+},
+{
+"re": "^(.*?)\\ moved\\ (.*?)\\.\\ (.*?)\\ will\\ not\\ fit\\ and\\ stay\\ in\\ the\\ hold\\.$",
+"rep": "$1 — перенесено: $2. Не поместилось и остаётся в трюме: $3."
+},
+{
+"re": "^(.*?)\\ of\\ (.*?)\\ saved\\ in\\ this\\ browser,\\ never\\ uploaded\\.\\ $",
+"rep": "Сохранено в этом браузере: $1 из $2, никуда не загружаются. "
+},
+{
+"re": "^You\\ are\\ more\\ than\\ (.*?)\\ m\\ apart\\.\\ The\\ trade\\ is\\ off$",
+"rep": "Между вами больше $1 м. Обмен отменён"
+},
+{
+"re": "^Heirloom\\ of\\ the\\ house(.*?),\\ first\\ borne\\ by\\ (.*?)\\ and\\ (.*?)\\.$",
+"rep": "Фамильная реликвия дома$1; первыми её носили $2 и $3."
+},
+{
+"re": "^(.*?)\\ rests\\ here,\\ and\\ you\\ rest\\ a\\ while\\ with\\ them\\.$",
+"rep": "$1 отдыхает здесь, и вы немного отдыхаете вместе."
+},
+{
+"re": "^(.*?)We've\\ no\\ carpenter's\\ stores\\ aboard,\\ Captain\\.$",
+"rep": "$1У нас на борту нет плотницких припасов, капитан."
+},
+{
+"re": "^You\\ have\\ (.*?)\\ not\\ yet\\ placed\\ in\\ your\\ Firmament\\.$",
+"rep": "Не размещено на Небосводе: $1."
+},
+{
+"re": "^,\\ and\\ a\\ (.*?)%\\ chance\\ to\\ block\\ it\\ outright\\ first$",
+"rep": ", и сначала $1% шанс полностью его заблокировать"
+},
+{
+"re": "^The\\ temperature\\ you\\ feel\\ here,\\ now\\ and\\ (.*?)\\ \\((.*?)\\)\\.$",
+"rep": "Температура, которую вы чувствуете здесь, сейчас и $1 ($2)."
+},
+{
+"re": "^(.*?)\\ wants\\ to\\ trade\\.\\ Press\\ F\\ on\\ them\\ to\\ accept\\.$",
+"rep": "$1 хочет поторговать. Нажмите F, глядя на него, чтобы принять."
+},
+{
+"re": "^Shipwrights\\ need\\ Naval\\ Combat\\ turned\\ on\\ \\((.*?)\\)\\.$",
+"rep": "Корабелам нужен включённый Морской бой ($1)."
+},
+{
+"re": "^Contract\\ done\\ \\-\\ (.*?)\\.\\ (.*?)\\ paid\\ by\\ (.*?)'s\\ harbormaster\\.$",
+"rep": "Контракт выполнен — $1. $2 выплачено начальником порта $3."
+},
+{
+"re": "^Joined\\ session\\ (.*?)(.*?)\\.\\ The\\ host\\ picks\\ who\\ fights\\.$",
+"rep": "Вы вошли в сессию $1$2. Кто сражается, выбирает хозяин."
+},
+{
+"re": "^Your\\ spoils\\ from\\ Redoubt\\ (.*?)\\ are\\ in\\ your\\ pack\\.$",
+"rep": "Ваша добыча из Редута $1 — в вашем рюкзаке."
+},
+{
+"re": "^The\\ yard\\ repaired\\ what\\ you\\ could\\ afford:\\ (.*?)\\.$",
+"rep": "Верфь починила, на сколько хватило денег: $1."
+},
+{
+"re": "^Loading\\ screens\\ are\\ off\\.\\ Turn\\ them\\ on\\ in\\ (.*?)\\.$",
+"rep": "Экраны загрузки выключены. Включите их в $1."
+},
+{
+"re": "^(.*?)\\ never\\ started\\ the\\ duel\\.\\ It\\ is\\ called\\ off\\.$",
+"rep": "$1 так и не начал поединок. Он отменён."
+},
+{
+"re": "^Arrows\\ and\\ spells\\ deal\\ \\+(.*?)\\ from\\ beyond\\ 12\\ m\\.$",
+"rep": "Стрелы и заклинания наносят +$1 с расстояния больше 12 м."
+},
+{
+"re": "^The\\ (.*?)\\ chapter's\\ Master\\ asks\\ for\\ (.*?)\\ this\\ week\\.$",
+"rep": "Мастер отделения $1 просит на этой неделе: $2."
+},
+{
+"re": "^(.*?)\\ have\\ had\\ enough\\ and\\ make\\ for\\ the\\ way\\ out\\.$",
+"rep": "С $1 довольно, и они пробираются к выходу."
+},
+{
+"re": "^Town\\ (.*?)'s\\ guild\\ halls\\ are\\ struck\\ \\((.*?)\\ reports\\)\\.$",
+"rep": "Залы гильдий города $1 закрыты (жалоб: $2)."
+},
+{
+"re": "^Hiring\\ costs\\ (.*?)\\ gold\\.\\ You\\ don't\\ have\\ enough\\.$",
+"rep": "Найм стоит $1 зол. У вас не хватает денег."
+},
+{
+"re": "^The\\ rite\\ costs\\ (.*?)\\ gold,\\ more\\ than\\ you\\ carry\\.$",
+"rep": "Обряд стоит $1 зол. — больше, чем у вас при себе."
+},
+{
+"re": "^You\\ already\\ have\\ (.*?)\\ sworn\\.\\ Release\\ one\\ first$",
+"rep": "У вас уже есть присягнувшие: $1. Сначала отпустите одного"
+},
+{
+"re": "^(.*?)The\\ carpenter's\\ stores\\ are\\ spent,\\ Captain\\.$",
+"rep": "$1Плотницкие припасы кончились, капитан."
+},
+{
+"re": "^a\\ weapon\\ or\\ armor\\ piece\\ (.*?),\\ Common\\ or\\ Magic$",
+"rep": "оружие или доспех $1, Обычный или Магический"
+},
+{
+"re": "^(.*?)\\ earned\\ a\\ rise\\.\\ Rest\\ or\\ travel\\ to\\ raise\\ (.*?)\\.$",
+"rep": "$1: заслужено повышение. Отдохните или отправьтесь в путь, чтобы повысить $2."
+},
+{
+"re": "^(.*?)\\ needs\\ that\\ button\\.\\ Give\\ it\\ another\\ first$",
+"rep": "Эта кнопка нужна для «$1». Сначала назначьте ей другую"
+},
+{
+"re": "^Curse\\ lifted\\ from\\ (.*?)\\.\\ Its\\ bonus\\ line\\ stays\\.$",
+"rep": "С предмета «$1» снято проклятие. Строка бонуса остаётся."
+},
+{
+"re": "^Works\\ online\\ only:\\ \\+(.*?)%\\ damage\\ at\\ Ascendant$",
+"rep": "Работает только в сети: +$1% к урону на ранге Вознесённого"
+},
+{
+"re": "^The\\ chapter\\ races\\ (.*?)\\ for\\ Merit\\ this\\ Season\\.$",
+"rep": "В этом Сезоне отделение соревнуется в заслугах с $1."
+},
+{
+"re": "^The\\ duel\\ with\\ (.*?)\\ begins\\.\\ Fight\\ in\\ (.*?)\\ seconds!$",
+"rep": "Поединок с $1 начинается. Бой через $2 с!"
+},
+{
+"re": "^The\\ last\\ of\\ a\\ company\\ of\\ (.*?)\\ still\\ standing\\.$",
+"rep": "Последний оставшийся на ногах из отряда в $1."
+},
+{
+"re": "^\"(.*?)\"\\ is\\ reserved\\.\\ Please\\ pick\\ another\\ name\\.$",
+"rep": "Имя «$1» зарезервировано. Выберите другое."
+},
+{
+"re": "^(.*?)'s\\ schism\\ ended\\ with\\ neither\\ side\\ carried$",
+"rep": "раскол $1 завершился без победы какой-либо стороны"
+},
+{
+"re": "^(.*?)'s\\ goods\\ were\\ not\\ valid\\ and\\ were\\ refused\\.$",
+"rep": "Товары $1 недопустимы и отклонены."
+},
+{
+"re": "^(.*?)\\ Arcane\\ Essence\\ \\(\\+(.*?)\\ Enchanting\\ experience\\)$",
+"rep": "Эссенция: Тайная ×$1 (+$2 опыта Зачарования)"
+},
+{
+"re": "^(.*?)\\ thanks\\ you\\ for\\ its\\ defense\\ \\((.*?)\\)\\.\\ You\\ are\\ (.*?)\\.$",
+"rep": "$1 благодарит вас за оборону ($2). Вы — $3."
+},
+{
+"re": "^(.*?)\\ is\\ closed\\.\\ You\\ wake\\ in\\ the\\ Bay's\\ waters\\.$",
+"rep": "$1 закрыт. Вы приходите в себя в водах залива."
+},
+{
+"re": "^(.*?)\\ is\\ inside\\ (.*?)\\.\\ You\\ will\\ arrive\\ at\\ its\\ door\\.$",
+"rep": "$1 внутри $2. Вы прибудете к входу."
+},
+{
+"re": "^(.*?)\\ inventory,\\ (.*?)\\ character,\\ (.*?)\\ quest\\ log,\\ (.*?)\\ map\\.$",
+"rep": "$1 — инвентарь, $2 — персонаж, $3 — журнал заданий, $4 — карта."
+},
+{
+"re": "^(.*?)\\ deleted\\.\\ Its\\ cards\\ stay\\ in\\ your\\ binder\\.$",
+"rep": "Колода «$1» удалена. Её карты остаются в альбоме."
+},
+{
+"re": "^You\\ have\\ not\\ taken\\ Redoubt\\ (.*?)\\ this\\ season\\.$",
+"rep": "В этом сезоне вы не брали Редут $1."
+},
+{
+"re": "^\\+(.*?)\\ damage\\ to\\ adds\\ under\\ a\\ quarter\\ health\\.$",
+"rep": "+$1 к урону по прислужникам, у которых меньше четверти здоровья."
+},
+{
+"re": "^The\\ chapter\\ of\\ the\\ (.*?)\\ here\\ is\\ (.*?)\\ \\(Strength\\ (.*?)\\)$",
+"rep": "Отделение $1 здесь: $2 (Сила $3)"
+},
+{
+"re": "^(.*?)'s\\ offer\\ was\\ not\\ valid\\.\\ The\\ trade\\ is\\ off$",
+"rep": "Предложение $1 недопустимо. Обмен отменён"
+},
+{
+"re": "^Reward:\\ (.*?)\\ gold\\ pieces\\ and\\ a\\ piece\\ of\\ kit\\.$",
+"rep": "Награда: $1 золотых и предмет снаряжения."
+},
+{
+"re": "^Your\\ crew\\ brings\\ the\\ ship\\ in\\ alongside\\ (.*?)\\.$",
+"rep": "Ваша команда подводит корабль к борту $1."
+},
+{
+"re": "^A\\ pack\\ costs\\ (.*?)\\ gold\\.\\ Your\\ purse\\ is\\ short\\.$",
+"rep": "Набор стоит $1 золотых. Вашего кошелька не хватает."
+},
+{
+"re": "^Limited\\ to\\ (.*?)\\ by\\ your\\ Renown\\ \\((.*?)\\ at\\ Renown\\ (.*?)\\)$",
+"rep": "Ограничено стадией «$1» вашей Славой («$2» при Славе $3)"
+},
+{
+"re": "^(.*?)\\ changes\\ between\\ first\\ and\\ third\\ person\\.$",
+"rep": "$1 переключает вид от первого и от третьего лица."
+},
+{
+"re": "^(.*?)\\ change(.*?)\\ not\\ saved\\ yet\\.\\ Press\\ (.*?)\\ to\\ keep\\ (.*?)\\.$",
+"rep": "Несохранённых изменений: $1. Нажмите $3, чтобы сохранить."
+},
+{
+"re": "^A\\ draw:\\ (.*?)\\ holdings\\ each,\\ and\\ (.*?)\\ power\\ to\\ (.*?)\\.$",
+"rep": "Ничья: по $1 владений у каждого и $2 силы против $3."
+},
+{
+"re": "^Each\\ level\\ rolls\\ (.*?)\\ to\\ (.*?)\\ attribute\\ points\\.$",
+"rep": "Каждый уровень даёт от $1 до $2 очков характеристик."
+},
+{
+"re": "^The\\ (.*?)\\ in\\ (.*?)\\ shatters\\.\\ The\\ socket\\ is\\ empty\\.$",
+"rep": "$1 в предмете «$2» раскалывается. Гнездо пусто."
+},
+{
+"re": "^Aim:\\ (.*?)\\ arrows\\ rain\\ down\\ within\\ (.*?)\\ m,\\ (.*?)\\ each$",
+"rep": "Прицел: $1 стрел обрушиваются в радиусе $2 м, $3 каждая"
+},
+{
+"re": "^You\\ name\\ (.*?)\\ to\\ follow\\ as\\ the\\ hall's\\ head\\.$",
+"rep": "Вы называете $1 преемником главы зала."
+},
+{
+"re": "^Through\\ (.*?),\\ (.*?)\\ held\\ the\\ Master's\\ chair\\ of\\ (.*?)\\.$",
+"rep": "В течение $1 $2 занимал кресло Мастера $3."
+},
+{
+"re": "^Your\\ guild\\ bids\\ (.*?)\\ for\\ its\\ patronage\\ in\\ (.*?)\\.$",
+"rep": "Ваша гильдия ставит $1 за покровительство в $2."
+},
+{
+"re": "^(.*?):\\ (.*?)\\ gold,\\ and\\ you\\ do\\ not\\ have\\ that\\ much\\.$",
+"rep": "$1: $2 золотых, а у вас столько нет."
+},
+{
+"re": "^Battlemage's\\ Reprieve!\\ A\\ (.*?)\\-point\\ shield\\.$",
+"rep": "Передышка боевого мага! Щит на $1 ед."
+},
+{
+"re": "^Iron\\ Hide!\\ The\\ next\\ (.*?)\\ damage\\ is\\ blocked\\.$",
+"rep": "Железная шкура! Следующие $1 ед. урона заблокированы."
+},
+{
+"re": "^Your\\ name\\ stands\\ ill\\ with\\ the\\ law\\ of\\ (.*?)\\.$",
+"rep": "У закона $1 о вас дурная слава."
+},
+{
+"re": "^You\\ have\\ (.*?)\\ orders\\ up,\\ the\\ most\\ allowed\\.$",
+"rep": "У вас выставлено заказов: $1 — это максимум."
+},
+{
+"re": "^Aim\\ a\\ foe:\\ dash\\ behind\\ it\\ and\\ strike,\\ (.*?)$",
+"rep": "Прицельтесь во врага: рывок ему за спину и удар, $1"
+},
+{
+"re": "^(.*?)\\ added\\ to\\ your\\ account\\.\\ You\\ now\\ hold\\ (.*?)\\.$",
+"rep": "$1 зачислено на ваш счёт. Теперь у вас $2."
+},
+{
+"re": "^(.*?)\\ breaks\\ a\\ false\\ wall\\.\\ An\\ alcove\\ opens\\.$",
+"rep": "$1 разбивает ложную стену. Открывается ниша."
+},
+{
+"re": "^False\\ colors!\\ (.*?)\\ runs\\ up\\ the\\ black\\ flag!$",
+"rep": "Ложный флаг! $1 поднимает чёрный флаг!"
+},
+{
+"re": "^(.*?)\\ is\\ going\\ down!\\ Back\\ to\\ your\\ own\\ ship!$",
+"rep": "$1 тонет! Назад на свой корабль!"
+},
+{
+"re": "^/unstuck\\ can\\ be\\ used\\ again\\ in\\ (.*?)\\ minute(.*?)\\.$",
+"rep": "/unstuck можно использовать снова через $1 мин."
+},
+{
+"re": "^(.*?)\\ grows\\ bolder\\.\\ It\\ has\\ waited\\ too\\ long\\.$",
+"rep": "$1 наглеет. Слишком долго оно ждало."
+},
+{
+"re": "^\\+(.*?)\\ magic\\ resistance,\\ \\+(.*?)\\ shock\\ resistance$",
+"rep": "+$1 к сопротивлению магии, +$2 к сопротивлению электричеству"
+},
+{
+"re": "^(.*?)\\ tells\\ you\\ where\\ you\\ are\\ and\\ the\\ date\\.$",
+"rep": "$1 сообщает, где вы находитесь, и текущую дату."
+},
+{
+"re": "^(.*?)'s\\ hoard\\ is\\ yours\\.\\ It\\ is\\ in\\ your\\ pack\\.$",
+"rep": "Сокровища ($1) ваши. Они у вас в рюкзаке."
+},
+{
+"re": "^Your\\ Renown\\ limits\\ it\\ to\\ (.*?)\\.\\ (.*?)\\ at\\ Renown\\ (.*?)$",
+"rep": "Ваша Слава ограничивает его стадией «$1». «$2» при Славе $3"
+},
+{
+"re": "^No\\ lines\\ from\\ or\\ about\\ \"(.*?)\"\\ on\\ any\\ tab\\.$",
+"rep": "Ни на одной вкладке нет реплик от «$1» или о нём."
+},
+{
+"re": "^In\\ irons\\.\\ Strike\\ sail(.*?)\\ and\\ row\\ to\\ turn$",
+"rep": "Левентик. Уберите паруса$1 и гребите, чтобы развернуться"
+},
+{
+"re": "^You\\ are\\ banished\\ from\\ (.*?)\\ for\\ (.*?)\\ more\\ day(.*?)\\.$",
+"rep": "Вы изгнаны из $1 ещё на $2 дн."
+},
+{
+"re": "^(.*?)\\ is\\ indoors\\.\\ You\\ will\\ arrive\\ outside\\.$",
+"rep": "$1 в помещении. Вы прибудете снаружи."
+},
+{
+"re": "^You\\ ran\\ from\\ (.*?)\\.\\ It\\ will\\ remember\\ this\\.$",
+"rep": "Вы бежали от $1. Он это запомнит."
+},
+{
+"re": "^The\\ party\\ sets\\ out\\ for\\ (.*?)\\.\\ You\\ follow\\ (.*?)\\.$",
+"rep": "Группа отправляется в $1. Вы следуете за: $2."
+},
+{
+"re": "^You\\ made\\ (.*?)\\ (.*?)s\\.\\ They\\ wait\\ in\\ your\\ Stores$",
+"rep": "Вы изготовили: $2 ($1 шт.). Они ждут на вашем складе"
+},
+{
+"re": "^Canceling\\.\\ Waiting\\ for\\ (.*?)\\ to\\ answer\\.\\.\\.$",
+"rep": "Отмена. Ждём ответа от $1..."
+},
+{
+"re": "^Not\\ enough\\ raw\\ materials:\\ short\\ of\\ (.*?)\\.$",
+"rep": "Не хватает сырья: недостаёт $1."
+},
+{
+"re": "^(.*?)(.*?)\\ \\-\\ right\\-click\\ its\\ flag\\ to\\ rename\\ it$",
+"rep": "$1$2 — правый щелчок по флажку, чтобы переименовать"
+},
+{
+"re": "^Allies\\ within\\ 6\\ m\\ take\\ (.*?)\\ less\\ damage\\.$",
+"rep": "Союзники в радиусе 6 м получают на $1 меньше урона."
+},
+{
+"re": "^Merit\\ with\\ the\\ (.*?)\\ here\\ this\\ week:\\ (.*?)\\ of\\ (.*?)$",
+"rep": "Заслуги перед $1 здесь на этой неделе: $2 из $3"
+},
+{
+"re": "^The\\ faithful's\\ rite\\ is\\ broken\\ near\\ (.*?)(.*?)\\.$",
+"rep": "Обряд верных сорван близ $1$2."
+},
+{
+"re": "^You\\ have\\ no\\ honor\\ left\\ to\\ keep\\ me,\\ (.*?)\\.$",
+"rep": "У тебя не осталось чести, чтобы удержать меня, $1."
+},
+{
+"re": "^You\\ pay\\ (.*?)\\ gold\\ for\\ the\\ Imperial\\ road\\.$",
+"rep": "Вы платите $1 зол. за Имперскую дорогу."
+},
+{
+"re": "^You\\ made\\ a\\ (.*?)\\.\\ It\\ waits\\ in\\ your\\ Stores$",
+"rep": "Вы изготовили: $1. Это ждёт на вашем складе"
+},
+{
+"re": "^(.*?)\\ is\\ the\\ first\\ ever\\ to\\ take\\ Redoubt\\ (.*?)(.*?)$",
+"rep": "$1 — первый, кто взял Редут $2$3"
+},
+{
+"re": "^Your\\ heals\\ on\\ allies\\ are\\ (.*?)\\ stronger\\.$",
+"rep": "Ваше лечение союзников на $1 сильнее."
+},
+{
+"re": "^its\\ owner\\ gains\\ \\+(.*?)\\ magicka\\ next\\ turn$",
+"rep": "его владелец получает +$1 маны в следующий ход"
+},
+{
+"re": "^The\\ farmstead\\ lies\\ (.*?)\\ meters\\ to\\ the\\ (.*?)\\.$",
+"rep": "Ферма в $1 м к $2."
+},
+{
+"re": "^You\\ ran\\ from\\ (.*?)\\.\\ (.*?)\\ will\\ remember\\ this\\.$",
+"rep": "Вы бежали от $1. $2 это запомнит."
+},
+{
+"re": "^In\\ (.*?)\\ the\\ dead\\ rise\\ after\\ 10\\ seconds\\.$",
+"rep": "В $1 мёртвые поднимаются через 10 секунд."
+},
+{
+"re": "^A\\ journey\\ inside\\ (.*?)\\ costs\\ (.*?)\\ gold\\ here\\.$",
+"rep": "Поездка внутри $1 стоит здесь $2 зол."
+},
+{
+"re": "^(.*?)\\ is\\ in\\ hand\\.\\ Choose\\ a\\ slot\\ for\\ it\\.$",
+"rep": "$1 в руке. Выберите для этого ячейку."
+},
+{
+"re": "^rolls\\ over\\.\\ Each\\ level\\ gives\\ you\\ (.*?),$",
+"rep": "переходит дальше. Каждый уровень даёт вам $1,"
+},
+{
+"re": "^The\\ lines\\ above\\ added\\ together\\ \\((.*?)\\)\\.$",
+"rep": "Сумма строк выше ($1)."
+},
+{
+"re": "^The\\ chapter\\ holds\\ to\\ (.*?)\\ this\\ Season\\.$",
+"rep": "В этом Сезоне отделение придерживается $1."
+},
+{
+"re": "^For\\ (.*?),\\ (.*?)\\ took\\ the\\ patronage\\ of\\ the\\ (.*?)\\.$",
+"rep": "На $1 $2 взял покровительство над $3."
+},
+{
+"re": "^(.*?)(.*?)\\ must\\ be\\ a\\ whole\\ number\\ from\\ (.*?)\\ to\\ (.*?)\\.$",
+"rep": "$1$2: нужно целое число от $3 до $4."
+},
+{
+"re": "^\\+(.*?)\\ armor\\ on\\ every\\ part,\\ \\+(.*?)\\ Endurance$",
+"rep": "+$1 к броне на каждой части, +$2 к Выносливости"
+},
+{
+"re": "^\\+(.*?)\\ armor\\ on\\ every\\ part,\\ \\+(.*?)\\ Willpower$",
+"rep": "+$1 к броне на каждой части, +$2 к Силе воли"
+},
+{
+"re": "^(.*?)\\ spell\\ points\\.\\ Not\\ enough\\ magicka$",
+"rep": "$1 ед. маны. Не хватает маны"
+},
+{
+"re": "^Crew\\ spirits\\ are\\ (.*?)\\.\\ A\\ round\\ costs\\ (.*?)$",
+"rep": "Настроение команды: $1. Угостить всех стоит $2"
+},
+{
+"re": "^Extracted:\\ the\\ (.*?)\\ from\\ (.*?),\\ for\\ (.*?)\\ gold\\.$",
+"rep": "Извлечено: $1 из предмета «$2» за $3 золотых."
+},
+{
+"re": "^You\\ cannot\\ open\\ a\\ breach\\ within\\ (.*?)\\.$",
+"rep": "Нельзя открыть прорыв в пределах $1."
+},
+{
+"re": "^\\+(.*?)\\ damage\\ while\\ under\\ half\\ health\\.$",
+"rep": "+$1 к урону, пока здоровья меньше половины."
+},
+{
+"re": "^Allies\\ within\\ 10\\ m\\ deal\\ \\+(.*?)\\ damage\\.$",
+"rep": "Союзники в радиусе 10 м наносят +$1 урона."
+},
+{
+"re": "^A\\ setting\\ is\\ (.*?)\\ characters\\ at\\ most\\.$",
+"rep": "Настройка — не больше $1 символов."
+},
+{
+"re": "^Works\\ something\\ above\\ it,\\ to\\ the\\ (.*?)$",
+"rep": "Приводит в действие что-то выше (направление: $1)"
+},
+{
+"re": "^Works\\ something\\ below\\ it,\\ to\\ the\\ (.*?)$",
+"rep": "Приводит в действие что-то ниже (направление: $1)"
+},
+{
+"re": "^My\\ debt\\ is\\ paid\\.\\ Go\\ with\\ honor,\\ (.*?)\\.$",
+"rep": "Мой долг уплачен. Ступай с честью, $1."
+},
+{
+"re": "^a\\ Common\\ weapon\\ or\\ armor\\ piece,\\ (.*?)$",
+"rep": "Обычное оружие или доспех, $1"
+},
+{
+"re": "^,\\ giving\\ back\\ what\\ it\\ carries\\ \\((.*?)\\)$",
+"rep": ", вернув всё, что несёт ($1)"
+},
+{
+"re": "^Not\\ enough\\ gold\\.\\ It\\ costs\\ (.*?)\\ each\\.$",
+"rep": "Не хватает золота. Каждое стоит $1."
+},
+{
+"re": "^Took:\\ your\\ (.*?)\\.\\ Take\\ (.*?)\\ back\\ from\\ it\\.$",
+"rep": "Отнято: ваш предмет «$1». Заберите $2 у него обратно."
+},
+{
+"re": "^Aim:\\ a\\ shot\\ through\\ (.*?)\\ foes,\\ (.*?)\\ each$",
+"rep": "Прицел: выстрел сквозь $1 врагов, $2 каждому"
+},
+{
+"re": "^Aim:\\ leap\\ (.*?)\\ m,\\ strike\\ all\\ in\\ (.*?)\\ m,\\ (.*?)$",
+"rep": "Прицел: прыжок на $1 м, удар по всем в $2 м, $3"
+},
+{
+"re": "^Dash\\ (.*?)\\ m,\\ striking\\ all\\ you\\ pass,\\ (.*?)$",
+"rep": "Рывок на $1 м с ударом по всем на пути, $2"
+},
+{
+"re": "^You\\ have\\ fallen\\.\\ (.*?)\\ wins\\ the\\ duel\\.$",
+"rep": "Вы пали. В поединке побеждает $1."
+},
+{
+"re": "^Your\\ Shield\\ spell\\ absorbs\\ (.*?)\\ more\\.$",
+"rep": "Ваше заклинание Щит поглощает на $1 больше."
+},
+{
+"re": "^Spells\\ cost\\ (.*?)%\\ fewer\\ Spell\\ Points$",
+"rep": "Заклинания стоят на $1% меньше маны"
+},
+{
+"re": "^Land\\ ho!\\ (.*?)(.*?)\\.\\ It\\ is\\ on\\ your\\ charts\\.$",
+"rep": "Земля! $1$2. Она есть на ваших картах."
+},
+{
+"re": "^(.*?)\\ is\\ brought\\ to\\ (.*?)\\ quay\\ and\\ moored\\.$",
+"rep": "$1 приведён к пристани $2 и пришвартован."
+},
+{
+"re": "^No\\ bets\\ on\\ (.*?)\\.\\ Too\\ big\\ a\\ favorite\\.$",
+"rep": "На $1 ставки не принимаются. Слишком явный фаворит."
+},
+{
+"re": "^(.*?)\\ felled\\ (.*?)\\.\\ It\\ will\\ remember\\ this\\.$",
+"rep": "$1 сразил: $2. Он это запомнит."
+},
+{
+"re": "^(.*?)\\ rises\\ again\\ for\\ its\\ last\\ stand\\.$",
+"rep": "$1 вновь поднимается для последнего боя."
+},
+{
+"re": "^base:\\ (.*?)\\ is\\ not\\ in\\ your\\ BLOCKS\\.BSA$",
+"rep": "основа: $1 нет в вашем BLOCKS.BSA"
+},
+{
+"re": "^yours,\\ back\\ to\\ (.*?)\\ when\\ taken\\ down$",
+"rep": "ваше; если снять — вернётся в $1"
+},
+{
+"re": "^Not\\ yet\\ witnessed:\\ no\\ (.*?)\\ here\\ yet$",
+"rep": "Ещё не засвидетельствовано: здесь пока нет — $1"
+},
+{
+"re": "^Worth\\ (.*?)\\.\\ The\\ shipmaster\\ offers\\ (.*?)\\.(.*?)$",
+"rep": "Стоит $1. Корабельщик предлагает $2.$3"
+},
+{
+"re": "^Strike\\ for\\ (.*?),\\ to\\ (.*?)\\ on\\ the\\ wounded$",
+"rep": "Удар на $1, до $2 по раненым"
+},
+{
+"re": "^Spells\\ cost\\ (.*?)%\\ more\\ Spell\\ Points$",
+"rep": "Заклинания стоят на $1% больше маны"
+},
+{
+"re": "^Everything\\ (.*?)\\ may\\ except\\ (.*?),\\ and:\\ (.*?)\\.$",
+"rep": "Всё, что может $1, кроме $2, а также: $3."
+},
+{
+"re": "^(.*?),\\ (.*?)\\ held\\ (.*?)\\ against\\ the\\ siege\\ of\\ (.*?)(.*?)\\.(.*?)$",
+"rep": "$1: $2 удержал $3 при осаде $4$5.$6"
+},
+{
+"re": "^Travelers\\ from\\ (.*?)\\ are\\ telling\\ it\\.$",
+"rep": "Так рассказывают путники из $1."
+},
+{
+"re": "^The\\ sigil\\ on\\ your\\ (.*?)\\ brightens:\\ (.*?)\\.$",
+"rep": "Сигил на предмете «$1» разгорается ярче: $2."
+},
+{
+"re": "^\\+(.*?)\\ frost\\ resistance,\\ \\+(.*?)\\ Endurance$",
+"rep": "+$1 к сопротивлению холоду, +$2 к Выносливости"
+},
+{
+"re": "^\\+(.*?)\\ Willpower,\\ \\+(.*?)\\ magic\\ resistance$",
+"rep": "+$1 к Силе воли, +$2 к сопротивлению магии"
+},
+{
+"re": "^You\\ leave\\ the\\ table\\ with\\ (.*?)\\ gold\\.$",
+"rep": "Вы выходите из-за стола с $1 зол."
+},
+{
+"re": "^(.*?)\\ removed\\ from\\ the\\ deck\\ \\((.*?)\\ of\\ (.*?)\\)\\.$",
+"rep": "$1 убрана из колоды ($2 из $3)."
+},
+{
+"re": "^Yours\\ to\\ fill:\\ (.*?)\\ (.*?),\\ for\\ the\\ (.*?)\\ in\\ (.*?)$",
+"rep": "Вам выполнить: $1 $2 для $3 в $4"
+},
+{
+"re": "^Battles\\ here\\ are\\ fought\\ from\\ (.*?)(.*?)\\.$",
+"rep": "Битвы здесь идут с $1$2."
+},
+{
+"re": "^Raise\\ the\\ (.*?)\\ to\\ grade\\ (.*?)\\ \\((.*?)\\ silver\\)$",
+"rep": "Поднять «$1» до ступени $2 ($3 серебра)"
+},
+{
+"re": "^(.*?)\\ \\(unavailable:\\ the\\ arms\\ need\\ (.*?)\\)$",
+"rep": "$1 (недоступно: гербу нужно $2)"
+},
+{
+"re": "^(.*?)\\ has\\ fallen\\.\\ You\\ won\\ the\\ duel!$",
+"rep": "$1 пал. Вы победили в поединке!"
+},
+{
+"re": "^Melee\\ hits\\ deal\\ \\+(.*?)\\ fire\\ damage\\.$",
+"rep": "Удары в ближнем бою наносят +$1 урона огнём."
+},
+{
+"re": "^take\\ pieces\\ out\\ of\\ the\\ vault,\\ (.*?)$",
+"rep": "забирать вещи из хранилища, $1"
+},
+{
+"re": "^rose\\ to\\ the\\ Master's\\ chair\\ of\\ (.*?)$",
+"rep": "занял кресло Мастера $1"
+},
+{
+"re": "^(.*?)'s\\ company,\\ and\\ (.*?)\\ draws\\ on\\ you!$",
+"rep": "Отряд $1, и $2 нападает на вас!"
+},
+{
+"re": "^\\+(.*?)\\ Intelligence,\\ \\+(.*?)\\ every\\ school$",
+"rep": "+$1 к Интеллекту, +$2 ко всем школам магии"
+},
+{
+"re": "^\\+(.*?)\\ poison\\ resistance,\\ \\+(.*?)\\ Agility$",
+"rep": "+$1 к сопротивлению яду, +$2 к Ловкости"
+},
+{
+"re": "^A\\ trophy\\ (.*?)\\.\\ It\\ is\\ in\\ your\\ pack\\.$",
+"rep": "Трофейная добыча: $1. Она у вас в рюкзаке."
+},
+{
+"re": "^Each\\ day\\ it\\ wears\\ down\\ your\\ (.*?)\\.$",
+"rep": "Каждый день подтачивает ваш показатель: $1."
+},
+{
+"re": "^(.*?)\\ in\\ the\\ hold\\.\\ Stores\\ are\\ full$",
+"rep": "$1 в трюме. Склад полон"
+},
+{
+"re": "^Repair\\ what\\ you\\ can\\ afford\\ \\-\\ (.*?)$",
+"rep": "Починить на сколько хватит денег — $1"
+},
+{
+"re": "^Works\\ online:\\ up\\ to\\ \\+(.*?)%\\ damage$",
+"rep": "Работает в сети: до +$1% к урону"
+},
+{
+"re": "^(.*?)%\\ less\\ Fatigue\\ when\\ traveling$",
+"rep": "На $1% меньше усталости в пути"
+},
+{
+"re": "^The\\ Sky\\-Ketch\\ arrives\\ over\\ (.*?)\\ (.*?)\\.$",
+"rep": "Небесная шхуна прибывает к $1 $2."
+},
+{
+"re": "^Rosters\\ close\\ (.*?)\\ minutes\\ before$",
+"rep": "Списки закрываются за $1 мин. до начала"
+},
+{
+"re": "^DFO\\ Online,\\ in\\ (.*?)'s\\ GrimoireUI\\ (.*?)$",
+"rep": "DFO Online в GrimoireUI $2 от $1"
+},
+{
+"re": "^\\+(.*?)\\ Strength,\\ \\+(.*?)\\ Critical\\ Strike$",
+"rep": "+$1 к Силе, +$2 к Критическому удару"
+},
+{
+"re": "^BOUT\\ (.*?):\\ (.*?)\\ against\\ (.*?)\\ \\-\\ begins\\ in\\ (.*?)$",
+"rep": "БОЙ $1: $2 против $3 — начнётся через $4"
+},
+{
+"re": "^Gather\\ on\\ the\\ arrival\\ plate\\.(.*?)$",
+"rep": "Соберитесь на площадке прибытия.$1"
+},
+{
+"re": "^Unavailable:\\ the\\ arms\\ need\\ (.*?)\\.$",
+"rep": "Недоступно: гербу нужно $1."
+},
+{
+"re": "^You\\ left\\ the\\ duel\\.\\ (.*?)\\ wins\\ it\\.$",
+"rep": "Вы покинули поединок. Побеждает $1."
+},
+{
+"re": "^(.*?)'s\\ decline\\ cost\\ it\\ (.*?)\\ Strength$",
+"rep": "упадок $1 стоил ему $2 Силы"
+},
+{
+"re": "^You\\ are\\ signed\\ for\\ the\\ (.*?)(.*?)\\ at\\ (.*?)\\.$",
+"rep": "Вы записаны за сторону $1$2 в $3."
+},
+{
+"re": "^You\\ spot\\ (.*?)\\ (.*?),\\ (.*?)\\ meters\\ to\\ the\\ (.*?)!$",
+"rep": "Вы замечаете $1 $2 в $3 м к $4!"
+},
+{
+"re": "^(.*?):\\ \"What'll\\ it\\ be,\\ traveler\\?\"$",
+"rep": "$1: «Чего желаешь, путник?»"
+},
+{
+"re": "^You\\ come\\ upon\\ (.*?),\\ at\\ work\\ in\\ (.*?)\\.$",
+"rep": "Вы натыкаетесь на $1 за работой в $2."
+},
+{
+"re": "^You\\ hold\\ (.*?)\\ contracts\\ already\\.$",
+"rep": "У вас уже $1 контрактов."
+},
+{
+"re": "^,\\ (.*?)\\ Merit\\ to\\ its\\ chapter\\ here$",
+"rep": ", $1 заслуг его отделению здесь"
+},
+{
+"re": "^\\+(.*?)%\\ per\\ hit\\ taken,\\ up\\ to\\ (.*?)\\ \\((.*?)s\\)$",
+"rep": "+$1% за каждый полученный удар, до $2 раз ($3 с)"
+},
+{
+"re": "^the\\ harbor\\ board\\ pays\\ (.*?)\\ more(.*?)$",
+"rep": "доска гавани платит на $1 больше$2"
+},
+{
+"re": "^Fed,\\ with\\ food\\ enough\\ for\\ (.*?)\\.$",
+"rep": "Сыт, еды хватит на $1."
+},
+{
+"re": "^(.*?)\\ only\\ in\\ witnessed\\ dungeons$",
+"rep": "$1 — только в засвидетельствованных подземельях"
+},
+{
+"re": "^Lair:\\ (.*?),\\ marked\\ on\\ your\\ map\\.$",
+"rep": "Логово: $1, отмечено на вашей карте."
+},
+{
+"re": "^Stunned\\.\\ Strike\\ its\\ head!\\ (.*?)s$",
+"rep": "Оглушён. Бейте в голову! $1 с"
+},
+{
+"re": "^(.*?)'s\\ rivalry\\ with\\ (.*?)\\ ended\\ even$",
+"rep": "соперничество $1 с $2 закончилось вничью"
+},
+{
+"re": "^A\\ great\\ serpent\\ is\\ sighted\\ (.*?)$",
+"rep": "Замечен великий змей $1"
+},
+{
+"re": "^The\\ Tide\\ in\\ (.*?)\\ this\\ week:\\ (.*?)\\ \\-\\ (.*?)(.*?)(.*?)$",
+"rep": "Прилив в $1 на этой неделе: $2 — $3$4$5"
+},
+{
+"re": "^You\\ meet\\ (.*?),\\ come\\ down\\ into\\ (.*?)\\.$",
+"rep": "Вы встречаете $1, спустившихся в $2."
+},
+{
+"re": "^False\\ colors!\\ (.*?)\\ is\\ a\\ pirate\\.$",
+"rep": "Ложный флаг! $1 — пират."
+},
+{
+"re": "^You\\ hold\\ (.*?)'s\\ letter\\ already\\.$",
+"rep": "Письмо ($1) у вас уже есть."
+},
+{
+"re": "^\\+(.*?)%\\ damage,\\ \\+(.*?)%\\ below\\ half\\ HP$",
+"rep": "+$1% к урону, +$2% при здоровье ниже половины"
+},
+{
+"re": "^(.*?)%\\ less\\ damage\\ below\\ half\\ HP$",
+"rep": "На $1% меньше урона при здоровье ниже половины"
+},
+{
+"re": "^Kill\\ marks\\ next\\ foe:\\ \\+(.*?)%\\ \\((.*?)s\\)$",
+"rep": "Убийство метит следующего врага: +$1% ($2 с)"
+},
+{
+"re": "^\\+(.*?)\\ Endurance,\\ \\+(.*?)\\ Blunt\\ Weapon$",
+"rep": "+$1 к Выносливости, +$2 к Дробящему оружию"
+},
+{
+"re": "^\\+(.*?)\\ frost\\ resist,\\ \\+(.*?)\\ Endurance$",
+"rep": "+$1 к сопр. холоду, +$2 к Выносливости"
+},
+{
+"re": "^\\+(.*?)%\\ per\\ hit\\ on\\ a\\ foe,\\ up\\ to\\ (.*?)$",
+"rep": "+$1% за удар по врагу, до $2 раз"
+},
+{
+"re": "^\\+(.*?)\\ Willpower,\\ \\+(.*?)\\ magic\\ resist$",
+"rep": "+$1 к Силе воли, +$2 к сопр. магии"
+},
+{
+"re": "^\\+(.*?)\\ shock\\ resistance,\\ \\+(.*?)\\ Speed$",
+"rep": "+$1 к сопротивлению электричеству, +$2 к Скорости"
+},
+{
+"re": "^Held\\ by\\ (.*?)\\ since\\ (.*?)\\.\\ Standing\\ (.*?)(.*?)\\.$",
+"rep": "Удерживает $1 с $2. Репутация $3$4."
+},
+{
+"re": "^(.*?)\\ added\\ to\\ the\\ deck\\ \\((.*?)\\ of\\ (.*?)\\)\\.$",
+"rep": "$1 добавлена в колоду ($2 из $3)."
+},
+{
+"re": "^This\\ week's\\ Proclamation:\\ (.*?)(.*?)$",
+"rep": "Указ этой недели: $1$2"
+},
+{
+"re": "^Strike\\ all\\ in\\ a\\ wide\\ arc,\\ (.*?)$",
+"rep": "Удар по всем широкой дугой, $1"
+},
+{
+"re": "^One\\ heavy\\ blow,\\ (.*?),\\ \\+(.*?)\\ to\\ hit$",
+"rep": "Один тяжёлый удар, $1, +$2 к попаданию"
+},
+{
+"re": "^You\\ yield\\.\\ (.*?)\\ wins\\ the\\ duel\\.$",
+"rep": "Вы сдаётесь. В поединке побеждает $1."
+},
+{
+"re": "^(.*?)\\ yields\\.\\ You\\ won\\ the\\ duel!$",
+"rep": "$1 сдаётся. Вы победили в поединке!"
+},
+{
+"re": "^(.*?)\\ has\\ fallen\\ in\\ (.*?)\\ of\\ (.*?)\\ courts$",
+"rep": "$1 пал в $2 из $3 дворов"
+},
+{
+"re": "^Up\\ to\\ (.*?)\\ a\\ ship\\ \\-\\ your\\ party$",
+"rep": "До $1 на корабль — ваша группа"
+},
+{
+"re": "^(.*?)\\ more\\ today\\ across\\ Tamriel$",
+"rep": "Ещё $1 сегодня по всему Тамриэлю"
+},
+{
+"re": "^Renew\\ your\\ room:\\ (.*?)\\ day(.*?)\\ left$",
+"rep": "Продлить комнату: осталось дней — $1"
+},
+{
+"re": "^Under\\ (.*?)%:\\ shed\\ skin,\\ heal\\ (.*?)%$",
+"rep": "Ниже $1%: сброс кожи, лечение $2%"
+},
+{
+"re": "^A\\ kill:\\ \\+(.*?)%\\ health,\\ magicka$",
+"rep": "Убийство: +$1% здоровья и маны"
+},
+{
+"re": "^\\+(.*?)\\ poison\\ resist,\\ \\+(.*?)\\ Agility$",
+"rep": "+$1 к сопр. яду, +$2 к Ловкости"
+},
+{
+"re": "^(.*?)\\ (.*?)\\ put\\ in\\ the\\ guild\\ Stores\\.$",
+"rep": "$1 $2: отправлено на склад гильдии."
+},
+{
+"re": "^(.*?)\\ \\-\\ (.*?)(.*?)\\ \\(right\\-click\\ to\\ edit\\)$",
+"rep": "$1 — $2$3 (правый щелчок — изменить)"
+},
+{
+"re": "^(.*?)\\ only\\ on\\ witnessed\\ ground$",
+"rep": "$1 — только на засвидетельствованной земле"
+},
+{
+"re": "^/(.*?)\\ needs\\ something\\ to\\ say\\.$",
+"rep": "/$1: нужно что-то сказать."
+},
+{
+"re": "^/(.*?)\\ takes\\ nothing\\ after\\ it\\.$",
+"rep": "После /$1 ничего не пишется."
+},
+{
+"re": "^Its\\ patron\\ this\\ Season:\\ (.*?)(.*?)(.*?)\\.$",
+"rep": "Его покровитель в этом Сезоне: $1$2$3."
+},
+{
+"re": "^\\ (.*?)\\ opens\\ your\\ Professions\\.$",
+"rep": " $1 открывает ваши Профессии."
+},
+{
+"re": "^(.*?)\\ is\\ (.*?)\\ now\\ \\(\\+(.*?)\\ (.*?)\\ experience\\)(.*?)\\.$",
+"rep": "$1 теперь $2 (+$3 опыта $4)$5."
+},
+{
+"re": "^(.*?)\\ gold\\ on\\ (.*?)\\ at\\ (.*?)\\.\\ Good\\ luck!$",
+"rep": "$1 золотых на $2 при $3. Удачи!"
+},
+{
+"re": "^Dagon's\\ Breach\\ \\-\\ sealed,\\ (.*?)$",
+"rep": "Разлом Дагона — запечатан, $1"
+},
+{
+"re": "^You\\ see\\ (.*?)\\ (.*?)\\ meters\\ to\\ the\\ (.*?)!$",
+"rep": "Вы видите $1: $2 м, направление — $3!"
+},
+{
+"re": "^(.*?)\\ \\-\\ (.*?)!\\ Added\\ to\\ your\\ codex\\.$",
+"rep": "$1 — $2! Добавлено в ваш кодекс."
+},
+{
+"re": "^Its\\ weakness\\ laid\\ bare:\\ (.*?)\\.$",
+"rep": "Его слабость раскрыта: $1."
+},
+{
+"re": "^(.*?)!\\ My\\ favorite\\ corpse!\\ Ha!$",
+"rep": "$1! Мой любимый труп! Ха!"
+},
+{
+"re": "^Under\\ (.*?)%:\\ Nova\\ (.*?),\\ \\+(.*?)%\\ damage$",
+"rep": "Ниже $1%: вспышка $2, +$3% к урону"
+},
+{
+"re": "^When\\ hit:\\ next\\ hit\\ \\+(.*?)%\\ \\((.*?)s\\)$",
+"rep": "После удара по вам: следующий удар +$1% ($2 с)"
+},
+{
+"re": "^Death\\ turned\\ back,\\ heal\\ (.*?)%$",
+"rep": "Смерть отступает, лечение $1%"
+},
+{
+"re": "^\\+(.*?)%\\ vs\\ undead\\ and\\ summoned$",
+"rep": "+$1% против нежити и призванных"
+},
+{
+"re": "^\\ (.*?)\\ opens\\ your\\ Professions\\.$",
+"rep": " $1 открывает ваши профессии."
+},
+{
+"re": "^could\\ not\\ read\\ that\\ zip:\\ (.*?)$",
+"rep": "не удалось прочитать этот zip: $1"
+},
+{
+"re": "^(.*?)\\ carpenter's\\ store(.*?)\\ aboard$",
+"rep": "Плотницких припасов на борту: $1"
+},
+{
+"re": "^Renown\\ limit:\\ (.*?)\\ at\\ Renown\\ (.*?)$",
+"rep": "Предел Славы: «$1» при Славе $2"
+},
+{
+"re": "^You\\ are\\ signed\\ for\\ the\\ (.*?)(.*?)\\.$",
+"rep": "Вы записаны за сторону: $1$2."
+},
+{
+"re": "^(.*?)\\ is\\ the\\ hall's\\ new\\ head\\.$",
+"rep": "$1 — новый глава зала."
+},
+{
+"re": "^(.*?)\\ left\\ the\\ duel\\.\\ You\\ won!$",
+"rep": "$1 покинул поединок. Вы победили!"
+},
+{
+"re": "^gain\\ \\+(.*?)\\ magicka\\ next\\ turn$",
+"rep": "получите +$1 маны в следующий ход"
+},
+{
+"re": "^Over\\ the\\ fields\\ east\\ of\\ (.*?)$",
+"rep": "Над полями к востоку от $1"
+},
+{
+"re": "^Every\\ (.*?)th\\ hit\\ on\\ a\\ foe\\ \\+(.*?)%$",
+"rep": "Каждый $1-й удар по врагу +$2%"
+},
+{
+"re": "^(.*?),\\ (.*?)\\ leagues\\ past\\ the\\ Veil$",
+"rep": "$1, $2 лиг за Вуалью"
+},
+{
+"re": "^(.*?)\\ skills:\\ (.*?)\\ of\\ (.*?)\\ mastered\\.$",
+"rep": "Навыки ($1): освоено $2 из $3."
+},
+{
+"re": "^Reading\\ the\\ catalog\\ \\-\\ (.*?)%$",
+"rep": "Читаем каталог — $1%"
+},
+{
+"re": "^You\\ are\\ banished\\ from\\ (.*?)\\.$",
+"rep": "Вы изгнаны из $1."
+},
+{
+"re": "^Colors\\ struck\\ \\-\\ (.*?):\\ board$",
+"rep": "Флаг спущен — $1: на абордаж"
+},
+{
+"re": "^Everything\\ (.*?)\\ may,\\ and:\\ (.*?)\\.$",
+"rep": "Всё, что может $1, а также: $2."
+},
+{
+"re": "^(.*?)'s\\ hall\\ took\\ a\\ new\\ head$",
+"rep": "у зала $1 новый глава"
+},
+{
+"re": "^At\\ the\\ end\\ of\\ (.*?),\\ (.*?)\\ held\\ (.*?)(.*?)\\.$",
+"rep": "В конце $1 $2 удерживал $3$4."
+},
+{
+"re": "^(.*?)\\ left\\.\\ The\\ trade\\ is\\ off$",
+"rep": "$1 ушёл. Обмен отменён"
+},
+{
+"re": "^(.*?)\\ of\\ 3\\ won\\ at\\ this\\ rank\\.$",
+"rep": "Выиграно на этом ранге: $1 из 3."
+},
+{
+"re": "^Works\\ something\\ to\\ the\\ (.*?)$",
+"rep": "Приводит в действие что-то (направление: $1)"
+},
+{
+"re": "^\\+(.*?)%\\ per\\ kill,\\ up\\ to\\ (.*?)\\ \\((.*?)s\\)$",
+"rep": "+$1% за убийство, до $2 раз ($3 с)"
+},
+{
+"re": "^\\+(.*?)\\ magic,\\ \\+(.*?)\\ shock\\ resist$",
+"rep": "+$1 к сопр. магии, +$2 к сопр. электричеству"
+},
+{
+"re": "^\\+(.*?)\\ shock\\ resist,\\ \\+(.*?)\\ Speed$",
+"rep": "+$1 к сопр. электричеству, +$2 к Скорости"
+},
+{
+"re": "^Your\\ wagon\\ is\\ painted\\ (.*?)\\.$",
+"rep": "Ваша повозка окрашена: $1."
+},
+{
+"re": "^From\\ the\\ journal\\ of\\ (.*?)\\ \\-\\ (.*?)$",
+"rep": "Из дневника: $1 — $2"
+},
+{
+"re": "^Wanted:\\ (.*?)\\ (.*?),\\ for\\ the\\ (.*?)\\ in\\ (.*?)$",
+"rep": "Требуется: $1 $2 для «$3» в $4"
+},
+{
+"re": "^you\\ put\\ in\\ (.*?)\\ of\\ your\\ own$",
+"rep": "вы вложили своих: $1"
+},
+{
+"re": "^(.*?)\\ saved\\ to\\ your\\ binder\\.$",
+"rep": "Колода «$1» сохранена в альбом."
+},
+{
+"re": "^(.*?):\\ the\\ bond\\ is\\ complete$",
+"rep": "$1: связь завершена"
+},
+{
+"re": "^(.*?)\\ in\\ witnessed\\ dungeons$",
+"rep": "$1 — в засвидетельствованных подземельях"
+},
+{
+"re": "^\\ \\((.*?),\\ (.*?)\\ posted\\ this\\ week\\)$",
+"rep": " ($1, вывешено на этой неделе: $2)"
+},
+{
+"re": "^Strike\\ all\\ within\\ (.*?)\\ m,\\ (.*?)$",
+"rep": "Удар по всем в радиусе $1 м, $2"
+},
+{
+"re": "^The\\ way\\ below\\ (.*?)\\ is\\ open$",
+"rep": "Путь ниже $1 открыт"
+},
+{
+"re": "^(.*?)\\ is\\ the\\ first\\ through(.*?)\\.$",
+"rep": "$1 проходит первым$2."
+},
+{
+"re": "^Dagon's\\ Breach\\ opens\\ (.*?)\\.$",
+"rep": "Прорыв Дагона открывается $1."
+},
+{
+"re": "^the\\ (.*?)(.*?)\\ on\\ each\\ side\\ here(.*?)$",
+"rep": "$1$2 с каждой стороны здесь$3"
+},
+{
+"re": "^The\\ Sky\\-Ketch\\ is\\ over\\ (.*?)$",
+"rep": "Небесная шхуна над $1"
+},
+{
+"re": "^\\ \\+(.*?)\\ toward\\ your\\ Renown\\.$",
+"rep": " +$1 к вашей Известности."
+},
+{
+"re": "^(.*?)\\ make\\ for\\ the\\ surface\\.$",
+"rep": "$1 пробираются на поверхность."
+},
+{
+"re": "^(.*?)All\\ repaired,\\ Captain\\.(.*?)$",
+"rep": "$1Всё починено, капитан.$2"
+},
+{
+"re": "^(.*?)\\ cannot\\ come\\ ashore:\\ (.*?)\\.$",
+"rep": "$1 не может сойти на берег: $2."
+},
+{
+"re": "^A\\ (.*?)\\ costs\\ (.*?)\\.\\ You\\ carry\\ (.*?)(.*?)\\.$",
+"rep": "$1 стоит $2. У вас при себе: $3$4."
+},
+{
+"re": "^My\\ fervor\\ only\\ grew,\\ (.*?)\\.$",
+"rep": "Мой пыл лишь возрос, $1."
+},
+{
+"re": "^\\+(.*?)%\\ at\\ sea,\\ half\\ ashore$",
+"rep": "+$1% в море, половина на суше"
+},
+{
+"re": "^\\ \\+(.*?)\\ toward\\ your\\ Renown\\.$",
+"rep": " +$1 к вашей Славе."
+},
+{
+"re": "^\\ \\((.*?),\\ (.*?)\\ posted\\ this\\ week\\)$",
+"rep": " ($1, за эту неделю опубликовано: $2)"
+},
+{
+"re": "^(.*?)%\\ maximum\\ Spell\\ Points$",
+"rep": "$1% к максимуму маны"
+},
+{
+"re": "^position:\\ (.*?),\\ rotation:\\ (.*?)$",
+"rep": "позиция: $1, поворот: $2"
+},
+{
+"re": "^Return\\ (.*?)%\\ of\\ hits\\ taken$",
+"rep": "Возврат $1% полученного урона"
+},
+{
+"re": "^(.*?)\\ weathered\\ a\\ crackdown$",
+"rep": "$1 пережил(а) облаву"
+},
+{
+"re": "^Absorbs\\ (.*?)\\ more\\ damage\\.$",
+"rep": "Поглощает ещё $1 урона."
+},
+{
+"re": "^You\\ are\\ pushed\\ (.*?)\\ less\\.$",
+"rep": "Вас отбрасывает на $1 меньше."
+},
+{
+"re": "^(.*?)\\ removed\\.\\ (.*?)\\ gold\\ back\\.$",
+"rep": "$1 убрано. $2 золотых возвращено."
+},
+{
+"re": "^You\\ (.*?)\\ up\\ the\\ cache:\\ (.*?)(.*?)\\ (.*?)(.*?)\\.$",
+"rep": "Вы $1 тайник: $2$3 $4$5."
+},
+{
+"re": "^You\\ ride\\ the\\ (.*?)\\ Dragon\\.$",
+"rep": "Вы оседлали дракона: $1."
+},
+{
+"re": "^Will\\ (.*?)\\ take\\ the\\ name\\ (.*?)\\?$",
+"rep": "Примет ли $1 имя $2?"
+},
+{
+"re": "^(.*?)\\ leads\\ the\\ party\\ to\\ (.*?)\\.$",
+"rep": "$1 ведёт группу в $2."
+},
+{
+"re": "^You\\ manage\\ to\\ pick\\ (.*?)\\ (.*?)(.*?)!$",
+"rep": "Вам удаётся собрать: $2$3 ($1 шт.)!"
+},
+{
+"re": "^Guns\\ \\+(.*?)%,\\ hull\\ hits\\ \\-(.*?)%$",
+"rep": "Пушки +$1%, урон корпусу −$2%"
+},
+{
+"re": "^(.*?)\\ maximum\\ Spell\\ Points$",
+"rep": "$1 к максимуму маны"
+},
+{
+"re": "^Pays\\ (.*?)\\ silver,\\ (.*?)\\ Renown(.*?)$",
+"rep": "Оплата: $1 серебра, Слава: $2$3"
+},
+{
+"re": "^(.*?)\\ new\\.\\ Jump\\ to\\ newest$",
+"rep": "Новых: $1. К последним"
+},
+{
+"re": "^an\\ amount\\ from\\ 0\\ to\\ (.*?)$",
+"rep": "сумма от 0 до $1"
+},
+{
+"re": "^(.*?)(.*?)\\ asks\\ for\\ your\\ hand,$",
+"rep": "$1$2 просит вашей руки,"
+},
+{
+"re": "^Take\\ back\\ your\\ vote\\ (.*?)$",
+"rep": "Отозвать свой голос $1"
+},
+{
+"re": "^Under\\ (.*?)%:\\ Chameleon\\ (.*?)s$",
+"rep": "Ниже $1%: Хамелеон $2 с"
+},
+{
+"re": "^(.*?)\\ (.*?)\\ put\\ in\\ the\\ Stores\\.$",
+"rep": "$1 $2: отправлено на склад."
+},
+{
+"re": "^\\ \\(room\\ for\\ (.*?)\\ kg\\ more\\)$",
+"rep": " (место ещё для $1 кг)"
+},
+{
+"re": "^Use\\ a\\ repair\\ kit\\ \\((.*?)\\)$",
+"rep": "Использовать ремонтный набор ($1)"
+},
+{
+"re": "^The\\ fields\\ east\\ of\\ (.*?)$",
+"rep": "Поля к востоку от $1"
+},
+{
+"re": "^(.*?)\\ of\\ the\\ (.*?),\\ (.*?),\\ Season\\ (.*?)$",
+"rep": "$1 — $2, $3, Сезон $4"
+},
+{
+"re": "^(.*?)\\ canceled\\ the\\ trade$",
+"rep": "$1 отменил обмен"
+},
+{
+"re": "^(.*?)'s\\ pack\\ is\\ stowed\\ (.*?)(.*?)\\.$",
+"rep": "Вещи $1 сложены $2$3."
+},
+{
+"re": "^(.*?)\\ comes\\ apart\\ into\\ (.*?)(.*?)\\.$",
+"rep": "$1 распадается на $2$3."
+},
+{
+"re": "^Traveling\\ at\\ ×(.*?)\\ of\\ ×(.*?)$",
+"rep": "Скорость путешествия ×$1 из ×$2"
+},
+{
+"re": "^The\\ voyage\\ takes\\ (.*?)\\ (.*?)(.*?)\\.$",
+"rep": "Плавание займёт $1 $2$3."
+},
+{
+"re": "^You\\ ride\\ with\\ (.*?)\\ to\\ (.*?)\\.$",
+"rep": "Вы едете с $1 в $2."
+},
+{
+"re": "^(.*?):\\ set\\ glow\\ removed\\.$",
+"rep": "$1: свечение комплекта снято."
+},
+{
+"re": "^The\\ ship\\ is\\ yours\\.(.*?)$",
+"rep": "Корабль ваш.$1"
+},
+{
+"re": "^(.*?)\\ won,\\ (.*?)\\ lost\\ \\(K/D\\ (.*?)\\)$",
+"rep": "Побед: $1, поражений: $2 (У/С $3)"
+},
+{
+"re": "^(.*?)(.*?)\\ will\\ remember\\ it(.*?)\\.$",
+"rep": "$1$2 это запомнит$3."
+},
+{
+"re": "^You\\ (.*?)\\ (.*?)\\ of\\ the\\ (.*?)\\ in\\ (.*?)\\.$",
+"rep": "Вы $1 $2 из $3, $4."
+},
+{
+"re": "^(.*?)\\ of\\ the\\ chapter:\\ (.*?)\\.$",
+"rep": "$1 отделения: $2."
+},
+{
+"re": "^Usage:\\ /(.*?)\\ \\[on\\|off\\]\\.$",
+"rep": "Использование: /$1 [on|off]."
+},
+{
+"re": "^Dagon's\\ Faithful,\\ (.*?)$",
+"rep": "Верные Дагона, $1"
+},
+{
+"re": "^Lay\\ (.*?)\\ to\\ rest\\ here\\?$",
+"rep": "Упокоить здесь $1?"
+},
+{
+"re": "^Been\\ practicing,\\ (.*?)\\?$",
+"rep": "Тренировался, $1?"
+},
+{
+"re": "^\\+(.*?)%\\ vs\\ unaware\\ foes$",
+"rep": "+$1% против ничего не подозревающих врагов"
+},
+{
+"re": "^Spells\\ cost\\ (.*?)%\\ less$",
+"rep": "Заклинания дешевле на $1%"
+},
+{
+"re": "^(.*?)\\ has\\ one\\ strength\\.$",
+"rep": "У «$1» одна сила."
+},
+{
+"re": "^The\\ Roll\\ of\\ the\\ (.*?),\\ (.*?)$",
+"rep": "Список: $1, $2"
+},
+{
+"re": "^Usage:\\ /(.*?)\\ \\[on\\|off\\]\\.$",
+"rep": "Использование: /$1 [on|off]."
+},
+{
+"re": "^Redoubt\\ (.*?)\\ is\\ yours\\.$",
+"rep": "Редут $1 ваш."
+},
+{
+"re": "^Lookout:\\ (.*?)\\ flying\\ (.*?)!$",
+"rep": "Впередсмотрящий: $1 под флагом «$2»!"
+},
+{
+"re": "^(.*?)\\ put\\ in\\ the\\ vault\\.$",
+"rep": "$1: положено в хранилище."
+},
+{
+"re": "^In\\ its\\ harbors:\\ (.*?)\\.$",
+"rep": "В её гаванях: $1."
+},
+{
+"re": "^The\\ next\\ Court:\\ (.*?)(.*?)\\.$",
+"rep": "Следующий Двор: $1$2."
+},
+{
+"re": "^(.*?),\\ (.*?)\\ (.*?)\\ past\\ the\\ Veil$",
+"rep": "$1, $2 $3 за Завесой"
+},
+{
+"re": "^Writs\\ today:\\ (.*?)\\ of\\ (.*?)(.*?)$",
+"rep": "Заказов сегодня: $1 из $2$3"
+},
+{
+"re": "^(.*?)(.*?):\\ (.*?),\\ reach\\ Renown\\ (.*?)$",
+"rep": "$1$2: $3, достигните Известности $4"
+},
+{
+"re": "^Takings\\ waiting:\\ (.*?)$",
+"rep": "Ждёт выручки: $1"
+},
+{
+"re": "^,\\ (.*?)\\ Merit\\ to\\ (.*?)\\ here$",
+"rep": ", $1 заслуг для $2 здесь"
+},
+{
+"re": "^At\\ the\\ end\\ of\\ (.*?),\\ (.*?)\\.$",
+"rep": "В конце $1 $2."
+},
+{
+"re": "^(.*?)\\ /\\ (.*?)\\ XP\\ to\\ Renown\\ (.*?)$",
+"rep": "$1 / $2 опыта до Известности $3"
+},
+{
+"re": "^Raids\\ elsewhere:\\ (.*?)$",
+"rep": "Набеги в других местах: $1"
+},
+{
+"re": "^Dagon's\\ Breach\\ \\-\\ (.*?)$",
+"rep": "Разлом Дагона — $1"
+},
+{
+"re": "^(.*?)\\ breaks\\ and\\ runs!$",
+"rep": "$1 не выдерживает и бежит!"
+},
+{
+"re": "^(.*?)\\ Deadlands\\ Embers$",
+"rep": "Угольки Мёртвых Земель: $1"
+},
+{
+"re": "^folder\\ failed:\\ (.*?)\\.\\ (.*?)$",
+"rep": "ошибка папки: $1. $2"
+},
+{
+"re": "^Open\\ \\-\\ (.*?)\\ to\\ answer$",
+"rep": "Открыт — $1, чтобы откликнуться"
+},
+{
+"re": "^Ward\\-Bearers\\ \\-\\ (.*?)\\ (.*?)$",
+"rep": "Хранители оберега — $1 $2"
+},
+{
+"re": "^\\+(.*?)\\ from\\ your\\ bond$",
+"rep": "+$1 от вашей связи"
+},
+{
+"re": "^Takes\\ (.*?)\\ from\\ you\\.$",
+"rep": "Отнимает у вас $1."
+},
+{
+"re": "^Bid\\ (.*?)(.*?)\\?\\ At\\ least\\ (.*?)\\.$",
+"rep": "Ставка $1$2? Не меньше $3."
+},
+{
+"re": "^Track\\ (.*?)\\ on\\ screen$",
+"rep": "Отслеживать «$1» на экране"
+},
+{
+"re": "^You\\ stand\\ in\\ (.*?)\\ ·\\ (.*?)(.*?)$",
+"rep": "Вы находитесь: $1 · $2$3"
+},
+{
+"re": "^Refined\\ first:\\ (.*?)(.*?)\\.$",
+"rep": "Сначала переработано: $1$2."
+},
+{
+"re": "^(.*?)/(.*?)\\ ready\\ to\\ rest\\.(.*?)$",
+"rep": "Готовы к отдыху: $1/$2.$3"
+},
+{
+"re": "^You\\ brewed\\ (.*?)\\ (.*?)(.*?)\\ of\\ (.*?)(.*?)$",
+"rep": "Вы сварили $1 $2$3 — $4$5"
+},
+{
+"re": "^Works\\ something\\ (.*?)$",
+"rep": "Приводит в действие что-то $1"
+},
+{
+"re": "^\"(.*?)(.*?)!\\ You're\\ home\\.\"$",
+"rep": "«$1$2! Ты дома.»"
+},
+{
+"re": "^Resting\\ with\\ (.*?)\\.\\.\\.$",
+"rep": "Отдых с $1..."
+},
+{
+"re": "^×(.*?)\\ only\\ on\\ a\\ road$",
+"rep": "×$1 только на дороге"
+},
+{
+"re": "^,\\ with\\ (.*?)\\ to\\ claim$",
+"rep": ", к получению: $1"
+},
+{
+"re": "^Relay:\\ (.*?)\\ is\\ now\\ (.*?)\\.$",
+"rep": "Сервер-ретранслятор: $1 теперь $2."
+},
+{
+"re": "^Your\\ (.*?)\\ is\\ mended(.*?)\\.$",
+"rep": "«$1» починен(а)$2."
+},
+{
+"re": "^Mastered\\ (.*?)/(.*?)\\ \\ \\(M\\)$",
+"rep": "Освоено $1/$2  (M)"
+},
+{
+"re": "^Guild\\ deed:\\ to\\ (.*?)$",
+"rep": "Купчая гильдии: $1"
+},
+{
+"re": "^Imbue\\ (.*?)\\ to\\ (.*?)\\ for\\ (.*?)$",
+"rep": "Наделить «$1» на $2 за $3"
+},
+{
+"re": "^(.*?)'s\\ vault\\ access$",
+"rep": "Доступ к хранилищу: $1"
+},
+{
+"re": "^Spell\\ damage\\ \\+(.*?)\\.$",
+"rep": "Урон заклинаний +$1."
+},
+{
+"re": "^(.*?)\\ broke\\ the\\ Hour$",
+"rep": "$1 сломил Час"
+},
+{
+"re": "^Unsticking\\ in\\ (.*?):(.*?)$",
+"rep": "Освобождение через $1:$2"
+},
+{
+"re": "^Open\\.\\ Seals\\ in\\ (.*?)$",
+"rep": "Открыт. Запечатается через $1"
+},
+{
+"re": "^(.*?)\\ (.*?)\\ past\\ the\\ Veil$",
+"rep": "$1 лиг за Вуалью"
+},
+{
+"re": "^Tier\\ (.*?)\\ \\(levels\\ (.*?)\\)$",
+"rep": "Уровень сложности $1 (уровни $2)"
+},
+{
+"re": "^Sockets:\\ (.*?)\\ empty$",
+"rep": "Гнёзда: $1 свободно"
+},
+{
+"re": "^Yes\\ \\-\\ sell\\ for\\ (.*?)$",
+"rep": "Да — продать за $1"
+},
+{
+"re": "^\\ \\((.*?)x\\ the\\ veins\\)$",
+"rep": " (жилы ×$1)"
+},
+{
+"re": "^DFO\\ Online\\ (.*?)\\ \\((.*?)\\)$",
+"rep": "DFO Online $1 ($2)"
+},
+{
+"re": "^(.*?)\\ took\\ Redoubt\\ (.*?)(.*?)$",
+"rep": "$1 взял Редут $2$3"
+},
+{
+"re": "^The\\ sky\\ burns\\ (.*?)$",
+"rep": "Небо горит $1"
+},
+{
+"re": "^Its\\ council:\\ (.*?)\\.$",
+"rep": "Его совет: $1."
+},
+{
+"re": "^Traveling\\ at\\ ×(.*?)$",
+"rep": "Скорость путешествия ×$1"
+},
+{
+"re": "^Elite\\ hall\\ \\((.*?),(.*?)\\)$",
+"rep": "Элитный зал ($1,$2)"
+},
+{
+"re": "^Gems:\\ (.*?)\\ at\\ most$",
+"rep": "Самоцветы: не больше $1"
+},
+{
+"re": "^,\\ (.*?)\\ more\\ (.*?)\\ a\\ day$",
+"rep": ", ещё $1 $2 в день"
+},
+{
+"re": "^Yes\\ \\-\\ pay\\ (.*?)\\ off$",
+"rep": "Да — выплатить $1"
+},
+{
+"re": "^Yes,\\ play\\ as\\ (.*?)$",
+"rep": "Да, играть за $1"
+},
+{
+"re": "^The\\ same\\ as\\ (.*?)\\.$",
+"rep": "То же, что $1."
+},
+{
+"re": "^(.*?)\\ to\\ (.*?)'s\\ market$",
+"rep": "$1 на рынок $2"
+},
+{
+"re": "^(.*?)\\ carpenter's\\ (.*?)$",
+"rep": "$1 плотницких $2"
+},
+{
+"re": "^The\\ (.*?)\\ Tidemail$",
+"rep": "Приливная кольчуга $1"
+},
+{
+"re": "^boot\\ failed:\\ (.*?)$",
+"rep": "ошибка запуска: $1"
+},
+{
+"re": "^\\+(.*?)%\\ damage\\ vs\\ (.*?)$",
+"rep": "+$1% к урону против: $2"
+},
+{
+"re": "^(.*?)\\ above,\\ (.*?)\\ more$",
+"rep": "$1 выше, ещё $2"
+},
+{
+"re": "^Your\\ silver:\\ (.*?)(.*?)(.*?)(.*?)$",
+"rep": "Ваше серебро: $1$2$3$4"
+},
+{
+"re": "^Sell\\ junk\\ \\((.*?)\\)$",
+"rep": "Продать хлам ($1)"
+},
+{
+"re": "^Raises\\ (.*?)\\ by\\ (.*?)\\.$",
+"rep": "Повышает $1 на $2."
+},
+{
+"re": "^Lowers\\ (.*?)\\ by\\ (.*?)\\.$",
+"rep": "Понижает $1 на $2."
+},
+{
+"re": "^Set\\ the\\ (.*?)\\ in\\ (.*?)$",
+"rep": "Вставить $1 в предмет «$2»"
+},
+{
+"re": "^(.*?)\\ in\\ the\\ wild$",
+"rep": "$1 в глуши"
+},
+{
+"re": "^The\\ (.*?)\\ Company$",
+"rep": "Компания $1"
+},
+{
+"re": "^(.*?)Perfect\\ Rare$",
+"rep": "$1Идеальный редкий"
+},
+{
+"re": "^Turn\\ over:\\ (.*?)$",
+"rep": "Перевернуть: $1"
+},
+{
+"re": "^Acquired:\\ (.*?)\\ (.*?)(.*?)$",
+"rep": "Получено: $1 $2$3"
+},
+{
+"re": "^(.*?)(.*?)\\ at\\ Renown\\ (.*?)$",
+"rep": "$1$2 при Известности $3"
+},
+{
+"re": "^Inactive\\ ·\\ (.*?)$",
+"rep": "Неактивно · $1"
+},
+{
+"re": "^Foot/horse\\ (.*?)$",
+"rep": "Пешком/верхом $1"
+},
+{
+"re": "^Reforged:\\ (.*?)(.*?)\\.$",
+"rep": "Перековано: $1$2."
+},
+{
+"re": "^Next\\ raid:\\ (.*?)$",
+"rep": "Следующий набег: $1"
+},
+{
+"re": "^An\\ honor,\\ (.*?)\\.$",
+"rep": "Это честь, $1."
+},
+{
+"re": "^(.*?):\\ glow\\ set\\.$",
+"rep": "$1: свечение задано."
+},
+{
+"re": "^You\\ leave\\ (.*?)\\.$",
+"rep": "Вы покидаете $1."
+},
+{
+"re": "^Your\\ (.*?)\\ boats$",
+"rep": "Ваши лодки: $1"
+},
+{
+"re": "^Learned:\\ (.*?)\\.$",
+"rep": "Изучено: $1."
+},
+{
+"re": "^Set\\ the\\ (.*?):\\ (.*?)$",
+"rep": "Вставить $1: $2"
+},
+{
+"re": "^You\\ back\\ (.*?)\\.$",
+"rep": "Вы поддерживаете $1."
+},
+{
+"re": "^Elite\\ (.*?)\\ \\((.*?),(.*?)\\)$",
+"rep": "Элитный $1 ($2,$3)"
+},
+{
+"re": "^Circle\\ (.*?):\\ (.*?)(.*?)$",
+"rep": "Круг $1: $2$3"
+},
+{
+"re": "^Circle\\ (.*?):\\ (.*?)(.*?)(.*?)$",
+"rep": "Круг $1: $2$3$4"
+},
+{
+"re": "^Resists\\ (.*?)(.*?)\\.$",
+"rep": "Сопротивление: $1$2."
+},
+{
+"re": "^Tithe\\ (.*?)%\\.\\ (.*?)(.*?)$",
+"rep": "Десятина $1%. $2$3"
+},
+{
+"re": "^This\\ (.*?)\\ \\-\\ (.*?)(.*?)\\.$",
+"rep": "Этот $1 — $2$3."
+},
+{
+"re": "^took\\ (.*?)\\ of\\ (.*?)$",
+"rep": "взял(а) $1 из $2"
+},
+{
+"re": "^lost\\ (.*?)\\ of\\ (.*?)$",
+"rep": "потерял(а) $1 из $2"
+},
+{
+"re": "^Hall\\ (.*?)\\ \\-\\ (.*?)$",
+"rep": "Зал $1 — $2"
+},
+{
+"re": "^Aboard\\ (.*?)\\ (.*?)$",
+"rep": "На борту: $1 $2"
+},
+{
+"re": "^Raises\\ (.*?)\\.$",
+"rep": "Повышает $1."
+},
+{
+"re": "^Lowers\\ (.*?)\\.$",
+"rep": "Понижает $1."
+},
+{
+"re": "^Auto\\ \\((.*?)×\\)$",
+"rep": "Авто ($1×)"
+},
+{
+"re": "^Against\\ (.*?)$",
+"rep": "Против: $1"
+},
+{
+"re": "^(.*?)x\\ XP\\ to\\ (.*?)$",
+"rep": "$1x опыта до стадии «$2»"
+},
+{
+"re": "^(.*?)\\ \\-\\ Pot\\ (.*?)$",
+"rep": "$1 — банк $2"
+},
+{
+"re": "^(.*?)\\ Echo:\\ (.*?)$",
+"rep": "Эхо $1: $2"
+},
+{
+"re": "^Votes:\\ (.*?)(.*?)$",
+"rep": "Голосов: $1$2"
+},
+{
+"re": "^Usage:\\ (.*?)$",
+"rep": "Использование: $1"
+},
+{
+"re": "^Stage\\ (.*?)$",
+"rep": "Стадия $1"
+},
+{
+"re": "^Yes\\ \\-\\ (.*?)(.*?)$",
+"rep": "Да — $1$2"
+},
+{
+"re": "^([A-Z][\\w'’-]*(?: [A-Z][\\w'’-]*)?)\\ Plank$",
+"rep": "Доска: $1"
+},
+{
+"re": "^Esc\\ \\-\\ (.*?)$",
+"rep": "Esc — $1"
+},
+{
+"re": "^([A-Z][\\w'’-]*(?: [A-Z][\\w'’-]*)?)\\ Card$",
+"rep": "Карта: $1"
+},
+{
+"re": "^([A-Z][\\w'’-]*(?: [A-Z][\\w'’-]*)?)\\ Vein$",
+"rep": "Жила: $1"
+},
+{
+"re": "^([A-Z][\\w'’-]*(?: [A-Z][\\w'’-]*)?)\\ Tree$",
+"rep": "Дерево: $1"
+},
+{
+"re": "^Bet\\ (.*?)\\.$",
+"rep": "Ставка $1."
+},
+{
+"re": "^Pot\\ (.*?)$",
+"rep": "Банк $1"
+},
+{
+"re": "^([A-Z][\\w'’-]*(?: [A-Z][\\w'’-]*)?)\\ Log$",
+"rep": "Бревно: $1"
+}
+]

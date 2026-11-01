@@ -1,0 +1,510 @@
+{
+ "launcher/index.html": [
+  [
+   ">Patch notes<",
+   ">Список изменений<"
+  ],
+  [
+   ">Game files<",
+   ">Файлы игры<"
+  ],
+  [
+   ">Change folder<",
+   ">Выбрать папку<"
+  ],
+  [
+   ">Saves<",
+   ">Сохранения<"
+  ],
+  [
+   ">Open saves folder<",
+   ">Папка сохранений<"
+  ],
+  [
+   ">Updates<",
+   ">Обновления<"
+  ],
+  [
+   "Check automatically",
+   "Проверять автоматически"
+  ],
+  [
+   ">Reinstall...<",
+   ">Переустановить...<"
+  ],
+  [
+   ">Play<",
+   ">Играть<"
+  ],
+  [
+   ">Where to play<",
+   ">Где играть<"
+  ],
+  [
+   ">Main servers<",
+   ">Основные серверы<"
+  ],
+  [
+   ">Private server<",
+   ">Приватный сервер<"
+  ],
+  [
+   ">Back to patch notes<",
+   ">Назад к списку изменений<"
+  ],
+  [
+   ">Host a game<",
+   ">Создать игру<"
+  ],
+  [
+   ">Friend's address<",
+   ">Адрес друга<"
+  ],
+  [
+   ">Join<",
+   ">Подключиться<"
+  ],
+  [
+   ">Stop<",
+   ">Остановить<"
+  ],
+  [
+   ">Once you host or join, press PLAY to load a character there.<",
+   ">Когда вы создадите игру или подключитесь, нажмите «Играть», чтобы загрузить там персонажа.<"
+  ],
+  [
+   ">Back<",
+   ">Назад<"
+  ],
+  [
+   ">Graphics<",
+   ">Графика<"
+  ],
+  [
+   "> Use Vulkan</label>",
+   "> Использовать Vulkan</label>"
+  ],
+  [
+   ">Restart to apply<",
+   ">Перезапустить для применения<"
+  ]
+ ],
+ "launcher/launcher.js": [
+  [
+   "const BADGE = { new: 'New', update: 'Update' };",
+   "const BADGE = { new: 'Новинка', update: 'Обновление' };"
+  ],
+  [
+   "label: 'Use these files'",
+   "label: 'Использовать эти файлы'"
+  ],
+  [
+   "`Use these files - ${f.from}: ${f.dir}`",
+   "`Использовать эти файлы — ${f.from}: ${f.dir}`"
+  ],
+  [
+   "`Update ${note.update}`",
+   "`Обновление ${note.update}`"
+  ]
+ ],
+ "main.cjs": [
+  [
+   "title: 'Choose your ARENA2 folder'",
+   "title: 'Выберите папку ARENA2'"
+  ],
+  [
+   "message: \"Daggerfall's game data is freeware but can't be bundled. Choose your ARENA2 folder (or the install folder that contains it).\"",
+   "message: \"Файлы данных Daggerfall бесплатны, но не включены в сборку. Выберите папку ARENA2 (или установленную игру).\""
+  ]
+ ],
+ "lib/launcherState.cjs": [
+  [
+   "dfu: 'from Daggerfall Unity'",
+   "dfu: 'из Daggerfall Unity'"
+  ],
+  [
+   "folder: 'on this computer'",
+   "folder: 'на этом компьютере'"
+  ],
+  [
+   "'Choose the arena2 folder inside the unpacked DaggerfallGameFiles.zip.'",
+   "'Выберите папку arena2 внутри распакованного архива DaggerfallGameFiles.zip.'"
+  ],
+  [
+   "'Choose the ARENA2 folder inside your Daggerfall install - on Steam it is under DF/DAGGER/ARENA2, on GOG it is in the game\\'s own folder.'",
+   "'Выберите папку ARENA2 внутри установленного Daggerfall (в Steam: DF/DAGGER/ARENA2, в GOG: в корневой папке игры).'"
+  ],
+  [
+   "`It did not answer in time - is its drive asleep, or disconnected? ${where}`",
+   "`Папка не ответила вовремя — возможно, диск спит или отключен? ${where}`"
+  ],
+  [
+   "`It could not be read - is its drive connected? ${where}`",
+   "`Не удалось прочитать папку — подключен ли диск? ${where}`"
+  ],
+  [
+   "`It has no ${missing.join(', ')}. ${where}`",
+   "`В папке отсутствуют файлы: ${missing.join(', ')}. ${where}`"
+  ],
+  [
+   "`It holds too many folders to look through them all. ${where}`",
+   "`Внутри слишком много вложенных папок для автоматического поиска. ${where}`"
+  ],
+  [
+   "`It holds no Daggerfall files. ${where}`",
+   "`В этой папке нет файлов Daggerfall. ${where}`"
+  ],
+  [
+   "loading: 'Loading the patch notes'",
+   "loading: 'Загрузка списка изменений'"
+  ],
+  [
+   "failed: 'The patch notes could not be loaded - GitHub did not answer.'",
+   "failed: 'Не удалось загрузить список изменений — GitHub не ответил.'"
+  ],
+  [
+   "off: 'The patch notes come with the update check, which is off.'",
+   "off: 'Список изменений загружается вместе с проверкой обновлений, которая сейчас отключена.'"
+  ],
+  [
+   "ready: 'No patch notes yet.'",
+   "ready: 'Списка изменений пока нет.'"
+  ],
+  [
+   "title: 'Looking for your Daggerfall files'",
+   "title: 'Поиск файлов Daggerfall'"
+  ],
+  [
+   "'Choose a different folder' : 'Choose the ARENA2 folder'",
+   "'Выбрать другую папку' : 'Выбрать папку ARENA2'"
+  ],
+  [
+   "label: 'Choose in the game instead'",
+   "label: 'Выбрать в самой игре'"
+  ],
+  [
+   "'Your Daggerfall folder cannot be reached' : 'Your Daggerfall folder is not whole'",
+   "'Папка Daggerfall недоступна' : 'Папка Daggerfall повреждена или неполная'"
+  ],
+  [
+   "'cannot be read right now - is its drive connected?'",
+   "'сейчас не может быть прочитана — подключен ли диск?'"
+  ],
+  [
+   "`has no ${sv.missing.join(', ')}.` : 'holds no Daggerfall files any more.'",
+   "`не содержит ${sv.missing.join(', ')}.` : 'больше не содержит файлов Daggerfall.'"
+  ],
+  [
+   "' Daggerfall is also here:'",
+   "' Daggerfall также найден здесь:'"
+  ],
+  [
+   "label: 'Try again'",
+   "label: 'Повторить попытку'"
+  ],
+  [
+   "'Found your Daggerfall files' : 'Found Daggerfall on this computer'",
+   "'Файлы Daggerfall найдены' : 'Daggerfall найден на этом компьютере'"
+  ],
+  [
+   "'DFO Online plays from the original game\\'s ARENA2 folder. Nothing is copied or uploaded - it is read where it is.'",
+   "'DFO Online работает с оригинальной папкой ARENA2. Ничего не копируется и не передается — файлы читаются напрямую.'"
+  ],
+  [
+   "label: 'Get DaggerfallGameFiles.zip'",
+   "label: 'Скачать DaggerfallGameFiles.zip'"
+  ],
+  [
+   "'Still looking on slower drives - they are added here if they turn up. '",
+   "'Поиск продолжается на медленных дисках — они появятся здесь, если файлы найдутся. '"
+  ],
+  [
+   "title: 'Where is Daggerfall?'",
+   "title: 'Где установлен Daggerfall?'"
+  ],
+  [
+   "`DFO Online plays from the original game's ARENA2 folder. The Elder Scrolls II: Daggerfall has been free since 2009 - on a Mac, get DaggerfallGameFiles.zip, unpack it, and choose the arena2 folder inside.`",
+   "`DFO Online работает с оригинальной папкой ARENA2. Игра The Elder Scrolls II: Daggerfall бесплатна с 2009 года — на Mac скачайте DaggerfallGameFiles.zip, распакуйте его и выберите папку arena2 внутри.`"
+  ],
+  [
+   "`DFO Online plays from the original game's ARENA2 folder. The Elder Scrolls II: Daggerfall has been free since 2009 - get it from Steam or GOG, then choose its ARENA2 folder.`",
+   "`DFO Online работает с оригинальной папкой ARENA2. Игра The Elder Scrolls II: Daggerfall бесплатна с 2009 года — получите её в Steam или GOG, затем выберите папку ARENA2.`"
+  ],
+  [
+   "label: 'Get it on Steam'",
+   "label: 'Скачать в Steam'"
+  ],
+  [
+   "label: 'Get it on GOG'",
+   "label: 'Скачать в GOG'"
+  ],
+  [
+   "'That folder cannot be read' : 'That folder is not a whole ARENA2'",
+   "'Папка не может быть прочитана' : 'Папка не является полной ARENA2'"
+  ],
+  [
+   "label: 'Play'",
+   "label: 'Играть'"
+  ],
+  [
+   "label: 'Change folder'",
+   "label: 'Выбрать папку'"
+  ],
+  [
+   "note: 'Chosen in the game', label: 'Choose folder'",
+   "note: 'Выбрано в игре', label: 'Выбрать папку'"
+  ],
+  [
+   "note: 'Not set yet', label: 'Choose folder'",
+   "note: 'Ещё не настроено', label: 'Выбрать папку'"
+  ],
+  [
+   "v.status = 'Starting DFO Online';",
+   "v.status = 'Запуск DFO Online';"
+  ],
+  [
+   "label: 'Downloaded'",
+   "label: 'Загружено'"
+  ],
+  [
+   "v.status = `v${u.version} is ready to install`;",
+   "v.status = `Версия v${u.version} готова к установке`;"
+  ],
+  [
+   "v.detail = 'It installs once your game files are set - then DFO Online reopens by itself.';",
+   "v.detail = 'Она установится после выбора файлов игры — затем DFO Online откроется снова.';"
+  ],
+  [
+   "v.status = `Installing v${u.version}`;",
+   "v.status = `Установка v${u.version}`;"
+  ],
+  [
+   "v.detail = 'DFO Online closes and reopens by itself in a few seconds. Your saves, settings and game files stay where they are.';",
+   "v.detail = 'DFO Online закроется и откроется через несколько секунд. Ваши сохранения, настройки и файлы игры сохранятся.';"
+  ],
+  [
+   "v.status = `Downloading v${u.version}`;",
+   "v.status = `Загрузка v${u.version}`;"
+  ],
+  [
+   "v.detail = 'It installs before you play, so you are on the same version as everyone online.';",
+   "v.detail = 'Она установится перед игрой, чтобы ваша версия совпадала со всеми игроками онлайн.';"
+  ],
+  [
+   "`${mb(u.transferred)} of ${mb(u.total)} MB` : 'Starting the download'",
+   "`${mb(u.transferred)} из ${mb(u.total)} МБ` : 'Начало загрузки'"
+  ],
+  [
+   "label: 'Play without updating'",
+   "label: 'Играть без обновления'"
+  ],
+  [
+   "v.status = 'Checking for updates';",
+   "v.status = 'Проверка обновлений';"
+  ],
+  [
+   "v.status = `Version ${u.version} is out`;",
+   "v.status = `Вышла версия ${u.version}`;"
+  ],
+  [
+   "v.detail = `You have v${s.current}. Download it, quit, and put it in place of this copy - your saves, settings and game files stay where they are.`;",
+   "v.detail = `У вас установлена v${s.current}. Скачайте обновление, закройте игру и замените файлы — ваши сохранения, настройки и файлы игры сохранятся.`;"
+  ],
+  [
+   "label: 'Download'",
+   "label: 'Скачать'"
+  ],
+  [
+   "v.status = `v${u.version} installs when you quit`;",
+   "v.status = `v${u.version} установится при выходе`;"
+  ],
+  [
+   "v.detail = 'It finishes downloading while you play.';",
+   "v.detail = 'Загрузка завершится во время игры.';"
+  ],
+  [
+   "v.status = `Could not download v${u.version}`;",
+   "v.status = `Не удалось загрузить v${u.version}`;"
+  ],
+  [
+   "v.detail = 'The download stopped. This version plays as it is, and the update is tried again.';",
+   "v.detail = 'Загрузка прервалась. Вы можете играть в текущую версию, повторная попытка произойдет позже.';"
+  ],
+  [
+   "v.status = `v${u.version} did not install`;",
+   "v.status = `v${u.version} не установилась`;"
+  ],
+  [
+   "v.detail = 'Play this version - it tries again when you quit. Or run the installer yourself: your saves, settings and game files stay where they are.';",
+   "v.detail = 'Вы можете играть в текущую версию — установка повторится при выходе. Или запустите установщик вручную: сохранения, настройки и файлы сохранятся.';"
+  ],
+  [
+   "label: 'Get the installer'",
+   "label: 'Скачать установщик'"
+  ],
+  [
+   "v.status = 'Could not check for updates';",
+   "v.status = 'Не удалось проверить обновления';"
+  ],
+  [
+   "v.detail = 'GitHub did not answer. This version plays as it is, and the next launch asks again.';",
+   "v.detail = 'GitHub не ответил. Вы можете играть в текущую версию, следующая проверка пройдет при повторном запуске.';"
+  ],
+  [
+   "v.status = 'Update checks are off';",
+   "v.status = 'Проверка обновлений отключена';"
+  ],
+  [
+   "v.detail = 'Turn them on under Updates to hear of new versions.';",
+   "v.detail = 'Включите её в разделе «Обновления», чтобы узнавать о новых версиях.';"
+  ],
+  [
+   "v.status = `Updated to v${s.current}`;",
+   "v.status = `Обновлено до v${s.current}`;"
+  ],
+  [
+   "v.detail = 'What changed is in the patch notes.';",
+   "v.detail = 'Список изменений доступен в новостях.';"
+  ],
+  [
+   "v.status = 'Up to date';",
+   "v.status = 'Установлена последняя версия';"
+  ],
+  [
+   "`${still}DFO Online plays from the original game's ARENA2 folder. The Elder Scrolls II: Daggerfall has been free since 2009 - on a Mac, get DaggerfallGameFiles.zip, unpack it, and choose the arena2 folder inside.`",
+   "`${still}DFO Online работает на папке ARENA2 оригинальной игры. The Elder Scrolls II: Daggerfall бесплатна с 2009 года — на Mac скачайте DaggerfallGameFiles.zip, распакуйте и выберите папку arena2 внутри.`"
+  ],
+  [
+   "`${still}DFO Online plays from the original game's ARENA2 folder. The Elder Scrolls II: Daggerfall has been free since 2009 - get it from Steam or GOG, then choose its ARENA2 folder.`",
+   "`${still}DFO Online работает на папке ARENA2 оригинальной игры. The Elder Scrolls II: Daggerfall бесплатна с 2009 года — возьмите её в Steam или GOG и выберите её папку ARENA2.`"
+  ],
+  [
+   "'The setting could not be saved.'",
+   "'Не удалось сохранить настройку.'"
+  ],
+  [
+   "'Vulkan did not work on this graphics card.'",
+   "'Vulkan не заработал на этой видеокарте.'"
+  ],
+  [
+   "'Direct3D 11 for this start only.'",
+   "'Direct3D 11 только на этот запуск.'"
+  ],
+  [
+   "'From the next start.'",
+   "'Со следующего запуска.'"
+  ],
+  [
+   "`Hosting on port ${p.port} - ${p.players ?? 0} of ${p.max} players. Friends join at ${",
+   "`Сервер на порту ${p.port} — игроков: ${p.players ?? 0} из ${p.max}. Друзья подключаются по адресу ${"
+  ],
+  [
+   ".join(' or ') || `this PC's address, port ${p.port}`}.`",
+   ".join(' или ') || `адрес этого ПК, порт ${p.port}`}.`"
+  ],
+  [
+   "`Joined ${p.address}. Load a character in the game to play on it.`",
+   "`Подключено к ${p.address}. Загрузите персонажа в игре, чтобы играть там.`"
+  ],
+  [
+   "'Starting the server...'",
+   "'Запуск сервера...'"
+  ],
+  [
+   "'That did not work.'",
+   "'Не получилось.'"
+  ],
+  [
+   "'Host a game for 2-10 friends on this PC, or join a friend\\'s.'",
+   "'Создайте игру для 2–10 друзей на этом ПК или подключитесь к игре друга.'"
+  ],
+  [
+   "'Only the files that changed. It is ready before you play, so you are on the same version as everyone online.'",
+   "'Только изменённые файлы. Всё будет готово до начала игры, и у вас будет та же версия, что у всех онлайн.'"
+  ],
+  [
+   "'It installs before you play, so you are on the same version as everyone online.'",
+   "'Обновление устанавливается до начала игры, и у вас будет та же версия, что у всех онлайн.'"
+  ],
+  [
+   "`v${u.version} plays from your next start`",
+   "`v${u.version} — со следующего запуска`"
+  ],
+  [
+   "`v${u.version} installs when you quit`",
+   "`v${u.version} установится при выходе`"
+  ]
+ ],
+ "lib/shellDialogs.cjs": [
+  [
+   "'Leave'",
+   "'Выйти'"
+  ],
+  [
+   "'Stay'",
+   "'Остаться'"
+  ],
+  [
+   "'Leave the game?'",
+   "'Выйти из игры?'"
+  ],
+  [
+   "'Progress since your last save will be lost.'",
+   "'Несохраненный прогресс будет потерян.'"
+  ],
+  [
+   "`Restart to install v${version}?`",
+   "`Перезапустить для установки v${version}?`"
+  ],
+  [
+   "'DFO Online closes, installs the update and reopens by itself. Save your game first - progress since your last save is lost.'",
+   "'Daggerfall Online закроется, установит обновление и перезапустится автоматически. Сохраните игру — несохраненный прогресс будет потерян.'"
+  ],
+  [
+   "'Restart'",
+   "'Перезапустить'"
+  ],
+  [
+   "'Not now'",
+   "'Не сейчас'"
+  ],
+  [
+   "'Reinstall DFO Online?'",
+   "'Переустановить Daggerfall Online?'"
+  ],
+  [
+   "'The newest installer downloads in your browser. Install it over this copy - your saves, settings and game files stay where they are.'",
+   "'Новейший установщик будет загружен в браузере. Установите его поверх этой копии — ваши сохранения, настройки и файлы игры сохранятся.'"
+  ],
+  [
+   "'Download'",
+   "'Скачать'"
+  ],
+  [
+   "'Cancel'",
+   "'Отмена'"
+  ],
+  [
+   "'The update could not be installed'",
+   "'Не удалось установить обновление'"
+  ],
+  [
+   "'DFO Online stays open on this version. Get the installer and run it yourself - your saves, settings and game files stay where they are.'",
+   "'Daggerfall Online останется на текущей версии. Скачайте установщик и запустите его вручную — ваши сохранения, настройки и файлы игры сохранятся.'"
+  ],
+  [
+   "'Get the installer'",
+   "'Скачать установщик'"
+  ],
+  [
+   "'Not now'",
+   "'Не сейчас'"
+  ]
+ ],
+ "launcher/launcher.css": [
+  [
+   "src: url(fonts/PixelifySans-latin.woff2) format('woff2');",
+   "src: url(fonts/PixelifySans-cyrillic.woff2) format('woff2'), url(fonts/PixelifySans-latin.woff2) format('woff2');"
+  ]
+ ]
+}

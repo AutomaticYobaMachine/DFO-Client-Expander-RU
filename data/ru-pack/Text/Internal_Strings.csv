@@ -1,0 +1,1295 @@
+Key,Value
+about_internal_strings,"В этой коллекции строк хранится текст, жёстко зашитый в FALL.EXE, и текст, специфичный для Daggerfall Unity."
+pleaseSelectYourHomeProvince,"Выберите родную провинцию..."
+saveGame,"Сохранить игру"
+loadGame,"Загрузить игру"
+thingJustDied,"%s только что погиб."
+gameSaved,"Игра сохранена."
+gameLoaded,"Игра загружена."
+thisHouseHasNothingOfValue,"В этом доме ничего ценного нет."
+findLocationPrompt,"Введите название места: "
+rightHandEquipped,"Правая рука занята."
+leftHandEquipped,"Левая рука занята."
+usingRightHand,"Используется оружие в правой руке."
+usingLeftHand,"Используется оружие в левой руке."
+itemHasBroken,"%s сломан."
+itemHasBrokenPlural,"%s сломаны."
+cannotCarryGold,"Вы не можете нести столько золота."
+cannotFloat,"Вы несёте слишком много, чтобы удержаться на плаву."
+youHaveNoArrows,"У вас нет стрел."
+oldSaveNoTrade,"Загружено старое сохранение из помещения, окно торговли не работает — выйдите и снова войдите в здание."
+theBodyHasNoTreasure,"На теле нет ничего ценного."
+youAreTooFarAway,"Вы слишком далеко..."
+youSeeAn,"Вы видите %s."
+youSeeA,"Вы видите %s."
+youSeeADeadPerson,"Вы видите мертвеца."
+youSeeADead,"Вы видите мёртвого %s."
+youCollectArrows,"Вы вытаскиваете стрелы из трупа."
+loiterHowManyHours,"Сколько часов бездельничать?"
+restHowManyHours,"Сколько часов отдыхать?"
+potionRecipeFor,"Рецепт зелья: %po"
+potionRecipeWeight,"Вес: %kg килограммов"
+potionOf,"Зелье: %po"
+letterPrefix,"Письмо: "
+multipleAssignments,"У вас несколько заданий..."
+youAreEntering,"Вы входите: %s"
+storeClosed,"Лавка закрыта. Открыто с %d1:00 до %d2:00."
+guildClosed,"Гильдия закрыта. Открыто с %d1:00 до %d2:00."
+any,"Любой %s"
+arkayDesc,"Бог рождения и смерти"
+zenDesc,"Бог труда и торговли"
+maraDesc,"Богиня любви"
+akatoshDesc,"Бог времени"
+julianosDesc,"Бог логики"
+dibellaDesc,"Богиня красоты"
+stendarDesc,"Бог милосердия"
+kynarethDesc,"Богиня воздуха"
+interactionIsNowInMode,"Режим взаимодействия переключён на %s."
+steal,"украсть"
+grab,"схватить"
+info,"инфо"
+dialogue,"диалог"
+residence,"Резиденция"
+youSee,"Вы видите %s."
+theNamedResidence,"Резиденция %s"
+playerResidence,"Дом %s"
+materialIneffective,"Материал оружия, которое вы используете, неэффективен."
+successfulBackstab,"Удар в спину удался!"
+languagePacified,"%e усмирен навыком %s."
+lockpickingSuccess,"Замок щёлкнул и открылся."
+lockpickingFailure,"Замок не поддаётся."
+magicLock,"Этот замок удерживается магией..."
+lockpickChance1,"Этому замку нечего бояться тебя..."
+lockpickChance2,"Вскрыть этот замок было бы чудом..."
+lockpickChance3,"Похоже, этот замок тебе не по зубам..."
+buildingNames,"Храм Акатоша
+Храм Аркея
+Храм Дибеллы
+Храм Юлианоса
+Храм Кинарет
+Храм Мары
+Храм Стендарра
+Храм Зена
+Орден Ворона
+Рыцари Дракона
+Рыцари Совы
+Орден Свечи
+Рыцари Пламени
+Дружина Рога
+Рыцари Розы
+Рыцари Колеса
+Орден Скарабея
+Рыцари Ястреба
+Гильдия магов
+Гильдия бойцов
+Таверна
+Библиотека
+Кузнец-оружейник
+Бронейник
+Алхимик
+Банк
+Книжный магазин
+Магазин одежды
+Магазин самоцветов
+Ломбард"
+lockpickChance,"Вы сомневаетесь, что справитесь с этим замком...
+Этот замок выглядит трудным...
+Этот замок будет для вас серьёзным испытанием...
+Этот замок окажется достойным испытанием...
+Вы думаете, что вскроете этот замок...
+Этот замок кажется относительно простым...
+Этот замок вызывает у вас улыбку...
+Вы смеётесь над несерьёзностью этого замка...
+Вы видите жалкое подобие замка...
+Этот замок оскорбляет ваши способности..."
+youPinchedGoldPiece,"Вы присвоили 1 золотую монету."
+youPinchedGoldPieces,"Вы присвоили %d золотых монет."
+youAreNotSuccessful,"Ничего не вышло..."
+daysUntilFreedom,"%d дней до свободы."
+skillImprove,"Ваш навык «%s» улучшен."
+mustDistributeBonusPoints,"Вы должны распределить все очки бонуса."
+enterNewName,"Введите новое имя: "
+affiliation,"Принадлежность"
+rank,"Ранг"
+serviceQuests,"Взять задание"
+serviceSell,"Продать"
+serviceBanking,"Банковские услуги"
+serviceIdentify,"Опознать"
+serviceBuySpells,"Купить заклинания"
+serviceTraining,"Тренировка"
+serviceTeleport,"Телепортация"
+serviceMakeSpells,"Создать заклинания"
+serviceBuyMagicItems,"Купить магические предметы"
+serviceSellMagicItems,"Продать магические предметы"
+serviceDaedraSummon,"Призыв даэдра"
+serviceMakeMagicItems,"Создать магические предметы"
+serviceRepairs,"Ремонт"
+serviceDonate,"Пожертвование"
+serviceCure,"Вылечить болезнь"
+serviceSpymaster,"Мастер шпионов"
+serviceMakePotions,"Сварить зелья"
+serviceBuyPotions,"Купить зелья"
+serviceBuySoulgems,"Купить самоцветы душ"
+serviceReceiveArmor,"Получить доспехи"
+serviceReceiveHouse,"Получить дом"
+serviceReceiveHouseAlready,"Вы уже получили свой дом."
+accessMembersOnly,"Чтобы попасть сюда, нужно быть членом не ниже требуемого ранга."
+serviceCured,"Вы выздоровели."
+serviceSummonCost1,"%pcn, стоимость моей попытки"
+serviceSummonCost2,"призвать %dae составит"
+serviceSummonCost3,"золотых."
+roomFreeForKnightSuchAsYou,"Комната бесплатна для такого рыцаря, как вы."
+roomFreeDueToHeartsDay,"Комната бесплатна из-за Дня влюблённых."
+youAreNotHungry,"Вы не голодны."
+exhaustedInWater,"Истощение настигает вас и уносит на дно..."
+youFeelSomewhatBad,"Вам немного нездоровится."
+avoidDeath,"По милости Стендарра вы избежали верной смерти!"
+pronounHe,"он"
+pronounShe,"она"
+pronounHim,"его"
+pronounHer,"её"
+pronounHer2,"её"
+pronounHis,"его"
+pronounHis2,"его"
+pronounHers,"её"
+pronounHimself,"себя"
+pronounHerself,"себя"
+city,"город"
+village,"деревня"
+hamlet,"хутор"
+farm,"ферма"
+shack,"хижина"
+manor,"усадьба"
+community,"община"
+shrine,"святилище"
+King,"Король"
+Queen,"Королева"
+Duke,"Герцог"
+Duchess,"Герцогиня"
+Marquis,"Маркиз"
+Marquise,"Маркиза"
+Count,"Граф"
+Countess,"Графиня"
+Baron,"Барон"
+Baroness,"Баронесса"
+Lord,"Лорд"
+Lady,"Леди"
+revered,"чтимый"
+esteemed,"уважаемый"
+honored,"почитаемый"
+admired,"восхищаемый"
+respected,"признанный"
+dependable,"надёжный"
+aCommonCitizen,"обычный горожанин"
+hated,"ненавистный"
+pondScum,"прудовая тина"
+aVillain,"злодей"
+aCriminal,"преступник"
+aScoundrel,"негодяй"
+undependable,"ненадёжный"
+unknown,"неизвестно"
+Broken,"Сломанное"
+Useless,"Бесполезное"
+Battered,"Потрёпанное"
+Worn,"Изношенное"
+Used,"Бывшее в употреблении"
+SlightlyUsed,"Слегка побывавшее в употреблении"
+AlmostNew,"Почти новое"
+New,"Новое"
+Nothing,"Ничего"
+local,"местный"
+tavern,"таверна"
+Attempted_Breaking_And_Entering,"Покушение на взлом"
+Trespassing,"Незаконное проникновение"
+Breaking_And_Entering,"Взлом"
+Assault,"Нападение"
+Murder,"Убийство"
+Tax_Evasion,"Уклонение от налогов"
+Criminal_Conspiracy,"Преступный сговор"
+Vagrancy,"Бродяжничество"
+Smuggling,"Контрабанда"
+Piracy,"Пиратство"
+High_Treason,"Государственная измена"
+Pickpocketing,"Карманная кража"
+Theft,"Кража"
+Treason,"Измена"
+Loan_Default,"Невозврат ссуды"
+Regular_Punishment_String,"%gtp золотых штрафа и %dip дней в тюрьме"
+Banishment,"Изгнание"
+Execution,"Казнь"
+cannotChangeTransportationIndoors,"В помещении нельзя сменить способ передвижения."
+cannotTravelWithEnemiesNearby,"Нельзя путешествовать, когда рядом враги."
+cannotTravelIndoors,"Нельзя путешествовать в помещении."
+powersUnknown,"Силы неизвестны."
+itemPowers,"Срабатывает при использовании:
+Срабатывает при ношении:
+Срабатывает при ударе:
+Доп. очки маны
+Особо сильно против
+Восстанавливает здоровье
+Вампирический эффект
+Повышенный переносимый вес
+Чинит предметы
+Поглощает заклинания
+Повышает навык
+Невесомость
+Укрепляет броню
+Улучшает таланты
+Хорошая репутация у
+Привязано к душе
+Предмет портится
+Владелец получает урон
+Проблемы со зрением
+Проблемы с походкой
+Малый урон по
+Пьёт здоровье
+Плохие реакции у
+Лишний вес
+Ослабляет броню
+Плохая репутация у"
+enemyNames,"Крыса
+Бес
+Спригган
+Гигантская летучая мышь
+Гризли
+Саблезубый тигр
+Паук
+Орк
+Кентавр
+Вервульф
+Нимфа
+Рыбо-людоед
+Сержант орков
+Гарпия
+Вербод
+Костяной воин
+Великан
+Зомби
+Призрак
+Мумия
+Гигантский скорпион
+Шаман орков
+Гаргулья
+Морок
+Вождь орков
+Ледяной даэдр
+Огненный даэдр
+Дэдрот
+Вампир
+Даэдр-Соблазнитель
+Древний вампир
+Даэдр-лорд
+Лич
+Древний лич
+Дракончик
+Огненный атронах
+Железный атронах
+Плотский атронах
+Ледяной атронах
+Лошадь
+Дракончик
+Друач
+Ламия
+Маг
+Маг-мечник
+Боевой маг
+Чародей
+Целитель
+Ночной клинок
+Бард
+Взломщик
+Разбойник
+Акробат
+Вор
+Убийца
+Монах
+Лучник
+Следопыт
+Варвар
+Воин
+Рыцарь
+Городская стража"
+extraSpellPtsTimes,"зимой
+весной
+летом
+осенью
+в полнолуние
+в полумесяце
+в новолуние
+рядом с нежитью
+рядом с даэдрами
+рядом с людьми
+рядом с животными"
+regensHealthTimes,"постоянно
+на солнце
+в темноте"
+vampiricEffectRanges,"на расстоянии
+при ударе"
+increasedWeightAllowances,"+25%
++50%"
+improvedTalents,"слух
+атлетичность
+выброс адреналина"
+itemDeteriorateLocations,"постоянно
+на солнце
+в святых местах"
+userTakesDamageLocations,"на солнце
+в святых местах"
+enemyGroupNames,"нежить
+даэдры
+люди
+животные"
+healthLeechStopConditions,"при каждом использовании
+если не использовать ежедневно
+если не использовать еженедельно"
+badReactionFromEnemyGroups,"людей
+животных
+даэдров"
+repWithGroups,"Простолюдины
+Купцы
+Учёные
+Дворянство
+Подземный мир
+Все"
+youReceiveGoldPieces,"Вы получаете %s золотых."
+bankPurchasePrice,"Цена: %s зол."
+youHaveRentedRoom,"У вас есть комната в %s на %d часов."
+haveNotRentedRoom,"Вы не снимали здесь комнату."
+expiredRentedRoom,"Срок вашей комнаты истёк."
+tavernAle,"Эль (1 золотой)"
+tavernBeer,"Пиво (1 золотой)"
+tavernMead,"Мёд (2 золота)"
+tavernWine,"Вино (3 золота)"
+tavernBread,"Хлеб (1 золотой)"
+tavernBroth,"Бульон (1 золотой)"
+tavernCheese,"Сыр (2 золота)"
+tavernFowl,"Птица (3 золота)"
+tavernGruel,"Жижа (2 золота)"
+tavernPie,"Пирог (2 золота)"
+tavernStew,"Рагу (3 золота)"
+pressButtonToFireSpell,"Нажмите кнопку, чтобы применить заклинание."
+climbingMode,"Режим скалолазания."
+rappelMode,"Режим спуска на верёвке."
+hangingMode,"Режим виса"
+acuteHearing,"Острый слух"
+adrenalineRush,"Выброс адреналина"
+athleticism,"Атлетичность"
+bonusToHit,"Бонус к точности"
+expertiseIn,"Мастерство в"
+immunity,"Иммунитет"
+increasedMagery,"Повышенная магия"
+rapidHealing,"Быстрое исцеление"
+regenerateHealth,"Регенерация здоровья"
+resistance,"Сопротивление"
+spellAbsorption,"Поглощение заклинаний"
+animals,"Животные"
+daedra,"Даэдры"
+humanoid,"Люди"
+undead,"Нежить"
+axe,"Топоры"
+bluntWeapon,"Дробящее оружие"
+handToHand,"Рукопашный бой"
+longBlade,"Длинные Клинки"
+missileWeapon,"Метательное оружие"
+shortBlade,"Короткие Клинки"
+toDisease,"К болезни"
+toFire,"К огню"
+toFrost,"К морозу"
+toMagic,"К магии"
+toParalysis,"К параличу"
+toPoison,"К яду"
+toShock,"К электричеству"
+intInSpellPoints15,"1.5x ИНТ в очках маны"
+intInSpellPoints175,"1.75x ИНТ в очках маны"
+intInSpellPoints2,"2x ИНТ в очках маны"
+intInSpellPoints3,"3x ИНТ в очках маны"
+intInSpellPoints,"ИНТ в очках маны"
+general,"Общее"
+inDarkness,"В темноте"
+inLight,"На свету"
+whileImmersed,"Пока в воде"
+criticalWeakness,"Критическая слабость"
+damage,"Урон запасам"
+darknessPoweredMagery,"Магия тьмы"
+forbiddenArmorType,"Запрещённый тип брони"
+forbiddenMaterial,"Запрещённый материал"
+forbiddenShieldTypes,"Запрещённые типы щитов"
+forbiddenWeaponry,"Запрещённое оружие"
+inabilityToRegen,"Невозможность восстанавливать ману"
+lightPoweredMagery,"Магия света"
+lowTolerance,"Низкая устойчивость"
+phobia,"Фобия"
+fromHolyPlaces,"От святых мест"
+fromSunlight,"От солнца"
+lowerMagicAbilityDaylight,"Снижение магии при дневном свете"
+unableToUseMagicInDaylight,"Невозможность колдовать при дневном свете"
+chain,"кольчуга"
+leather,"кожа"
+plate,"латы"
+adamantium,"адамантий"
+daedric,"даэдрический металл"
+dwarven,"двемерский металл"
+ebony,"эбонит"
+elven,"эльфийский металл"
+iron,"железо"
+mithril,"мифрил"
+orcish,"орочий металл"
+silver,"серебро"
+steel,"сталь"
+buckler,"Баклер"
+kiteShield,"Каплевидный щит"
+roundShield,"Круглый щит"
+towerShield,"Башенный щит"
+lowerMagicAbilityDarkness,"Снижение магии в темноте"
+unableToUseMagicInDarkness,"Невозможность колдовать в темноте"
+helpAttributes,"Атрибуты"
+helpClassName,"Название класса"
+helpGeneral,"Общее"
+helpReputations,"Репутации"
+helpSkillAdvancement,"Развитие навыков"
+helpSkills,"Навыки"
+helpSpecialAdvantages,"Особые преимущества"
+helpSpecialDisadvantages,"Особые недостатки"
+lower,"Ниже"
+higher,"Выше"
+unchanged,"Без изменений"
+elsweyr,"Эльсвейр"
+blackMarsh,"Чёрные топи"
+hammerfell,"Хаммерфелл"
+highRock,"Хай Рок"
+morrowind,"Морровинд"
+skyrim,"Скайрим"
+sumurset,"Сумурсет"
+valenwood,"Валенвуд"
+rollingHills,"холмы"
+desertLand,"пустынные земли"
+mountains,"горы"
+swamps,"болота"
+forests,"леса"
+shores,"побережья"
+medical,"Медицина"
+etiquette,"Этикет"
+streetwise,"Знание улиц"
+jumping,"Прыжки"
+harpy,"Язык гарпий"
+giantish,"Язык великанов"
+dragonish,"Драконий язык"
+nymph,"Язык нимф"
+aedric,"Даэдрический язык"
+spriggan,"Язык сприггана"
+centaurian,"Язык кентавров"
+impish,"Язык бесов"
+lockpicking,"Взлом замков"
+mercantile,"Торговля"
+pickpocket,"Карманная кража"
+stealth,"Скрытность"
+swimming,"Плавание"
+climbing,"Лазание"
+backstabbing,"Удар в спину"
+dodging,"Уклонение"
+running,"Бег"
+destruction,"Разрушение"
+restoration,"Восстановление"
+illusion,"Иллюзия"
+alteration,"Изменение"
+thaumaturgy,"Тауматургия"
+mysticism,"Мистицизм"
+archery,"Стрельба из лука"
+criticalStrike,"Критический удар"
+strength,"Сила"
+intelligence,"Интеллект"
+willpower,"Сила воли"
+agility,"Ловкость"
+endurance,"Выносливость"
+personality,"Обаяние"
+speed,"Скорость"
+luck,"Удача"
+STR,"СИЛ"
+INT,"ИНТ"
+WIL,"ВОЛ"
+AGI,"ЛОВ"
+END,"КОНЕЦ"
+PER,"ОБА"
+SPD,"СКОР"
+LUC,"УДЧ"
+breton,"Бретон"
+redguard,"Редгард"
+darkElf,"Тёмный эльф"
+highElf,"Высший эльф"
+woodElf,"Лесной эльф"
+khajiit,"Каджит"
+argonian,"Аргонианин"
+vampire,"Вампир"
+werewolf,"Вервульф"
+wereboar,"Вербод"
+vraseth,"Врасет"
+haarvenu,"Харвену"
+thrafey,"Трафей"
+lyrezi,"Лирези"
+montalion,"Монталион"
+khulari,"Хулари"
+garlythi,"Гарлити"
+anthotis,"Антотис"
+selenu,"Селену"
+lockedExteriorDoor,"Заперто."
+canOnlyCastOncePerDay,"Это заклинание можно применить лишь раз в день..."
+youNeedToHuntTheInnocent,"Вас тянет охотиться на невинных..."
+youDreamOfTheMoon,"Вы снова видите во сне луну..."
+inventoryWhileShapechanged,"Пока вы в изменённом облике, инвентарь недоступен..."
+youGetNoResponse,"Ответа нет."
+copyLogbookInfo,"Левая кнопка: копировать выделенный текст. Правая кнопка: копировать весь текущий разговор."
+east,"восток"
+northeast,"северо-восток"
+north,"север"
+northwest,"северо-запад"
+west,"запад"
+southwest,"юго-запад"
+south,"юг"
+southeast,"юго-восток"
+thisPlace,"это место"
+AnyNews,"Что нового?"
+WhereAmI,"Где я?"
+AnswerTextWhereAmI,"Вы находитесь в {0}, в области {1}."
+YouAreInSameBuilding,"Вы нашли {0}. Вы внутри."
+NpcInSameBuilding,"{0} где-то поблизости, в {1}."
+PreviousList,"Предыдущий список"
+General,"Общее"
+Regional,"Региональные"
+Alchemists,"Алхимики"
+Armorers,"Бронейщики"
+Banks,"Банки"
+Bookstores,"Книжные магазины"
+Clothingstores,"Магазины одежды"
+Gemstores,"Магазины самоцветов"
+Generalstores,"Универмаги"
+Guilds,"Гильдии"
+Libraries,"Библиотеки"
+Pawnshops,"Ломбарды"
+Taverns,"Таверны"
+Weaponsmiths,"Кузнецы"
+Localtemples,"Местные храмы"
+Sir,"Сэр"
+Ma'am,"Сударыня"
+oldLeaderFate0,"умер от сердечной недостаточности"
+oldLeaderFate1,"пал и ударился головой"
+oldLeaderFate2,"умер от мора"
+oldLeaderFate3,"отступил под давлением"
+oldLeaderFate4,"был свергнут"
+oldLeaderFate5,"был найден убитым в своей постели"
+toBeReplacedStringRegional,"Любой"
+replacementStringRegional,"любой"
+comma,","
+resolvingError,"...неразборчиво..."
+chameleon,"Хамелеон"
+charm,"Очарование"
+comprehendLanguages,"Понимание языков"
+continuousDamage,"Урон запасам (временный)"
+createItem,"Создание предмета"
+cure,"Лечение"
+detect,"Обнаружение"
+disintegrate,"Развеивание"
+dispel,"Изгнание"
+drain,"Урон характеристикам (постоянный)"
+elementalResistance,"Сопротивление стихиям"
+fortifyAttribute,"Усиление характеристик"
+freeAction,"Снятие паралича"
+heal,"Восстановление характеристик"
+identify,"Опознание"
+invisibility,"Невидимость"
+levitate,"Левитация"
+light,"Свет"
+lock,"Запирание"
+morphSelf,"Изменение себя"
+open,"Отпирание"
+pacify,"Усмирение"
+paralyze,"Паралич"
+regenerate,"Регенерация здоровья"
+shadow,"Тень"
+shield,"Щит"
+silence,"Немота"
+slowfall,"Замедленное падение"
+soulTrap,"Захват душ"
+spellReflection,"Отражение заклинаний"
+spellResistance,"Сопротивление заклинаниям"
+teleport,"Телепортация"
+transfer,"Поглощение характеристик"
+waterBreathing,"Дыхание под водой"
+waterWalking,"Ходьба по воде"
+fire,"Огонь"
+frost,"Мороз"
+magicka,"Мана"
+poison,"Яд"
+shock,"Электричество"
+enemy,"Враг"
+magic,"Магия"
+treasure,"Сокровище"
+fatigue,"Усталость"
+health,"Здоровье"
+spellPoints,"Мана"
+disease,"Болезнь"
+paralyzation,"Парализация"
+animal,"Животное"
+normal,"Обычный"
+TRUE,"ИСТИНА"
+noName,"<без имени>"
+youDontHaveTheSpellPoints,"У вас не хватает маны."
+youAreSilenced,"Вы лишены речи."
+youAreParalyzed,"Вы парализованы."
+youFeelDrained,"Вы чувствуете себя истощённым."
+youAreFortified,"Вы укреплены."
+youAreInvisible,"Вы невидимы."
+youAreLevitating,"Вы парите."
+youAreRegenerating,"Вы регенерируете."
+youAreBlending,"Вы смешиваетесь с местностью."
+youAreAShade,"Вы — тень."
+slowFallActive,"Медленное падение активно."
+saveVersusSpellMade,"Спасброск против заклинания."
+spellEffectFailed,"Эффект заклинания не сработал."
+spellAbsorbed,"Заклинание было поглощено."
+spellReflected,"Заклинание было отражено."
+spellResisted,"Заклинанию оказано сопротивление."
+readyToLock,"Готово к запиранию."
+readyToOpen,"Готово к отмыканию."
+doorLocked,"Дверь теперь заперта."
+doorAlreadyLocked,"Дверь уже заперта."
+openFailed,"Замок слишком крепок."
+noSpellbook,"У вас нет книги заклинаний!"
+sunlightDamageFastTravelDay,"Днём нельзя начать быстрое перемещение."
+trapActive,"Ловушка активна."
+trapHumanoid,"Ловушка не сработает на людях."
+trapSuccess,"Душа поймана."
+trapFail,"Ловушка не сработала."
+trapNoneEmpty,"У вас нет пустых ловушек для душ!"
+stamina,"Выносливость"
+orcStrength,"Сила орка"
+healing,"Восстановление здоровья (5 + 9 за уровень)"
+restorePower,"Восстановление магии (5 + 4 за уровень)"
+resistFire,"Сопротивление огню"
+resistFrost,"Сопротивление холоду"
+resistShock,"Сопротивление электричеству"
+cureDisease,"Лечение болезни"
+slowFalling,"Замедленное падение"
+healTrue,"Истинное здоровье (5 + 19 за уровень)"
+levitation,"Левитация"
+resistPoison,"Сопротивление яду"
+curePoison,"Лечение отравления"
+chameleonForm,"Хамелеон"
+shadowForm,"Тень"
+purification,"Очищение"
+LeatherCuirass,"Кожаный нагрудник"
+LeatherGauntlets,"Кожаные перчатки"
+LeatherGreaves,"Кожаные поножи"
+LeatherLeftPauldron,"Кожаное наплечье (левое)"
+LeatherRightPauldron,"Кожаное наплечье (правое)"
+LeatherHelm,"Кожаный шлем"
+LeatherBoots,"Кожаные сапоги"
+ChainCuirass,"Кольчужный нагрудник"
+ChainGauntlets,"Кольчужные перчатки"
+ChainGreaves,"Кольчужные поножи"
+ChainLeftPauldron,"Кольчужное наплечье (левое)"
+ChainRightPauldron,"Кольчужное наплечье (правое)"
+ChainHelm,"Кольчужный шлем"
+ChainBoots,"Кольчужные сапоги"
+SteelCuirass,"Стальной нагрудник"
+SteelGauntlets,"Стальные перчатки"
+SteelGreaves,"Стальные поножи"
+SteelLeftPauldron,"Стальное наплечье (левое)"
+SteelRightPauldron,"Стальное наплечье (правое)"
+SteelHelm,"Стальной шлем"
+SteelBoots,"Стальные сапоги"
+SteelBuckler,"Стальной баклер"
+SteelDagger,"Стальной кинжал"
+SteelLongsword,"Стальной длинный меч"
+SteelStaff,"Стальной посох"
+ShortBow,"Короткий лук"
+Arrows,"Стрелы"
+SteelBattleAxe,"Стальной боевой топор"
+Robes,"Одеяние"
+CastWhenUsed,"Срабатывает при использовании:"
+CastWhenHeld,"Срабатывает при ношении:"
+CastWhenStrikes,"Срабатывает при ударе:"
+ExtraSpellPts,"Доп. очки маны"
+PotentVs,"Особо сильно против"
+RegensHealth,"Восстанавливает здоровье"
+VampiricEffect,"Вампирический эффект"
+IncreasedWeightAllowance,"Повышенный переносимый вес"
+RepairsObjects,"Чинит предметы"
+AbsorbsSpells,"Поглощает заклинания"
+EnhancesSkill,"Повышает навык"
+FeatherWeight,"Невесомость"
+StrengthensArmor,"Укрепляет броню"
+ImprovesTalents,"Улучшает таланты"
+GoodRepWith,"Хорошая репутация у"
+SoulBound,"Привязано к душе"
+ItemDeteriorates,"Предмет портится"
+UserTakesDamage,"Владелец получает урон"
+VisionProblems,"Проблемы со зрением"
+WalkingProblems,"Проблемы с походкой"
+LowDamageVs,"Малый урон по"
+HealthLeech,"Пьёт здоровье"
+BadReactionsFrom,"Плохие реакции у"
+ExtraWeight,"Лишний вес"
+WeakensArmor,"Ослабляет броню"
+BadRepWith,"Плохая репутация у"
+inHolyPlaces,"в святых местах"
+wheneverUsed,"при каждом использовании"
+unlessUsedDaily,"если не использовать ежедневно"
+unlessUsedWeekly,"если не использовать еженедельно"
+fromHumanoids,"от людей"
+fromAnimals,"от животных"
+fromDaedra,"от даэдров"
+duringWinter,"зимой"
+duringSpring,"весной"
+duringSummer,"летом"
+duringFall,"осенью"
+duringFullMoon,"в полнолуние"
+duringHalfMoon,"в полумесяце"
+duringNewMoon,"в новолуние"
+nearUndead,"рядом с нежитью"
+nearDaedra,"рядом с даэдрами"
+nearHumanoids,"рядом с людьми"
+nearAnimals,"рядом с животными"
+undeadLower,"нежить"
+humanoidLower,"люди"
+animalsLower,"животные"
+animalsUpper,"Животные"
+allTheTime,"постоянно"
+inSunlight,"на солнце"
+inDarknessLower,"в темноте"
+atRange,"на расстоянии"
+whenStrikes,"при ударе"
+add25Percent,"+25%"
+add50Percent,"+50%"
+hearing,"слух"
+athleticismLower,"атлетичность"
+adrenalineRushLower,"выброс адреналина"
+commoners,"Простолюдины"
+merchants,"Купцы"
+scholars,"Учёные"
+nobility,"Дворянство"
+underworld,"Подземный мир"
+all,"Все"
+noRoomInItem,"В предмете нет места..."
+noEnchantments,"Вы не подготовили зачарования для этого предмета."
+noMonstersNearby,"Поблизости нет монстров."
+Fire,"Огонь"
+Frost,"Мороз"
+Poison,"Яд"
+Shock,"Электричество"
+Magicka,"Мана"
+Animal,"Животное"
+Undead,"Нежить"
+Humanoid,"Люди"
+Daedra,"Даэдры"
+dialogButtonInfo,"Переключение между: активные задания; завершённые задания; заметки; сообщения"
+activeQuests,"Активные задания"
+activeQuestsInfo,"Нажмите на активное задание с местом назначения, чтобы отправиться туда."
+finishedQuests,"Завершённые задания"
+finishedQuestsInfo,"Нажмите на запись, чтобы переместить её. Правый щелчок — удалить."
+notebook,"Заметки"
+notebookInfo,"Нажмите на заметку, чтобы переместить её. Правый щелчок — удалить. Щелчок между заметками добавляет новую."
+messages,"Сообщения"
+messagesInfo,"История сообщений, недавно показанных на экране"
+confirmMoveHead,"Переместить запись"
+confirmMove,"Изменить положение этой записи?"
+confirmMove2,"(Она встанет перед следующей выбранной записью)"
+confirmRemoveHead,"Удалить запись"
+confirmRemove,"Удалить эту запись?"
+confirmRemove2,"(Она будет удалена навсегда, восстановить её нельзя)"
+confirmFindHead,"Путешествие"
+confirmFind,"Открыть карту мира и отправиться в:"
+confirmFind2,"(Путешествие можно отменить на карте мира)"
+enterNote,"Введите вашу запись:"
+completedQuest,"завершено"
+endedQuest,"окончено"
+finishQuestHeader,"{0} {1} в {2}:"
+quest,"Задание"
+noteHeader,"{0} в {1}:"
+houseDeed,"Вы получили документ и теперь владеете домом в %town области %region."
+levelProgress,"Прогресс до следующего уровня: {0}%"
+readMap,"Вы открыли для себя местонахождение %map, изучив карту."
+readMapTG,"Воры Гильдии воров раскрыли строго охраняемое местоположение сокровищника по имени %map."
+readMapDB,"Тёмное Братство раскрыло тайну богатых склепов в месте, именуемом %map."
+readMapFail,"Вы уже открыли для себя местоположение, указанное этой картой."
+howManyItems,"Выберите количество предметов (не больше {0})?"
+wagonFullGold,"Ваша повозка вместила только {0} золотых."
+itemsIdentified,"Предметы опознаны."
+repairDone,"ГОТОВО"
+repairDays,"%d дн."
+interruptRepair,"Забрать предмет до окончания ремонта?"
+repairNote,"Оставил свой {0} на ремонт в {1}."
+doesntNeedIdentify,"Это не нуждается в опознании."
+goldAmount,"{0} зол."
+goldWeight,"Вес: {0} кг"
+letterOfCredit,"Вам расплатились векселем."
+stealSuccess,"У вас получилось."
+stealFailure,"Не получилось..."
+cannotRemoveItem,"Вы не можете убрать этот предмет."
+cannotCarryAnymore,"Вы больше ничего не можете унести."
+cannotHoldAnymore,"Ваша повозка больше ничего не вместит."
+cannotUseThis,"Вы не можете это использовать."
+equippingWeapon,"Берётся в руки: %s"
+lightDouse,"Вы гасите %it."
+lightLight,"Вы разжигаете %it."
+lightDies,"%it мерцает и гаснет."
+lightEmpty,"%it: топливо закончилось."
+lightRefuel,"Вы заправляете %it бутылкой масла."
+lightFull,"%it полон."
+kgSrc,"килограммов"
+kgRep,"кг"
+damSrc,"очков урона"
+damRep,"урона"
+arSrc,"класс брони"
+arRep,"брони"
+northern,"(северная)"
+southern,"(южная)"
+noWagon,"У вас нет повозки."
+exitTooFar,"Выход слишком далеко, чтобы добраться до повозки."
+bookUnavailable,"Книга испорчена и теперь нечитаема."
+unknownAuthor,"неизвестный автор"
+cannotDeleteVamp,"Нельзя удалить особые заклинания вампиров."
+cannotDeleteWere,"Нельзя удалить особое заклинание ликантропии."
+noRecipes,"У вас нет рецептов."
+potionMixed,"Ваше зелье смешано."
+potionFailed,"Эти ингредиенты не дали действенного зелья."
+reqIngredients,"У вас нет нужных ингредиентов."
+region,"Область"
+account,"Счёт"
+loan,"Заём"
+dueDate,"Срок платежа по займу"
+noAccount,"Нет"
+loanReminder,"У вас заём в {0} золотых, срок платежа"
+loanReminder2,"менее чем через {0} месяцев в {1}"
+classicIcons,"Классические"
+suggestedIcons,"Предлагаемые"
+serviceMembersOnly,"Мои услуги только для членов гильдии."
+serviceDonateHowMuch,"Пожертвуйте сколько: "
+curedDisease,"Вы выздоровели."
+freeHolidayCuring,"Сегодня праздник, поэтому вы выздоровели бесплатно."
+gettingQuests1,"Хм, посмотрю, какие задания у нас есть."
+gettingQuests2,"Подождите здесь немного, %pcf."
+illegalRestWarning,"Разбивать лагерь в городе или рядом с ним запрещено. Продолжить?"
+cannotLoiterMoreThanXHours1,"Вы не можете бездельничать более"
+cannotLoiterMoreThanXHours2,"{0} часов подряд."
+automapToolTipTextGridButton,"левая кнопка: переключение между 2D-видом сверху и 3D-видом (горячая клавиша: {0})\rправая кнопка: сброс оси вращения к позиции игрока (горячая клавиша: {1})\rколесо мыши вверх над кнопкой: увеличить перспективу (только в 3D)\rколесо мыши вниз над кнопкой: уменьшить перспективу (только в 3D)"
+automapToolTipForwardButton,"левая кнопка: сдвинуть точку обзора вперёд (горячая клавиша: {0})\rправая кнопка: сдвинуть ось вращения вперёд (горячая клавиша: {1})"
+automapToolTipBackwardButton,"левая кнопка: сдвинуть точку обзора назад (горячая клавиша: {0})\rправая кнопка: сдвинуть ось вращения назад (горячая клавиша: {1})"
+automapToolTipLeftButton,"левая кнопка: сдвинуть точку обзора влево (горячая клавиша: {0})\rправая кнопка: сдвинуть ось вращения влево (горячая клавиша: {1})"
+automapToolTipRightButton,"левая кнопка: сдвинуть точку обзора вправо (горячая клавиша: {0})\rправая кнопка: сдвинуть ось вращения вправо (горячая клавиша: {1})"
+automapToolTipRotateLeftButton,"левая кнопка: повернуть подземелье влево (горячая клавиша: {0})\rправая кнопка: повернуть камеру влево (горячая клавиша: {1})"
+automapToolTipRotateRightButton,"левая кнопка: повернуть подземелье вправо (горячая клавиша: {0})\rправая кнопка: повернуть камеру вправо (горячая клавиша: {1})"
+automapToolTipUpstairsButton,"левая кнопка: поднять точку обзора (горячая клавиша: {0})\rправая кнопка: поднять уровень среза (горячая клавиша: {1})\rуровень среза также можно менять, удерживая среднюю кнопку мыши\r\rподсказка: разные режимы отрисовки показывают скрытую геометрию:\rгорячая клавиша {2}: режим выреза\rгорячая клавиша {3}: каркасный режим\rгорячая клавиша {4}: прозрачный режим\rпереключение режимов клавишей Enter\r"
+automapToolTipDownstairsButton,"левая кнопка: опустить точку обзора (горячая клавиша: {0})\rправая кнопка: опустить уровень среза (горячая клавиша: {1})\rуровень среза также можно менять, удерживая среднюю кнопку мыши\r\rподсказка: разные режимы отрисовки показывают скрытую геометрию:\rгорячая клавиша {2}: режим выреза\rгорячая клавиша {3}: каркасный режим\rгорячая клавиша {4}: прозрачный режим\rпереключение режимов клавишей Enter\r"
+automapToolTipPanelCompass,"левая кнопка: переключить фокус (горячая клавиша: {0})\rмаяки: красный ... игрок, зелёный ... вход, синий ... ось вращения\r\rправая кнопка: сбросить вид (горячая клавиша: {1})\rдвойной щелчок левой кнопкой по окну — создать или изменить заметку к метке\rdвойной щелчок левой кнопкой по окну с клавишей Ctrl — создать метку\rdвойной щелчок левой кнопкой по метке — добавить или изменить заметку\rdвойной щелчок правой кнопкой по метке — удалить её\rdвойной щелчок правой кнопкой по окну — задать ось вращения\rdвойной щелчок средней кнопкой по окну — центрировать вид\rdвойной щелчок левой кнопкой по открытой метке портала — перейти к связанному порталу телепортера"
+automapPlayerPositionBeacon,"маяк позиции игрока"
+automapRotationPivotAxis,"ось вращения"
+automapEntranceExitPositionBeacon,"маяк входа и выхода"
+automapEntranceExit,"вход и выход"
+automapPlayerMarker,"метка игрока"
+automapTeleporterEntrance,"телепортер (вход)"
+automapTeleporterExit,"телепортер (выход)"
+exteriorAutomapBuildingTypeAlchemist,"Алхимик"
+exteriorAutomapBuildingTypeArmorer,"Бронейщик"
+exteriorAutomapBuildingTypeBank,"Банк"
+exteriorAutomapBuildingTypeBookseller,"Книжный магазин"
+exteriorAutomapBuildingTypeClothingStore,"Магазин одежды"
+exteriorAutomapBuildingTypeFurnitureStore,"Магазин мебели"
+exteriorAutomapBuildingTypeGemStore,"Магазин самоцветов"
+exteriorAutomapBuildingTypeGeneralStore,"Универмаг"
+exteriorAutomapBuildingTypeGuildHall,"Гильдия"
+exteriorAutomapBuildingTypeHouseForSale,"Дом на продажу"
+exteriorAutomapBuildingTypeLibrary,"Библиотека"
+exteriorAutomapBuildingTypePalace,"Дворец"
+exteriorAutomapBuildingTypePawnShop,"Ломбард"
+exteriorAutomapBuildingTypeTavern,"Таверна"
+exteriorAutomapBuildingTypeTemple,"Храм"
+exteriorAutomapBuildingTypeWeaponSmith,"Кузнец"
+exteriorAutomapBuildingTypeUnknown,"Неизвестно"
+exteriorAutomapToolTipTextGridButton,"левая кнопка: переключить режим отображения (горячая клавиша: {0})\rдоступные режимы отображения:\r- исходный (горячая клавиша {1})\r- дополнительный: включает лишние здания (горячая клавиша {2})\r- все: включает лишние здания и наземные постройки (горячая клавиша {3})\rсменить фоновую текстуру клавишами {4}, {5}, {6}, {7}"
+exteriorAutomapToolTipForwardButton,"левая кнопка: сдвинуть вверх (горячая клавиша: {0})\rправая кнопка: перейти к северной границе области (горячая клавиша: {1})"
+exteriorAutomapToolTipBackwardButton,"левая кнопка: сдвинуть вниз (горячая клавиша: {0})\rправая кнопка: перейти к южной границе области (горячая клавиша: {1})"
+exteriorAutomapToolTipLeftButton,"левая кнопка: сдвинуть влево (горячая клавиша: {0})\rправая кнопка: перейти к западной границе области (горячая клавиша: {1})"
+exteriorAutomapToolTipRightButton,"левая кнопка: сдвинуть вправо (горячая клавиша: {0})\rправая кнопка: перейти к восточной границе области (горячая клавиша: {1})"
+exteriorAutomapToolTipRotateLeftButton,"левая кнопка: повернуть карту влево (горячая клавиша: {0})\rправая кнопка: повернуть карту вокруг позиции игрока\rвлево (горячая клавиша: {1})"
+exteriorAutomapToolTipRotateRightButton,"левая кнопка: повернуть карту вправо (горячая клавиша: {0})\rправая кнопка: повернуть карту вокруг позиции игрока\rвправо (горячая клавиша: {1})"
+exteriorAutomapToolTipUpstairsButton,"левая кнопка: приблизить (горячая клавиша: {0})\rправая кнопка: максимальное приближение"
+exteriorAutomapToolTipDownstairsButton,"левая кнопка: отдалить (горячая клавиша: {0})\rправая кнопка: максимальное отдаление"
+exteriorAutomapToolTipPanelCompass,"левая кнопка: навестись на позицию игрока (горячая клавиша: {0})\rправая кнопка: сбросить вид (горячая клавиша: {1})"
+loading,"Подождите..."
+classicSave,"Классический"
+cancel,"Отмена"
+renameSave,"Переименовать"
+deleteSave,"Удалить"
+switchChar,"Сменить персонажа"
+savePrompt,"Сохранить игру"
+loadPrompt,"Загрузить игру"
+saveButton,"Сохранить"
+loadButton,"Загрузка"
+enterSaveName,"Введите название сохранения"
+selectSaveName,"Выберите сохранение"
+confirmDeleteSave,"Вы уверены, что хотите удалить сохранение?"
+confirmOverwriteSave,"Перезаписать это сохранение?"
+youMustEnterASaveName,"Введите название сохранения."
+youMustSelectASaveName,"Выберите сохранение."
+noSavesFound,"Сохранений не найдено. Загрузить классическое сохранение?"
+cannotSaveNow,"Сейчас нельзя сохранить."
+addEffect,"Добавить эффект"
+buySpell,"Купить заклинание"
+newSpell,"Новое заклинание"
+exit,"Выход"
+casterOnly,"Только заклинатель"
+byTouch,"Касанием"
+singleTargetAtRange,"Одиночная цель на расстоянии"
+areaAroundCaster,"Область вокруг заклинателя"
+areaAtRange,"Область на расстоянии"
+fireBased,"На основе огня"
+coldBased,"На основе холода"
+poisonBased,"На основе яда"
+shockBased,"На основе электричества"
+magicBased,"На основе магии"
+selectIcon,"Выбрать иконку"
+nextIcon,"Следующая иконка"
+previousIcon,"Предыдущая иконка"
+nameSpell,"Назвать заклинание"
+enterSpellName,"Введите название заклинания:"
+noEffectsError,"Вы должны добавить хотя бы один эффект в это заклинание."
+deleteSpell,"Вы хотите удалить это заклинание?"
+sortSpells,"Вы хотите отсортировать заклинания?"
+effectNotFoundError,"<эффект не найден>"
+noItemToActivate,"У вас нет пригодного магического предмета"
+Akatosh,"Акатош"
+Arkay,"Аркей"
+Dibella,"Дибелла"
+Julianos,"Джулианос"
+Kynareth,"Кинарет"
+Mara,"Мара"
+Stendarr,"Стендарр"
+Zenithar,"Зенитар"
+removeKeybind,"Вы уверены, что хотите убрать привязку для {0} ('{1}')?"
+nord,"Норд"
+settingsNotApplied,"Обратите внимание: некоторые изменения вступят в силу только после перезапуска игры."
+doneButton,"Готово"
+temple,"храм"
+unknownPowers,"Неизвестные силы"
+cannotBeRepaired,"Это нельзя починить."
+youNeverAwaken,"Вы так и не проснётесь."
+modSettings,"Настройки мода"
+gameEffectsSettings,"Настройки эффектов"
+antialiasing,"Сглаживание"
+ambientOcclusion,"Затенение"
+bloom,"Свечение"
+motionBlur,"Размытие движения"
+vignette,"Виньетка"
+depthOfField,"Глубина резкости"
+antialiasingTip,"Делает изображение более гладким"
+enable,"Включить"
+fxaa,"FXAA"
+smaa,"SMAA"
+taa,"TAA"
+none,"Нет"
+method,"Метод"
+fxaaFastMode,"Быстрый режим FXAA"
+low,"Низкое"
+medium,"Среднее"
+high,"Высокое"
+smaaQuality,"Качество SMAA"
+taaSharpness,"Резкость TAA"
+disabled,"Отключено"
+setPageDefaults,"Сбросить настройки страницы"
+ambientOcclusionTip,"Затемняет складки и отверстия"
+scalableAmbientObscurance,"Масштабируемое мягкое затемнение"
+multiScaleVolumetricObscurance,"Многоуровневое объёмное затемнение"
+scalableAmbient,"Масштабируемое мягкое"
+multiScaleVolumetric,"Многоуровневое объёмное"
+intensity,"Интенсивность"
+lowest,"Минимальное"
+ultra,"Ультра"
+radius,"Радиус"
+quality,"Качество"
+thickness,"Толщина"
+bloomTip,"Заставить яркие области светиться"
+threshold,"Порог"
+diffusion,"Рассеивание"
+bloomFastMode,"Быстрый режим свечения"
+motionBlurTip,"Имитирует движение объектов быстрее выдержки камеры"
+shutterAngle,"Угол затвора"
+sampleCount,"Число выборок"
+vignetteTip,"Затемнять к краям экрана"
+smoothness,"Плавность"
+roundness,"Округлённость"
+rounded,"Скруглённый"
+depthOfFieldTip,"Имитирует фокусировку объектива камеры"
+focusDistance,"Расстояние фокусировки"
+aperture,"Диафрагма"
+focalLength,"Фокусное расстояние объектива"
+maxBlurSize,"Максимальный размер размытия"
+small,"Малое"
+large,"Большое"
+veryLarge,"Очень большое"
+ditherTip,"Добавлять шум, чтобы убрать крупные узоры вроде полос градиента"
+dither,"Дизеринг"
+colorBoost,"Усиление цвета"
+colorBoostTip,"Осветляет цвета вблизи камеры"
+dungeonScale,"Масштаб подземелий"
+interiorScale,"Масштаб помещений"
+exteriorScale,"Масштаб внешнего мира"
+dungeonFalloff,"Затухание в подземельях"
+retroMode,"Ретрорежим"
+retroModeTip,"Отрисовывает мир в меньшем разрешении"
+mode,"Режим"
+retroModeOff,"Выкл."
+retroMode320x200,"320x200"
+retroMode640x400,"640x400"
+off,"Выкл."
+posterizationFull,"Постеризация (полная)"
+posterizationMinusSky,"Постеризация (без неба)"
+palettizationFull,"Палитра (полная)"
+palettizationMinusSky,"Палитра (без неба)"
+postProcess,"Постобработка"
+retroModeAspectCorrection,"Коррекция соотношения сторон"
+FourThree,"4:3"
+SixteenTen,"16:10"
+notEnoughSpellpointsLeft,"У вас не хватает маны."
+totalIdentified,"Опознано {0} из {1}."
+dispelMagicSuccess,"Изгнание магии удалось..."
+dispelMagicFailed,"Изгнать магию не удалось..."
+smallerDungeonsChanged,"Пока вы были внутри, подземелье изменило размер. Игрок перенесён к выходу."
+youNote,"Вы записали:"
+customName,"Своё имя:"
+ocean,"Океан"
+unknownUpper,"Неизвестно"
+switchToRegion,"Перейти в регион: {0}"
+locationInRegionProvince,"{0} в провинции {1}"
+dayNames,"Сундас
+Морндас
+Тирдас
+Миддас
+Турдас
+Фредас
+Лоредас"
+monthNames,"Утренняя звезда
+Рассвет солнца
+Первое семя
+Дождливая длань
+Второе семя
+Середина года
+Высота солнца
+Последнее семя
+Очаг
+Первый иней
+Закат солнца
+Вечерняя звезда"
+birthSignNames,"Ритуал
+Влюблённый
+Повелитель
+Маг
+Тень
+Конь
+Ученик
+Воин
+Леди
+Башня
+Атронах
+Вор"
+seasonNames,"Осень
+Весна
+Лето
+Зима"
+longDateTimeFormatString,"{0:00}:{1:00}:{2:00} в {3}, {4}{5} г. {6:00}, 3E{7}"
+dateTimeFormatString,"{0:00}:{1:00}:{2:00} в {3}{4} г. {5:00}, 3E{6}"
+dateFormatString,"{0}, {1} {3:00}"
+longWeaponNameFormatString,"{1} ({0})"
+longArmorNameFormatString,"{1} ({0})"
+strRatings,"жалкий
+хилый
+слабый
+ниже среднего
+средний
+довольно сильный
+атлетичный
+очень сильный
+мощный
+сверхчеловеческий"
+intRatings,"как овощ
+идиотский
+полудурашкий
+туповатый
+средний
+хитрый
+довольно сообразительный
+очень умный
+блестящий
+гений"
+wilRatings,"нелепый
+покорный
+пассивный
+рассеянный
+нерешительный
+устойчивый
+уверенный
+волевой
+очень сосредоточенный
+просветлённый"
+agiRatings,"вульгарный\r
+сбитый с толку\r
+неловкий\r
+неуклюжий\r
+средний\r
+живой\r
+ловкий\r
+искусный\r
+очень подвижный\r
+акробатический\r"
+endRatings,"хилый
+жалкий
+неустойчивый
+капризный
+средний
+выше среднего
+очень здоровый
+крепкий
+титанический
+бессмертный"
+perRatings,"отвратительный
+непопулярный
+безымянный
+скромный
+непримечательный
+интересный
+обаятельный
+притягательный
+авторитетный
+харизматичный"
+spdRatings,"неактивный
+вялый
+очень медленный
+медленный
+средний
+выше среднего
+быстрый
+скороходный
+мгновенный
+метеорный"
+lucRatings,"проклятый
+безнадёжный
+несчастливый
+неудачливый
+средний
+довольно везучий
+везучий
+удачливый
+очень благоприятный
+благословлённый судьбой"
+Mage,"Маг"
+Spellsword,"Магический клинок"
+Battlemage,"Боевой маг"
+Sorcerer,"Чародей"
+Healer,"Целитель"
+Nightblade,"Ночной клинок"
+Bard,"Бард"
+Burglar,"Взломщик"
+Rogue,"Разбойник"
+Acrobat,"Акробат"
+Thief,"Вор"
+Assassin,"Убийца"
+Monk,"Монах"
+Archer,"Лучник"
+Ranger,"Следопыт"
+Barbarian,"Варвар"
+Warrior,"Воин"
+Knight,"Рыцарь"
+Custom,"Свой"
+darkBrotherhoodRanks,"Ученик
+Подмастерье
+Оператор
+Убийца
+Палач
+Каратель
+Терминатор
+Наёмный убийца
+Тёмный брат
+Мастер-убийца"
+fightersRanks,"Ученик
+Подмастерье
+Мечник
+Защитник
+Оборонец
+Страж
+Хранитель
+Чемпион
+Воин
+Мастер"
+knightlyOrderRanks,"Претендент
+Паж
+Доблестный
+Шевалье
+Смотритель
+Брат-рыцарь
+Командир
+Маршал
+Сенешаль
+Паладин"
+magesRanks,"Ученик
+Подмастерье
+Призыватель
+Заклинатель
+Маг
+Чародей
+Колдун
+Волшебник
+Мастер-волшебник
+Архимаг"
+templeRanks,"Новичок
+Послушник
+Служитель
+Искусный
+Кюстер
+Ученик
+Брат
+Прорицатель
+Мастер
+Патриарх"
+thievesRanks,"Ученик
+Подмастерье
+Карманник
+Жулик
+Грабитель
+Бандит
+Вор
+Вожак
+Вдохновитель
+Мастер воров"
+darkSister,"Тёмная сестра"
+nonMember,"не член"
+knightSister,"Сестра-рыцарь"
+matriarch,"Матриарх"
+sister,"Сестра"
+daedricSkill,"Даэдрический язык"
+orcishSkill,"Орочий язык"
+hthDamageFormatString,"{0}: урон {1}-{2}"
+affiliationFormatString,"{0} (реп.:{1})"
+answers_5404,"лук\r
+стрела из лука\r
+арбалет\r
+луки\r
+арбалеты"
+answers_5406,"один\r
+1"
+answers_5423,"покровитель\r
+благодетель"
+answers_5424,"заткнись\r
+заткнись\r
+замолчи"
+answers_5464,"да\r
+ок\r
+я согласен\r
+д\r
+согласен\r
+готово\r
+хорошо\r
+ладно\r
+разумеется\r
+ага"
+random,"Случайно"
+confirmDefaultControls,"Вы уверены, что хотите вернуть управление по умолчанию?"
+saveLoadPromptFormat,"{0} для «{1}»"

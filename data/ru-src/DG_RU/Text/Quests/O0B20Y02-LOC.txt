@@ -1,0 +1,58 @@
+Quest: O0B20Y02
+DisplayName: Ценная вещь
+
+QRC:
+
+QuestorOffer:  [1000]
+<ce>                       Потише. Моё
+<ce>                      имя... э-э, просто зови
+<ce>                           меня _qgiver_. У меня есть
+<ce>                      гильдейская работа для тебя. Обычная
+<ce>                        оплата. Пока интересно?
+
+RefuseQuest:  [1001]
+<ce>                      Хорошо, что я не сказал тебе
+<ce>                     никаких подробностей. А теперь проваливай.
+
+AcceptQuest:  [1002]
+<ce>                         Тебе надо украсть
+<ce>                       _magicitem_ из _mansion_
+<ce>                           в «__mansion_». У тебя
+<ce>                     есть =traveltime_ дней, иначе
+<ce>                       сделка отменяется. Я говорил,
+<ce>                       что место охраняется?
+<ce>                      Клянусь, говорил.
+
+QuestComplete:  [1004]
+<ce>                     Товар добыл? А! Отлично.
+<ce>                      Обычная плата за эту работу —
+<ce>                    _gold_ золотых. Не спускай всё
+<ce>                          в одном месте.
+
+RumorsDuringQuest:  [1005]
+В _mansion_ в «__mansion_» хранится богатая коллекция магических диковин.
+
+RumorsPostfailure:  [1006]
+_magicitem_ перевезли из _mansion_ из соображений безопасности.
+
+RumorsPostsuccess:  [1007]
+_magicitem_ украли из _mansion_. Вот это скандал.
+
+QuestorPostsuccess:  [1008]
+Удивлён(а), что видишь меня, %pcf? Думал, я сбежал(а) с _magicitem_?
+
+QuestorPostfailure:  [1009]
+<ce>                  Они уже вывезли _magicitem_
+<ce>                       из _mansion_, %pcf. Иными
+<ce>                 словами, ты провалил(а) задание.
+<ce>                             Теперь уходи.
+
+QuestLogEntry:  [1010]
+%qdt:
+ _qgiver_, (или, как %g назвал(а) %g2-self)
+ из гильдии нанял(а) меня,
+ чтобы украсть _magicitem_ из
+ _mansion_ в «__mansion_».
+ У меня есть =traveltime_ дней, чтобы
+ вернуть её %g2 в «__qgiver_»
+ в «___qgiver_».

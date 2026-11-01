@@ -1,0 +1,75 @@
+Key,Value
+weaponSwingModes,"Обычный
+Нажатие
+Удержание"
+mouseLookSmoothingStrengths,"Нет
+Минимальная
+Низкая
+Средняя
+Высокая
+Максимальная"
+configureAdvancedControls,"Настроить расширенное управление"
+continueUpper,"ПРОДОЛЖИТЬ"
+mouseLookSmoothing,"Сглаживание движения мыши"
+mouseLookSensitivity,"Чувствительность мыши"
+invertLookY,"Инвертировать взгляд по вертикали"
+movementAcceleration,"Ускорение движения"
+weaponSwingMode,"Режим замаха"
+bowDrawback,"Луки — натяжение тетивы и отпускание"
+toggleSneak,"Переключить скрытность"
+mouseWeaponAttackThreshold,"Порог атаки мышью"
+Escape,"Выход"
+AutoRun,"Автобег"
+ToggleConsole,"Консоль"
+PrintScreen,"Скриншот"
+QuickSave,"Быстрое сохранение"
+QuickLoad,"Быстрая загрузка"
+close,"Закрыть"
+dungeonTextureModes,"Классический
+Климат
+Только климат
+Случайный
+Только случайный"
+cameraRecoilStrengths,"Выкл.
+Низкая (25%)
+Средняя (50%)
+Высокая (75%)
+Очень высокая (100%)"
+interactionModeIconModes,"Нет
+Минимальный
+Большой
+Классический
+Цветной
+Монохромный
+Классический прицел
+Цветной прицел"
+iconsPositioningSchemes,"Классическая
+Средняя
+Малая
+Малая слева
+Малая справа
+Малая вертикально слева
+Малая вертикально справа
+Малая горизонтально снизу"
+helmAndShieldMaterialDisplay,"Выкл.
+Без кожи и кольчуги
+Без кожи
+Вкл."
+qualitySettings,"Быстрейший
+Быстрый
+Простой
+Хороший
+Красивый
+Великолепный"
+filterModes,"Точечный
+Билинейный
+Трилинейный"
+shadowResolutionModes,"Низкое
+Среднее
+Высокое
+Очень высокое"
+textureArrayLabel,"Текстурные массивы: "
+unsupported,"Не поддерживается"
+enabled,"Вкл."
+disabled,"Выкл."
+textureArrayInfo,"Улучшенная реализация текстур рельефа: лучше производительность и больше возможностей для модов"

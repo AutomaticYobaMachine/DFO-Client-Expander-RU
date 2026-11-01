@@ -1,0 +1,59 @@
+Quest: O0B2XY10
+DisplayName: Драгоценное зелье
+
+QRC:
+
+QuestorOffer:  [1000]
+<ce>                           %pcn, меня зовут
+<ce>                        _qgiver_. У меня есть
+<ce>                         одно дельце с _potion_. Нужен
+<ce>                         кто-то, кто вытащит его
+<ce>                      для меня. Заплачу тебе _gold_ золотых
+<ce>                       за работу. Что скажешь?
+
+RefuseQuest:  [1001]
+<ce>                       Дай знать, когда захочешь
+<ce>                        взяться за настоящую работу, %pcn.
+
+AcceptQuest:  [1002]
+<ce>                          В лавке _alchemyshop_ в
+<ce>                        «__alchemyshop_» ты найдёшь
+<ce>                         _potion_. Возьми
+<ce>                        его и принеси мне
+<ce>                      за =traveltime_ дней, и я
+<ce>                        заплачу. Это не так уж
+<ce>                           сложно, верно?
+
+QuestComplete:  [1004]
+<ce>                         Неплохо, %pcn. Вот
+<ce>                           твои _gold_ золотых.
+
+RumorsDuringQuest:  [1005]
+В _alchemyshop_ есть лучшие ингредиенты в «__alchemyshop_».
+                                     <--->
+Нужна любая мелочь — иди в _alchemyshop_ в «__alchemyshop_».
+
+RumorsPostfailure:  [1006]
+В _alchemyshop_ было редкое _potion_, но теперь оно в надёжном месте.
+
+RumorsPostsuccess:  [1007]
+Кто-то прямо из _alchemyshop_ унёс бутылку _potion_. Какая наглость!
+
+QuestorPostsuccess:  [1008]
+Конечно, я тебя помню, %pcf. _potion_, верно?
+
+QuestorPostfailure:  [1009]
+<ce>                  Не говори. Ты дошёл до
+<ce>                      _alchemyshop_, нашёл
+<ce>                       _potion_ и случайно
+<ce>                    его выпил, верно? %oth, другой
+<ce>                         вор, да старая песня.
+
+QuestLogEntry:  [1010]
+%qdt:
+ _qgiver_, член Гильдии
+ воров из «___qgiver_», предложил мне работу:
+ украсть _potion_ из
+ _alchemyshop_ в
+ «__alchemyshop_». У меня
+ есть =traveltime_ дней, чтобы доставить её %g2.

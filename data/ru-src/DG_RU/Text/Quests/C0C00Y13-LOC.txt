@@ -1,0 +1,63 @@
+Quest: C0C00Y13
+DisplayName: Поручение
+
+QRC:
+
+QuestorOffer:  [1000]
+<ce>                       Благословение тебе, %pcn,
+<ce>                     хотя ты и язычник
+<ce>                        и не имеет отношения к нашему
+<ce>                         храму. Я _qgiver_.
+<ce>                      Значит, ты хочешь заслужить
+<ce>                         расположение «__qgiver_».
+<ce>                        Доставь этот _religitem_
+<ce>                          «___priest_» в течение
+<ce>                      =traveltime_ дней, и я смогу
+<ce>                           хорошо о тебе отозваться.
+
+RefuseQuest:  [1001]
+<ce>                     На свой страх. Больше
+<ce>                      не смей просить
+<ce>                            об услугах этого храма, %pcn.
+
+AcceptQuest:  [1002]
+<ce>                       Вот твой _religitem_.
+<ce>                          Отнеси его _priest_
+<ce>                      из «__priest_» в «___priest_».
+<ce>                     О, я почти забыл(а) упомянуть,
+<ce>                        что соперничающий храм может
+<ce>                      послать головорезов, чтобы остановить тебя.
+
+QuestComplete:  [1004]
+<ce>                       Благословение бога да будет с тобой,
+<ce>                         %pcn. Этот _religitem_
+<ce>                         крайне нужен здесь.
+
+RumorsDuringQuest:  [1005]
+Два храма состязаются за этот _religitem_.
+
+RumorsPostfailure:  [1006]
+_priest_ не получил(а) %g3 _religitem_, и _qgiver_ в гневе.
+
+RumorsPostsuccess:  [1007]
+_priest_ и «__qgiver_» благодаря отважному %ra смогли получить этот _religitem_.
+
+QuestorPostsuccess:  [1008]
+%god bless you, of course I remember %pcf. How are you, my child?
+
+QuestorPostfailure:  [1009]
+_priest_ так и не получил(а) _religitem_, и меня это не радует.
+
+QuestLogEntry:  [1010]
+%qdt:
+ _qgiver_ из «__qgiver_»
+ дал(а) мне поручение
+ доставить _religitem_
+ _priest_ в «__priest_» в
+ «___priest_». Его нужно доставить в течение =traveltime_ дней.
+
+Message:  1011
+<ce>                         Этот _religitem_
+<ce>                      никогда не достанется до «__priest_».
+<ce>                        Вместо этого я доставлю
+<ce>                            тебе твою голову!

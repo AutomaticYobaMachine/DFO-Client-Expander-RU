@@ -15,11 +15,12 @@ const { transformAsset, injectPage, EXPECTED } = require('./transforms.cjs');
 
 const VERSION = (() => { try { return JSON.parse(fs.readFileSync(path.join(__dirname, 'version.json'), 'utf8')).version; } catch { return '?'; } })();
 const DEFAULTS = Object.freeze({
-  enabled: true, ru: true, marks: true,
+  enabled: true, ru: true, marks: true, nearbyLoot: true,
+  nearbyLootOptions: { keyCode: 'KeyJ' },
   marksOptions: { onlyVisited: true, markRadiusM: 1200, nameRadiusM: 300, maxMarks: 60 },
 });
 const OWN = Object.freeze({   // served at dagger://game/dfo-mod/<name>
-  'dfo_marks.js': 'page/dfo_marks.js', 'dfo_town.js': 'page/dfo_town.js', 'ru_dict.js': 'page/ru_dict.js', 'ru_i18n.js': 'page/ru_i18n.js',
+  'dfo_loot.js': 'page/dfo_loot.js', 'dfo_marks.js': 'page/dfo_marks.js', 'dfo_town.js': 'page/dfo_town.js', 'ru_dict.js': 'page/ru_dict.js', 'ru_i18n.js': 'page/ru_i18n.js',
   'ru_locale.js': 'page/ru_locale.js', 'ru_items.js': 'page/ru_items.js',
 });
 /** The town map's cache, as the page keeps it (dfo_town.js): <userData>/dfo-mod-cache.json - readable JSON. */
@@ -56,8 +57,8 @@ function wrap(handleDagger, { app = null } = {}) {
     // the pack the game's language system reads, as the page lists it (ru_locale.js): its credits and its files
     let pack = null;
     if (ru) { try { pack = JSON.parse(fs.readFileSync(path.join(__dirname, 'ru-pack', 'index.json'), 'utf8')); } catch { pack = null; } }
-    ctx = { ru, marks: !!cfg.marks, fontB64, quests, ql,
-      pageCfg: { marks: { marks: !!cfg.marks, ...cfg.marksOptions }, ru: { on: ru, pack, gameLanguage: cfg.gameLanguage !== false } } };
+    ctx = { ru, marks: !!cfg.marks, nearbyLoot: cfg.nearbyLoot !== false, fontB64, quests, ql,
+      pageCfg: { nearbyLoot: { ...cfg.nearbyLootOptions, enabled: cfg.nearbyLoot !== false }, marks: { marks: !!cfg.marks, ...cfg.marksOptions }, ru: { on: ru, pack, gameLanguage: cfg.gameLanguage !== false } } };
     return ctx;
   };
   const cache = new Map();   // rel -> { key, text }
@@ -66,7 +67,7 @@ function wrap(handleDagger, { app = null } = {}) {
   let summaryTimer = null;
   /** Once the game's files have come (no new one for a few seconds): which expected hooks found no place at all. */
   const summary = () => {
-    const want = [...(ctx?.marks ? EXPECTED.marks : []), ...(ctx?.ru ? EXPECTED.ru : [])];
+    const want = [...(ctx?.nearbyLoot ? EXPECTED.nearbyLoot : []), ...(ctx?.marks ? EXPECTED.marks : []), ...(ctx?.ru ? EXPECTED.ru : [])];
     const lost = want.filter((id) => !(seenHooks.get(id) > 0));
     log(lost.length ? `NOT FOUND in this game version (these features are off): ${lost.join(', ')}` : `all ${want.length} expected hooks found`);
   };

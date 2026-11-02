@@ -9,13 +9,12 @@ DFO Online.
 
 ## Скачать готовую программу
 
-**[Скачать установщик EXE для Windows 10/11 x64](https://github.com/AutomaticYobaMachine/DFO-Client-Expander-RU/raw/refs/heads/main/releases/1.13.1/DFO-Client-Expander-RU-1.13.1.exe)**
+**[Скачать установщик EXE для Windows 10/11 x64](https://github.com/AutomaticYobaMachine/DFO-Client-Expander-RU/releases/download/v1.13.1/DFO-Client-Expander-RU-1.13.1.exe)**
 
-[EXE и ZIP в разделе Releases](https://github.com/AutomaticYobaMachine/DFO-Client-Expander-RU/releases/tag/v1.13.1)
-· [Все релизы](https://github.com/AutomaticYobaMachine/DFO-Client-Expander-RU/releases)
+[ZIP с программой, инструкцией и лицензиями](https://github.com/AutomaticYobaMachine/DFO-Client-Expander-RU/releases/download/v1.13.1/DFO-Client-Expander-RU-1.13.1.zip)
+· [Страница релиза](https://github.com/AutomaticYobaMachine/DFO-Client-Expander-RU/releases/tag/v1.13.1)
 
-Основная ссылка ведёт на проверенный EXE, сохранённый в самом репозитории;
-она доступна и без ожидания сборки GitHub Actions.
+EXE уже содержит все компоненты. В ZIP находятся только EXE, инструкция и лицензии.
 
 Сборка исходников, Go и отдельный Node.js игроку **не нужны**. Закройте игру,
 запустите установщик, укажите клиент DFO Online и выберите нужные функции.

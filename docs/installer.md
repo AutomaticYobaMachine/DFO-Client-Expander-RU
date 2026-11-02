@@ -6,7 +6,7 @@ DFO Online. Имя используется в окне, именах дистр
 
 ## Для игрока
 
-Готовый EXE можно [скачать напрямую](https://github.com/AutomaticYobaMachine/DFO-Client-Expander-RU/raw/refs/heads/main/releases/1.13.1/DFO-Client-Expander-RU-1.13.1.exe).
+Готовый EXE можно [скачать напрямую](https://github.com/AutomaticYobaMachine/DFO-Client-Expander-RU/releases/download/v1.13.1/DFO-Client-Expander-RU-1.13.1.exe).
 EXE и ZIP также публикуются в
 [GitHub Releases](https://github.com/AutomaticYobaMachine/DFO-Client-Expander-RU/releases/latest).
 Скачивайте файл с именем программы; стандартные архивы GitHub `Source code`

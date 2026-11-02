@@ -7,6 +7,20 @@ DFO Online.
 русификация, метки заведений, карта города, детектор лута и карточки данжей. Здесь хранятся исходники
 расширения, а не исходники самой игры.
 
+## Скачать готовую программу
+
+**[Скачать установщик EXE для Windows 10/11 x64](https://github.com/AutomaticYobaMachine/DFO-Client-Expander-RU/raw/refs/heads/main/releases/1.13.1/DFO-Client-Expander-RU-1.13.1.exe)**
+
+[EXE и ZIP в разделе Releases](https://github.com/AutomaticYobaMachine/DFO-Client-Expander-RU/releases/tag/v1.13.1)
+· [Все релизы](https://github.com/AutomaticYobaMachine/DFO-Client-Expander-RU/releases)
+
+Основная ссылка ведёт на проверенный EXE, сохранённый в самом репозитории;
+она доступна и без ожидания сборки GitHub Actions.
+
+Сборка исходников, Go и отдельный Node.js игроку **не нужны**. Закройте игру,
+запустите установщик, укажите клиент DFO Online и выберите нужные функции.
+В релизе скачивайте EXE или ZIP с названием программы; **Source code** — исходники.
+
 ## Родительский проект
 
 **Оригинал Daggerfall Online: <https://github.com/Lattymoy/daggerfall-js-source>.**

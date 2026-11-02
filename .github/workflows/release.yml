@@ -1,0 +1,94 @@
+name: Windows installer release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Existing release tag, for example v1.13.1'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ inputs.tag || github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
+    steps:
+      - name: Check out the release tag
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          ref: ${{ inputs.tag || github.ref }}
+          fetch-depth: 0
+
+      - name: Validate tag, version and release notes
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json, os, pathlib, re
+          version = json.loads(pathlib.Path('src/mod/version.json').read_text())['version']
+          tag = os.environ['RELEASE_TAG']
+          if not re.fullmatch(r'v[0-9]+\.[0-9]+\.[0-9]+', tag) or tag != 'v' + version:
+              raise SystemExit(f'Tag {tag!r} does not match version {version!r}')
+          notes = pathlib.Path('docs/releases') / (version + '.md')
+          if not notes.is_file():
+              raise SystemExit(f'Missing release notes: {notes}')
+          with open(os.environ['GITHUB_ENV'], 'a') as env:
+              env.write(f'RELEASE_VERSION={version}\n')
+          PY
+          test "$(git rev-parse HEAD)" = "$(git rev-parse "$RELEASE_TAG^{commit}")"
+
+      - name: Set up Go
+        uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
+        with:
+          go-version: '1.27.3'
+          cache: false
+
+      - name: Build the standalone Windows installer
+        run: sh tools/build.sh
+
+      - name: Check installer options and packaged install/uninstall
+        shell: bash
+        run: |
+          (cd src/gui && go test ./...)
+          node --test test/packaging.test.cjs
+          (cd dist && sha256sum --check "DFO-Client-Expander-RU-$RELEASE_VERSION.exe.sha256" \
+            "DFO-Client-Expander-RU-$RELEASE_VERSION.zip.sha256")
+
+      - name: Keep build artifacts
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: DFO-Client-Expander-RU-${{ env.RELEASE_VERSION }}-windows-x64
+          path: dist/DFO-Client-Expander-RU-${{ env.RELEASE_VERSION }}.*
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Publish EXE, ZIP and checksums to GitHub Releases
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          notes="docs/releases/$RELEASE_VERSION.md"
+          title="DFO-Client-Expander-RU $RELEASE_VERSION — Windows x64"
+          if ! gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            gh release create "$RELEASE_TAG" --verify-tag --draft --title "$title" --notes-file "$notes"
+          fi
+          gh release upload "$RELEASE_TAG" --clobber \
+            "dist/DFO-Client-Expander-RU-$RELEASE_VERSION.exe" \
+            "dist/DFO-Client-Expander-RU-$RELEASE_VERSION.zip" \
+            "dist/DFO-Client-Expander-RU-$RELEASE_VERSION.exe.sha256" \
+            "dist/DFO-Client-Expander-RU-$RELEASE_VERSION.zip.sha256"
+          gh release edit "$RELEASE_TAG" --draft=false --prerelease=false --latest \
+            --title "$title" --notes-file "$notes"
+

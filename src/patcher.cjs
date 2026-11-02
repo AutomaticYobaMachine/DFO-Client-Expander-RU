@@ -89,7 +89,7 @@ function hookMain(src) {
 }
 
 /** The mod's switches in <userData>/dfo-mod.json: made with the defaults where missing, then each `--set key=0|1`
- *  (ru, marks, onlyVisited) of the installer's window applied. */
+ *  of the installer's window applied, preserving independent feature settings. */
 function writeConfig(ud, withRu) {
   fs.mkdirSync(ud, { recursive: true });
   const file = path.join(ud, 'dfo-mod.json');
@@ -101,7 +101,7 @@ function writeConfig(ud, withRu) {
     const [k, v] = String(args[i + 1] ?? '').split('=');
     const on = v === '1' || v === 'true';
     if (k === 'ru') cfg.ru = on && withRu;
-    else if (k === 'marks') cfg.marks = on;
+    else if (k === 'marks' || k === 'nearbyLoot' || k === 'dungeons' || k === 'enabled') cfg[k] = on;
     else if (k === 'onlyVisited') cfg.marksOptions.onlyVisited = on;
   }
   if (!withRu) cfg.ru = false;
@@ -112,7 +112,8 @@ function writeConfig(ud, withRu) {
 function install() {
   const asarPath = findAsar();
   const ud = userDataDir();
-  say(`DFO Mod ${VERSION} - установка`);
+  say(`DFO-Client-Expander-RU ${VERSION} — установка`);
+  say('Автор: AutomaticYobaMachine. Создано специально для русского сообщества DFO Online.');
   say(`Игра:   ${path.dirname(path.dirname(asarPath))}`);
   if (gameRunning()) stop('DFO Online сейчас запущена. Закройте игру полностью и запустите установку снова.');
 
@@ -221,7 +222,7 @@ function install() {
 
 function uninstall() {
   const asarPath = findAsar();
-  say(`DFO Mod ${VERSION} - удаление`);
+  say(`DFO-Client-Expander-RU ${VERSION} — удаление`);
   if (gameRunning()) stop('DFO Online сейчас запущена. Закройте игру полностью и запустите удаление снова.');
   const ourBak = asarPath + BAK;
   const a = openAsar(asarPath);

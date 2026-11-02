@@ -87,3 +87,23 @@
   200 записей. Не сохранять игровые сущности, инвентарь или содержимое сундуков.
 - Тесты: test/dungeon-intel.test.cjs, test/dungeon-bridge.test.cjs (нужны
   DFO_UPSTREAM_DIR и DFO_BUILD_DIR) и tools/test-dungeons-browser.cjs.
+
+# Установщик (1.13.0)
+
+- Имя продукта — DFO-Client-Expander-RU, автор — AutomaticYobaMachine;
+  приписка — «Создано специально для русского сообщества DFO Online.».
+  Сохраняйте отдельное авторство переводов и их лицензии.
+- Нативное окно: src/gui/ui_windows.go и win32_windows.go; операции/поиск —
+  install_windows.go и discovery_windows.go. Каталог функций и аргументы
+  инъектора общие, в options.go. Не добавлять галочку без передачи её в --set.
+- Игрок получает самостоятельный EXE со встроенным payload. Генерация архива,
+  иконки/manifest/version resources и сборка выполняются tools/build.sh;
+  payload_windows.zip и resources_windows_amd64.syso не коммитятся.
+- Выбор ru/marks/nearbyLoot/dungeons независим; onlyVisited зависит от marks.
+  При установке enabled=1, остальные пользовательские настройки сохраняются.
+  Физический перевод оболочки исключать через --no-ru при снятой русификации.
+- Не вызывать Win32-функции изменения контролов из рабочих goroutine.
+  Ответ проверки старого пути/старой ревизии выбора не должен затирать новый.
+  Во время изменения ASAR нельзя закрывать окно или убивать дочерний процесс.
+- Тесты: go test ./... в src/gui, test/packaging.test.cjs и
+  tools/test-installer-ui.py (Wine/Xvfb, настоящий EXE, отдельный тестовый профиль).

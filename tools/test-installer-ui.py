@@ -120,6 +120,10 @@ def main():
         assert 'DFO-Client-Expander-RU' in s['Title']
         assert all(s['by_id'][i]['Checked'] == 1 for i in [103,104,105,106,107])
         assert all(len(s['by_id'][1000+i]['Title'])>100 for i in [103,104,105,106])
+        assert not any(c['Title']=='GitHub' for c in s['Controls'])
+        pane=s['by_id'][118]['Rect']
+        for i in [103,104,105,106]:
+            assert s['by_id'][i]['Rect']['Top']>=pane['Top'] and s['by_id'][1000+i]['Rect']['Bottom']<=pane['Bottom'], 'all four features and descriptions should fit the initial test screen'
         shot('installer-components.png')
 
         picker=subprocess.Popen([WINE,winpath(probe),'click','101'],env=env,stdout=log,stderr=log)

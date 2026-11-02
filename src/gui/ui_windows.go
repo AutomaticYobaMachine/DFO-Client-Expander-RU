@@ -90,7 +90,7 @@ func (a *app) createControls() {
 	for _, v := range []struct {
 		id    int
 		label string
-	}{{idSaveLog, "Сохранить журнал…"}, {idOpenLog, "Журнал игры"}, {idOpenReport, "Отчёт меток"}, {idRepo, "GitHub"}, {idReadme, "Инструкция"}, {idUninstall, "Удалить расширение"}, {idInstall, "Установить выбранное"}} {
+	}{{idSaveLog, "Сохранить журнал…"}, {idOpenLog, "Журнал игры"}, {idOpenReport, "Отчёт меток"}, {idReadme, "Инструкция"}, {idUninstall, "Удалить расширение"}, {idInstall, "Установить выбранное"}} {
 		a.button(v.id, v.label)
 	}
 	pSendMessageW.Call(a.ctl[idLog], emSetLimit, 1024*1024, 0)
@@ -191,8 +191,7 @@ func (a *app) layout() {
 	base := r.bottom - P(60)
 	move(a.ctl[idInstall], rect{r.right - P(276), base, r.right - P(24), base + P(42)})
 	move(a.ctl[idUninstall], rect{r.right - P(470), base, r.right - P(288), base + P(42)})
-	move(a.ctl[idRepo], rect{P(24), base + P(4), P(108), base + P(36)})
-	move(a.ctl[idReadme], rect{P(116), base + P(4), P(230), base + P(36)})
+	move(a.ctl[idReadme], rect{P(24), base + P(4), P(138), base + P(36)})
 	a.layoutRows()
 	invalidate(a.hwnd)
 }
@@ -631,8 +630,6 @@ func wndProc(hwnd uintptr, m uint32, wp, lp uintptr) uintptr {
 			a.openFile("dfo-mod.log")
 		case idOpenReport:
 			a.openFile("dfo-mod-marks.txt")
-		case idRepo:
-			pShellExecuteW.Call(hwnd, uintptr(unsafe.Pointer(u16("open"))), uintptr(unsafe.Pointer(u16(appRepo))), 0, 0, 1)
 		case idReadme:
 			a.openGuide()
 		case 2:
@@ -771,7 +768,7 @@ func main() {
 	if work.right == 0 {
 		work = rect{0, 0, a.px(1280), a.px(900)}
 	}
-	r := rect{0, 0, a.px(1000), a.px(900)}
+	r := rect{0, 0, a.px(1000), a.px(1040)}
 	pAdjustWindowRect.Call(uintptr(unsafe.Pointer(&r)), style, 0)
 	w, h := r.right-r.left, r.bottom-r.top
 	if w > work.right-work.left-a.px(40) {

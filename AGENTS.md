@@ -88,11 +88,14 @@
 - Тесты: test/dungeon-intel.test.cjs, test/dungeon-bridge.test.cjs (нужны
   DFO_UPSTREAM_DIR и DFO_BUILD_DIR) и tools/test-dungeons-browser.cjs.
 
-# Установщик (1.13.0)
+# Установщик (1.13.x)
 
 - Имя продукта — DFO-Client-Expander-RU, автор — AutomaticYobaMachine;
   приписка — «Создано специально для русского сообщества DFO Online.».
   Сохраняйте отдельное авторство переводов и их лицензии.
+- Кнопка перехода на GitHub убрана по запросу пользователя. Начальная высота
+  окна — 1040 логических пикселей с ограничением по рабочей области экрана;
+  на небольших экранах остаётся прокрутка списка.
 - Нативное окно: src/gui/ui_windows.go и win32_windows.go; операции/поиск —
   install_windows.go и discovery_windows.go. Каталог функций и аргументы
   инъектора общие, в options.go. Не добавлять галочку без передачи её в --set.

@@ -10,10 +10,9 @@ import (
 
 const (
 	appName      = "DFO-Client-Expander-RU"
-	appVersion   = "1.13.0"
+	appVersion   = "1.13.1"
 	appAuthor    = "AutomaticYobaMachine"
 	appCommunity = "Создано специально для русского сообщества DFO Online."
-	appRepo      = "https://github.com/AutomaticYobaMachine/DFO-Client-Expander-RU"
 )
 
 const (
@@ -32,7 +31,7 @@ const (
 	idSaveLog
 	idOpenLog
 	idOpenReport
-	idRepo
+	_ // Reserved: removed repository button; keep the remaining control IDs stable.
 	idPath
 	idPane
 	idReadme

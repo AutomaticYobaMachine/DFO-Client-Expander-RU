@@ -1,0 +1,106 @@
+'use strict';
+// Exercise the published Overworld HUD and its actual minified metadata with a small world host.
+const fs=require('node:fs'),path=require('node:path'),http=require('node:http'),os=require('node:os'),assert=require('node:assert/strict');
+const upstream=path.resolve(process.argv[2]||'/tmp/dfo-upstream'),dist=path.resolve(process.argv[3]||'/tmp/dfo-release-0.1.14512');
+const {chromium}=require(path.join(upstream,'node_modules/playwright')),{parse}=require(path.join(upstream,'node_modules/acorn'));
+const {transformAsset}=require('../src/mod/transforms.cjs'),{wrap}=require('../src/mod/hook.cjs');
+const userData=fs.mkdtempSync(path.join(os.tmpdir(),'dfo-dungeons-ui-')),handle=wrap(async()=>new Response('404',{status:404}),{app:{getPath:()=>userData}});
+const world=fs.readdirSync(path.join(dist,'assets')).find(f=>/^world-[^.]+\.js$/.test(f));assert(world);
+const raw=fs.readFileSync(path.join(dist,'assets',world),'utf8'),processed=transformAsset('assets/'+world,raw,{ru:false,marks:true,nearbyLoot:true,dungeons:true});
+assert(!processed.log.some(([id])=>id.startsWith('dungeon.')&&id.includes('!error')),JSON.stringify(processed.log));
+function declarations(source){const functions=[],pending=[parse(source,{ecmaVersion:'latest',sourceType:'module'})];
+ while(pending.length){const node=pending.pop();if(!node||typeof node!=='object')continue;if(node.type==='FunctionDeclaration')functions.push({name:node.id.name,text:source.slice(node.start,node.end)});for(const k of Object.keys(node)){const v=node[k];if(v&&typeof v==='object')Array.isArray(v)?pending.push(...v):pending.push(v)}}return functions;
+}
+const findIn=(functions,...parts)=>{const xs=functions.filter(f=>parts.every(p=>typeof p==='string'?f.text.includes(p):p.test(f.text))).sort((a,b)=>a.text.length-b.text.length);assert(xs.length,'native test seam: '+parts);return xs[0]};
+const functions=declarations(processed.text),find=(...parts)=>findIn(functions,...parts);
+const create=find('TV_PLACE_LIFT:','travelViewMarks:'),show=find('.back.onclick=','.onReturn?.('),update=find('.canvas?.ownerDocument?.defaultView','.marks','.route'),pick=find(/return [\w$]+\.key/,'.x0','.x1','.y0','.y1','return null'),mark=find('.startsWith(`bounty:`)','.startsWith(`spawn:`)');
+const guards=/\{if\(([\w$]+)\(\)\)\{([\w$]+)\(!1\);return\}if\(([\w$]+)\([\w$]+\)\)\{([\w$]+)\([\w$]+,[\w$]+\);return\}(?:if\()?([\w$]+)=null[,;]/.exec(mark.text);assert(guards,'native confirmation/attack guards');
+const markFactory=`const ${guards[1]}=()=>s.nativeConfirm,${guards[2]}=()=>s.nativeConfirm=false,${guards[3]}=()=>false,${guards[4]}=()=>{};let ${guards[5]}='queued';return{run:${mark.text},pending:()=>${guards[5]}}`;
+const worldModule=processed.text+`\nexport{${create.name} as fixtureCreate,${show.name} as fixtureShow,${update.name} as fixtureUpdate,${pick.name} as fixturePick};`;
+const viewFile=fs.readdirSync(path.join(dist,'assets')).find(f=>/^travelView-[^.]+\.js$/.test(f));assert(viewFile);
+const viewProcessed=transformAsset('assets/'+viewFile,fs.readFileSync(path.join(dist,'assets',viewFile),'utf8'),{ru:false,marks:true,nearbyLoot:true,dungeons:true});
+const viewFactory=findIn(declarations(viewProcessed.text),'pointerdown','pointerup','.onPick?.(','.actionsOf?.(');
+const viewModule=viewProcessed.text+`\nexport{${viewFactory.name} as fixtureView};`;
+const html=`<!doctype html><html><head><meta charset="utf-8"><style>body{margin:0;background:#17251f;color:#eee}canvas.game{position:fixed;inset:0;width:100vw;height:100vh}</style><script src="/dfo-mod/dfo_dungeon_model.js"></script><script src="/dfo-mod/dfo_dungeons.js"></script></head><body><canvas class="game"></canvas><script type="module">
+import {fixtureCreate,fixtureShow,fixtureUpdate,fixturePick} from '/assets/${world}';
+import {fixtureView} from '/assets/${viewFile}';
+const nativeMarkFactory=Function('s',${JSON.stringify(markFactory)});
+const loc=(id,name,type,extra={})=>({name,hasDungeon:true,regionIndex:1,regionName:'Daggerfall',locationIndex:0,mapTableData:{mapId:id,dungeonType:type,locationType:1},dungeon:{blocks:Array.from({length:24},(_,i)=>({x:i%6,z:Math.floor(i/6),blockName:i%4===0?'B0000000.RDB':'N0000000.RDB'})),recordElement:{header:{locationId:id,unknown2:0}}},...extra});
+const vampire=loc(12345,'Castle of Many Shadows',8),elite=loc(54321,'Volcanic Fortress',16,{elite:true,spawned:true}),unfound=loc(11111,'Hidden Spoiler',0);
+const state={present:true,canTravel:true,journeys:0,gameKeys:0,weaponMaterial:0,player:{level:25,skills:Array(35).fill(140),stats:{luck:70}},mode:'exterior',emptyLedger:false,ctx:null};
+const nativeHandler=nativeMarkFactory(state),nativeMark=nativeHandler.run;
+const view=fixtureView({win:window,canvas:document.querySelector('canvas.game'),feet:()=>[0,0,0],yaw:()=>0,headView:()=>({eye:[0,1.7,0],fwd:[0,0,1]}),allowed:()=>({ok:true}),windowUp:()=>false,danger:()=>state.danger,actionsOf:e=>e.key==='Escape'?['Escape']:[],schedule:()=>null,cancel:()=>{},hud:{show:fixtureShow,hide:()=>{},pickAt:fixturePick},onMark:nativeMark,onPick:()=>{state.groundClicks=(state.groundClicks||0)+1}});
+const places=()=>state.present?[{key:'place:12345',summary:{mapId:12345,name:vampire.name,loc:vampire,pixel:{x:12,y:34}},x:1,z:1}]:[];
+const dungeons=()=>[{key:'spawn:54,32',found:true,spawn:true,px:54,py:32,loc:elite,x:2,z:2},{key:'dungeon:11111',found:false,loc:unfound,px:1,py:2}];
+const modes={get mode(){return state.mode},get dungeonLocation(){return vampire},get dungeonCtx(){return state.ctx}};
+const host={TV_PLACE_LIFT:2,params:new URLSearchParams('online'),travelViewPlaces:places,travelViewFarPlaces:()=>[],travelViewDungeons:dungeons,social:{others:()=>[{name:'Party Member',p:{px:12,py:34,in:1,loc:vampire.name,h:50,hm:100,m:12,mm:80,f:40,fm:50}},{name:'Other Dungeon Member',p:{px:12,py:34,in:1,loc:'Other Dungeon',h:20,hm:50,m:0,mm:10,f:50,fm:50}}]},__dfoWorld:{player:()=>state.player,modes:()=>modes,viewOpen:()=>['up','rising'].includes(view.state),now:()=>Date.now(),serverNow:()=>Date.now(),spawnRecord:()=>state.emptyLedger?null:{seen:0},wallTime:()=>Date.now()+3600000,luck:p=>p.stats.luck,weapon:()=>({material:state.weaponMaterial,name:'Iron Sword'}),travel:p=>{if(!state.canTravel)return false;state.journeys++;return true}}};
+fixtureCreate(host);
+function marks(){return __dfoDungeons.decorate([{key:'place:12345',label:vampire.name,kind:'place dungeon',at:[0,0,0],x:450,y:430,front:true,pick:true},{key:'spawn:54,32',label:elite.name,sub:'Elite Dungeon - 2.0 km',kind:'far dungeon',at:[0,0,0],x:1700,y:530,front:true,edge:true,pick:true},{key:'dungeon:11111',label:'?',kind:'lair',at:[0,0,0],x:220,y:300,front:true}])}
+const raise=()=>{view.enter();for(let i=0;i<40&&view.state==='rising';i++)view.frame(.25)};raise();function draw(){fixtureUpdate({marks:marks(),feet:{x:700,y:650,front:true},route:[],where:'Dungeon UI test',hint:'',keys:{}})}draw();
+addEventListener('keydown',()=>state.gameKeys++,true);
+window.fixture={state,host,vampire,elite,marks,draw,pick:fixturePick,nativeHandler,view,raise};window.ready=true;
+setInterval(()=>{if(view.active)view.frame(.25);draw()},250);
+</script></body></html>`;
+const cache=new Map([['assets/'+world,worldModule],['assets/'+viewFile,viewModule]]);let failNotes=false,failRead=false,notePosts=0;
+const server=http.createServer(async(req,res)=>{try{
+ const url=new URL(req.url,'http://localhost'),rel=url.pathname.slice(1);
+ if(rel==='dfo-mod/dungeon-notes'||rel==='dfo-mod/cache'){
+  const chunks=[];for await(const c of req)chunks.push(c);
+  if(req.method==='POST'&&rel.endsWith('dungeon-notes'))notePosts++;
+  if((failNotes&&req.method==='POST')||(failRead&&req.method==='GET')){res.statusCode=500;res.setHeader('Content-Type','application/json');return res.end('{"error":"disk"}')}
+  const r=await handle(new Request('dagger://game/'+rel,{method:req.method,...(req.method==='POST'?{body:Buffer.concat(chunks)}:{})}));res.statusCode=r.status;r.headers.forEach((v,k)=>res.setHeader(k,v));return res.end(Buffer.from(await r.arrayBuffer()));
+ }
+ if(!rel){res.setHeader('Content-Type','text/html; charset=utf-8');return res.end(html)}
+ if(['dfo-mod/dfo_dungeon_model.js','dfo-mod/dfo_dungeons.js'].includes(rel)){res.setHeader('Content-Type','text/javascript');return res.end(fs.readFileSync(path.join(__dirname,'../src/mod/page',path.basename(rel))))}
+ const file=path.resolve(dist,rel);if(!file.startsWith(dist+path.sep)){res.statusCode=403;return res.end()}
+ let body=fs.readFileSync(file);if(file.endsWith('.js')){res.setHeader('Content-Type','text/javascript');if(!cache.has(rel))cache.set(rel,transformAsset(rel,body.toString(),{ru:false,marks:true,nearbyLoot:true,dungeons:true}).text);body=cache.get(rel)}else if(file.endsWith('.css'))res.setHeader('Content-Type','text/css');res.end(body);
+ }catch(e){res.statusCode=404;res.end('not found')}});
+(async()=>{let browser,page;try{
+ await new Promise(r=>server.listen(0,'127.0.0.1',r));browser=await chromium.launch({executablePath:process.env.DFO_CHROMIUM||'/usr/bin/chromium',headless:true,args:['--no-sandbox']});
+ page=await browser.newPage({viewport:{width:1400,height:900}});const errors=[];page.on('pageerror',e=>{errors.push(String(e));console.error('Page error:',String(e),e.stack)});await page.goto('http://127.0.0.1:'+server.address().port);await page.waitForFunction(()=>window.ready);
+ const data=await page.evaluate(()=>({rank:__dfoDungeonTools.rank(8),name:__dfoDungeonTools.enemyName(28),tables:__dfoDungeonTools.tables(8).length,marks:fixture.marks().map(m=>({label:m.label,sub:m.sub,has:!!m.dfoDungeon})),helpers:Object.keys(__dfoDungeonTools)}));
+ assert.equal(data.rank,14);assert.equal(data.name,'Vampire');assert.ok(data.tables>0);assert.match(data.marks[0].label,/Логово вампиров - 14 ранг/);assert.ok(data.marks[0].has);assert.equal(data.marks[2].label,'?');assert.equal(data.marks[2].has,false);assert.ok(!data.marks.some(m=>m.label.includes('Hidden Spoiler')));
+ assert.equal(await page.evaluate(()=>typeof __dfoDungeonTools.eliteSlots),'function');assert.ok([3,4].includes(await page.evaluate(()=>__dfoDungeonTools.eliteSlots(54321,true))));
+ assert.equal(await page.evaluate(()=>fixture.pick(450,420)),'place:12345','third line has a real native hit box');
+ if(process.env.DFO_SCREENSHOT_DIR){fs.mkdirSync(process.env.DFO_SCREENSHOT_DIR,{recursive:true});await page.screenshot({path:path.join(process.env.DFO_SCREENSHOT_DIR,'dungeon-marks.png')})}
+ await page.evaluate(()=>fixture.state.nativeConfirm=true);await page.mouse.click(450,420);assert.equal(await page.locator('.dfo-dungeon-dialog').count(),0,'native pending confirmation takes the first click');assert.equal(await page.evaluate(()=>fixture.state.nativeConfirm),false);
+ await page.mouse.click(450,420);const dialog=page.getByRole('dialog',{name:'Castle of Many Shadows',exact:true});await dialog.waitFor();assert.equal(await page.evaluate(()=>fixture.nativeHandler.pending()),null,'opening the card clears the native queued attack');
+ assert.equal(await page.evaluate(()=>fixture.state.journeys),0,'native LMB opens a card, never starts travel');assert.equal(await dialog.getByRole('tab',{name:'Оценка',exact:true}).getAttribute('aria-selected'),'true');assert.match(await dialog.innerText(),/персонализированы/);
+ const profile=await page.evaluate(()=>{const before=fixture.marks()[0].dfoDungeon.model;fixture.state.weaponMaterial=9;fixture.state.player.stats.luck=90;fixture.state.player.skills.fill(180);const after=fixture.marks()[0].dfoDungeon.model;return{oldBlocked:before.blocked,blocked:after.blocked,oldChance:before.chances.legendary,chance:after.chances.legendary,skill:after.bestSkill}});
+ assert.ok(profile.oldBlocked>0);assert.equal(profile.blocked,0);assert.ok(profile.chance>profile.oldChance);assert.equal(profile.skill,180);
+ const keys=await page.evaluate(()=>fixture.state.gameKeys);await page.keyboard.press('j');assert.equal(await page.evaluate(()=>fixture.state.gameKeys),keys,'dialog keys cannot reach game capture handlers');
+ await dialog.getByRole('tab',{name:'Оценка',exact:true}).focus();await page.keyboard.press('ArrowRight');assert.equal(await dialog.getByRole('tab',{name:'Враги',exact:true}).getAttribute('aria-selected'),'true');await page.keyboard.press('End');assert.equal(await dialog.getByRole('tab',{name:'Посещение',exact:true}).getAttribute('aria-selected'),'true');await page.keyboard.press('Home');assert.equal(await dialog.getByRole('tab',{name:'Оценка',exact:true}).getAttribute('aria-selected'),'true');
+ for(const tab of ['Враги','Добыча','Ресурсы','Мир и группа','Посещение','Оценка']){await dialog.getByRole('tab',{name:tab,exact:true}).click();assert.equal(await page.locator('.dfo-dungeon-dialog').count(),1)}
+ await dialog.getByRole('tab',{name:'Враги',exact:true}).click();assert.match(await dialog.innerText(),/Vampire/);assert.ok(await dialog.locator('tbody tr').count()>=2);
+ await dialog.getByRole('tab',{name:'Ресурсы',exact:true}).click();assert.match(await dialog.innerText(),/Aurum/);assert.ok(await dialog.locator('tbody tr').count()>=1,'actual native day veins are displayed');
+ await dialog.getByRole('tab',{name:'Мир и группа',exact:true}).click();assert.match(await dialog.innerText(),/Party Member/);assert.match(await dialog.innerText(),/50 \/ 100/);assert.ok(!(await dialog.innerText()).includes('Other Dungeon Member'));
+ await dialog.getByRole('tab',{name:'Оценка',exact:true}).click();await dialog.getByRole('button',{name:'Мини-гайд',exact:true}).click();const help=page.getByRole('dialog',{name:'Как читать оценки данжа',exact:true});await help.waitFor();assert.equal(await page.locator('.dfo-dungeon-dialog').count(),2);assert.match(await help.innerText(),/0,55/);await page.keyboard.press('Escape');await help.waitFor({state:'hidden'});assert.equal(await dialog.count(),1);
+ assert.equal(await page.evaluate(()=>fixture.view.state),'up','Escape in the help cannot lower the native Overworld');assert.equal(await page.evaluate(()=>fixture.state.groundClicks||0),0,'dialog controls cannot click the ground beneath them');
+ if(process.env.DFO_SCREENSHOT_DIR)await page.screenshot({path:path.join(process.env.DFO_SCREENSHOT_DIR,'dungeon-card.png')});
+ await page.setViewportSize({width:720,height:600});assert.equal(await dialog.evaluate(n=>{const r=n.getBoundingClientRect();return r.left>=0&&r.right<=innerWidth&&r.top>=0&&r.bottom<=innerHeight}),true,'card remains within a small viewport');await page.setViewportSize({width:1400,height:900});await page.evaluate(()=>fixture.draw());
+ await page.evaluate(()=>fixture.state.canTravel=false);await dialog.getByRole('button',{name:'В путь',exact:true}).click();assert.equal(await dialog.count(),1);assert.equal(await page.evaluate(()=>fixture.state.journeys),0);assert.match(await dialog.getByRole('status').innerText(),/не начала/);
+ await page.evaluate(()=>fixture.state.canTravel=true);await dialog.getByRole('button',{name:'В путь',exact:true}).click();await dialog.waitFor({state:'hidden'});assert.equal(await page.evaluate(()=>fixture.state.journeys),1);
+ await page.evaluate(()=>__dfoDungeons.open('place:12345'));await dialog.waitFor();await page.evaluate(()=>{for(let i=0;i<20;i++)__dfoDungeons.open('place:12345')});assert.equal(await page.locator('.dfo-dungeon-dialog').count(),1);await dialog.getByRole('button',{name:'Закрыть',exact:true}).click();assert.equal(await page.evaluate(()=>fixture.state.journeys),1);
+ await page.evaluate(()=>{__dfoDungeons.open('place:12345');fixture.state.danger=true;fixture.view.frame(.25)});await page.waitForTimeout(1800);assert.equal(await page.locator('.dfo-dungeon-dialog').count(),0,'danger lowering the native Overworld closes the card even while mode stays exterior');await page.evaluate(()=>{fixture.state.danger=false;fixture.raise();fixture.draw()});
+ await page.evaluate(()=>__dfoDungeons.open('place:12345'));await dialog.waitFor();await page.evaluate(()=>fixture.view.exit('test',true));await dialog.getByRole('button',{name:'В путь',exact:true}).click();assert.equal(await page.locator('.dfo-dungeon-dialog').count(),0,'travel checks the native view immediately, before the next poll');assert.equal(await page.evaluate(()=>fixture.state.journeys),1);await page.evaluate(()=>{fixture.raise();fixture.draw()});
+ await page.evaluate(()=>{__dfoDungeons.open('place:12345');__dfoDungeons.register({...fixture.host})});assert.equal(await page.locator('.dfo-dungeon-dialog').count(),0,'a replacement world host discards its predecessor card');await page.evaluate(()=>__dfoDungeons.register(fixture.host));
+ const edge=await(await page.waitForFunction(()=>{const ys=[];for(let y=0;y<innerHeight;y++)if(fixture.pick(1300,y)==='spawn:54,32')ys.push(y);return ys.at(-1)-ys[0]>=70?{top:ys[0],bottom:ys.at(-1)}:null})).jsonValue();
+ await page.mouse.click(1300,edge.bottom-10);const farDialog=page.getByRole('dialog',{name:'Volcanic Fortress',exact:true});await farDialog.waitFor();await farDialog.getByRole('button',{name:'Закрыть',exact:true}).click();assert.equal(await page.evaluate(()=>fixture.state.journeys),1);
+ const timer=await page.evaluate(()=>{fixture.state.emptyLedger=true;const sub=fixture.marks()[1].sub;fixture.state.emptyLedger=false;return sub});assert.match(timer,/таймер неизвестен/);
+ const written=page.waitForResponse(r=>r.url().endsWith('/dfo-mod/dungeon-notes')&&r.request().method()==='POST'&&r.status()===200);
+ await page.evaluate(()=>{fixture.state.mode='dungeon';fixture.state.ctx={foes:[{src:{mobileType:28}},{src:{mobileType:30},corpse:true}],lootTargets:()=>[{key:'loot:0'},{key:'corpse:1'}],actions:{objects:new Map([['door:1',{kind:'door',state:'end',currentLockValue:0}]])}}});
+ await written;
+ let saved=JSON.parse(fs.readFileSync(path.join(userData,'dfo-mod-cache.json'),'utf8'));assert.equal(saved.dungeons['12345'].dead,1);assert.equal(saved.dungeons['12345'].counts.length,2);assert.equal(saved.dungeons['12345'].doors,1);
+ const unavailable=page.waitForResponse(r=>r.url().endsWith('/dfo-mod/dungeon-notes')&&r.request().method()==='POST'&&r.status()===200);await page.evaluate(()=>{fixture.state.ctx.lootTargets=()=>{throw new Error('scene changing')};fixture.state.ctx.foes.push({src:{mobileType:32,allied:true}})});await unavailable;
+ saved=JSON.parse(fs.readFileSync(path.join(userData,'dfo-mod-cache.json'),'utf8'));assert.equal(saved.dungeons['12345'].piles,null,'unavailable loot targets stay unknown, rather than claiming zero');assert.equal(saved.dungeons['12345'].corpses,null);assert.equal(saved.dungeons['12345'].counts.length,2,'allied foes are not recorded as enemies');
+ const writesBeforeExcluded=notePosts;await page.evaluate(()=>{fixture.originalAllowed=__dfoDungeonTools.allowed;__dfoDungeonTools.allowed=()=>false;fixture.state.ctx.foes.push({src:{mobileType:2}})});await page.waitForTimeout(1800);assert.equal(notePosts,writesBeforeExcluded,'excluded special places cannot write a geographic dungeon observation');await page.evaluate(()=>{__dfoDungeonTools.allowed=fixture.originalAllowed;fixture.state.ctx.foes.pop()});
+ failNotes=true;const failed=page.waitForResponse(r=>r.url().endsWith('/dfo-mod/dungeon-notes')&&r.request().method()==='POST'&&r.status()===500);await page.evaluate(()=>fixture.state.ctx.foes.push({src:{mobileType:32}}));await failed;
+ assert.equal(JSON.parse(fs.readFileSync(path.join(userData,'dfo-mod-cache.json'),'utf8')).dungeons['12345'].counts.length,2,'failed writes preserve the previous journal');failNotes=false;
+ failRead=true;await page.evaluate(()=>fixture.state.mode='exterior');await page.reload();await page.waitForFunction(()=>window.ready);await page.evaluate(()=>__dfoDungeons.open('place:12345'));await dialog.waitFor();await page.waitForFunction(()=>document.querySelector('.dfo-dungeon-dialog [role=status]')?.textContent.includes('Не удалось прочитать'));
+ failRead=false;await page.evaluate(()=>__dfoDungeons.open('place:12345'));await page.waitForFunction(()=>!document.querySelector('.dfo-dungeon-dialog [role=status]')?.textContent.includes('Не удалось прочитать'));
+ await dialog.getByRole('tab',{name:'Посещение',exact:true}).click();await page.waitForFunction(()=>document.querySelector('.dfo-dungeon-dialog')?.textContent.includes('Наблюдалось:'));assert.match(await dialog.innerText(),/Ancient Vampire/);
+ await page.evaluate(()=>fixture.state.present=false);await page.waitForFunction(()=>document.querySelector('.dfo-dungeon-dialog [role=status]')?.textContent.includes('больше не доступна'));assert.equal(await dialog.getByRole('button',{name:'В путь',exact:true}).isDisabled(),true);
+ assert.deepEqual(errors,[]);console.log('PASS: native Overworld pointer/keyboard controller and HUD, 3-line labels/hit boxes, tabs/help/Escape, travel gating/autoclose, danger/view/world teardown, hidden discoveries, historical cache/unknowns/errors/restart, no page errors');
+ }catch(e){if(page)console.error('Browser state:',await page.evaluate(()=>({body:document.body.innerText.slice(-2400),ready:window.ready,view:window.fixture?.view.state,target:document.elementFromPoint(450,420)?.outerHTML.slice(0,240),tools:Object.keys(window.__dfoDungeonTools||{})})).catch(()=>null));throw e}
+ finally{await browser?.close();server.close();fs.rmSync(userData,{recursive:true,force:true})}
+})().catch(e=>{console.error(e);process.exitCode=1});

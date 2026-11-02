@@ -20,7 +20,7 @@ for (const f of fs.readdirSync(dir).filter((x) => x.endsWith('.js'))) {
   try { execFileSync(process.execPath, ['--check', out], { stdio: 'pipe' }); } catch (e) { bad++; console.log(`SYNTAX ${f}: ${String(e.stderr).split('\n').slice(0, 3).join(' ')}`); }
 }
 fs.rmSync(tmp, { recursive: true, force: true });
-const lost = [...EXPECTED.marks, ...EXPECTED.ru, ...EXPECTED.nearbyLoot].filter((id) => !(total.get(id) > 0));
+const lost = [...EXPECTED.marks, ...EXPECTED.ru, ...EXPECTED.nearbyLoot, ...EXPECTED.dungeons].filter((id) => !(total.get(id) > 0));
 for (const [id, n] of [...total].sort()) console.log(`${id.padEnd(22)} ${n}`);
 console.log(`changed files: ${changed}, syntax errors: ${bad}`);
 console.log(lost.length ? `NOT FOUND: ${lost.join(', ')}` : 'all expected hooks found');

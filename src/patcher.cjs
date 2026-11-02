@@ -89,11 +89,11 @@ function hookMain(src) {
 }
 
 /** The mod's switches in <userData>/dfo-mod.json: made with the defaults where missing, then each `--set key=0|1`
- *  (ru, marks, onlyVisited) of the installer's window applied. */
+ *  of the installer's window applied, preserving independent feature settings. */
 function writeConfig(ud, withRu) {
   fs.mkdirSync(ud, { recursive: true });
   const file = path.join(ud, 'dfo-mod.json');
-  let cfg = { enabled: true, ru: withRu, marks: true, nearbyLoot: true, nearbyLootOptions: { keyCode: 'KeyJ' }, marksOptions: { onlyVisited: true, markRadiusM: 1200, nameRadiusM: 300, maxMarks: 60 } };
+  let cfg = { enabled: true, ru: withRu, marks: true, nearbyLoot: true, dungeons: true, nearbyLootOptions: { keyCode: 'KeyJ' }, marksOptions: { onlyVisited: true, markRadiusM: 1200, nameRadiusM: 300, maxMarks: 60 } };
   try { if (fs.existsSync(file)) cfg = { ...cfg, ...JSON.parse(fs.readFileSync(file, 'utf8')) }; } catch { /* a broken file is written again */ }
   cfg.marksOptions = { onlyVisited: true, markRadiusM: 1200, nameRadiusM: 300, maxMarks: 60, ...(cfg.marksOptions ?? {}) };
   for (let i = 0; i < args.length; i++) {
@@ -101,7 +101,7 @@ function writeConfig(ud, withRu) {
     const [k, v] = String(args[i + 1] ?? '').split('=');
     const on = v === '1' || v === 'true';
     if (k === 'ru') cfg.ru = on && withRu;
-    else if (k === 'marks') cfg.marks = on;
+    else if (k === 'marks' || k === 'nearbyLoot' || k === 'dungeons' || k === 'enabled') cfg[k] = on;
     else if (k === 'onlyVisited') cfg.marksOptions.onlyVisited = on;
   }
   if (!withRu) cfg.ru = false;
@@ -112,7 +112,8 @@ function writeConfig(ud, withRu) {
 function install() {
   const asarPath = findAsar();
   const ud = userDataDir();
-  say(`DFO Mod ${VERSION} - установка`);
+  say(`DFO-Client-Expander-RU ${VERSION} — установка`);
+  say('Автор: AutomaticYobaMachine. Создано специально для русского сообщества DFO Online.');
   say(`Игра:   ${path.dirname(path.dirname(asarPath))}`);
   if (gameRunning()) stop('DFO Online сейчас запущена. Закройте игру полностью и запустите установку снова.');
 
@@ -191,7 +192,7 @@ function install() {
   put.set('main.cjs', Buffer.from(hooked));
 
   // the mod itself
-  for (const rel of ['hook.cjs', 'transforms.cjs', 'nearby-loot-transform.cjs', 'loot-tags-transform.cjs', 'loot-store.cjs', 'page/dfo_loot_rules.js', 'page/dfo_loot_ui.js', 'page/dfo_loot.js', 'version.json', 'page/dfo_marks.js', 'page/dfo_town.js', 'page/ru_locale.js', 'page/ru_items.js']) put.set(`dfo-mod/${rel}`, fs.readFileSync(path.join(MOD, ...rel.split('/'))));
+  for (const rel of ['hook.cjs', 'transforms.cjs', 'nearby-loot-transform.cjs', 'loot-tags-transform.cjs', 'dungeon-transform.cjs', 'page/dfo_dungeon_model.js', 'page/dfo_dungeons.js', 'loot-store.cjs', 'page/dfo_loot_rules.js', 'page/dfo_loot_ui.js', 'page/dfo_loot.js', 'version.json', 'page/dfo_marks.js', 'page/dfo_town.js', 'page/ru_locale.js', 'page/ru_items.js']) put.set(`dfo-mod/${rel}`, fs.readFileSync(path.join(MOD, ...rel.split('/'))));
 
   say('Пересобираю app.asar...');
   const tmp = `${asarPath}.dfo-tmp`;
@@ -221,7 +222,7 @@ function install() {
 
 function uninstall() {
   const asarPath = findAsar();
-  say(`DFO Mod ${VERSION} - удаление`);
+  say(`DFO-Client-Expander-RU ${VERSION} — удаление`);
   if (gameRunning()) stop('DFO Online сейчас запущена. Закройте игру полностью и запустите удаление снова.');
   const ourBak = asarPath + BAK;
   const a = openAsar(asarPath);

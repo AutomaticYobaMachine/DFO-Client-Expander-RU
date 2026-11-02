@@ -1,3 +1,5 @@
 /dist/
 __pycache__/
 *.py[cod]
+/src/gui/payload_windows.zip
+/src/gui/resources_windows_amd64.syso

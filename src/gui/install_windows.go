@@ -1,0 +1,308 @@
+package main
+
+import (
+	"bufio"
+	"context"
+	"encoding/json"
+	"fmt"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"regexp"
+	"strconv"
+	"strings"
+	"syscall"
+	"time"
+	"unsafe"
+)
+
+func (a *app) patcherCmd(ctx context.Context, exe string, args ...string) *exec.Cmd {
+	full := append([]string{filepath.Join(a.payloadDir, "patcher", "patcher.cjs")}, args...)
+	full = append(full, "--asar", filepath.Join(filepath.Dir(exe), "resources", "app.asar"))
+	c := exec.CommandContext(ctx, exe, full...)
+	c.Dir = a.payloadDir
+	c.Env = append(os.Environ(), "ELECTRON_RUN_AS_NODE=1")
+	c.SysProcAttr = &syscall.SysProcAttr{HideWindow: true, CreationFlags: 0x08000000}
+	return c
+}
+
+func (a *app) appendLog(s string) {
+	s = strings.ReplaceAll(strings.ReplaceAll(s, "\r\n", "\n"), "\n", "\r\n")
+	a.mu.Lock()
+	a.pending.WriteString(s)
+	a.fullLog.WriteString(s)
+	a.mu.Unlock()
+	pPostMessageW.Call(a.hwnd, wmLog, 0, 0)
+}
+
+func (a *app) startSearch() {
+	a.mu.Lock()
+	if a.busy || a.searching {
+		a.mu.Unlock()
+		return
+	}
+	a.searching = true
+	token := a.generation
+	a.mu.Unlock()
+	a.syncControls()
+	invalidate(a.hwnd)
+	a.wg.Add(1)
+	go func() {
+		defer a.wg.Done()
+		var found []string
+		how := ""
+		if b, e := os.ReadFile(filepath.Join(a.prefsDir, "game-path.txt")); e == nil {
+			if exe := gameIn(filepath.Dir(strings.TrimSpace(string(b)))); exe != "" {
+				found = []string{exe}
+				how = "сохранённый путь"
+			}
+		}
+		if len(found) == 0 && a.ctx.Err() == nil {
+			found, how = findGame(a.modDir)
+		}
+		a.mu.Lock()
+		a.searching = false
+		if token == a.generation {
+			a.searchFound = found
+			a.searchHow = how
+			a.searchReady = true
+		}
+		a.mu.Unlock()
+		if a.ctx.Err() == nil {
+			pPostMessageW.Call(a.hwnd, wmSearch, 0, 0)
+		}
+	}()
+}
+
+func (a *app) setGame(exe, how string) {
+	a.mu.Lock()
+	a.generation++
+	a.exe = exe
+	a.status = nil
+	a.querying = false
+	a.searchHow = how
+	a.note = ""
+	a.mu.Unlock()
+	caption(a.ctl[idPath], exe)
+	if e := os.MkdirAll(a.prefsDir, 0700); e == nil {
+		_ = os.WriteFile(filepath.Join(a.prefsDir, "game-path.txt"), []byte(exe), 0600)
+	}
+	a.appendLog("Клиент: " + exe + " (" + how + ")\r\n")
+	a.requestStatus(true)
+}
+
+func (a *app) requestStatus(restoreChoices bool) {
+	if a.ctx.Err() != nil {
+		return
+	}
+	a.mu.Lock()
+	if a.exe == "" || a.querying || a.busy {
+		a.mu.Unlock()
+		return
+	}
+	exe, token, revision := a.exe, a.generation, a.choiceRevision
+	a.querying = true
+	a.mu.Unlock()
+	pPostMessageW.Call(a.hwnd, wmStatus, 0, 0)
+	a.wg.Add(1)
+	go func() {
+		defer a.wg.Done()
+		ctx, cancel := context.WithTimeout(a.ctx, 20*time.Second)
+		defer cancel()
+		out, err := a.patcherCmd(ctx, exe, "status", "--json").Output()
+		var st *gameStatus
+		if err == nil {
+			for _, line := range strings.Split(string(out), "\n") {
+				var value gameStatus
+				if strings.HasPrefix(strings.TrimSpace(line), "{") && json.Unmarshal([]byte(strings.TrimSpace(line)), &value) == nil {
+					st = &value
+					break
+				}
+			}
+		}
+		a.mu.Lock()
+		if token != a.generation || a.ctx.Err() != nil {
+			a.mu.Unlock()
+			return
+		}
+		a.querying = false
+		a.status = st
+		if st != nil && restoreChoices && st.Installed && revision == a.choiceRevision {
+			a.toggles = loadChoices(st.Cfg, a.toggles)
+		}
+		if st == nil {
+			a.note = "Не удалось проверить клиент. Нажмите «Проверить» или выберите игру заново."
+			a.noteCol = colRed
+		}
+		a.mu.Unlock()
+		if st == nil {
+			a.appendLog(fmt.Sprintf("Проверка клиента: %v\r\n%s\r\n", err, out))
+		}
+		pPostMessageW.Call(a.hwnd, wmStatus, 0, 0)
+	}()
+}
+
+var pctRe = regexp.MustCompile(`^\s*(\d{1,3})%\s*$`)
+
+func (a *app) run(what string) {
+	a.mu.Lock()
+	if a.busy || a.querying || a.exe == "" || a.status == nil || a.status.Running {
+		a.mu.Unlock()
+		return
+	}
+	if what == "install" && selectedCount(a.toggles) == 0 {
+		a.note = "Выберите хотя бы один компонент."
+		a.noteCol = colDim
+		a.mu.Unlock()
+		invalidate(a.hwnd)
+		return
+	}
+	if what == "uninstall" && !a.status.Installed {
+		a.mu.Unlock()
+		return
+	}
+	a.busy = true
+	a.operation = what
+	a.progress = 0
+	a.note = ""
+	a.stage = "Подготовка файлов…"
+	exe := a.exe
+	args := operationArgs(what, a.toggles)
+	a.mu.Unlock()
+	a.syncControls()
+	invalidate(a.hwnd)
+	a.appendLog("\r\n" + time.Now().Format("02.01.2006 15:04:05") + " · " + map[string]string{"install": "Установка / обновление", "uninstall": "Удаление"}[what] + "\r\n")
+	a.wg.Add(1)
+	go func() {
+		defer a.wg.Done()
+		// Closing the window is disabled while the archive is being replaced.
+		// A UI/status timeout must never kill an installation mid-write.
+		c := a.patcherCmd(context.Background(), exe, args...)
+		r, w, err := os.Pipe()
+		if err == nil {
+			c.Stdout, c.Stderr = w, w
+			err = c.Start()
+			w.Close()
+			if err == nil {
+				s := bufio.NewScanner(r)
+				s.Buffer(make([]byte, 4096), 512*1024)
+				for s.Scan() {
+					line := s.Text()
+					if m := pctRe.FindStringSubmatch(line); m != nil {
+						p, _ := strconv.Atoi(m[1])
+						if p > 100 {
+							p = 100
+						}
+						a.mu.Lock()
+						a.progress = p
+						a.mu.Unlock()
+						pPostMessageW.Call(a.hwnd, wmLog, 0, 0)
+						continue
+					}
+					a.appendLog(line + "\r\n")
+					if strings.TrimSpace(line) != "" {
+						a.mu.Lock()
+						a.stage = line
+						a.mu.Unlock()
+					}
+				}
+				readErr := s.Err()
+				r.Close()
+				err = c.Wait()
+				if err == nil {
+					err = readErr
+				}
+			} else {
+				r.Close()
+			}
+		}
+		if err != nil {
+			a.appendLog("Операция завершилась с ошибкой: " + err.Error() + "\r\n")
+		}
+		a.mu.Lock()
+		a.busy = false
+		if err == nil {
+			a.progress = 100
+			a.noteCol = colGreen
+			if what == "install" {
+				a.note = "Готово. Выбранные функции включены. Запускайте игру как обычно."
+			} else {
+				a.note = "Расширение удалено. Исходный клиент восстановлен; ваши настройки сохранены."
+			}
+		} else {
+			a.progress = 0
+			a.noteCol = colRed
+			a.note = "Операция не завершена. Причина показана во вкладке «Журнал»."
+			a.page = idJournal
+		}
+		a.mu.Unlock()
+		pPostMessageW.Call(a.hwnd, wmDone, 0, 0)
+		a.requestStatus(false)
+	}()
+}
+
+func (a *app) browse() {
+	file := make([]uint16, 32768)
+	filter := dialogFilter("Клиент DFO Online", "DFO Online.exe;Daggerfall Online.exe;DaggerfallOnline.exe", "Программы (*.exe)", "*.exe")
+	ofn := openFileName{hwndOwner: a.hwnd, lpstrFilter: &filter[0], nFilterIndex: 1, lpstrFile: &file[0], nMaxFile: uint32(len(file)), lpstrTitle: u16("Выберите DFO Online.exe в папке установленной игры"), flags: 0x1000 | 0x0800 | 0x80000 | 0x0008}
+	ofn.lStructSize = uint32(unsafe.Sizeof(ofn))
+	if r, _, _ := pGetOpenFileNameW.Call(uintptr(unsafe.Pointer(&ofn))); r == 0 {
+		return
+	}
+	p := syscall.UTF16ToString(file)
+	if exe := gameIn(filepath.Dir(p)); exe != "" {
+		a.setGame(exe, "выбрано вручную")
+	} else {
+		a.message("Выберите установленный клиент DFO Online. Рядом с программой должна находиться папка resources с файлом app.asar.", 0x30)
+	}
+}
+
+func (a *app) message(s string, kind uintptr) {
+	pMessageBoxW.Call(a.hwnd, uintptr(unsafe.Pointer(u16(s))), uintptr(unsafe.Pointer(u16(appName))), kind)
+}
+func (a *app) openGuide() {
+	p := filepath.Join(a.payloadDir, "README.txt")
+	if data, e := os.ReadFile(p); e == nil && os.MkdirAll(a.prefsDir, 0700) == nil {
+		dest := filepath.Join(a.prefsDir, "README.txt")
+		if os.WriteFile(dest, data, 0600) == nil {
+			p = dest
+		}
+	}
+	r, _, _ := pShellExecuteW.Call(a.hwnd, uintptr(unsafe.Pointer(u16("open"))), uintptr(unsafe.Pointer(u16(p))), 0, 0, 1)
+	if r <= 32 {
+		a.message("Не удалось открыть инструкцию. Она также есть в ZIP и в репозитории проекта.", 0x30)
+	}
+}
+func (a *app) openFile(name string) {
+	a.mu.Lock()
+	dir := ""
+	if a.status != nil {
+		dir = a.status.UserData
+	}
+	a.mu.Unlock()
+	if dir == "" {
+		dir = filepath.Join(os.Getenv("APPDATA"), "DFO Online")
+	}
+	p := filepath.Join(dir, name)
+	if _, err := os.Stat(p); err != nil {
+		a.message("Этот отчёт появится после первого запуска игры с расширением.", 0x40)
+		return
+	}
+	pShellExecuteW.Call(a.hwnd, uintptr(unsafe.Pointer(u16("open"))), uintptr(unsafe.Pointer(u16(p))), 0, 0, 1)
+}
+func (a *app) saveLog() {
+	file := make([]uint16, 32768)
+	copy(file, syscall.StringToUTF16(appName+"-install.log"))
+	filter := dialogFilter("Журнал (*.log)", "*.log", "Все файлы", "*.*")
+	ofn := openFileName{hwndOwner: a.hwnd, lpstrFilter: &filter[0], nFilterIndex: 1, lpstrFile: &file[0], nMaxFile: uint32(len(file)), lpstrTitle: u16("Сохранить журнал установки"), lpstrDefExt: u16("log"), flags: 0x2 | 0x800 | 0x80000 | 0x8}
+	ofn.lStructSize = uint32(unsafe.Sizeof(ofn))
+	if r, _, _ := pGetSaveFileNameW.Call(uintptr(unsafe.Pointer(&ofn))); r == 0 {
+		return
+	}
+	a.mu.Lock()
+	s := versionTitle() + "\r\nАвтор: " + appAuthor + "\r\n" + appCommunity + "\r\n" + a.fullLog.String()
+	a.mu.Unlock()
+	if err := os.WriteFile(syscall.UTF16ToString(file), []byte(s), 0600); err != nil {
+		a.message("Не удалось сохранить журнал: "+err.Error(), 0x10)
+	}
+}

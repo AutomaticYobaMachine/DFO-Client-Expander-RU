@@ -4,6 +4,9 @@ const fs = require('node:fs'), path = require('node:path'), crypto = require('no
 const Rules = require('./page/dfo_loot_rules.js');
 const Dungeon = require('./page/dfo_dungeon_model.js');
 const MAX = 16 * 1024 * 1024;
+const KEY_RE = /^(?:Key[A-Z]|Digit[0-9]|F(?:[1-9]|1[0-9]|2[0-4])|Mouse[345]|Numpad(?:[0-9]|Enter|Add|Subtract|Multiply|Divide|Decimal|Comma|Equal)|Space|Tab|Enter|Backspace|Insert|Delete|Home|End|PageUp|PageDown|Arrow(?:Up|Down|Left|Right)|CapsLock|NumLock|ScrollLock|Pause|PrintScreen|Backquote|Minus|Equal|BracketLeft|BracketRight|Backslash|Semicolon|Quote|Comma|Period|Slash|IntlBackslash|ContextMenu)$/;
+const validLootKey = key => typeof key === 'string' && KEY_RE.test(key);
+const cachedLootKey = cache => [cache?.hotkeys?.loot, cache?.loot?.keyCode].find(validLootKey) ?? null;
 function createLootStore(userData) {
   const file = userData && path.join(userData, 'dfo-mod-cache.json');
   const read = () => {
@@ -27,7 +30,21 @@ function createLootStore(userData) {
     const merged = { ...obj };
     if (current.loot) merged.loot = current.loot; else delete merged.loot;
     if (current.dungeons) merged.dungeons = current.dungeons; else delete merged.dungeons;
+    if (current.hotkeys) merged.hotkeys = current.hotkeys; else delete merged.hotkeys;
     write(merged);
+  }
+  const hotkeys = () => {
+    const h = read().hotkeys;
+    return h && typeof h === 'object' && !Array.isArray(h) ? { ...h } : {};
+  };
+  function saveHotkeys(payload) {
+    if (!payload || typeof payload !== 'object' || Array.isArray(payload)) throw fail('Некорректные клавиши.');
+    if (Object.hasOwn(payload, 'loot') && !validLootKey(payload.loot)) throw fail('Некорректная кнопка лута.');
+    const cache = read();
+    const current = cache.hotkeys && typeof cache.hotkeys === 'object' && !Array.isArray(cache.hotkeys) ? cache.hotkeys : {};
+    const next = { ...current, ...payload };
+    write({ ...cache, hotkeys: next });
+    return next;
   }
   function saveSettings(payload) {
     const cache = read(), old = Rules.cleanState(cache.loot);
@@ -60,6 +77,6 @@ function createLootStore(userData) {
     const kept = Object.fromEntries(Object.values(notes).sort((a, b) => b.at - a.at).slice(0, 200).map(n => [n.id, n]));
     write({ ...cache, dungeons: kept }); return note;
   }
-  return { read, state, replaceCityCache, saveSettings, savePreset, dungeonNotes, saveDungeonNote };
+  return { read, state, replaceCityCache, saveSettings, savePreset, dungeonNotes, saveDungeonNote, hotkeys, saveHotkeys, lootKey: () => cachedLootKey(read()) };
 }
-module.exports = { createLootStore };
+module.exports = { createLootStore, validLootKey, cachedLootKey };

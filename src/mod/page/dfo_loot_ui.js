@@ -97,16 +97,75 @@
     function styles() {
       if (doc.getElementById('dfo-loot-styles')) return;
       const style = el('style'); style.id = 'dfo-loot-styles'; style.textContent = `
-.dfo-loot-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px}.dfo-loot-button{font:inherit;cursor:pointer;padding:7px 12px;border:1px solid #6a6a70;border-radius:4px;background:#34343a;color:#e5e5e8}.dfo-loot-button:hover{border-color:#d3ad4b}.dfo-loot-button:focus-visible,.dfo-loot-dialog input:focus-visible,.dfo-loot-dialog select:focus-visible{outline:2px solid #f0ca69;outline-offset:2px}.dfo-loot-button[aria-pressed="true"]{color:#211b10;background:#d8b34f;border-color:#ffe3a0}.dfo-loot-button[aria-pressed="false"]{background:#414149;color:#d1d1d5}.dfo-loot-button:disabled{opacity:.55;cursor:wait}
-.dfo-loot-dialog{box-sizing:border-box;width:min(1000px,94vw);max-height:90vh;overflow:auto;color:#f3ead5;background:#191b23;border:2px solid #b08c42;border-radius:8px;padding:20px;font:15px/1.4 system-ui,sans-serif;box-shadow:0 8px 50px #000b}.dfo-loot-dialog::backdrop{background:#0009}.dfo-loot-dialog h2{font-size:21px;margin:0 0 14px;color:#f1d88e}.dfo-loot-dialog p{margin:8px 0}.dfo-loot-dialog fieldset{min-width:0;max-width:100%;border:0;padding:0;margin:12px 0}.dfo-loot-dialog legend{font-weight:bold}.dfo-loot-dialog input,.dfo-loot-dialog select{box-sizing:border-box;font:inherit;color:#eee;background:#292c37;border:1px solid #777;border-radius:4px;padding:8px}.dfo-loot-dialog input[type="checkbox"]{accent-color:#d8b34f;width:18px;height:18px;flex-shrink:0}.dfo-loot-dialog label{display:flex;align-items:center;gap:8px}.dfo-loot-modes,.dfo-loot-footer{display:flex;gap:10px;flex-wrap:wrap}.dfo-loot-footer{margin-top:18px;justify-content:flex-end}.dfo-loot-tag-controls{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.dfo-loot-tag-controls input{flex:1;min-width:140px}.dfo-loot-tags{min-width:0;max-width:100%;display:grid;grid-template-rows:repeat(2,minmax(44px,auto));grid-auto-flow:column;grid-auto-columns:max-content;overflow-x:auto;gap:8px;padding:6px 2px 14px;scrollbar-color:#b08c42 #292c37}.dfo-loot-tag{box-sizing:border-box;border:1px solid #676775;border-radius:4px;background:#292c37;padding:8px;cursor:pointer;max-width:360px}.dfo-loot-tag:has(input:checked){border-color:#d8b34f;background:#393322}.dfo-loot-small{width:min(520px,94vw)}.dfo-loot-form input[type="text"]{width:100%}.dfo-loot-list{display:flex;flex-direction:column;gap:7px;max-height:40vh;overflow:auto;margin:12px 0}.dfo-loot-list button{text-align:left}.dfo-loot-status{min-height:1.4em;color:#e7c584}.dfo-loot-status[data-error="true"]{color:#ff9f98}.dfo-loot-note{color:#b9bdc8;font-size:13px}.dfo-loot-item-picker{max-height:280px;overflow:auto;display:flex;flex-direction:column;gap:5px}.dfo-loot-classicbar{position:fixed;bottom:12px;left:50%;transform:translateX(-50%);z-index:15;display:flex;gap:10px;padding:8px;background:#191b23;border:1px solid #b08c42}
+.dfo-loot-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px;align-items:center}
+.dfo-loot-button{font-family:var(--data,'Pixelify Sans',system-ui,sans-serif);font-size:12px;letter-spacing:.03em;cursor:pointer;padding:5px 12px;border:1px solid rgba(192,138,62,.45);border-radius:2px;background:rgba(43,50,59,.65);color:var(--bone,#f1e6c8);transition:background .15s,border-color .15s}
+.dfo-loot-button:hover{background:rgba(78,127,114,.35);border-color:rgba(192,138,62,.85);color:#fff}
+.dfo-loot-button:focus-visible,.dfo-loot-dialog input:focus-visible,.dfo-loot-dialog select:focus-visible{outline:2px solid #f2c443;outline-offset:1px}
+.dfo-loot-button[aria-pressed="true"]{color:#211b10;background:#d8b34f;border-color:#ffe3a0;box-shadow:inset 0 0 6px rgba(192,138,62,.25)}
+.dfo-loot-button[aria-pressed="false"]{background:rgba(43,50,59,.45);border-color:rgba(192,138,62,.25);color:var(--dim,#a9a08a)}
+.dfo-loot-button.dfo-btn-sec{background:rgba(43,50,59,.45);border-color:rgba(192,138,62,.3);color:var(--dim,#a9a08a)}
+.dfo-loot-button.dfo-btn-sec:hover{background:rgba(55,64,76,.6);border-color:rgba(192,138,62,.6);color:var(--bone,#f1e6c8)}
+.dfo-loot-button:disabled{opacity:.45;cursor:wait}
+
+.dfo-loot-dialog{box-sizing:border-box;position:fixed;inset:0;margin:auto;padding:0;width:min(980px,94vw);max-height:min(840px,90vh);display:flex;flex-direction:column;overflow:hidden;font-family:var(--data,'Pixelify Sans',system-ui,sans-serif);color:var(--bone,#f1e6c8);background:linear-gradient(180deg,rgba(23,27,33,.985),rgba(14,16,19,.985));border:1px solid rgba(192,138,62,.45);border-radius:3px;box-shadow:0 4px 28px rgba(0,0,0,.85)}
+.dfo-loot-dialog::backdrop{background:rgba(0,0,0,.68)}
+.dfo-loot-dialog.dfo-loot-small{width:min(520px,92vw);max-height:min(440px,80vh)}
+.dfo-loot-dialog .wh{display:flex;align-items:center;gap:8px;padding:8px 12px 8px 14px;font-size:14px;letter-spacing:.05em;color:#f6e7b0;border-bottom:1px solid rgba(192,138,62,.25);user-select:none;flex-shrink:0}
+.dfo-loot-dialog .wh .t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600;text-transform:uppercase}
+.dfo-loot-dialog .wh button{background:none;border:0;color:var(--dim,#a9a08a);cursor:pointer;font:inherit;font-size:15px;padding:2px 6px;border-radius:2px;transition:color .15s,background .15s}
+.dfo-loot-dialog .wh button:hover{color:#fff;background:rgba(255,255,255,.08)}
+.dfo-loot-dialog .wb{overflow-y:auto;overscroll-behavior:contain;padding:12px 16px 14px;font-size:12.5px;line-height:1.45;min-height:0;flex:1}
+.dfo-loot-dialog .acts{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:8px 14px;border-top:1px solid rgba(192,138,62,.2);background:rgba(18,21,26,.6);flex-shrink:0}
+.dfo-loot-footer-btns{display:flex;gap:8px;margin-left:auto}
+
+.dfo-loot-dialog p{margin:6px 0}
+.dfo-loot-dialog fieldset{min-width:0;max-width:100%;border:1px solid rgba(192,138,62,.25);border-radius:2px;padding:8px 10px 10px;margin:8px 0;background:rgba(16,19,24,.4)}
+.dfo-loot-dialog legend{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim,#a9a08a);padding:0 4px}
+.dfo-loot-dialog input,.dfo-loot-dialog select{box-sizing:border-box;font:inherit;font-size:12px;color:var(--bone,#f1e6c8);background:rgba(22,26,33,.85);border:1px solid rgba(192,138,62,.35);border-radius:2px;padding:5px 8px}
+.dfo-loot-dialog input[type="checkbox"]{accent-color:#d8b34f;width:14px;height:14px;margin:0;cursor:pointer}
+.dfo-loot-dialog label{display:flex;align-items:center;gap:6px}
+.dfo-loot-modes{display:flex;gap:6px;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid rgba(192,138,62,.2)}
+.dfo-loot-tag-controls{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 6px}
+.dfo-loot-tag-controls input{flex:1;min-width:140px}
+
+.dfo-loot-tags{min-width:0;width:100%;box-sizing:border-box;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 8px;max-height:48vh;overflow-y:auto;overflow-x:hidden;padding:4px 4px 8px 0;scrollbar-width:thin;scrollbar-color:rgba(192,138,62,.5) rgba(22,26,33,.8)}
+.dfo-loot-tag{box-sizing:border-box;display:flex;align-items:center;gap:6px;padding:4px 7px;font-size:11.5px;background:rgba(35,42,50,.45);border:1px solid rgba(192,138,62,.22);border-radius:2px;cursor:pointer;user-select:none;min-height:28px;min-width:0;transition:background .12s,border-color .12s}
+.dfo-loot-tag:hover{background:rgba(48,58,70,.6);border-color:rgba(192,138,62,.5)}
+.dfo-loot-tag:has(input:checked){background:rgba(78,127,114,.28);border-color:rgba(192,138,62,.75);color:#f6e7b0}
+.dfo-loot-tag .t-grp{color:var(--dim,#a9a08a);font-size:10.5px;flex-shrink:0}
+.dfo-loot-tag .t-lbl{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+.dfo-loot-form{margin:4px 0}
+.dfo-loot-form input[type="text"]{width:100%;margin-top:4px}
+.dfo-loot-list{display:flex;flex-direction:column;gap:4px;max-height:38vh;overflow-y:auto;margin:8px 0}
+.dfo-loot-list button{text-align:left;padding:6px 10px;background:rgba(35,42,50,.45);border:1px solid rgba(192,138,62,.25);border-radius:2px;color:var(--bone,#f1e6c8);font-size:12px}
+.dfo-loot-list button:hover{background:rgba(48,58,70,.6);border-color:rgba(192,138,62,.5)}
+.dfo-loot-list button[aria-selected="true"]{background:rgba(78,127,114,.35);border-color:#f2c443;color:#f6e7b0}
+.dfo-loot-status{min-height:1.4em;font-size:11.5px;color:#9fd3c7}
+.dfo-loot-status[data-error="true"]{color:#ff9f98}
+.dfo-loot-note{color:var(--dim,#a9a08a);font-size:11.5px;margin:4px 0 8px;line-height:1.4}
+.dfo-loot-item-picker{max-height:220px;overflow-y:auto;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 8px;margin-top:6px}
+.dfo-loot-classicbar{position:fixed;bottom:12px;left:50%;transform:translateX(-50%);z-index:15;display:flex;gap:10px;padding:8px 12px;background:linear-gradient(180deg,rgba(23,27,33,.96),rgba(14,16,19,.98));border:1px solid rgba(192,138,62,.45);border-radius:3px;box-shadow:0 4px 16px rgba(0,0,0,.7)}
 `; doc.head.append(style);
     }
     function modal(title, { small = false, onClose = () => {} } = {}) {
       styles();
-      const focused = doc.activeElement, node = el('dialog', `dfo-loot-dialog${small ? ' dfo-loot-small' : ''}`);
-      const heading = el('h2', null, title); heading.id = `dfo-loot-heading-${Date.now()}-${stack.length}`;
-      node.setAttribute('aria-labelledby', heading.id); node.append(heading);
-      const status = el('p', 'dfo-loot-status'); status.setAttribute('role', 'status');
+      const focused = doc.activeElement;
+      const node = el('dialog', `dfo-panel dfo-win dfo-loot-dialog${small ? ' dfo-loot-small' : ''}`);
+      const wh = el('div', 'wh');
+      const heading = el('span', 't', title); heading.id = `dfo-loot-heading-${Date.now()}-${stack.length}`;
+      node.setAttribute('aria-labelledby', heading.id);
+      const wx = el('button', 'dfo-win-x', '✕'); wx.type = 'button'; wx.setAttribute('aria-label', `Закрыть окно «${title}»`);
+      wh.append(heading, wx);
+
+      const wb = el('div', 'wb');
+      const acts = el('div', 'acts');
+      const status = el('span', 'dfo-loot-status'); status.setAttribute('role', 'status');
+      const footerWrap = el('div', 'dfo-loot-footer-btns');
+      acts.append(status, footerWrap);
+
+      node.append(wh, wb, acts);
+
       const state = { node, title, close: null, message(text, error = false) { status.textContent = text; status.dataset.error = String(error); } };
       state.close = () => {
         if (!stack.includes(state)) return;
@@ -114,14 +173,18 @@
         stack.splice(stack.indexOf(state), 1); node.close(); node.remove(); onClose();
         if (focused?.isConnected) focused.focus();
       };
+      wx.onclick = e => { e.preventDefault(); e.stopPropagation(); state.close(); };
       node.addEventListener('cancel', e => { e.preventDefault(); e.stopPropagation(); state.close(); });
-      node.addEventListener('click', e => e.stopPropagation());
-      node.addEventListener('pointerdown', e => e.stopPropagation());
-      node.addEventListener('mousedown', e => e.stopPropagation());
-      node.addEventListener('mouseup', e => e.stopPropagation());
-      node.append(status); (doc.getElementById('enhanced-inventory') || doc.body).append(node);
+      for (const type of ['click', 'mousedown', 'mouseup', 'pointerdown', 'wheel']) node.addEventListener(type, e => e.stopPropagation());
+      doc.body.append(node);
       stack.push(state); node.showModal();
-      state.content = n => node.insertBefore(n, status);
+      state.content = n => {
+        if (n.classList?.contains('dfo-loot-footer')) {
+          footerWrap.replaceChildren(...n.childNodes);
+        } else {
+          wb.append(n);
+        }
+      };
       if (lastError) state.message(lastError, true);
       return state;
     }
@@ -133,10 +196,15 @@
       // select menu, then the top dialog via its cancel event. Do not close both.
     }, true);
     const footer = (...buttons) => { const n = el('div', 'dfo-loot-footer'); n.append(...buttons); return n; };
-    const checkbox = (text, checked, change, key) => {
+    const checkbox = (text, checked, change, key, group = null) => {
       const n = el('label', 'dfo-loot-tag'), input = el('input'); input.type = 'checkbox'; input.checked = checked;
       if (key) input.dataset.tag = key;
-      input.onchange = () => change(input.checked); n.append(input, el('span', null, text)); return n;
+      input.onchange = () => change(input.checked);
+      n.title = group ? `${group}: ${text}` : text;
+      n.append(input);
+      if (group) { const g = el('span', 't-grp', `${group}:`); n.append(g); }
+      n.append(el('span', 't-lbl', text));
+      return n;
     };
     function tagPicker(selected, changed) {
       const all = Rules.catalog(tools()), picked = new Set(selected), host = el('fieldset'), controls = el('div', 'dfo-loot-tag-controls');
@@ -149,20 +217,19 @@
       }
       const search = el('input'); search.type = 'search'; search.placeholder = 'Найти тег'; search.setAttribute('aria-label', 'Поиск тегов');
       controls.append(axis, search); host.append(controls);
-      const grid = el('div', 'dfo-loot-tags'); grid.setAttribute('aria-label', 'Теги в два ряда'); host.append(grid);
+      const grid = el('div', 'dfo-loot-tags'); grid.setAttribute('aria-label', 'Теги в две колонки'); host.append(grid);
       const count = el('p', 'dfo-loot-note'); host.append(count);
       const render = () => {
         grid.replaceChildren(); const query = search.value.trim().toLocaleLowerCase();
         for (const t of all) {
           if (axis.value !== 'all' && t.axis !== axis.value) continue;
           if (query && !`${t.label} ${t.group}`.toLocaleLowerCase().includes(query)) continue;
-          grid.append(checkbox(`${t.group}: ${t.label}`, picked.has(t.id), yes => {
+          grid.append(checkbox(t.label, picked.has(t.id), yes => {
             if (yes) picked.add(t.id); else picked.delete(t.id); changed([...picked]); updateCount();
-          }, t.id));
+          }, t.id, t.group));
         }
       };
-      const updateCount = () => { count.textContent = `Выбрано: ${picked.size}. Совпадение хотя бы одного тега. Ряды можно прокручивать колесом.`; };
-      grid.addEventListener('wheel', e => { if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return; const was = grid.scrollLeft; grid.scrollLeft += e.deltaY; if (grid.scrollLeft !== was) { e.preventDefault(); e.stopPropagation(); } }, { passive: false });
+      const updateCount = () => { count.textContent = `Выбрано: ${picked.size}. Совпадение хотя бы одного тега. Выберите нужные теги в колонках.`; };
       host.sync = tags => {
         picked.clear(); for (const tag of tags) picked.add(tag);
         let added = false;
@@ -184,9 +251,10 @@
     }
     function saveDialog(parent) {
       const m = modal('Имя сохранённого фильтра', { small: true }), form = el('form', 'dfo-loot-form');
-      const label = el('label', null, 'Название'), input = el('input'); input.type = 'text'; input.maxLength = 60; input.required = true; input.name = 'presetName'; label.append(input); form.append(label);
-      const save = button('Сохранить', null); save.type = 'submit';
-      form.append(footer(save, button('Отмена', m.close)));
+      form.id = 'dfo-loot-save-form';
+      const label = el('label', null, 'Название: '), input = el('input'); input.type = 'text'; input.maxLength = 60; input.required = true; input.name = 'presetName'; label.append(input); form.append(label);
+      const save = button('Сохранить', () => form.requestSubmit()); save.type = 'button';
+      const cancel = button('Отмена', m.close, 'dfo-btn-sec');
       form.onsubmit = async e => {
         e.preventDefault(); if (save.disabled) return; save.disabled = true;
         try {
@@ -197,7 +265,9 @@
         }
         catch (err) { m.message(errorOf(err), true); } finally { save.disabled = false; }
       };
-      m.content(form); input.focus();
+      m.content(form);
+      m.content(footer(save, cancel));
+      input.focus();
     }
     async function loadDialog(parent) {
       const m = modal('Загрузить фильтр', { small: true });
@@ -208,7 +278,7 @@
         try { await client.update({ filter: chosen.filter }); parent.sync?.(); parent.message(`Загружен фильтр «${chosen.name}».`); m.close(); }
         catch (e) { m.message(errorOf(e), true); } finally { load.disabled = false; }
       }); load.disabled = true;
-      m.content(list); m.content(footer(load, button('Отмена', m.close)));
+      m.content(list); m.content(footer(load, button('Отмена', m.close, 'dfo-btn-sec')));
       try { await client.refresh(); } catch (e) { m.message(errorOf(e), true); }
       if (!m.node.isConnected) return;
       for (const p of client.get().presets) {
@@ -235,7 +305,7 @@
         for (const [id, b] of buttons) b.setAttribute('aria-pressed', String(f.mode === id));
         picker.sync(f.tags);
       };
-      m.sync(); m.content(footer(button('Сохранить', () => saveDialog(m)), button('Загрузить', () => loadDialog(m)), button('Закрыть', m.close)));
+      m.sync(); m.content(footer(button('Сохранить', () => saveDialog(m)), button('Загрузить', () => loadDialog(m)), button('Закрыть', m.close, 'dfo-btn-sec')));
     }
     function autoDialog() {
       if (stack.length) return;
@@ -272,13 +342,13 @@
         for (const input of list.querySelectorAll('input[data-item-key]')) input.checked = a.items.includes(input.dataset.itemKey);
         updateInfo();
       };
-      search.oninput = () => { limit = 40; render(); }; render(); m.content(host); m.content(footer(button('Закрыть', m.close)));
+      search.oninput = () => { limit = 40; render(); }; render(); m.content(host); m.content(footer(button('Закрыть', m.close, 'dfo-btn-sec')));
     }
     function toolbar(parent, loot, refresh, options = {}) {
       if (!loot?.nearby) return;
       styles(); activeLoot = loot; repaint = refresh;
       const bar = el('div', 'dfo-loot-actions');
-      for (const type of ['click', 'pointerdown', 'mousedown', 'mouseup']) bar.addEventListener(type, e => e.stopPropagation());
+      for (const type of ['click', 'pointerdown', 'mousedown', 'mouseup', 'wheel']) bar.addEventListener(type, e => e.stopPropagation());
       const auto = button('Автолут', autoDialog); auto.dataset.autoButton = 'true'; auto.setAttribute('aria-pressed', String(client.get().autoLoot.enabled));
       const status = el('span', 'dfo-loot-status', lastError); status.setAttribute('role', 'status');
       const take = button('Забрать все', () => {

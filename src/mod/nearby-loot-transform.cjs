@@ -49,6 +49,7 @@ function dungeon(text) {
   const tail = need(body, rx(`let (${ID})=(${ID})\\(${start[1]}\\),(${ID})=(${ID})\\((${ID}),(${ID}),\\{lootHooks:(${ID}),lootKey:\\1\\}\\);return \\3&&\\((${ID})=\\3\\),\\3&&\\1&&\\((${ID})=\\1,(${ID})\\(\\1,\\{claim:!0\\}\\)\\),\\3&&(${ID})&&(${ID})\\(\\11\\.kind,\\11\\.key\\),\\5\\.length`));
   const [key, canonical, win, factory, items, emptied, hooks, overlay, openKey, publish, find, silver] = tail.slice(1);
   const drop = need(body, rx(`if\\((${ID})\\.physical\\.owns\\(`))[1];
+  const colMatch = need(text, rx(`${drop}\\.physical\\.attach\\(\\{collider:\\(\\)=>(${ID})`))[1];
   const f = need(text, rx(`function ${factory}\\(${ID},${ID}=null,\\{wagonPrompt:${ID}=!1,lootHooks:${ID}=null,lootKey:${ID}=null\\}=\\{\\}\\)\\{return ${ID}\\(\\{[\\s\\S]{0,400}?items:\\(\\)=>(${ID})\\.items`));
   const near = need(text.slice(f.index, f.index + 1000), rx(`nearExit:\\(\\)=>!!(${ID})&&`))[1];
   const insertion = `if(_dfoVisit){const _dfoKey=${canonical}(${start[1]}),_dfoWas=${openKey};let _dfoMoved=false;try{if(_dfoKey){${openKey}=_dfoKey;${publish}(_dfoKey,{claim:true})}_dfoMoved=_dfoVisit(${items})!==false;return _dfoMoved}finally{if(_dfoMoved&&${find})${silver}(${find}.kind,${find}.key);${openKey}=_dfoWas;if(_dfoKey)${publish}(_dfoKey);${emptied}?.();${drop}.releaseEmptied()}}`;
@@ -60,7 +61,7 @@ function dungeon(text) {
   if (!body.includes(quick)) throw new Error('missing dungeon quick door');
   body = body.replace(quick, insertion + quick);
   const quest = need(body, rx(`getQuest:(${ID}=>[^,]{1,150}),took:`))[1];
-  const getter = `get dfoNearbyLoot(){const api=this;return {kind:"dungeon",entity:${f[1]},getQuest:${quest},feet:()=>${near},collider:()=>api.collider,blocked:()=>api.uiOverlayActive,sources:()=>api.lootTargets().filter(t=>/^(loot|corpse|droppedLoot):/.test(t.key)&&!t.key.startsWith("droppedLoot:pi")).filter(t=>!t.key.startsWith("droppedLoot:")||globalThis.__dfoLootGround(${drop}.pileFor(t.key))).map(t=>({...t,items:()=>api.lootContents(t.key),visit:fn=>api.takeLoot(t.key,"grab",[],fn)})),open:loot=>{if(!api.openLootList(loot.items(),loot))return null;return api.overlayWindow()}}},`;
+  const getter = `get dfoNearbyLoot(){const api=this;return {kind:"dungeon",entity:${f[1]},getQuest:${quest},feet:()=>${near},collider:()=>${colMatch},blocked:()=>api.uiOverlayActive,sources:()=>api.lootTargets().filter(t=>/^(loot|corpse|droppedLoot):/.test(t.key)&&!t.key.startsWith("droppedLoot:pi")).filter(t=>!t.key.startsWith("droppedLoot:")||globalThis.__dfoLootGround(${drop}.pileFor(t.key))).map(t=>({...t,items:()=>api.lootContents(t.key),visit:fn=>api.takeLoot(t.key,"grab",[],fn)})),open:loot=>{if(!api.openLootList(loot.items(),loot))return null;return api.overlayWindow()}}},`;
   return text.slice(0, start.index) + getter + body + text.slice(end);
 }
 

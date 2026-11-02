@@ -29,14 +29,30 @@ func validLootKey(code string) bool {
 	return named || simpleLootKey.MatchString(code)
 }
 
+func resolveLootKey(st *gameStatus) string {
+	if st == nil {
+		return defaultLootKey
+	}
+	if validLootKey(st.CachedLootKey) {
+		return st.CachedLootKey
+	}
+	return configuredLootKey(st.Cfg)
+}
+
 func configuredLootKey(raw json.RawMessage) string {
 	var cfg struct {
+		Cached  string `json:"cachedLootKey"`
 		Options struct {
 			Code string `json:"keyCode"`
 		} `json:"nearbyLootOptions"`
 	}
-	if json.Unmarshal(raw, &cfg) == nil && cfg.Options.Code != "" {
-		return cfg.Options.Code
+	if json.Unmarshal(raw, &cfg) == nil {
+		if validLootKey(cfg.Cached) {
+			return cfg.Cached
+		}
+		if validLootKey(cfg.Options.Code) {
+			return cfg.Options.Code
+		}
 	}
 	return defaultLootKey
 }

@@ -131,7 +131,7 @@ const server = http.createServer(async (req, res) => {
     const black=filter.getByRole('button',{name:'Чёрный список',exact:true}),white=filter.getByRole('button',{name:'Белый список',exact:true});
     assert.equal(await black.getAttribute('aria-pressed'),'true');
     await white.click();assert.equal(await white.getAttribute('aria-pressed'),'true');assert.equal(await black.getAttribute('aria-pressed'),'false');
-    assert.equal(await white.evaluate(n=>getComputedStyle(n).backgroundColor),'rgb(216, 179, 79)');
+    await page.waitForFunction(()=>getComputedStyle([...document.querySelectorAll('.dfo-loot-modes button')].find(n=>n.getAttribute('aria-pressed')==='true')).backgroundColor==='rgb(216, 179, 79)');
     await page.evaluate(()=>__dfoLootSettings.flush());
     failNextSettings=true; await black.click();
     await page.waitForFunction(()=>document.querySelector('.dfo-loot-dialog [role="status"]').textContent.includes('ошибка записи'));
@@ -145,9 +145,19 @@ const server = http.createServer(async (req, res) => {
     await filter.locator('input[data-tag="type:Weapons:131"]').check();
     await filter.getByRole('combobox',{name:'Группа тегов'}).click();await page.keyboard.press('Escape');
     assert.equal(await filter.count(),1,'Escape dismisses an open native select without closing its dialog');
-    assert.equal(await filter.locator('.dfo-loot-tags').evaluate(n=>getComputedStyle(n).gridTemplateRows.split(' ').length),2);
+    assert.equal(await filter.locator('.dfo-loot-tags').evaluate(n=>getComputedStyle(n).gridTemplateColumns.split(' ').length),2);
     assert.ok(await page.evaluate(()=>__dfoLootRules.catalog(__dfoLootTools).length)>300,'catalog is game-wide, not just nearby drops');
     if(process.env.DFO_SCREENSHOT_DIR){fs.mkdirSync(process.env.DFO_SCREENSHOT_DIR,{recursive:true});await page.screenshot({path:path.join(process.env.DFO_SCREENSHOT_DIR,'loot-filter.png')});}
+    await page.setViewportSize({width:720,height:600});
+    assert.equal(await filter.evaluate(n=>{const r=n.getBoundingClientRect();return r.left>=0&&r.right<=innerWidth&&r.top>=0&&r.bottom<=innerHeight}),true,'filter stays within a small viewport');
+    assert.equal(await filter.getByRole('button',{name:'Закрыть',exact:true}).evaluate(n=>{const r=n.getBoundingClientRect();return r.top>=0&&r.bottom<=innerHeight}),true,'filter footer remains reachable');
+    assert.equal(await filter.locator('.wb').evaluate(n=>n.scrollWidth<=n.clientWidth),true,'filter body must not overflow horizontally');
+    await filter.locator('.dfo-loot-tags').evaluate(n=>{n.scrollTop=n.scrollHeight});
+    await filter.locator('.dfo-loot-tag').last().click();
+    await filter.locator('.dfo-loot-tag').last().click();
+    if(process.env.DFO_SCREENSHOT_DIR)await page.screenshot({path:path.join(process.env.DFO_SCREENSHOT_DIR,'loot-filter-small.png')});
+    await page.evaluate(()=>__dfoLootSettings.flush());
+    await page.setViewportSize({width:1400,height:900});
     assert.deepEqual(await page.evaluate(()=>fixture.a.length),1201,'changing a display filter moved no loot');
     await filter.getByRole('button',{name:'Сохранить',exact:true}).click();
     let nameDialog=page.getByRole('dialog',{name:'Имя сохранённого фильтра',exact:true});

@@ -66,3 +66,32 @@ func TestLootKeyChoiceReachesInstallWithoutReplacingAnUnchangedBinding(t *testin
 		t.Fatal("changed legacy default")
 	}
 }
+
+func TestResolveLootKeyPrefersCache(t *testing.T) {
+	stWithCache := &gameStatus{
+		CachedLootKey: "Mouse4",
+		Cfg:           json.RawMessage(`{"nearbyLootOptions":{"keyCode":"KeyK"}}`),
+	}
+	if got := resolveLootKey(stWithCache); got != "Mouse4" {
+		t.Fatalf("expected Mouse4 from cache, got %s", got)
+	}
+
+	stOnlyCfg := &gameStatus{
+		Cfg: json.RawMessage(`{"nearbyLootOptions":{"keyCode":"KeyK"}}`),
+	}
+	if got := resolveLootKey(stOnlyCfg); got != "KeyK" {
+		t.Fatalf("expected KeyK from cfg, got %s", got)
+	}
+
+	stInvalidCache := &gameStatus{
+		CachedLootKey: "InvalidKeyName",
+		Cfg:           json.RawMessage(`{"nearbyLootOptions":{"keyCode":"KeyK"}}`),
+	}
+	if got := resolveLootKey(stInvalidCache); got != "KeyK" {
+		t.Fatalf("expected KeyK on invalid cache key, got %s", got)
+	}
+
+	if got := resolveLootKey(nil); got != defaultLootKey {
+		t.Fatalf("expected default %s for nil status, got %s", defaultLootKey, got)
+	}
+}

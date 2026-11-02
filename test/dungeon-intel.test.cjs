@@ -97,6 +97,53 @@ test('unsupported and event/zone dungeons do not acquire fabricated ratings or m
   const m=M.forecast(place(),{level:20,skills:[]},{});assert.equal(m.ready,false);assert.equal(m.scores.threat,null);assert.equal(m.scores.loot,null);assert.equal(m.meanLevel,null);assert.equal(m.hp,null);
 });
 
+test('spawned dungeon timer formats remaining lifetime cleanly as "Исчезнет через: X ч. Yм."', () => {
+  assert.equal(M.formatRemaining(30720000), '8 ч. 32м.');
+  assert.equal(M.formatRemaining(300000), '0 ч. 05м.');
+  assert.equal(M.formatRemaining(60000), '0 ч. 01м.');
+  assert.equal(M.formatRemaining(0), 'срок истёк');
+  assert.equal(M.formatRemaining(-5000), 'срок истёк');
+  assert.equal(M.formatRemaining(NaN), 'срок истёк');
+
+  const now = 1000000000;
+  const tools = {
+    now: () => now,
+    spawnRecord: () => ({ seen: 10 }),
+    spawnDeath: () => 100,
+    wallTime: () => now + 30720000,
+  };
+  const spawned = place({ spawned: true });
+  const life = M.lifetime(spawned, tools);
+  assert.equal(life.kind, 'spawned');
+  assert.equal(life.remaining, '8 ч. 32м.');
+  assert.equal(life.timerText, 'Исчезнет через: 8 ч. 32м.');
+  assert.equal(life.text, 'порождённый, Исчезнет через: 8 ч. 32м.');
+
+  const expiredTools = { ...tools, wallTime: () => now - 1000 };
+  const expLife = M.lifetime(spawned, expiredTools);
+  assert.equal(expLife.expired, true);
+  assert.equal(expLife.remaining, 'срок истёк');
+  assert.equal(expLife.timerText, 'срок истёк');
+  assert.equal(expLife.text, 'порождённый, срок истёк');
+});
+
+test('forecast cleans coordinates and redundant Elite prefix from dungeon name and title', () => {
+  const p = place({ name: "Elite Hawkwind's Hold (396,344)", mapTableData: { dungeonType: 0 } });
+  const f = M.forecast(p, { level: 20, skills: [] }, { size: () => 'Medium' });
+  assert.equal(f.name, "Hawkwind's Hold");
+  assert.equal(f.rawName, "Elite Hawkwind's Hold (396,344)");
+  assert.match(f.title, /\[Крипта - \? ранг\] M Hawkwind's Hold/);
+});
+
+test('dungeon transform decorates travelView marks loop with dfoDungeon preservation', () => {
+  const { transformDungeons } = require('../src/mod/dungeon-transform.cjs');
+  const dummy = 'for(let t of e.marks?.()??[]){let e=l(t.at);d.push({key:t.key,x:e?.x??0,y:e?.y??0});}e.hud.update({marks:d,routeDots:[]});';
+  const log = [];
+  const out = transformDungeons('assets/travelView-test.js', dummy, log);
+  assert.deepEqual(log, [['dungeon.travelView', 1]]);
+  assert.ok(out.includes('d.push({dfoDungeon:t.dfoDungeon,key:t.key,'));
+});
+
 test('lifetime reads the real ledger deadline; missing records stay unknown and permanent dungeons have no timer', native, async()=>{
   const {spawnDeath}=await load('src/world/spawnedDungeons.js'),{sharedClassicMinutes,wallMsForClassicMinutes}=await load('src/net/wire.js');
   const now=Date.UTC(2026,10,2,12),minutes=sharedClassicMinutes(now),rec={seen:minutes-60,cleared:minutes-20};

@@ -2,6 +2,7 @@
 (function (root) {
   'use strict';
   const TYPES = ['Крипта', 'Орочья твердыня', 'Людская твердыня', 'Тюрьма', 'Осквернённый храм', 'Шахта', 'Природная пещера', 'Ковен', 'Логово вампиров', 'Лаборатория', 'Гнездо гарпий', 'Разрушенный замок', 'Паучье гнездо', 'Твердыня великанов', 'Логово дракона', 'Крепость варваров', 'Вулканические пещеры', 'Гнездо скорпионов', 'Кладбище'];
+  const SHARE = [0.88, 0.88, 0.22, 0.44, 1.0, 0.11, 0.11, 1.0, 1.0, 1.0, 0.44, 0.22, 0.22, 0.88, 1.0, 1.0, 1.0, 0.44, 0.22];
   const FAMILY = { undead: 'нежить', daedra: 'даэдра и магические создания', dragon: 'драконы', beast: 'звери и природные создания', brute: 'орки и великаны', caster: 'маги', rogue: 'разбойники', warrior: 'воины' };
   const METALS = ['Железо', 'Сталь', 'Серебро', 'Эльфийский', 'Двемерский', 'Мифрил', 'Адамантий', 'Эбонит', 'Орочий', 'Даэдрический'];
   const MATERIALS = { 'metal:silver': 'серебро', 'metal:gold': 'золото', 'ore:dwarven': 'двемерская руда', 'metal:platinum': 'платина', 'ore:adamantium': 'адамантиевая руда', 'ore:moonstone': 'лунный камень' };
@@ -39,13 +40,25 @@
     return !!loc?.hasDungeon && Number.isInteger(loc.mapTableData?.dungeonType) && TYPES[loc.mapTableData.dungeonType] !== undefined
       && !loc.superTier && !loc.wildHall && !loc.madeLevel && !loc.arenaFloor && !loc.arenaUndercroft;
   }
+  function formatRemaining(ms) {
+    if (!finite(ms) || ms <= 0) return 'срок истёк';
+    const totalMinutes = Math.max(1, Math.floor(ms / 60000));
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    const mm = minutes < 10 ? '0' + minutes : String(minutes);
+    return `${hours} ч. ${mm}м.`;
+  }
+
   function lifetime(place, tools) {
     const loc = place.loc;
     if (!loc.spawned) return { kind: 'permanent', text: 'постоянный данж' };
     const rec = call(tools.spawnRecord, place), at = rec && call(tools.spawnDeath, rec), wall = finite(at) ? call(tools.wallTime, at) : null;
     if (!finite(wall)) return { kind: 'spawned', text: 'порождённый, таймер неизвестен', cleared: finite(rec?.cleared) };
-    const expired = wall <= (call(tools.now) ?? Date.now());
-    return { kind: 'spawned', text: `порождённый, ${expired ? 'срок истёк' : new Date(wall).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}`, expires: wall, cleared: finite(rec.cleared), expired };
+    const now = call(tools.now) ?? Date.now();
+    const expired = wall <= now;
+    const remaining = expired ? 'срок истёк' : formatRemaining(wall - now);
+    const timerText = expired ? 'срок истёк' : `Исчезнет через: ${remaining}`;
+    return { kind: 'spawned', text: `порождённый, ${timerText}`, timerText, remaining, expires: wall, cleared: finite(rec?.cleared), expired };
   }
 
   function forecast(place, player, tools = {}, note = null) {
@@ -56,7 +69,7 @@
     const choices = call(tools.tables, type) ?? [], tableList = Array.isArray(choices[0]) ? choices : [];
     const mix = new Map(), alternate = call(tools.alternate) === true;
     for (const table of tableList) for (const row of distribution(table, level, alternate)) mix.set(row.type, (mix.get(row.type) || 0) + row.probability / tableList.length);
-    const lootOn = call(tools.lootOn) !== false, standing = call(tools.standing, player), share = call(tools.share, type), placeThreat = call(tools.placeVeteran, rank), hero = call(tools.hero, player);
+    const lootOn = call(tools.lootOn) !== false, standing = call(tools.standing, player), share = call(tools.share, type) ?? SHARE[type] ?? 0, placeThreat = call(tools.placeVeteran, rank), hero = call(tools.hero, player);
     const skillIds = tools.skillIds ?? [], bestSkill = Math.max(0, ...skillIds.map(id => player?.skills?.[id] || 0));
     const weapon = call(tools.weapon, player), weaponMetal = finite(weapon?.material) ? weapon.material : null;
     const rows = [...mix].map(([id, probability]) => {
@@ -91,10 +104,12 @@
     const aurumId = online ? call(tools.aurumKey, loc) : null, aurum = aurumId ? call(tools.aurumAmount, aurumId) : null;
     const family = call(tools.family, type), signatures = family ? call(tools.signatures, family) ?? [] : [];
     const eliteSlots = online || lootOn ? call(tools.eliteSlots, loc.dungeon?.recordElement?.header?.locationId ?? loc.name ?? '', elite) : 0;
-    const title = `[${TYPES[type]} - ${rank ?? '?'} ранг] ${size} ${loc.name || 'Без названия'}`;
-    return { title, name: loc.name, type, typeName: TYPES[type], rank, size, elite, online, level, bestSkill, luck, lootOn, alternate,
+    const rawName = loc.name || 'Без названия';
+    const cleanName = rawName.replace(/\s*\(-?\d+,\s*-?\d+\)$/, '').replace(/^Elite\s+/i, '');
+    const title = `[${TYPES[type]} - ${rank ?? '?'} ранг] ${size} ${cleanName}`;
+    return { title, name: cleanName, rawName, type, typeName: TYPES[type], rank, size, elite, online, level, bestSkill, luck, lootOn, alternate,
       life, rows, scores, boss, blocked, hp, damage, meanLevel, growthWeight, weaponMetal, weaponName: weapon?.name,
-      ready, choices: tableList.length, family, signatures, chances, xp, renown, identity, veins, aurum, aurumId,
+      ready, choices: tableList.length, family, signatures, chances, xp, renown, identity, veins, aurum, aurumId, share,
       aurumTaken: aurumId ? call(tools.aurumTaken, aurumId) : null, respawn: call(tools.respawn, { elite }), eliteSlots,
       color: dominant?.[1] >= 0.5 ? COLORS[dominant[0]] || COLORS.other : COLORS.other, note,
       metadata: `${elite ? 'Элитный' : 'Обычный'} данж, ${life.text}` };
@@ -107,6 +122,6 @@
     return { id: String(value.id), at: value.at, online: value.online === true, counts, alive: count(value.alive), dead: count(value.dead),
       piles: count(value.piles), corpses: count(value.corpses), doors: count(value.doors), openDoors: count(value.openDoors) };
   }
-  const api = { TYPES, FAMILY, METALS, MATERIALS, COLORS, SKULL, distribution, eligible, lifetime, forecast, cleanNote, number };
+  const api = { TYPES, SHARE, FAMILY, METALS, MATERIALS, COLORS, SKULL, distribution, eligible, lifetime, formatRemaining, forecast, cleanNote, number };
   if (typeof module === 'object' && module.exports) module.exports = api; else root.__dfoDungeonModel = api;
 })(globalThis);

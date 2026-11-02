@@ -22,7 +22,7 @@ test('distribution installer: install, reinstall and uninstall preserve original
     const original=fs.readFileSync(asar);
     fs.mkdirSync(user);fs.writeFileSync(path.join(user,'dfo-mod.json'),JSON.stringify({nearbyLootOptions:{keyCode:'KeyK',customOption:123},marks:false}));
     const cache=Buffer.from(JSON.stringify({towns:{kept:true},loot:{revision:7,presets:[]},dungeons:{'12345':{at:1}}}));fs.writeFileSync(path.join(user,'dfo-mod-cache.json'),cache);
-    const run=(cmd,...args)=>cp.execFileSync(process.execPath,[path.join(dist,'patcher/patcher.cjs'),cmd,'--asar',asar,'--user-data',user,...args],{encoding:'utf8'});
+    const run=(cmd,...args)=>cp.execFileSync(process.execPath,[path.join(dist,'patcher/patcher.cjs'),cmd,'--no-proc-check','--asar',asar,'--user-data',user,...args],{encoding:'utf8'});
     for(let i=0;i<2;i++){
       run('install');
       const a=openAsar(asar),files=listFiles(a.header);
@@ -43,13 +43,39 @@ test('distribution installer: install, reinstall and uninstall preserve original
     run('install','--loot-key','Mouse5');run('install');
     cfg=JSON.parse(fs.readFileSync(path.join(user,'dfo-mod.json')));assert.equal(cfg.nearbyLootOptions.keyCode,'Mouse5');assert.equal(cfg.nearbyLootOptions.customOption,123);
     const beforeInvalid=fs.readFileSync(asar),configBeforeInvalid=fs.readFileSync(path.join(user,'dfo-mod.json'));
-    const invalid=cp.spawnSync(process.execPath,[path.join(dist,'patcher/patcher.cjs'),'install','--asar',asar,'--user-data',user,'--loot-key','Mouse6'],{encoding:'utf8'});
+    const invalid=cp.spawnSync(process.execPath,[path.join(dist,'patcher/patcher.cjs'),'install','--no-proc-check','--asar',asar,'--user-data',user,'--loot-key','Mouse6'],{encoding:'utf8'});
     assert.notEqual(invalid.status,0);assert.match(invalid.stdout+invalid.stderr,/Некорректная кнопка лута/);
     assert.deepEqual(fs.readFileSync(asar),beforeInvalid);assert.deepEqual(fs.readFileSync(path.join(user,'dfo-mod.json')),configBeforeInvalid);
     current=openAsar(asar);assert.equal(listFiles(current.header).has('dfo-mod/page/ru_dict.js'),true);current.close();
     assert.deepEqual(fs.readFileSync(asar+'.dfo-mod-original.bak'),original);
     run('uninstall');assert.deepEqual(fs.readFileSync(asar),original);
-    assert.deepEqual(fs.readFileSync(path.join(user,'dfo-mod-cache.json')),cache,'town, filter and dungeon caches survive every installer operation');
+    const finalCache=JSON.parse(fs.readFileSync(path.join(user,'dfo-mod-cache.json'),'utf8'));
+    assert.deepEqual(finalCache.towns,{kept:true});assert.equal(finalCache.loot?.revision,7);assert.deepEqual(finalCache.dungeons,{'12345':{at:1}});
+    assert.equal(finalCache.hotkeys?.loot,'Mouse5','hotkey must be saved in cache across installer operations');
+
+    // Verify that status and reinstall without --loot-key restore previously assigned hotkey from cache
+    const statusWithCache=JSON.parse(run('status','--json'));
+    assert.equal(statusWithCache.cachedLootKey,'Mouse5','status must read cached hotkey');
+    assert.equal(statusWithCache.cfg.nearbyLootOptions.keyCode,'Mouse5');
+    fs.unlinkSync(path.join(user,'dfo-mod.json'));
+    const statusNoConfig=JSON.parse(run('status','--json'));
+    assert.equal(statusNoConfig.cachedLootKey,'Mouse5','status must read cached hotkey even if config is absent');
+    assert.equal(statusNoConfig.cfg.nearbyLootOptions.keyCode,'Mouse5');
+    run('install');
+    const restoredCfg=JSON.parse(fs.readFileSync(path.join(user,'dfo-mod.json'),'utf8'));
+    assert.equal(restoredCfg.nearbyLootOptions.keyCode,'Mouse5','install must restore previously assigned hotkey from cache');
+    const beforeCacheFailure=fs.readFileSync(path.join(user,'dfo-mod-cache.json'));
+    const beforeCfgFailure=fs.readFileSync(path.join(user,'dfo-mod.json'));
+    fs.mkdirSync(path.join(user,'dfo-mod-cache.json.tmp'));
+    const failedCache=cp.spawnSync(process.execPath,[path.join(dist,'patcher/patcher.cjs'),'install','--no-proc-check','--asar',asar,'--user-data',user,'--loot-key','Mouse4'],{encoding:'utf8'});
+    assert.notEqual(failedCache.status,0);assert.match(failedCache.stdout+failedCache.stderr,/Не удалось сохранить/);
+    assert.deepEqual(fs.readFileSync(path.join(user,'dfo-mod-cache.json')),beforeCacheFailure);assert.deepEqual(fs.readFileSync(path.join(user,'dfo-mod.json')),beforeCfgFailure);
+    fs.rmdirSync(path.join(user,'dfo-mod-cache.json.tmp'));
+    fs.writeFileSync(path.join(user,'dfo-mod-cache.json'),'{broken');
+    const beforeBadCacheAsar=fs.readFileSync(asar);
+    const badCache=cp.spawnSync(process.execPath,[path.join(dist,'patcher/patcher.cjs'),'install','--no-proc-check','--asar',asar,'--user-data',user,'--loot-key','Mouse4'],{encoding:'utf8'});
+    assert.notEqual(badCache.status,0);assert.match(badCache.stdout+badCache.stderr,/файлы клиента не изменены/);
+    assert.deepEqual(fs.readFileSync(asar),beforeBadCacheAsar);assert.equal(fs.readFileSync(path.join(user,'dfo-mod-cache.json'),'utf8'),'{broken');
   }finally{fs.rmSync(temp,{recursive:true,force:true});}
 });
 

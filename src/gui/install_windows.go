@@ -137,7 +137,7 @@ func (a *app) requestStatus(restoreChoices bool) {
 			a.toggles = loadChoices(st.Cfg, a.toggles)
 		}
 		if st != nil && !a.lootKeyDirty {
-			a.lootKey = configuredLootKey(st.Cfg)
+			a.lootKey = resolveLootKey(st)
 		}
 		if st == nil {
 			a.note = "Не удалось проверить клиент. Нажмите «Проверить» или выберите игру заново."
@@ -147,7 +147,12 @@ func (a *app) requestStatus(restoreChoices bool) {
 		if st == nil {
 			a.appendLog(fmt.Sprintf("Проверка клиента: %v\r\n%s\r\n", err, out))
 		} else {
-			a.appendLog("Кнопка лута в профиле: " + lootKeyLabel(configuredLootKey(st.Cfg)) + ". Профиль: " + st.UserData + "\r\n")
+			key := resolveLootKey(st)
+			source := "профиле"
+			if validLootKey(st.CachedLootKey) {
+				source = "кеше мода"
+			}
+			a.appendLog("Кнопка лута в " + source + ": " + lootKeyLabel(key) + ". Профиль: " + st.UserData + "\r\n")
 		}
 		pPostMessageW.Call(a.hwnd, wmStatus, 0, 0)
 	}()
@@ -178,10 +183,7 @@ func (a *app) run(what string) {
 	a.note = ""
 	a.stage = "Подготовка файлов…"
 	exe := a.exe
-	keyOverride := ""
-	if a.lootKeyDirty {
-		keyOverride = a.lootKey
-	}
+	keyOverride := a.lootKey
 	args := operationArgs(what, a.toggles, keyOverride)
 	a.mu.Unlock()
 	a.syncControls()

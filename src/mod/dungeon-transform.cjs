@@ -63,9 +63,15 @@ function hud(text) {
   return out;
 }
 
+function travelView(text) {
+  const m = need(text, rx(`\\{let (${ID})=(${ID})\\((${ID})\\.at\\);(${ID})\\.push\\(\\{key:\\3\\.key,`));
+  return text.replace(m[0], `{let ${m[1]}=${m[2]}(${m[3]}.at);${m[4]}.push({dfoDungeon:${m[3]}.dfoDungeon,key:${m[3]}.key,`);
+}
+
 function transformDungeons(rel, source, log) {
   const actions = [];
   if (/\/world-[^/]+\.js$/.test(rel)) actions.push(['dungeon.world', world]);
+  if (/\/travelView-[^/]+\.js$/.test(rel) || (source.includes('.marks?.()??[]') && source.includes('routeDots:'))) actions.push(['dungeon.travelView', travelView]);
   if (source.includes('GetRandomBlock() failed to find a suitable block.')) actions.push(['dungeon.layout', text => {
     const size = need(text, rx(`function (${ID})\\((${ID}),(${ID})=\\{\\}\\)\\{let (${ID})=${ID}\\(\\2,\\3\\);return \\4!==\`full\`&&${ID}\\(\\2,${ID}\\[\\4\\]\\)\\?\\4:\`full\`\\}`))[1];
     const curated = need(text, rx(`\\.whole\\?(${ID}):(${ID})\\(\\1\\)`))[2];

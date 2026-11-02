@@ -11,9 +11,9 @@ import sys
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 NAME = 'DFO-Client-Expander-RU'
 AUTHOR = 'AutomaticYobaMachine'
-VERSION = json.loads((ROOT / 'src/mod/version.json').read_text())['version']
+VERSION = json.loads((ROOT / 'src/mod/version.json').read_text(encoding='utf-8'))['version']
 GUI = ROOT / 'src/gui'
-if re.search(r'appVersion\s*=\s*"([^"]+)"', (GUI / 'options.go').read_text())[1] != VERSION:
+if re.search(r'appVersion\s*=\s*"([^"]+)"', (GUI / 'options.go').read_text(encoding='utf-8'))[1] != VERSION:
     raise ValueError('Installer and mod versions must match')
 
 

@@ -221,7 +221,8 @@ def main():
         assert cfg['marksOptions']['onlyVisited'] is False
         assert cfg['nearbyLootOptions']['keyCode']=='Mouse5' and cfg['custom']==123
         assert cfg['nearbyLootOptions']['customOption']==456
-        assert archive.read_bytes()!=original and cache.read_bytes()==cached
+        assert archive.read_bytes()!=original
+        assert json.loads(cache.read_text())=={**json.loads(cached), 'hotkeys': {'loot':'Mouse5'}}
         print('PASS install: chosen mouse binding and unrelated options/cache survive repeated game selection and installation',flush=True)
 
         state('close'); app.wait(timeout=15)
@@ -259,9 +260,16 @@ def main():
         state('click', 109)
         wait(lambda: archive.read_bytes()==original)
         wait(lambda: state()['by_id'][108]['Enabled'])
-        assert cache.read_bytes()==cached
+        assert json.loads(cache.read_text())=={**json.loads(cached), 'hotkeys': {'loot':'NumpadEnter'}}
         assert not archive.with_name(archive.name+'.dfo-mod-original.bak').exists()
         state('close'); app.wait(timeout=15); app=None
+        config.unlink()
+        app=launch()
+        wait(lambda:(s:=state()) and s['by_id'][108]['Visible'] and s['by_id'][108]['Enabled'] and s['by_id'][117]['Title']==winpath(game/'DFO Online.exe'))
+        assert state()['by_id'][120]['Title']=='Клавиша: NumPad Enter', 'cached binding must survive a missing config'
+        assert not config.exists(), 'status must not recreate or change the config'
+        assert archive.read_bytes()==original
+        state('close');app.wait(timeout=15);app=None
         print('PASS: standalone Win32 EXE; keyboard capture, Escape/focus/tab cancel, Space/Tab/Enter release safety, NumPad 0-9/navigation/operators/Enter, real mouse buttons 4/5, apply/preservation/restart; file picker/cancel, checkboxes/descriptions/focus scrolling, small window, selected install, journal/export/cancel, ASAR restoration and cache conservation')
     finally:
         if app and app.poll() is None:

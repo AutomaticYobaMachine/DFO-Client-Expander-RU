@@ -460,7 +460,7 @@ function injectPage(html, prefix, ctx) {
 /** The hooks a working install finds somewhere in the game's files - one missing from every file means that feature is
  *  off in this version of the game (the log says which). The other ids are older shapes of the same places. */
 const EXPECTED = Object.freeze({
-  dungeons: ['dungeon.world', 'dungeon.hud', 'dungeon.bestiary', 'dungeon.tables', 'dungeon.scaling', 'dungeon.rewards', 'dungeon.runtime', 'dungeon.lifetime', 'dungeon.aurum', 'dungeon.ore', 'dungeon.renown', 'dungeon.respawn', 'dungeon.layout', 'dungeon.sizes', 'dungeon.elites'],
+  dungeons: ['dungeon.world', 'dungeon.hud', 'dungeon.travelView', 'dungeon.bestiary', 'dungeon.tables', 'dungeon.scaling', 'dungeon.rewards', 'dungeon.runtime', 'dungeon.lifetime', 'dungeon.aurum', 'dungeon.ore', 'dungeon.renown', 'dungeon.respawn', 'dungeon.layout', 'dungeon.sizes', 'dungeon.elites'],
   nearbyLoot: ['loot.tags', 'loot.types', 'loot.kinds', 'loot.identified', 'loot.bound', 'loot.bootstrap', 'loot.world', 'loot.exterior', 'loot.modes', 'loot.dungeon', 'loot.inventory', 'loot.transfer', 'loot.arrows'],
   marks: ['marks.world', 'marks.townSources', 'marks.list', 'marks.look', 'marks.glyph', 'marks.groups', 'marks.words', 'marks.group', 'marks.discovery',
     'prices.shopAdj', 'prices.skills', 'prices.cost', 'prices.trade', 'prices.noGuild',

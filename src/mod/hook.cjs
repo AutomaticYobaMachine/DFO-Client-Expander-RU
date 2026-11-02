@@ -33,9 +33,14 @@ function wrap(handleDagger, { app = null } = {}) {
   try { userData = app?.getPath?.('userData') ?? null; } catch { userData = null; }
   const cfgFile = userData && path.join(userData, 'dfo-mod.json');
   const logFile = userData && path.join(userData, 'dfo-mod.log');
+  const lootStore = createLootStore(userData);
   let cfg = { ...DEFAULTS };
   try { if (cfgFile && fs.existsSync(cfgFile)) cfg = { ...DEFAULTS, ...JSON.parse(fs.readFileSync(cfgFile, 'utf8')) }; } catch (e) { cfg = { ...DEFAULTS }; }
   cfg.marksOptions = { ...DEFAULTS.marksOptions, ...(cfg.marksOptions ?? {}) };
+  try {
+    const keyCode = lootStore.lootKey();
+    if (keyCode) cfg.nearbyLootOptions = { ...DEFAULTS.nearbyLootOptions, ...cfg.nearbyLootOptions, keyCode };
+  } catch { /* An unreadable optional cache must not prevent the game starting. */ }
   const hasRu = fs.existsSync(path.join(__dirname, 'page', 'ru_dict.js'));
   const ru = !!cfg.ru && hasRu;
 
@@ -114,7 +119,6 @@ function wrap(handleDagger, { app = null } = {}) {
   /** THE TOWN MAP'S CACHE: towns' owners, players' guilds, guilds' names - read once at the page's start, written as the
    *  page says (a new file beside, then put in place: a crash mid-write never leaves half a cache). */
   const cacheFile = userData && path.join(userData, 'dfo-mod-cache.json');
-  const lootStore = createLootStore(userData);
   const readCache = () => {
     try { return cacheFile && fs.existsSync(cacheFile) ? fs.readFileSync(cacheFile) : Buffer.from('{}'); } catch (e) { log(`cache read: ${e?.message ?? e}`); return Buffer.from('{}'); }
   };

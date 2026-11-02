@@ -61,7 +61,7 @@ jobs:
         shell: bash
         run: |
           (cd src/gui && go test ./...)
-          node --test test/packaging.test.cjs test/loot-input.test.cjs
+          node --test test/packaging.test.cjs test/loot-input.test.cjs test/local-import.test.cjs test/dungeon-intel.test.cjs
           (cd dist && sha256sum --check "DFO-Client-Expander-RU-$RELEASE_VERSION.exe.sha256" \
             "DFO-Client-Expander-RU-$RELEASE_VERSION.zip.sha256")
 

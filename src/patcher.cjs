@@ -22,6 +22,7 @@ const MOD = path.join(ROOT, 'mod');
 const DATA = path.join(ROOT, 'data');
 const BAK = '.dfo-mod-original.bak';
 const VERSION = JSON.parse(fs.readFileSync(path.join(MOD, 'version.json'), 'utf8')).version;
+const { createLootStore, validLootKey: validKey, cachedLootKey } = require(path.join(MOD, 'loot-store.cjs'));
 
 const args = process.argv.slice(2);
 const cmd = args.find((a) => !a.startsWith('--')) ?? 'install';
@@ -56,7 +57,7 @@ function gameRunning() {
     const m = /^"([^"]+)","(\d+)"/.exec(line);
     if (!m || Number(m[2]) === process.pid) continue;
     const n = m[1].toLowerCase();
-    if (n === me || /^(dfo online|daggerfall online|daggerfallonline)\.exe$/.test(n)) return true;
+    if ((me !== 'node.exe' && n === me) || /^(dfo online|daggerfall online|daggerfallonline)\.exe$/.test(n)) return true;
   }
   return false;
 }
@@ -93,10 +94,25 @@ function hookMain(src) {
 function writeConfig(ud, withRu) {
   fs.mkdirSync(ud, { recursive: true });
   const file = path.join(ud, 'dfo-mod.json');
+  const store = createLootStore(ud);
   let cfg = { enabled: true, ru: withRu, marks: true, nearbyLoot: true, dungeons: true, nearbyLootOptions: { keyCode: 'KeyJ' }, marksOptions: { onlyVisited: true, markRadiusM: 1200, nameRadiusM: 300, maxMarks: 60 } };
   try { if (fs.existsSync(file)) cfg = { ...cfg, ...JSON.parse(fs.readFileSync(file, 'utf8')) }; } catch { /* a broken file is written again */ }
   cfg.marksOptions = { onlyVisited: true, markRadiusM: 1200, nameRadiusM: 300, maxMarks: 60, ...(cfg.marksOptions ?? {}) };
-  if (opt('loot-key') !== null) cfg.nearbyLootOptions = { ...(cfg.nearbyLootOptions ?? {}), keyCode: opt('loot-key') };
+
+  // Determine hotkey: explicit cli flag > cached in dfo-mod-cache.json > existing config > default KeyJ
+  let chosenKey = null;
+  const explicitKey = opt('loot-key');
+  if (validKey(explicitKey)) {
+    chosenKey = explicitKey;
+  } else {
+    chosenKey = store.lootKey();
+    if (!chosenKey && validKey(cfg.nearbyLootOptions?.keyCode)) {
+      chosenKey = cfg.nearbyLootOptions.keyCode;
+    }
+  }
+  if (!chosenKey) chosenKey = 'KeyJ';
+
+  cfg.nearbyLootOptions = { ...(cfg.nearbyLootOptions ?? {}), keyCode: chosenKey };
   for (let i = 0; i < args.length; i++) {
     if (args[i] !== '--set') continue;
     const [k, v] = String(args[i + 1] ?? '').split('=');
@@ -106,19 +122,32 @@ function writeConfig(ud, withRu) {
     else if (k === 'onlyVisited') cfg.marksOptions.onlyVisited = on;
   }
   if (!withRu) cfg.ru = false;
-  fs.writeFileSync(file, `${JSON.stringify(cfg, null, 2)}\n`);
+  const tmp = file + '.tmp';
+  try {
+    fs.writeFileSync(tmp, `${JSON.stringify(cfg, null, 2)}\n`);
+    // Cache is authoritative for the binding. Validate/preserve every other
+    // namespace and confirm its atomic write before publishing the config.
+    store.saveHotkeys({ loot: chosenKey });
+    fs.renameSync(tmp, file);
+  } catch (e) {
+    try { fs.unlinkSync(tmp); } catch {}
+    stop(`Не удалось сохранить настройки и кнопку лута: ${e.message}`);
+  }
+
   return file;
 }
 
 function install() {
   const lootKey = opt('loot-key');
-  if (args.includes('--loot-key') && (lootKey === null || !/^(?:Key[A-Z]|Digit[0-9]|F(?:[1-9]|1[0-9]|2[0-4])|Mouse[345]|Numpad(?:[0-9]|Enter|Add|Subtract|Multiply|Divide|Decimal|Comma|Equal)|Space|Tab|Enter|Backspace|Insert|Delete|Home|End|PageUp|PageDown|Arrow(?:Up|Down|Left|Right)|CapsLock|NumLock|ScrollLock|Pause|PrintScreen|Backquote|Minus|Equal|BracketLeft|BracketRight|Backslash|Semicolon|Quote|Comma|Period|Slash|IntlBackslash|ContextMenu)$/.test(lootKey))) stop('Некорректная кнопка лута. Назначьте клавишу заново в установщике.');
+  if (args.includes('--loot-key') && (lootKey === null || !validKey(lootKey))) stop('Некорректная кнопка лута. Назначьте клавишу заново в установщике.');
   const asarPath = findAsar();
   const ud = userDataDir();
   say(`DFO-Client-Expander-RU ${VERSION} — установка`);
   say('Автор: AutomaticYobaMachine. Создано специально для русского сообщества DFO Online.');
   say(`Игра:   ${path.dirname(path.dirname(asarPath))}`);
   if (gameRunning()) stop('DFO Online сейчас запущена. Закройте игру полностью и запустите установку снова.');
+  try { createLootStore(ud).read(); }
+  catch (e) { stop(`Не удалось прочитать кеш настроек; файлы клиента не изменены: ${e.message}`); }
 
   let cur = openAsar(asarPath);
   const curFiles = listFiles(cur.header);
@@ -258,13 +287,30 @@ function status() {
   const a = openAsar(asarPath);
   const files = listFiles(a.header);
   const st = { asar: asarPath, shell: versionOf(a), installed: files.has('dfo-mod/hook.cjs'), withRu: files.has('dfo-mod/page/ru_dict.js'),
-    modVersion: null, cleanCopy: fs.existsSync(asarPath + BAK), oldRu: files.has('dist/assets/ru_dict.js'), running: gameRunning(), cfg: null, userData: ud };
+    modVersion: null, cleanCopy: fs.existsSync(asarPath + BAK), oldRu: files.has('dist/assets/ru_dict.js'), running: gameRunning(), cfg: null, userData: ud, cachedLootKey: null };
   try { st.modVersion = JSON.parse(readFile(a, 'dfo-mod/version.json')?.toString('utf8') ?? 'null')?.version ?? null; } catch { st.modVersion = null; }
   a.close();
   try { st.cfg = JSON.parse(fs.readFileSync(path.join(ud, 'dfo-mod.json'), 'utf8')); } catch { st.cfg = null; }
+
+  // Check cache first for assigned hotkey!
+  const cacheFile = path.join(ud, 'dfo-mod-cache.json');
+  try {
+    if (fs.existsSync(cacheFile)) {
+      const cache = JSON.parse(fs.readFileSync(cacheFile, 'utf8'));
+      if (cache && typeof cache === 'object') {
+        st.cachedLootKey = cachedLootKey(cache);
+      }
+    }
+  } catch {}
+  if (st.cachedLootKey) {
+    st.cfg = st.cfg || {};
+    st.cfg.nearbyLootOptions = { ...(st.cfg.nearbyLootOptions || {}), keyCode: st.cachedLootKey };
+  }
+
   if (flag('json')) { say(JSON.stringify(st)); return; }
   say(`app.asar: ${asarPath} (оболочка ${st.shell})`);
   say(`Мод: ${st.installed ? `установлен ${st.modVersion ?? ''}` : 'не установлен'}${st.withRu ? ', с русификатором' : ''}`);
+  if (st.cachedLootKey) say(`Кнопка лута (в кеше): ${st.cachedLootKey}`);
   say(`Чистая копия: ${st.cleanCopy ? 'есть' : 'нет'}`);
   const log = path.join(ud, 'dfo-mod.log');
   if (fs.existsSync(log)) { say('Журнал последнего запуска:'); say(fs.readFileSync(log, 'utf8').split('\n').slice(0, 40).join('\n')); }

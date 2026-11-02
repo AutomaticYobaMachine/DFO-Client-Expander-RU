@@ -9,7 +9,7 @@ import (
 
 const (
 	appName      = "DFO-Client-Expander-RU"
-	appVersion   = "1.14.1"
+	appVersion   = "1.14.2"
 	appAuthor    = "AutomaticYobaMachine"
 	appCommunity = "Создано специально для русского сообщества DFO Online."
 )
@@ -50,16 +50,17 @@ var features = []feature{
 }
 
 type gameStatus struct {
-	Asar       string          `json:"asar"`
-	Shell      string          `json:"shell"`
-	Installed  bool            `json:"installed"`
-	WithRu     bool            `json:"withRu"`
-	ModVersion *string         `json:"modVersion"`
-	CleanCopy  bool            `json:"cleanCopy"`
-	OldRu      bool            `json:"oldRu"`
-	Running    bool            `json:"running"`
-	UserData   string          `json:"userData"`
-	Cfg        json.RawMessage `json:"cfg"`
+	Asar          string          `json:"asar"`
+	Shell         string          `json:"shell"`
+	Installed     bool            `json:"installed"`
+	WithRu        bool            `json:"withRu"`
+	ModVersion    *string         `json:"modVersion"`
+	CleanCopy     bool            `json:"cleanCopy"`
+	OldRu         bool            `json:"oldRu"`
+	Running       bool            `json:"running"`
+	UserData      string          `json:"userData"`
+	Cfg           json.RawMessage `json:"cfg"`
+	CachedLootKey string          `json:"cachedLootKey,omitempty"`
 }
 
 func defaults() map[int]bool {

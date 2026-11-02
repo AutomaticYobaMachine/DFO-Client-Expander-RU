@@ -1,7 +1,8 @@
 'use strict';
-// One file, separate namespaces. City-map replacement writes may never discard loot settings.
+// One file, separate namespaces. City-map replacement writes preserve loot settings and dungeon notes.
 const fs = require('node:fs'), path = require('node:path'), crypto = require('node:crypto');
 const Rules = require('./page/dfo_loot_rules.js');
+const Dungeon = require('./page/dfo_dungeon_model.js');
 const MAX = 16 * 1024 * 1024;
 function createLootStore(userData) {
   const file = userData && path.join(userData, 'dfo-mod-cache.json');
@@ -25,6 +26,7 @@ function createLootStore(userData) {
     const current = read();
     const merged = { ...obj };
     if (current.loot) merged.loot = current.loot; else delete merged.loot;
+    if (current.dungeons) merged.dungeons = current.dungeons; else delete merged.dungeons;
     write(merged);
   }
   function saveSettings(payload) {
@@ -48,6 +50,16 @@ function createLootStore(userData) {
       write({ ...cache, loot: next }); return { state: next, preset: p, file: `dfo-mod-loot-presets/${p.id}.json` };
     } catch (e) { fs.unlinkSync(dest); throw e; }
   }
-  return { read, state, replaceCityCache, saveSettings, savePreset };
+  const dungeonNotes = () => Object.values(read().dungeons || {}).map(Dungeon.cleanNote).filter(Boolean);
+  function saveDungeonNote(payload) {
+    const note = Dungeon.cleanNote(payload); if (!note) throw fail('Некорректное наблюдение данжа.');
+    if (note.at > Date.now() + 300000) throw fail('Некорректное время наблюдения.');
+    const cache = read(), notes = Object.fromEntries(Object.values(cache.dungeons || {}).map(Dungeon.cleanNote).filter(Boolean).map(n => [n.id, n]));
+    if ((notes[note.id]?.at ?? 0) > note.at) return notes[note.id];
+    notes[note.id] = note;
+    const kept = Object.fromEntries(Object.values(notes).sort((a, b) => b.at - a.at).slice(0, 200).map(n => [n.id, n]));
+    write({ ...cache, dungeons: kept }); return note;
+  }
+  return { read, state, replaceCityCache, saveSettings, savePreset, dungeonNotes, saveDungeonNote };
 }
 module.exports = { createLootStore };

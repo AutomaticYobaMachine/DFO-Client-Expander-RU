@@ -4,7 +4,7 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),cp=r
 const {openAsar,readFile,writeAsar,listFiles}=require('../src/asar.cjs');
 const dist=path.resolve(__dirname,'../dist/DFO_Mod');
 
-test('distribution installer: install, reinstall and uninstall preserve original ASAR and package all detector files',
+test('distribution installer: install, reinstall and uninstall preserve original ASAR and package loot/dungeon files',
   {skip:!fs.existsSync(path.join(dist,'DFO_Mod.exe'))},()=>{
   const temp=fs.mkdtempSync(path.join(os.tmpdir(),'dfo-package-'));
   try {
@@ -24,13 +24,13 @@ test('distribution installer: install, reinstall and uninstall preserve original
     for(let i=0;i<2;i++){
       run('install');
       const a=openAsar(asar),files=listFiles(a.header);
-      for(const file of ['nearby-loot-transform.cjs','loot-tags-transform.cjs','loot-store.cjs','page/dfo_loot_rules.js','page/dfo_loot_ui.js','page/dfo_loot.js','transforms.cjs']){
+      for(const file of ['nearby-loot-transform.cjs','loot-tags-transform.cjs','dungeon-transform.cjs','page/dfo_dungeon_model.js','page/dfo_dungeons.js','loot-store.cjs','page/dfo_loot_rules.js','page/dfo_loot_ui.js','page/dfo_loot.js','transforms.cjs']){
         assert.ok(files.has('dfo-mod/'+file));assert.deepEqual(readFile(a,'dfo-mod/'+file),fs.readFileSync(path.join(dist,'mod',file)));
       }
       assert.match(readFile(a,'main.cjs').toString(),/dfo-mod\/hook.cjs/);
       assert.deepEqual(readFile(a,'untouched.bin'),Buffer.from([0,10,42,255]));a.close();
       const cfg=JSON.parse(fs.readFileSync(path.join(user,'dfo-mod.json')));
-      assert.equal(cfg.nearbyLoot,true);assert.equal(cfg.nearbyLootOptions.keyCode,'KeyK');assert.equal(cfg.marks,false);
+      assert.equal(cfg.nearbyLoot,true);assert.equal(cfg.dungeons,true);assert.equal(cfg.nearbyLootOptions.keyCode,'KeyK');assert.equal(cfg.marks,false);
     }
     run('uninstall');assert.deepEqual(fs.readFileSync(asar),original);
   }finally{fs.rmSync(temp,{recursive:true,force:true});}

@@ -12,13 +12,15 @@
   const when = at => new Date(at).toLocaleString('ru-RU', { dateStyle: 'short', timeStyle: 'short' });
   const tools = () => ({ ...root.__dfoDungeonTools, ...host?.__dfoWorld, online: () => host?.params?.has('online') === true });
   const keyOf = loc => String(loc?.mapTableData?.mapId ?? '');
+  const allowed = loc => M.eligible(loc) && safe(() => tools().allowed?.(loc), false) === true;
+  const viewReady = () => safe(() => { const t = tools(); return t.modes?.()?.mode === 'exterior' && t.viewOpen?.() === true; }, false);
 
   function records() {
     const out = new Map();
     for (const p of safe(() => host.travelViewPlaces(), [])) if (M.eligible(p.summary?.loc)) out.set(p.key, { ...p, loc: p.summary.loc, px: p.summary.pixel.x, py: p.summary.pixel.y });
     for (const p of safe(() => host.travelViewFarPlaces(), [])) if (M.eligible(p.summary?.loc)) out.set(p.key, { ...p, loc: p.summary.loc, px: p.summary.pixel.x, py: p.summary.pixel.y });
     for (const p of safe(() => host.travelViewDungeons(), [])) if (p.found && M.eligible(p.loc)) out.set(p.key, p);
-    for (const [key, p] of out) if (safe(() => tools().allowed?.(p.loc), false) === false) out.delete(key);
+    for (const [key, p] of out) if (!allowed(p.loc)) out.delete(key);
     return out;
   }
   function model(p) {
@@ -210,6 +212,7 @@
     state.travel.disabled = state.travelling; state.modal.status.textContent = readError || cacheError || state.message || '';
   }
   function open(key) {
+    if (!viewReady()) return false;
     const p = records().get(key); if (!p) return false;
     void loadNotes();
     if (current) { current.key = key; current.tab = 'overview'; render(true); return true; }
@@ -220,6 +223,7 @@
     for (const [id, word] of TABS) { const b = btn(word, () => { if (current) { current.tab = id; render(true); } }); b.setAttribute('role', 'tab'); b.setAttribute('aria-controls', body.id); b.id = `dfo-dungeon-tab-${id}`; tabs.append(b); current.tabs.set(id, b); }
     const foot = el('div', 'dfo-dungeon-footer'), travel = btn('В путь', async () => {
       const state = current; if (!state || state.travelling) return;
+      if (!viewReady()) { closeAll(); return; }
       const live = records().get(state.key); if (!live) { m.status.textContent = 'Метка больше не доступна.'; travel.disabled = true; return; }
       state.travelling = true; travel.disabled = true;
       state.message = '';
@@ -238,13 +242,13 @@
     const t = tools(), modes = t.modes?.();
     if (Date.now() < retryObservationAt) return;
     if (modes?.mode !== 'dungeon') return;
-    const loc = modes.dungeonLocation, ctx = modes.dungeonCtx; if (!M.eligible(loc) || !ctx?.foes) return;
+    const loc = modes.dungeonLocation, ctx = modes.dungeonCtx; if (!allowed(loc) || !ctx?.foes) return;
     const counts = new Map(); let alive = 0, dead = 0;
     for (const f of ctx.foes) { const id = f.src?.mobileType ?? f.entity?.mobileType; if (!Number.isInteger(id) || f.src?.allied || f.companion != null) continue; counts.set(id, (counts.get(id) || 0) + 1); if (f.dead || f.corpse) dead++; else alive++; }
-    const targets = safe(() => ctx.lootTargets(), []), objects = safe(() => [...ctx.actions.objects.values()], null);
+    const targets = safe(() => ctx.lootTargets(), null), objects = safe(() => [...ctx.actions.objects.values()], null);
     const doors = objects ? objects.filter(r => r.kind === 'door') : null;
     const value = M.cleanNote({ id: keyOf(loc), at: Date.now(), online: t.online(), counts: [...counts].map(([type, count]) => ({ type, count })), alive, dead,
-      piles: targets.filter(r => /^(loot|droppedLoot):/.test(r.key)).length, corpses: targets.filter(r => /^corpse:/.test(r.key)).length,
+      piles: targets ? targets.filter(r => /^(loot|droppedLoot):/.test(r.key)).length : null, corpses: targets ? targets.filter(r => /^corpse:/.test(r.key)).length : null,
       doors: doors ? doors.length : null, openDoors: doors ? doors.filter(r => r.state === 'end').length : null });
     if (!value) return;
     const signature = JSON.stringify({ ...value, at: 0 });
@@ -252,7 +256,7 @@
     lastObservation = signature; lastSaved = Date.now(); notes[value.id] = value;
     root.fetch('/dfo-mod/dungeon-notes', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(value) }).then(r => { if (!r.ok) throw new Error('Не удалось сохранить журнал посещений.'); cacheError = ''; }).catch(e => { cacheError = e.message; lastObservation = ''; retryObservationAt = Date.now() + 30000; });
   }
-  root.__dfoDungeons = { register(value) { host = value; void loadNotes(); }, decorate, sprite, box, open, closeAll,
+  root.__dfoDungeons = { register(value) { if (host && host !== value) closeAll(); host = value; lastObservation = ''; retryObservationAt = 0; void loadNotes(); }, decorate, sprite, box, open, closeAll,
     isOpen: () => stack.length > 0, state: () => ({ key: current?.key ?? null, tab: current?.tab ?? null }) };
-  root.setInterval(() => { if (!host) return; safe(observe); if (current) { const modes = tools().modes?.(); if (modes && modes.mode !== 'exterior') closeAll(); else safe(() => render()); } }, 1500);
+  root.setInterval(() => { if (!host) return; safe(observe); if (current) { if (!viewReady()) closeAll(); else safe(() => render()); } }, 1500);
 })(globalThis);

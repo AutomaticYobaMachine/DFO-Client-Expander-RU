@@ -30,10 +30,12 @@ function world(text) {
   const tail = text.slice(handler.index, handler.index + 1400);
   const spawn = need(tail, rx(`if\\(${handler[2]}\\.startsWith\\(\`spawn:\`\\)\\)\\{(${ID})\\(${handler[2]}\\);return\\}`))[1];
   const route = need(tail, rx(`${handler[2]}===\`dest\`\\)\\{let (${ID})=[^;]+;\\1&&(${ID})\\(\\)&&(${ID})\\(\\1\\)`));
+  const view = need(text, rx(`!(${ID})\\?\\.active\\|\\|!${route[2]}\\(\\)`))[1];
   const reset = need(tail, rx(`if\\((${ID})=null,${handler[2]}\\.startsWith\\(\`bounty:\`\\)\\)`));
   const luck = need(text, rx(`luck:(${ID})\\(${inv[4]},\`luck\`\\)`))[1];
   const weapon = need(text, rx(`(${ID})\\.playerWeapon\\.strikingWeapon`))[1];
-  const native = `{player:()=>${inv[4]},modes:()=>${modes},now:()=>Date.now(),serverNow:()=>Date.now()+${wall[3]},wallTime:m=>${wall[2]}(m)-${wall[3]},luck:p=>${luck}(p,"luck"),weapon:()=>${weapon}.playerWeapon?.strikingWeapon??null,spawnRecord:p=>{const k=p.px+","+p.py;if(!${ledger}.has(k,${clockRead}()))return null;const r=${ledger}.wireRow(k);return r?{seen:r[2],cleared:r[3]}:null},travel:p=>p.loc.spawned?${spawn}(p.key):p.summary&&${route[2]}()?${route[3]}(p.summary):false}`;
+  const viewOpen = `["rising","up"].includes(${view}?.state)`;
+  const native = `{player:()=>${inv[4]},modes:()=>${modes},viewOpen:()=>${viewOpen},now:()=>Date.now(),serverNow:()=>Date.now()+${wall[3]},wallTime:m=>${wall[2]}(m)-${wall[3]},luck:p=>${luck}(p,"luck"),weapon:()=>${weapon}.playerWeapon?.strikingWeapon??null,spawnRecord:p=>{const k=p.px+","+p.py;if(!${ledger}.has(k,${clockRead}()))return null;const r=${ledger}.wireRow(k);return r?{seen:r[2],cleared:r[3]}:null},travel:p=>${viewOpen}&&(p.loc.spawned?${spawn}(p.key):p.summary&&${route[2]}()?${route[3]}(p.summary):false)}`;
   let out = text.replace('({TV_PLACE_LIFT:', `({__dfoWorld:${native},TV_PLACE_LIFT:`);
   if (out === text) throw new Error('missing marks host construction');
   out = out.replace(ctor[0], ctor[0].replace('{let{', `{globalThis.__dfoDungeons?.register(${ctor[2]});let{`));

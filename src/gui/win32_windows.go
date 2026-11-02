@@ -32,6 +32,7 @@ var (
 	pGetWindowTextLengthW          = user32.NewProc("GetWindowTextLengthW")
 	pGetWindowTextW                = user32.NewProc("GetWindowTextW")
 	pGetFocus                      = user32.NewProc("GetFocus")
+	pGetKeyState                   = user32.NewProc("GetKeyState")
 	pSetFocus                      = user32.NewProc("SetFocus")
 	pGetDlgCtrlID                  = user32.NewProc("GetDlgCtrlID")
 	pGetWindowRect                 = user32.NewProc("GetWindowRect")
@@ -94,6 +95,12 @@ const (
 	wmDrawItem        = 0x002b
 	wmSetFont         = 0x0030
 	wmKeyDown         = 0x0100
+	wmKeyUp           = 0x0101
+	wmChar            = 0x0102
+	wmSysKeyDown      = 0x0104
+	wmSysKeyUp        = 0x0105
+	wmSysChar         = 0x0106
+	wmActivateApp     = 0x001c
 	wmCommand         = 0x0111
 	wmTimer           = 0x0113
 	wmVScroll         = 0x0115
@@ -101,6 +108,12 @@ const (
 	wmCtlColorBtn     = 0x0135
 	wmCtlColorStat    = 0x0138
 	wmMouseWheel      = 0x020a
+	wmLButtonDown     = 0x0201
+	wmRButtonDown     = 0x0204
+	wmMButtonDown     = 0x0207
+	wmMButtonUp       = 0x0208
+	wmXButtonDown     = 0x020b
+	wmXButtonUp       = 0x020c
 	wmDpiChanged      = 0x02e0
 	wmLog             = 0x8001
 	wmDone            = 0x8002

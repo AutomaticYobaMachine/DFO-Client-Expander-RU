@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"regexp"
 	"strconv"
 	"strings"
 	"unicode/utf16"
@@ -10,7 +9,7 @@ import (
 
 const (
 	appName      = "DFO-Client-Expander-RU"
-	appVersion   = "1.13.1"
+	appVersion   = "1.14.0"
 	appAuthor    = "AutomaticYobaMachine"
 	appCommunity = "Создано специально для русского сообщества DFO Online."
 )
@@ -35,6 +34,7 @@ const (
 	idPath
 	idPane
 	idReadme
+	idLootKey
 )
 
 type feature struct {
@@ -101,13 +101,16 @@ func selectedCount(choices map[int]bool) int {
 	return n
 }
 
-func operationArgs(what string, choices map[int]bool) []string {
+func operationArgs(what string, choices map[int]bool, lootKey string) []string {
 	args := []string{what}
 	if what != "install" {
 		return args
 	}
 	if !choices[idRu] {
 		args = append(args, "--no-ru")
+	}
+	if validLootKey(lootKey) {
+		args = append(args, "--loot-key", lootKey)
 	}
 	args = append(args, "--set", "enabled=1")
 	for _, f := range features {
@@ -131,26 +134,4 @@ func dialogFilter(parts ...string) []uint16 {
 func versionTitle() string { return appName + " · " + appVersion }
 func selectionLabel(choices map[int]bool) string {
 	return "Выбрано " + strconv.Itoa(selectedCount(choices)) + " из " + strconv.Itoa(len(features))
-}
-
-var keyCodePattern = regexp.MustCompile(`^(Key[A-Z]|Digit[0-9]|F([1-9]|1[0-9]|2[0-4])|Numpad[0-9]|Space)$`)
-
-func lootKeyBadge(raw json.RawMessage) string {
-	var cfg struct {
-		Options struct {
-			Code string `json:"keyCode"`
-		} `json:"nearbyLootOptions"`
-	}
-	code := "KeyJ"
-	if json.Unmarshal(raw, &cfg) == nil && cfg.Options.Code != "" {
-		code = cfg.Options.Code
-	}
-	if !keyCodePattern.MatchString(code) {
-		return "ВАША КЛАВИША · 15 МЕТРОВ"
-	}
-	key := strings.TrimPrefix(strings.TrimPrefix(code, "Key"), "Digit")
-	if key == "Space" {
-		key = "ПРОБЕЛ"
-	}
-	return "КЛАВИША " + key + " · 15 МЕТРОВ"
 }

@@ -26,7 +26,7 @@ func TestEveryVisibleFeatureReachesPatcherIndependently(t *testing.T) {
 	for _, f := range features {
 		on := defaults()
 		on[f.ID] = false
-		args := operationArgs("install", on)
+		args := operationArgs("install", on, "")
 		flags := map[string]string{}
 		for i := 0; i < len(args)-1; i++ {
 			if args[i] == "--set" {
@@ -45,7 +45,7 @@ func TestEveryVisibleFeatureReachesPatcherIndependently(t *testing.T) {
 			t.Fatal("disabled translation still changes shell language")
 		}
 	}
-	if !reflect.DeepEqual(operationArgs("uninstall", defaults()), []string{"uninstall"}) {
+	if !reflect.DeepEqual(operationArgs("uninstall", defaults(), "Mouse5"), []string{"uninstall"}) {
 		t.Fatal("uninstall should not rewrite user options")
 	}
 }

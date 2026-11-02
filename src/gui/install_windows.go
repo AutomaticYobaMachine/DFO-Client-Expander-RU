@@ -76,9 +76,15 @@ func (a *app) startSearch() {
 
 func (a *app) setGame(exe, how string) {
 	a.mu.Lock()
+	sameGame := a.exe != "" && strings.EqualFold(filepath.Clean(a.exe), filepath.Clean(exe))
 	a.generation++
 	a.exe = exe
 	a.status = nil
+	if !sameGame {
+		a.lootKey, a.lootKeyDirty = defaultLootKey, false
+	}
+	a.capturingKey = false
+	a.recordedKey, a.recordedMouse = 0, 0
 	a.querying = false
 	a.searchHow = how
 	a.note = ""
@@ -130,6 +136,9 @@ func (a *app) requestStatus(restoreChoices bool) {
 		if st != nil && restoreChoices && st.Installed && revision == a.choiceRevision {
 			a.toggles = loadChoices(st.Cfg, a.toggles)
 		}
+		if st != nil && !a.lootKeyDirty {
+			a.lootKey = configuredLootKey(st.Cfg)
+		}
 		if st == nil {
 			a.note = "Не удалось проверить клиент. Нажмите «Проверить» или выберите игру заново."
 			a.noteCol = colRed
@@ -137,6 +146,8 @@ func (a *app) requestStatus(restoreChoices bool) {
 		a.mu.Unlock()
 		if st == nil {
 			a.appendLog(fmt.Sprintf("Проверка клиента: %v\r\n%s\r\n", err, out))
+		} else {
+			a.appendLog("Кнопка лута в профиле: " + lootKeyLabel(configuredLootKey(st.Cfg)) + ". Профиль: " + st.UserData + "\r\n")
 		}
 		pPostMessageW.Call(a.hwnd, wmStatus, 0, 0)
 	}()
@@ -146,7 +157,7 @@ var pctRe = regexp.MustCompile(`^\s*(\d{1,3})%\s*$`)
 
 func (a *app) run(what string) {
 	a.mu.Lock()
-	if a.busy || a.querying || a.exe == "" || a.status == nil || a.status.Running {
+	if a.busy || a.querying || a.capturingKey || a.exe == "" || a.status == nil || a.status.Running {
 		a.mu.Unlock()
 		return
 	}
@@ -167,7 +178,11 @@ func (a *app) run(what string) {
 	a.note = ""
 	a.stage = "Подготовка файлов…"
 	exe := a.exe
-	args := operationArgs(what, a.toggles)
+	keyOverride := ""
+	if a.lootKeyDirty {
+		keyOverride = a.lootKey
+	}
+	args := operationArgs(what, a.toggles, keyOverride)
 	a.mu.Unlock()
 	a.syncControls()
 	invalidate(a.hwnd)
@@ -225,6 +240,7 @@ func (a *app) run(what string) {
 			a.progress = 100
 			a.noteCol = colGreen
 			if what == "install" {
+				a.lootKeyDirty = false
 				a.note = "Готово. Выбранные функции включены. Запускайте игру как обычно."
 			} else {
 				a.note = "Расширение удалено. Исходный клиент восстановлен; ваши настройки сохранены."

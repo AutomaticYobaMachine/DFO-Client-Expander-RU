@@ -24,6 +24,9 @@ type app struct {
 	exe                                      string
 	status                                   *gameStatus
 	busy, querying, searching                bool
+	lootKey                                  string
+	lootKeyDirty, capturingKey               bool
+	recordedKey, recordedMouse               uint32
 	generation, choiceRevision               uint64
 	searchFound                              []string
 	searchHow                                string
@@ -43,7 +46,7 @@ type app struct {
 	auto                                     string
 }
 
-var A = &app{dpi: 96, page: idComponents, toggles: defaults(), ctl: map[int]uintptr{}, descriptions: map[int]uintptr{}, fonts: map[string]uintptr{}, rows: map[int]rect{}}
+var A = &app{dpi: 96, page: idComponents, lootKey: defaultLootKey, toggles: defaults(), ctl: map[int]uintptr{}, descriptions: map[int]uintptr{}, fonts: map[string]uintptr{}, rows: map[int]rect{}}
 
 func (a *app) px(v int32) int32 { return v * a.dpi / 96 }
 func (a *app) font(name string, size, weight int32) uintptr {
@@ -85,6 +88,9 @@ func (a *app) createControls() {
 				pSetWindowTheme.Call(a.ctl[idVisited], uintptr(unsafe.Pointer(u16(""))), uintptr(unsafe.Pointer(u16(""))))
 			}
 		}
+		if f.ID == idLoot {
+			a.child(pane, idLootKey, "BUTTON", "Клавиша: J", wsVisible|wsTabStop|bsOwnerDraw|bsNotify)
+		}
 	}
 	a.child(a.hwnd, idLog, "EDIT", "", wsVScroll|wsTabStop|esMultiline|esAutoVScroll|esReadOnly)
 	for _, v := range []struct {
@@ -114,6 +120,7 @@ func (a *app) syncControls() {
 		choices[id] = on
 	}
 	busy, querying, searching, st, page, operation := a.busy, a.querying, a.searching, a.status, a.page, a.operation
+	key, recording := a.lootKey, a.capturingKey
 	a.mu.Unlock()
 	for _, f := range features {
 		pSendMessageW.Call(a.ctl[f.ID], bmSetCheck, uintptrBool(choices[f.ID]), 0)
@@ -122,7 +129,14 @@ func (a *app) syncControls() {
 	}
 	pSendMessageW.Call(a.ctl[idVisited], bmSetCheck, uintptrBool(choices[idVisited]), 0)
 	enable(a.ctl[idVisited], !busy && choices[idMarks])
-	ready := !busy && !querying && st != nil && !st.Running
+	ready := !busy && !querying && st != nil && !st.Running && !recording
+	enable(a.ctl[idLootKey], !busy && !querying && st != nil && choices[idLoot])
+	keyLabel := "Клавиша: " + lootKeyLabel(key)
+	if recording {
+		keyLabel = "Нажмите клавишу…"
+	}
+	caption(a.ctl[idLootKey], keyLabel)
+	invalidate(a.ctl[idLootKey])
 	enable(a.ctl[idInstall], ready && selectedCount(choices) > 0)
 	enable(a.ctl[idUninstall], ready && st.Installed)
 	enable(a.ctl[idBrowse], !busy)
@@ -223,6 +237,9 @@ func (a *app) layoutRows() {
 		if f.ID == idMarks && h < P(116) {
 			h = P(116)
 		}
+		if f.ID == idLoot && h < P(130) {
+			h = P(130)
+		}
 		a.rows[f.ID] = rect{0, y, w, y + h}
 		measured = append(measured, measure{f, t.bottom + P(4)})
 		y += h + P(10)
@@ -249,6 +266,9 @@ func (a *app) layoutRows() {
 		if m.f.ID == idMarks {
 			move(a.ctl[idVisited], rect{P(40), top + P(80), P(244), top + P(104)})
 		}
+		if m.f.ID == idLoot {
+			move(a.ctl[idLootKey], rect{P(40), top + P(80), P(244), top + P(114)})
+		}
 	}
 	invalidate(a.pane)
 }
@@ -258,6 +278,10 @@ func (a *app) focusRow(id int) {
 	offset := a.px(16)
 	if id == idVisited {
 		rowID = idMarks
+		offset = a.px(80)
+	}
+	if id == idLootKey {
+		rowID = idLoot
 		offset = a.px(80)
 	}
 	r, ok := a.rows[rowID]
@@ -342,7 +366,10 @@ func (a *app) paint(hdc uintptr, r rect) {
 	footer := r.bottom - P(foot)
 	fill(hdc, rect{P(24), footer, r.right - P(24), footer + P(1)}, colEdge)
 	note, ncol := a.note, a.noteCol
-	if a.busy {
+	if a.capturingKey {
+		note = "Нажмите клавишу или кнопку мыши 3/4/5. Esc — отмена."
+		ncol = colBrass
+	} else if a.busy {
 		if note == "" {
 			note = "Установка…"
 			if a.operation == "uninstall" {
@@ -403,11 +430,7 @@ func (a *app) paintRows(hdc uintptr, r rect) {
 		roundBox(hdc, field, P(8), colField, colField)
 		badge := f.Badge
 		if f.ID == idLoot {
-			var cfg []byte
-			if a.status != nil {
-				cfg = a.status.Cfg
-			}
-			badge = lootKeyBadge(cfg)
+			badge = lootBindingBadge(a.lootKey)
 		}
 		text(hdc, badge, rect{P(40), row.top + P(53), P(246), row.top + P(73)}, a.font("badge", 10, 600), colDim, dtSingleLine|dtVCenter|dtEndEllipsis)
 	}
@@ -416,10 +439,13 @@ func (a *app) drawButton(d *drawItemStruct) {
 	hdc, r, id := d.hDC, d.rcItem, int(d.ctlID)
 	a.mu.Lock()
 	page := a.page
+	recording := a.capturingKey
 	a.mu.Unlock()
 	bg, edge, fg := colCard, colEdge, colBone
 	if id == idInstall {
 		bg, edge, fg = colBrass, colBrass, colInk
+	} else if id == idLootKey && recording {
+		bg, edge, fg = colField, colBrass, colBrass
 	} else if id == idComponents || id == idJournal {
 		if id == page {
 			bg, edge, fg = colField, colBrass, colBrass
@@ -484,6 +510,9 @@ func paintWindow(hwnd uintptr, paint func(uintptr, rect)) {
 func paneProc(hwnd uintptr, m uint32, wp, lp uintptr) uintptr {
 	a := A
 	switch m {
+	case wmDrawItem:
+		a.drawButton((*drawItemStruct)(unsafe.Pointer(lp)))
+		return 1
 	case wmEraseBkgnd:
 		return 1
 	case wmPaint:
@@ -536,6 +565,13 @@ func paneProc(hwnd uintptr, m uint32, wp, lp uintptr) uintptr {
 func wndProc(hwnd uintptr, m uint32, wp, lp uintptr) uintptr {
 	a := A
 	switch m {
+	case wmActivateApp:
+		if wp == 0 {
+			a.recordedKey, a.recordedMouse = 0, 0
+			if a.capturingKey {
+				a.finishLootKeyCapture("")
+			}
+		}
 	case wmCreate:
 		a.hwnd = hwnd
 		a.createControls()
@@ -593,10 +629,19 @@ func wndProc(hwnd uintptr, m uint32, wp, lp uintptr) uintptr {
 		return 0
 	case wmCommand:
 		id := int(wp & 0xffff)
+		if id == idLootKey && wp>>16 == 5 { // BS_NOTIFY: the second click can be BN_DOUBLECLICKED.
+			a.startLootKeyCapture()
+			return 0
+		}
 		if wp>>16 != 0 {
 			return 0
 		}
+		if a.capturingKey && id != idLootKey {
+			a.finishLootKeyCapture("")
+		}
 		switch id {
+		case idLootKey:
+			a.startLootKeyCapture()
 		case idBrowse:
 			a.browse()
 		case idRefresh:
@@ -805,6 +850,9 @@ func main() {
 		r, _, _ := pGetMessageW.Call(uintptr(unsafe.Pointer(&mm)), 0, 0, 0)
 		if r == 0 || int32(r) == -1 {
 			break
+		}
+		if a.captureInput(&mm) {
+			continue
 		}
 		if mm.message == wmKeyDown && mm.wParam == 13 {
 			focus, _, _ := pGetFocus.Call()

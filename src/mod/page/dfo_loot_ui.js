@@ -239,7 +239,7 @@
     }
     function autoDialog() {
       if (stack.length) return;
-      const m = modal('Автолут по J', { onClose: () => { if (!activeLoot?.isClosed?.()) repaint?.(); } });
+      const m = modal('Автолут по кнопке лута', { onClose: () => { if (!activeLoot?.isClosed?.()) repaint?.(); } });
       const note = el('p', 'dfo-loot-note', 'Подбирает выбранное до открытия списка. Лутфильтр и поиск окна на автолут не влияют. Без правил ничего не подбирается.'); m.content(note);
       const update = auto => client.update({ autoLoot: auto }).catch(e => m.message(errorOf(e), true));
       const enabled = checkbox('Автолут включён', client.get().autoLoot.enabled, yes => update({ ...client.get().autoLoot, enabled: yes })); enabled.querySelector('input').dataset.autolootEnabled = 'true'; m.content(enabled);

@@ -20,7 +20,7 @@ test('distribution installer: install, reinstall and uninstall preserve original
       ['untouched.bin',Buffer.from([0,10,42,255])],
     ])});blank.close();
     const original=fs.readFileSync(asar);
-    fs.mkdirSync(user);fs.writeFileSync(path.join(user,'dfo-mod.json'),JSON.stringify({nearbyLootOptions:{keyCode:'KeyK'},marks:false}));
+    fs.mkdirSync(user);fs.writeFileSync(path.join(user,'dfo-mod.json'),JSON.stringify({nearbyLootOptions:{keyCode:'KeyK',customOption:123},marks:false}));
     const cache=Buffer.from(JSON.stringify({towns:{kept:true},loot:{revision:7,presets:[]},dungeons:{'12345':{at:1}}}));fs.writeFileSync(path.join(user,'dfo-mod-cache.json'),cache);
     const run=(cmd,...args)=>cp.execFileSync(process.execPath,[path.join(dist,'patcher/patcher.cjs'),cmd,'--asar',asar,'--user-data',user,...args],{encoding:'utf8'});
     for(let i=0;i<2;i++){
@@ -34,12 +34,18 @@ test('distribution installer: install, reinstall and uninstall preserve original
       const cfg=JSON.parse(fs.readFileSync(path.join(user,'dfo-mod.json')));
       assert.equal(cfg.nearbyLoot,true);assert.equal(cfg.dungeons,true);assert.equal(cfg.nearbyLootOptions.keyCode,'KeyK');assert.equal(cfg.marks,false);
     }
-    run('install','--no-ru','--set','ru=0','--set','marks=1','--set','nearbyLoot=0','--set','dungeons=0','--set','onlyVisited=0','--set','enabled=1');
+    run('install','--no-ru','--loot-key','Mouse4','--set','ru=0','--set','marks=1','--set','nearbyLoot=0','--set','dungeons=0','--set','onlyVisited=0','--set','enabled=1');
     let cfg=JSON.parse(fs.readFileSync(path.join(user,'dfo-mod.json')));
-    assert.equal(cfg.enabled,true);assert.equal(cfg.ru,false);assert.equal(cfg.marks,true);assert.equal(cfg.nearbyLoot,false);assert.equal(cfg.dungeons,false);assert.equal(cfg.marksOptions.onlyVisited,false);assert.equal(cfg.nearbyLootOptions.keyCode,'KeyK');
+    assert.equal(cfg.enabled,true);assert.equal(cfg.ru,false);assert.equal(cfg.marks,true);assert.equal(cfg.nearbyLoot,false);assert.equal(cfg.dungeons,false);assert.equal(cfg.marksOptions.onlyVisited,false);assert.equal(cfg.nearbyLootOptions.keyCode,'Mouse4');
     let current=openAsar(asar);assert.equal(listFiles(current.header).has('dfo-mod/page/ru_dict.js'),false);current.close();
-    run('install','--set','ru=1','--set','marks=0','--set','nearbyLoot=1','--set','dungeons=1','--set','onlyVisited=1');
-    cfg=JSON.parse(fs.readFileSync(path.join(user,'dfo-mod.json')));assert.equal(cfg.ru,true);assert.equal(cfg.marks,false);assert.equal(cfg.nearbyLoot,true);assert.equal(cfg.dungeons,true);assert.equal(cfg.marksOptions.onlyVisited,true);assert.equal(cfg.nearbyLootOptions.keyCode,'KeyK');
+    run('install','--loot-key','NumpadEnter','--set','ru=1','--set','marks=0','--set','nearbyLoot=1','--set','dungeons=1','--set','onlyVisited=1');
+    cfg=JSON.parse(fs.readFileSync(path.join(user,'dfo-mod.json')));assert.equal(cfg.ru,true);assert.equal(cfg.marks,false);assert.equal(cfg.nearbyLoot,true);assert.equal(cfg.dungeons,true);assert.equal(cfg.marksOptions.onlyVisited,true);assert.equal(cfg.nearbyLootOptions.keyCode,'NumpadEnter');
+    run('install','--loot-key','Mouse5');run('install');
+    cfg=JSON.parse(fs.readFileSync(path.join(user,'dfo-mod.json')));assert.equal(cfg.nearbyLootOptions.keyCode,'Mouse5');assert.equal(cfg.nearbyLootOptions.customOption,123);
+    const beforeInvalid=fs.readFileSync(asar),configBeforeInvalid=fs.readFileSync(path.join(user,'dfo-mod.json'));
+    const invalid=cp.spawnSync(process.execPath,[path.join(dist,'patcher/patcher.cjs'),'install','--asar',asar,'--user-data',user,'--loot-key','Mouse6'],{encoding:'utf8'});
+    assert.notEqual(invalid.status,0);assert.match(invalid.stdout+invalid.stderr,/Некорректная кнопка лута/);
+    assert.deepEqual(fs.readFileSync(asar),beforeInvalid);assert.deepEqual(fs.readFileSync(path.join(user,'dfo-mod.json')),configBeforeInvalid);
     current=openAsar(asar);assert.equal(listFiles(current.header).has('dfo-mod/page/ru_dict.js'),true);current.close();
     assert.deepEqual(fs.readFileSync(asar+'.dfo-mod-original.bak'),original);
     run('uninstall');assert.deepEqual(fs.readFileSync(asar),original);

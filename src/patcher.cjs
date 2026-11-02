@@ -96,6 +96,7 @@ function writeConfig(ud, withRu) {
   let cfg = { enabled: true, ru: withRu, marks: true, nearbyLoot: true, dungeons: true, nearbyLootOptions: { keyCode: 'KeyJ' }, marksOptions: { onlyVisited: true, markRadiusM: 1200, nameRadiusM: 300, maxMarks: 60 } };
   try { if (fs.existsSync(file)) cfg = { ...cfg, ...JSON.parse(fs.readFileSync(file, 'utf8')) }; } catch { /* a broken file is written again */ }
   cfg.marksOptions = { onlyVisited: true, markRadiusM: 1200, nameRadiusM: 300, maxMarks: 60, ...(cfg.marksOptions ?? {}) };
+  if (opt('loot-key') !== null) cfg.nearbyLootOptions = { ...(cfg.nearbyLootOptions ?? {}), keyCode: opt('loot-key') };
   for (let i = 0; i < args.length; i++) {
     if (args[i] !== '--set') continue;
     const [k, v] = String(args[i + 1] ?? '').split('=');
@@ -110,6 +111,8 @@ function writeConfig(ud, withRu) {
 }
 
 function install() {
+  const lootKey = opt('loot-key');
+  if (args.includes('--loot-key') && (lootKey === null || !/^(?:Key[A-Z]|Digit[0-9]|F(?:[1-9]|1[0-9]|2[0-4])|Mouse[345]|Numpad(?:[0-9]|Enter|Add|Subtract|Multiply|Divide|Decimal|Comma|Equal)|Space|Tab|Enter|Backspace|Insert|Delete|Home|End|PageUp|PageDown|Arrow(?:Up|Down|Left|Right)|CapsLock|NumLock|ScrollLock|Pause|PrintScreen|Backquote|Minus|Equal|BracketLeft|BracketRight|Backslash|Semicolon|Quote|Comma|Period|Slash|IntlBackslash|ContextMenu)$/.test(lootKey))) stop('Некорректная кнопка лута. Назначьте клавишу заново в установщике.');
   const asarPath = findAsar();
   const ud = userDataDir();
   say(`DFO-Client-Expander-RU ${VERSION} — установка`);

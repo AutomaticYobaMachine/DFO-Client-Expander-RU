@@ -32,6 +32,17 @@ var foreground = u.NewProc("SetForegroundWindow")
 var guiInfo = u.NewProc("GetGUIThreadInfo")
 var currentThread = syscall.NewLazyDLL("kernel32.dll").NewProc("GetCurrentThreadId")
 var parent = u.NewProc("GetParent")
+var sendInput = u.NewProc("SendInput")
+
+// Win64 INPUT: its union is 32 bytes, with KEYBDINPUT at offset 8.
+type keyboardInput struct {
+	Type, Padding uint32
+	VK, Scan      uint16
+	Flags, Time   uint32
+	_             uint32
+	ExtraInfo     uintptr
+	_             [8]byte
+}
 
 type rect struct{ Left, Top, Right, Bottom int32 }
 type control struct {
@@ -85,6 +96,20 @@ func main() {
 	enum.Call(h, cb, 0)
 	if len(os.Args) > 1 {
 		switch os.Args[1] {
+		case "key":
+			vk, _ := strconv.ParseUint(os.Args[2], 0, 16)
+			scan, _ := strconv.ParseUint(os.Args[3], 0, 16)
+			flags := uint32(0)
+			if len(os.Args) > 4 && os.Args[4] == "extended" {
+				flags = 1
+			}
+			input := []keyboardInput{{Type: 1, VK: uint16(vk), Scan: uint16(scan), Flags: flags}, {Type: 1, VK: uint16(vk), Scan: uint16(scan), Flags: flags | 2}}
+			foreground.Call(h)
+			n, _, err := sendInput.Call(2, uintptr(unsafe.Pointer(&input[0])), unsafe.Sizeof(input[0]))
+			if n != 2 {
+				fmt.Fprintln(os.Stderr, "SendInput:", n, err)
+				os.Exit(2)
+			}
 		case "click":
 			id, _ := strconv.Atoi(os.Args[2])
 			foreground.Call(h)
@@ -104,6 +129,8 @@ func main() {
 			move.Call(h, uintptr(r.Left), uintptr(r.Top), uintptr(w), uintptr(v), 1)
 		case "close":
 			post.Call(h, 0x10, 0, 0)
+		case "deactivate":
+			post.Call(h, 0x001c, 0, 0)
 		case "savepath":
 			var edit uintptr
 			for _, c := range controls {

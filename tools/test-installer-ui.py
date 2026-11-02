@@ -81,7 +81,9 @@ def main():
             return value
 
         def key(code):
-            subprocess.run([XDO, 'key', '--clearmodifiers', code], env=env, check=True)
+            # Clearing modifiers also synthesizes Num Lock presses, which a
+            # legitimate recorder would capture before the requested key.
+            subprocess.run([XDO, 'key', code], env=env, check=True)
 
         def shot(name):
             folder = Path(os.environ.get('DFO_SCREENSHOT_DIR', str(ROOT/'dist/installer-screenshots')))
@@ -101,7 +103,7 @@ def main():
         profile = Path(env['WINEPREFIX'])/'drive_c'/Path(appdata[3:].replace('\\', '/'))/'DFO Online'
         profile.mkdir(parents=True, exist_ok=True)
         config = profile/'dfo-mod.json'
-        config.write_text(json.dumps({'enabled': False, 'nearbyLootOptions': {'keyCode': 'KeyK'}, 'custom': 123}))
+        config.write_text(json.dumps({'enabled': False, 'nearbyLootOptions': {'keyCode': 'KeyK', 'customOption': 456}, 'custom': 123}))
         cache = profile/'dfo-mod-cache.json'
         cached = b'{"towns":{"kept":true},"loot":{"revision":7,"presets":[]},"dungeons":{}}'
         cache.write_bytes(cached)
@@ -116,7 +118,7 @@ def main():
             return subprocess.Popen([WINE, winpath(executable), '--game', winpath(game/'DFO Online.exe')], env=env, stdout=log, stderr=log)
 
         app = launch()
-        s = wait(lambda: (v if (v := state()) and v['by_id'][108]['Enabled'] else None))
+        s = wait(lambda: (v if (v := state()) and v['by_id'][108]['Enabled'] and v['by_id'][108]['Visible'] and v['by_id'][117]['Title']==winpath(game/'DFO Online.exe') else None))
         assert 'DFO-Client-Expander-RU' in s['Title']
         assert all(s['by_id'][i]['Checked'] == 1 for i in [103,104,105,106,107])
         assert all(len(s['by_id'][1000+i]['Title'])>100 for i in [103,104,105,106])
@@ -125,6 +127,58 @@ def main():
         for i in [103,104,105,106]:
             assert s['by_id'][i]['Rect']['Top']>=pane['Top'] and s['by_id'][1000+i]['Rect']['Bottom']<=pane['Bottom'], 'all four features and descriptions should fit the initial test screen'
         shot('installer-components.png')
+
+        assert s['by_id'][120]['Title']=='Клавиша: K', f'uninstalled client lost its saved binding: {s["by_id"][120]["Title"]}; game={s["by_id"][117]["Title"]}; config={config}; log={s["by_id"][112]["Title"]}'
+        r=s['by_id'][120]['Rect']
+        subprocess.run([XDO,'mousemove','--sync',str((r['Left']+r['Right'])//2),str((r['Top']+r['Bottom'])//2),'click','1'],env=env,check=True)
+        wait(lambda:state()['by_id'][120]['Title']=='Нажмите клавишу…')
+        subprocess.run([XDO,'click','1'],env=env,check=True)
+        wait(lambda:state()['by_id'][120]['Title']=='Клавиша: K')
+
+        def bind_key(keys, label, native=None):
+            state('click',120)
+            assert state()['by_id'][120]['Title']=='Нажмите клавишу…'
+            if native is None:
+                key(keys)
+            else:
+                state('key',*native)
+            try:
+                wait(lambda:state()['by_id'][120]['Title']=='Клавиша: '+label, timeout=8)
+            except AssertionError:
+                current=state();shot('installer-capture-failure.png')
+                raise AssertionError(f'Capture {keys}: wanted {label!r}, got {current["by_id"][120]["Title"]!r}')
+            assert state()['by_id'][108]['Enabled'], 'recorded release restarted capture or clicked Install'
+            assert json.loads(config.read_text())['enabled'] is False, 'recording alone must not install or save config'
+
+        state('focus',120);key('Return')
+        assert state()['by_id'][120]['Title']=='Нажмите клавишу…', 'Enter should start capture, not bind itself'
+        shot('installer-hotkey-recording.png')
+        key('Escape');assert state()['by_id'][120]['Title']=='Клавиша: K', 'Escape changed the binding'
+        bind_key('space','Пробел')
+        bind_key('Tab','Tab')
+        bind_key('1','1')
+        # Xdotool synthesizes extra Num Lock presses for keypad keysyms. Send
+        # the physical Win32 scan codes through SendInput instead, with both
+        # virtual-key forms delivered by Windows when Num Lock is on/off.
+        keypad=[(0x52,0x2d),(0x4f,0x23),(0x50,0x28),(0x51,0x22),(0x4b,0x25),(0x4c,0x0c),(0x4d,0x27),(0x47,0x24),(0x48,0x26),(0x49,0x21)]
+        for digit,(scan,off_vk) in enumerate(keypad):
+            for vk in [0x60+digit,off_vk]:
+                bind_key('NumPad '+str(digit),'NumPad '+str(digit),(str(vk),str(scan)))
+        for keys,label,vk,scan,extended in [('Return','Enter',0x0d,0x1c,False),('KP_Enter','NumPad Enter',0x0d,0x1c,True),('KP_Add','NumPad +',0x6b,0x4e,False),('KP_Subtract','NumPad −',0x6d,0x4a,False),('KP_Multiply','NumPad ×',0x6a,0x37,False),('KP_Divide','NumPad /',0x6f,0x35,True),('KP_Decimal','NumPad .',0x6e,0x53,False),('KP_Delete','NumPad .',0x2e,0x53,False)]:
+            bind_key(keys,label,(str(vk),str(scan),*(['extended'] if extended else [])))
+        state('click',120);state('deactivate')
+        wait(lambda:state()['by_id'][120]['Title']=='Клавиша: NumPad .')
+        for button in [8,9]:
+            state('click',120)
+            r=state()['by_id'][120]['Rect']
+            subprocess.run([XDO,'mousemove','--sync',str((r['Left']+r['Right'])//2),str((r['Top']+r['Bottom'])//2),'click',str(button)],env=env,check=True)
+            wait(lambda:state()['by_id'][120]['Title']=='Клавиша: Мышь '+str(button-4))
+        state('click',102);wait(lambda:state()['by_id'][108]['Enabled'])
+        assert state()['by_id'][120]['Title']=='Клавиша: Мышь 5', 'status refresh replaced an unapplied binding'
+        assert json.loads(config.read_text())['nearbyLootOptions']['keyCode']=='KeyK', 'capture wrote before Apply'
+        state('click',120);state('click',111);state('click',110)
+        assert state()['by_id'][120]['Title']=='Клавиша: Мышь 5', 'changing tabs should cancel capture'
+        print('PASS capture: real clicks, Escape, Space/Tab/Enter, physical NumPad and both Windows Num Lock VK forms, mouse 4/5, refresh and tab cancellation',flush=True)
 
         picker=subprocess.Popen([WINE,winpath(probe),'click','101'],env=env,stdout=log,stderr=log)
         wait(lambda:state('dialog'));state('cancel-save');picker.wait(timeout=10)
@@ -152,6 +206,11 @@ def main():
         primary, outer = s['by_id'][108]['Rect'], s['Window']
         assert primary['Bottom']<=outer['Bottom'] and primary['Right']<=outer['Right']
         shot('installer-small.png')
+        state('click',105)
+        state('focus',120)
+        s=state();child,pane=s['by_id'][120]['Rect'],s['by_id'][118]['Rect']
+        assert child['Top']>=pane['Top'] and child['Bottom']<=pane['Bottom'], 'key button focus did not scroll into view'
+        state('click',105)
         state('resize', 1008, 927)
 
         state('click', 108)
@@ -160,21 +219,27 @@ def main():
         cfg = json.loads(config.read_text())
         assert [cfg[k] for k in ['ru','marks','nearbyLoot','dungeons']] == [False,True,False,False], cfg
         assert cfg['marksOptions']['onlyVisited'] is False
-        assert cfg['nearbyLootOptions']['keyCode']=='KeyK' and cfg['custom']==123
+        assert cfg['nearbyLootOptions']['keyCode']=='Mouse5' and cfg['custom']==123
+        assert cfg['nearbyLootOptions']['customOption']==456
         assert archive.read_bytes()!=original and cache.read_bytes()==cached
+        print('PASS install: chosen mouse binding and unrelated options/cache survive repeated game selection and installation',flush=True)
 
         state('close'); app.wait(timeout=15)
         app = launch()
-        wait(lambda: (s := state()) and s['by_id'][108]['Enabled'])
+        wait(lambda: (s := state()) and s['by_id'][108]['Enabled'] and s['by_id'][108]['Visible'] and s['by_id'][117]['Title']==winpath(game/'DFO Online.exe'))
         s = state()
         assert [s['by_id'][i]['Checked'] for i in [103,104,105,106,107]] == [0,1,0,0,0], 'restart lost saved checkboxes'
+        assert s['by_id'][120]['Title']=='Клавиша: Мышь 5' and not s['by_id'][120]['Enabled'], 'restart lost the saved mouse binding or ignored the disabled feature'
         for i in [103,104,105,106]:
             state('click', i)
+        state('click',120);key('KP_Enter')
+        wait(lambda:state()['by_id'][120]['Title']=='Клавиша: NumPad Enter')
         state('click', 108)
         wait(lambda: json.loads(config.read_text()).get('ru') is True)
         wait(lambda: state()['by_id'][108]['Enabled'])
         cfg = json.loads(config.read_text())
         assert [cfg[k] for k in ['ru','marks','nearbyLoot','dungeons']] == [True,False,True,True]
+        assert cfg['nearbyLootOptions']['keyCode']=='NumpadEnter'
         state('click', 111)
         s=state()
         assert s['by_id'][112]['Visible'] and not s['by_id'][118]['Visible']
@@ -197,7 +262,7 @@ def main():
         assert cache.read_bytes()==cached
         assert not archive.with_name(archive.name+'.dfo-mod-original.bak').exists()
         state('close'); app.wait(timeout=15); app=None
-        print('PASS: standalone Win32 EXE, real file picker/cancel, all checkboxes/descriptions, Space/Tab/focus scrolling, small window, exact selected install, restart, reconfiguration, journal/export/cancel, original ASAR restoration and cache conservation')
+        print('PASS: standalone Win32 EXE; keyboard capture, Escape/focus/tab cancel, Space/Tab/Enter release safety, NumPad 0-9/navigation/operators/Enter, real mouse buttons 4/5, apply/preservation/restart; file picker/cancel, checkboxes/descriptions/focus scrolling, small window, selected install, journal/export/cancel, ASAR restoration and cache conservation')
     finally:
         if app and app.poll() is None:
             app.terminate()

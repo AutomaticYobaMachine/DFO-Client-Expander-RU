@@ -15,7 +15,7 @@ const entry = fs.readdirSync(path.join(dist, 'assets')).find(f => f.startsWith('
 assert(entry, 'Build upstream with Vite before running this check');
 const cache = new Map();
 let failNextSettings = false, failNextPreset = false, presetPosts = 0;
-const html = `<!doctype html><html><head><meta charset="utf-8"><script>window.__DFO_MOD_CFG__={nearbyLoot:{keyCode:'KeyJ'}};</script><script src="/dfo_loot_rules.js"></script><script src="/dfo_loot_ui.js"></script><script src="/dfo_loot.js"></script></head><body><canvas></canvas><script type="module">
+const html = `<!doctype html><html><head><meta charset="utf-8"><script>window.__DFO_MOD_CFG__={nearbyLoot:{keyCode:new URLSearchParams(location.search).get('lootKey')||'KeyJ'}};</script><script src="/dfo_loot_rules.js"></script><script src="/dfo_loot_ui.js"></script><script src="/dfo_loot.js"></script></head><body><canvas></canvas><script type="module">
 import {mountEnhancedInventory} from '/assets/${entry}';
 const mk=(name,templateIndex,extra={})=>({name,templateIndex,group:'Weapons',stackCount:1,currentCondition:50,maxCondition:50,...extra});
 const rare=mk('Longsword',120,{rarity:'rare'}),plain=mk('Dagger',113),arrows=mk('Arrow',131,{stackCount:10});
@@ -25,6 +25,8 @@ let mounts=0,view=null,win=null;
 const source=(key,items,pos)=>({key,pos,items:()=>items,visit:fn=>fn(items)});
 const scene={wall:false,upper:false},collider={raycast:(_p,dir)=>scene.wall&&dir[2]>.5?3:Infinity,surfaceHit:p=>({dist:p[1],normal:[0,1,0]})};
 window.fixture={entity,a,b,rare,plain,arrows,scene,get mounts(){return mounts},get view(){return view}};
+// The real hosts prevent browser back/forward on both mouse edges too.
+for(const type of ['mousedown','mouseup']) addEventListener(type,e=>{if(e.button===3||e.button===4)e.preventDefault()});
 __dfoLoot.register('test',{entity,collider:()=>collider,feet:()=>[0,0,0],blocked:()=>!!win&&!win.done,sources:()=>[source('corpse:0',a,[1,0,0]),source('loot:0',b,scene.upper?[0,3,5]:[0,0,15]),source('search:0',[mk('Excluded grave',113)],[0,0,0])],open(loot){
  mounts++; const host=document.createElement('div');host.id='enhanced-inventory';document.body.append(host);
  win={done:false};
@@ -204,7 +206,7 @@ const server = http.createServer(async (req, res) => {
     assert.equal(await page.locator('.loot-win .itemrow').count(),2,'saved filter hides only Arrow after a reload');
     assert.equal(await page.evaluate(()=>fixture.b.length),2,'hidden loot remains at its source');
     await page.locator('.loot-win').getByRole('button',{name:'Автолут',exact:true}).click();
-    const auto=page.getByRole('dialog',{name:'Автолут по J',exact:true});
+    const auto=page.getByRole('dialog',{name:'Автолут по кнопке лута',exact:true});
     failNextSettings=true;await auto.locator('input[data-autoloot-enabled]').evaluate(n=>n.click());
     await page.waitForFunction(()=>document.querySelector('.dfo-loot-dialog [role="status"]').textContent.includes('ошибка записи'));
     assert.equal(await auto.locator('input[data-autoloot-enabled]').isChecked(),false);
@@ -257,6 +259,39 @@ const server = http.createServer(async (req, res) => {
     assert.equal(await page.locator('#enhanced-inventory').count(),1);assert.equal(await page.locator('.loot-win .itemrow').count(),2);
     assert.deepEqual(await page.evaluate(()=>[fixture.a.length,fixture.b.length,fixture.entity.items.map(it=>it.templateIndex)]),[1,1,[131]],'the game allows zero-weight arrows while leaving heavy weapons');
     if(process.env.DFO_SCREENSHOT_DIR)await page.screenshot({path:path.join(process.env.DFO_SCREENSHOT_DIR,'loot-overweight.png')});
+    // Test the actual inventory under different persisted physical bindings.
+    const address=`http://127.0.0.1:${server.address().port}`;
+    for(const code of ['Numpad1','NumpadEnter','NumpadAdd','NumpadDecimal']) {
+      await page.goto(address+'/?lootKey='+code);await page.waitForFunction(()=>window.ready);
+      await page.keyboard.press(code==='NumpadEnter'?'Enter':'Digit1');
+      assert.equal(await page.locator('#enhanced-inventory').count(),0,'main keyboard key aliased '+code);
+      await page.keyboard.press(code);await page.waitForSelector('.loot-win');
+      assert.equal(await page.evaluate(()=>fixture.mounts),1);
+      await page.keyboard.press(code);assert.equal(await page.evaluate(()=>fixture.mounts),1);
+      await page.keyboard.press('Escape');await page.locator('#enhanced-inventory').waitFor({state:'hidden'});
+    }
+    const mouseSession=await page.context().newCDPSession(page);
+    async function sideMouse(button) {
+      // Playwright's high-level Mouse API exposes only left/right/middle;
+      // CDP emits trusted physical back/forward input, including all DOM phases.
+      await mouseSession.send('Input.dispatchMouseEvent',{type:'mousePressed',x:400,y:300,button,buttons:button==='back'?8:16,clickCount:1});
+      await mouseSession.send('Input.dispatchMouseEvent',{type:'mouseReleased',x:400,y:300,button,buttons:0,clickCount:1});
+    }
+    for(const [code,button] of [['Mouse4','back'],['Mouse5','forward']]) {
+      await page.goto(address+'/?lootKey='+code);await page.waitForFunction(()=>window.ready);
+      const search=await page.evaluateHandle(()=>{const n=document.createElement('input');document.body.append(n);n.focus();return n});
+      await sideMouse(button);assert.equal(await page.evaluate(()=>fixture.mounts),0,'side mouse button activated while editing');
+      await search.evaluate(n=>n.remove());
+      await sideMouse(button);await page.waitForSelector('.loot-win');
+      assert.equal(await page.evaluate(()=>fixture.mounts),1);
+      await page.locator('.loot-win .sortbtn').click();
+      await sideMouse(button);assert.equal(await page.evaluate(()=>fixture.mounts),1);
+      assert.equal(await page.locator('#enhanced-inventory').count(),1);
+      assert.equal(page.url(),address+'/?lootKey='+code,'side mouse button navigated browser history');
+      await page.keyboard.press('Escape');await page.locator('#enhanced-inventory').waitFor({state:'hidden'});
+      await sideMouse(button);await page.waitForSelector('.loot-win');
+      assert.equal(await page.evaluate(()=>fixture.mounts),2);
+    }
     assert.deepEqual(errors,[]);
     console.log('PASS: actual upstream inventory: sorting/search, filtered Take all, one overlay, 1200+ virtualized items, nested dialogs/Escape/cancel, failed writes visibly roll back, double-submit and duplicate names, disk/export presets and restart, independent auto-loot, live wall/door/floor restrictions, no page errors');
   } catch(e) {

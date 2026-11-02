@@ -261,8 +261,59 @@
     return api;
   }
 
+  function bindInput(api, cfg, target = root) {
+    const code = cfg.keyCode || 'KeyJ';
+    // Labels use the physical mouse numbering players see: middle = 3, back = 4,
+    // forward = 5. DOM button numbers are 1, 3 and 4 respectively.
+    const button = ({ Mouse3: 1, Mouse4: 3, Mouse5: 4 })[code];
+    let keyHeld = false, mouseOwned = false, mouseDown = false;
+    const consume = e => { e.preventDefault(); e.stopImmediatePropagation(); };
+    const editable = node => node?.closest?.('input,textarea,select,[contenteditable]:not([contenteditable="false"]),[role="textbox"]');
+    function activate(e) {
+      if (e.defaultPrevented || e.ctrlKey || e.altKey || e.metaKey || e.shiftKey
+        || editable(e.target) || editable(target.document?.activeElement)) return false;
+      if (api.isOpen() || api.isOpening()) { consume(e); return true; }
+      if (e.repeat || !api.canOpen()) return false;
+      consume(e); void api.activate(); return true;
+    }
+    const listeners = {
+      keydown(e) {
+        if (button !== undefined || e.code !== code) return;
+        if (keyHeld) { consume(e); return; }
+        if (activate(e)) keyHeld = true;
+      },
+      keyup(e) {
+        if (keyHeld && e.code === code) { consume(e); keyHeld = false; }
+      },
+      pointerdown(e) {
+        if (button === undefined || e.button !== button || (e.pointerType && e.pointerType !== 'mouse')) return;
+        mouseOwned = mouseDown = activate(e);
+      },
+      mousedown(e) {
+        if (button === undefined || e.button !== button) return;
+        // A pointer press can also produce a compatibility mousedown, even if
+        // autoloot already finished and no window remains. Never activate twice.
+        if (mouseOwned && mouseDown) { consume(e); return; }
+        mouseOwned = mouseDown = activate(e);
+      },
+      pointerup(e) {
+        if (mouseOwned && e.button === button) { consume(e); mouseDown = false; }
+      },
+      mouseup(e) {
+        if (mouseOwned && e.button === button) { consume(e); mouseDown = false; }
+      },
+      auxclick(e) {
+        if (mouseOwned && e.button === button) { consume(e); mouseOwned = false; }
+      },
+      pointercancel() { mouseOwned = mouseDown = false; },
+      blur() { keyHeld = mouseOwned = mouseDown = false; },
+    };
+    for (const [name, fn] of Object.entries(listeners)) target.addEventListener(name, fn, true);
+    return () => { for (const [name, fn] of Object.entries(listeners)) target.removeEventListener?.(name, fn, true); };
+  }
+
   if (typeof module === 'object' && module.exports) {
-    module.exports = { RADIUS, MAX_VERTICAL, canReach, allowed, distance, position, groundPile, sources, actualItem, createSession, controller };
+    module.exports = { RADIUS, MAX_VERTICAL, canReach, allowed, distance, position, groundPile, sources, actualItem, createSession, controller, bindInput };
     return;
   }
   if (root.__dfoLoot) return;
@@ -270,12 +321,5 @@
   if (cfg.enabled === false) return;
   root.__dfoLootGround = groundPile;
   const api = root.__dfoLoot = controller();
-  root.addEventListener('keydown', (e) => {
-    if (e.defaultPrevented || e.code !== (cfg.keyCode || 'KeyJ') || e.ctrlKey || e.altKey || e.metaKey || e.shiftKey) return;
-    if (e.target?.closest?.('input,textarea,select,[contenteditable]:not([contenteditable="false"]),[role="textbox"]')) return;
-    if (api.isOpen()) { e.preventDefault(); e.stopImmediatePropagation(); return; }
-    if (api.isOpening()) { e.preventDefault(); e.stopImmediatePropagation(); return; }
-    if (e.repeat || !api.canOpen()) return;
-    e.preventDefault(); e.stopImmediatePropagation(); void api.activate();
-  }, true);
+  bindInput(api, cfg);
 })(globalThis);

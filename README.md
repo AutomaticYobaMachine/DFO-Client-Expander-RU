@@ -9,10 +9,10 @@ DFO Online.
 
 ## Скачать готовую программу
 
-**[Скачать установщик EXE для Windows 10/11 x64](https://github.com/AutomaticYobaMachine/DFO-Client-Expander-RU/releases/download/v1.14.0/DFO-Client-Expander-RU-1.14.0.exe)**
+**[Скачать установщик EXE для Windows 10/11 x64](https://github.com/AutomaticYobaMachine/DFO-Client-Expander-RU/releases/download/v1.14.1/DFO-Client-Expander-RU-1.14.1.exe)**
 
-[ZIP с программой, инструкцией и лицензиями](https://github.com/AutomaticYobaMachine/DFO-Client-Expander-RU/releases/download/v1.14.0/DFO-Client-Expander-RU-1.14.0.zip)
-· [Страница релиза](https://github.com/AutomaticYobaMachine/DFO-Client-Expander-RU/releases/tag/v1.14.0)
+[ZIP с программой, инструкцией и лицензиями](https://github.com/AutomaticYobaMachine/DFO-Client-Expander-RU/releases/download/v1.14.1/DFO-Client-Expander-RU-1.14.1.zip)
+· [Страница релиза](https://github.com/AutomaticYobaMachine/DFO-Client-Expander-RU/releases/tag/v1.14.1)
 
 EXE уже содержит все компоненты. В ZIP находятся только EXE, инструкция и лицензии.
 
@@ -34,7 +34,7 @@ EXE уже содержит все компоненты. В ZIP находятс
 **0.1.14487**. Это историческая отметка из архива, а не подтверждение совместимости
 с последним релизом игры.
 
-## Установщик 1.14.0
+## Установщик 1.14.1
 
 **DFO-Client-Expander-RU.exe** — один файл со всеми компонентами внутри.
 Игроку не нужны отдельные Node.js, Go или папки с данными установщика.

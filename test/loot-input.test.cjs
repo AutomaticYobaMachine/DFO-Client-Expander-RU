@@ -68,3 +68,14 @@ test('typing and keyboard modifiers stay native; an instant autoloot cannot repe
   for(let i=0;i<20;i++) f.fire('keydown',{code:'KeyK',repeat:true});
   assert.equal(f.count,1);f.fire('keyup',{code:'KeyK'});f.fire('keydown',{code:'KeyK'});assert.equal(f.count,2);
 });
+
+test('a bound Tab or Enter/Space keeps native navigation and button activation inside the open loot UI',()=>{
+  for(const code of ['Tab','Enter','NumpadEnter','Space']) {
+    const f=fixture(code);
+    f.fire('keydown',{code});f.fire('keyup',{code});assert.equal(f.count,1);
+    const target={closest:selector=>selector==='button,[role="button"]'?{}:null};
+    const e=f.fire('keydown',{code,target});assert.equal(e.prevented,false,'stole UI control '+code);
+    assert.equal(f.fire('keyup',{code,target}).prevented,false);
+    assert.equal(f.count,1);
+  }
+});

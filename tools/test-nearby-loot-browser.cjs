@@ -261,13 +261,20 @@ const server = http.createServer(async (req, res) => {
     if(process.env.DFO_SCREENSHOT_DIR)await page.screenshot({path:path.join(process.env.DFO_SCREENSHOT_DIR,'loot-overweight.png')});
     // Test the actual inventory under different persisted physical bindings.
     const address=`http://127.0.0.1:${server.address().port}`;
-    for(const code of ['Numpad1','NumpadEnter','NumpadAdd','NumpadDecimal']) {
+    for(const code of ['Numpad1','NumpadEnter','NumpadAdd','NumpadDecimal','Tab']) {
       await page.goto(address+'/?lootKey='+code);await page.waitForFunction(()=>window.ready);
       await page.keyboard.press(code==='NumpadEnter'?'Enter':'Digit1');
       assert.equal(await page.locator('#enhanced-inventory').count(),0,'main keyboard key aliased '+code);
       await page.keyboard.press(code);await page.waitForSelector('.loot-win');
       assert.equal(await page.evaluate(()=>fixture.mounts),1);
       await page.keyboard.press(code);assert.equal(await page.evaluate(()=>fixture.mounts),1);
+      if(code==='NumpadEnter') {
+        await page.locator('.loot-win').getByRole('button',{name:'Лутфильтр',exact:true}).focus();
+        await page.keyboard.press('NumpadEnter');
+        await page.getByRole('dialog',{name:'Лутфильтр',exact:true}).waitFor();
+        await page.keyboard.press('Escape');
+        await page.getByRole('dialog',{name:'Лутфильтр',exact:true}).waitFor({state:'hidden'});
+      }
       await page.keyboard.press('Escape');await page.locator('#enhanced-inventory').waitFor({state:'hidden'});
     }
     const mouseSession=await page.context().newCDPSession(page);

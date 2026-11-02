@@ -1,4 +1,4 @@
-# Установщик DFO-Client-Expander-RU 1.14.0
+# Установщик DFO-Client-Expander-RU 1.14.1
 
 Автор: **AutomaticYobaMachine**. Создано специально для русского сообщества
 DFO Online. Имя используется в окне, именах дистрибутива, свойствах PE/EXE,
@@ -6,7 +6,7 @@ DFO Online. Имя используется в окне, именах дистр
 
 ## Для игрока
 
-Готовый EXE можно [скачать напрямую](https://github.com/AutomaticYobaMachine/DFO-Client-Expander-RU/releases/download/v1.14.0/DFO-Client-Expander-RU-1.14.0.exe).
+Готовый EXE можно [скачать напрямую](https://github.com/AutomaticYobaMachine/DFO-Client-Expander-RU/releases/download/v1.14.1/DFO-Client-Expander-RU-1.14.1.exe).
 EXE и ZIP также публикуются в
 [GitHub Releases](https://github.com/AutomaticYobaMachine/DFO-Client-Expander-RU/releases/latest).
 Скачивайте файл с именем программы; стандартные архивы GitHub `Source code`
@@ -157,8 +157,8 @@ payload, название/автора/версию, иконку и DPI manifes
 Это проверка установщика; живая игровая сессия и физическая Windows-машина
 в этом стенде не использовались.
 
-Для **1.14.0** прошли шесть Go-тестов и шесть тестов ввода/упаковки,
-а также 50 регрессионных проверок с оригиналом
+Для **1.14.1** прошли шесть Go-тестов и семь тестов ввода/упаковки,
+а также 51 регрессионная проверка с оригиналом
 `5d2165dfd006a9dbe96d80d816bfe363023133d4` и опубликованными ассетами **0.1.14513**.
 Все ожидаемые хуки найдены, синтаксических ошибок в изменённых модулях нет.
 Браузерный стенд проверил назначенные NumPad и настоящие боковые события Chromium

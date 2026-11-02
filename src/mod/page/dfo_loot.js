@@ -280,6 +280,10 @@
       keydown(e) {
         if (button !== undefined || e.code !== code) return;
         if (keyHeld) { consume(e); return; }
+        // Once our window is open, its keyboard controls keep their normal
+        // meaning even when Tab/Enter/Space is also the world loot binding.
+        if (api.isOpen() && (e.code === 'Tab' || (['Enter', 'NumpadEnter', 'Space'].includes(e.code)
+          && e.target?.closest?.('button,[role="button"]')))) return;
         if (activate(e)) keyHeld = true;
       },
       keyup(e) {

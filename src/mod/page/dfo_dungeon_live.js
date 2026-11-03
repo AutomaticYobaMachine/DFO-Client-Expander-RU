@@ -27,6 +27,12 @@
 .dfo-dungeon-live .dfo-dungeon-footer-btns{flex-wrap:wrap;justify-content:flex-end}
 .dfo-dungeon-launch{position:fixed;right:16px;top:16px;z-index:8;cursor:pointer;font:12px var(--data,'Pixelify Sans',system-ui,sans-serif);color:var(--bone,#f1e6c8);background:rgba(16,20,25,.88);border:1px solid rgba(192,138,62,.5);padding:8px 12px}
 .dfo-dungeon-launch[hidden]{display:none}
+.dfo-nav-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin:8px 0}
+.dfo-nav-actions button,.dfo-nav-stop{cursor:pointer;padding:8px 10px;font:inherit;color:var(--bone,#f1e6c8);background:rgba(31,47,59,.8);border:1px solid rgba(95,158,189,.45);text-align:left}
+.dfo-nav-actions button:hover,.dfo-nav-stop:hover{background:rgba(46,72,91,.8)}
+.dfo-nav-actions button[aria-pressed="true"]{color:#b4e8ff;border-color:#63c4ff}
+.dfo-nav-actions button:disabled,.dfo-nav-stop:disabled{opacity:.45;cursor:default}
+.dfo-nav-select{font:inherit;background:#151e27;color:var(--bone,#f1e6c8);border:1px solid rgba(192,138,62,.4);padding:5px;max-width:100%;margin:4px 0}
 @media(max-width:600px){.dfo-live-stats{gap:5px}.dfo-live-stat{padding:7px}.dfo-live-stat strong{font-size:23px}.dfo-dungeon-live .acts button{padding:5px 8px}}
 `;doc.head.append(s);
   }
@@ -41,6 +47,27 @@
     if (uid != null && !M.quests(now.live.questBridge, now.live.location, now.live.foes).some(q => q.uid === uid)) { state.status.textContent = 'Задание больше не активно в этом данже.';return; }
     close();
     if (!now.live.journal(uid)) { open();if (current) current.status.textContent = 'Не удалось открыть журнал. Завершите другое действие и повторите.'; }
+  }
+  function navigation(body, data) {
+    const nav = root.__dfoDungeonNavigation, available = nav?.availability() || {}, state = nav?.state();
+    paragraph(body, 'Навигация по данжу', 'sec');
+    paragraph(body, 'Выберите цель — окно закроется, а светящаяся линия на полу покажет проход. Двери открываются вручную.', 'dfo-dungeon-note');
+    if (data.quests.length) {
+      const label = el('label', '', 'Задание: '), select = el('select', 'dfo-nav-select');select.dataset.navControl = 'quest';select.setAttribute('aria-label', 'Задание для навигации');
+      const option = (uid, name) => { const o = el('option', '', name);o.value = uid;select.append(o); };
+      option('', 'Отслеживаемое или ближайшая активная цель');
+      for (const [i, q] of data.quests.entries()) option(q.uid, tr(q.name) + (data.quests.filter(x => x.name === q.name).length > 1 ? ' (' + (i + 1) + ')' : ''));
+      if (current.navQuest && !data.quests.some(q => q.uid === current.navQuest)) current.navQuest = '';
+      select.value = current.navQuest || '';select.onchange = e => { if (current) current.navQuest = e.currentTarget.value; };label.append(select);body.append(label);
+    }
+    const buttons = el('div', 'dfo-nav-actions');
+    for (const [kind, text, reason] of [['exit','К выходу','В этой локации не найден выход.'],['aurum','К сундуку с аурумом','Сундук недоступен или уже открыт.'],['elite','К ближайшему элитнику','Живых элитных противников нет.'],['quest','К цели задания','Доступных целей задания нет.']]) {
+      const b = button(text, () => { const uid = kind === 'quest' ? current?.navQuest || null : null;if (nav?.start(kind, uid)) close();else render(true); });
+      b.dataset.navControl = kind;b.disabled = !available.ready || !available[kind];b.title = !available.ready ? 'Навигация ещё подготавливается.' : available[kind] ? '' : reason;b.setAttribute('aria-pressed', String(state?.kind === kind && state.phase !== 'idle'));buttons.append(b);
+    }
+    body.append(buttons);
+    if (state?.phase !== 'idle' && state?.kind) paragraph(body, [tr(state.name), state.distance == null ? '' : state.distance + ' м', state.message].filter(Boolean).join(' · '), 'dfo-dungeon-note');
+    const stop = button('Убрать маршрут', () => { nav?.stop();render(true); });stop.className = 'dfo-nav-stop';stop.dataset.navControl = 'stop';stop.disabled = !state || state.phase === 'idle';body.append(stop);
   }
   function contents(body, tab, data) {
     const forecast = data.forecast;
@@ -67,6 +94,7 @@
         const link = button(tr(q.name), () => quest(q.uid));link.className = 'dfo-live-quest';link.dataset.quest = q.uid;body.append(link);
         for (const objective of q.objectives) paragraph(body, tr(objective), 'dfo-dungeon-note');
       }
+      navigation(body, data);
     } else if (tab === 'enemies') {
       paragraph(body, 'Живые противники текущей сцены. Индивидуальные элитники и усиление всего данжа указаны отдельно.', 'dfo-dungeon-note');
       if (!data.enemies.rows.length) paragraph(body, data.enemies.count == null ? 'Состав ещё не получен.' : 'Живых противников не осталось.');
@@ -93,17 +121,35 @@
       paragraph(body, 'Здоровье в таблице суммируется по группе одинаковых противников. Прогноз материалов относится к таблицам появления и может отличаться от оставшегося состава.', 'dfo-dungeon-note');
     }
   }
+  function patchChildren(parent, source) {
+    const key = n => n.nodeType === 1 ? n.dataset.quest || n.dataset.navControl || '' : '';
+    const fresh = [...source.childNodes];
+    for (let i = 0; i < fresh.length; i++) {
+      const next = fresh[i], old = parent.childNodes[i];
+      if (!old) { parent.append(next);continue; }
+      if (old.nodeType !== next.nodeType || old.nodeName !== next.nodeName || key(old) !== key(next)) { parent.replaceChild(next, old);continue; }
+      if (old.nodeType === 3) { if (old.nodeValue !== next.nodeValue) old.nodeValue = next.nodeValue;continue; }
+      const selectValue = next.tagName === 'SELECT' ? next.value : null;
+      for (const a of [...old.attributes]) if (!next.hasAttribute(a.name)) old.removeAttribute(a.name);
+      for (const a of next.attributes) if (old.getAttribute(a.name) !== a.value) old.setAttribute(a.name, a.value);
+      old.onclick = next.onclick;old.onchange = next.onchange;
+      patchChildren(old, next);
+      if (old.tagName === 'SELECT' && doc.activeElement !== old && old.value !== selectValue) old.value = selectValue;
+    }
+    while (parent.childNodes.length > fresh.length) parent.lastChild.remove();
+  }
   function render(force = false) {
     const state = current, now = info();if (!state) return;
     if (!now || now.live.ctx !== state.ctx || state.owner.done || now.live.owns?.(state.owner) === false) { close();return; }
     if (state.pressing) return;
     const data = M.snapshot(now.live, now.world, now.tools, now.heading);if (!data) return;
-    const signature = JSON.stringify([state.tab, data]);if (!force && state.signature === signature) return;
+    const signature = JSON.stringify([state.tab, data, root.__dfoDungeonNavigation?.state(), root.__dfoDungeonNavigation?.availability()]);if (!force && state.signature === signature) return;
     state.signature = signature;state.heading.textContent = data.title;state.subtitle.textContent = data.subtitle;state.rating.textContent = data.rating;
-    const scroll = state.body.scrollTop, focused = doc.activeElement?.dataset?.quest;
-    state.body.replaceChildren();contents(state.body, state.tab, data);state.body.scrollTop = scroll;
+    const scroll = state.body.scrollTop, focused = doc.activeElement?.dataset?.quest, navFocus = doc.activeElement?.dataset?.navControl;
+    const next = doc.createDocumentFragment();contents(next, state.tab, data);patchChildren(state.body, next);state.body.scrollTop = scroll;
     state.body.setAttribute('aria-labelledby', 'dfo-live-tab-' + state.tab);
     if (focused) [...state.body.querySelectorAll('[data-quest]')].find(n => n.dataset.quest === focused)?.focus({ preventScroll: true });
+    if (navFocus) [...state.body.querySelectorAll('[data-nav-control]')].find(n => n.dataset.navControl === navFocus)?.focus({ preventScroll: true });
     for (const [id, b] of state.tabs) { b.setAttribute('aria-selected', String(id === state.tab));b.classList.toggle('on', id === state.tab);b.tabIndex = id === state.tab ? 0 : -1; }
   }
   function close() {
@@ -168,6 +214,7 @@
   root.addEventListener('pointerup', () => { if (current) current.pressing = false; }, true);
   root.addEventListener('pointercancel', () => { mouseOwned = mouseHeld = false;if (current) current.pressing = false; }, true);
   root.setInterval(() => { const n = info(!!current);launcher.hidden = !n || !!current || n.live.blocked();if (current) render(); }, 500);
+  root.addEventListener('dfo-navigation-change', () => { if (current) render(); });
   root.__dfoDungeonLive = { open, close, isOpen: () => !!current,
     focusJournal(uid) {
       if (uid == null) return;

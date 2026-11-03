@@ -37,5 +37,10 @@ for (const p of want) {
     const dep = path.posix.normalize(path.posix.join(path.posix.dirname(p), m[1]));
     if (byPath.has(dep)) want.add(dep);
   }
+  // Module workers are addressed by Vite through new URL(), not an import.
+  for (const m of body.matchAll(/new URL\(["'`]([\w./$-]+\.js)["'`],\s*import\.meta\.url\)/g)) {
+    const dep = path.posix.normalize(path.posix.join(path.posix.dirname(p), m[1]));
+    if (byPath.has(dep)) want.add(dep);
+  }
 }
 console.log(`${version}: ${n} files in ${out}`);

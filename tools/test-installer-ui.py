@@ -118,7 +118,7 @@ def main():
             return subprocess.Popen([WINE, winpath(executable), '--game', winpath(game/'DFO Online.exe')], env=env, stdout=log, stderr=log)
 
         app = launch()
-        s = wait(lambda: (v if (v := state()) and v['by_id'][108]['Enabled'] and v['by_id'][108]['Visible'] and v['by_id'][117]['Title']==winpath(game/'DFO Online.exe') else None))
+        s = wait(lambda: (v if (v := state()) and v['by_id'][108]['Enabled'] and v['by_id'][108]['Visible'] and v['by_id'][120]['Enabled'] and v['by_id'][121]['Enabled'] and v['by_id'][117]['Title']==winpath(game/'DFO Online.exe') else None))
         assert 'DFO-Client-Expander-RU' in s['Title']
         assert all(s['by_id'][i]['Checked'] == 1 for i in [103,104,105,106,107])
         assert all(len(s['by_id'][1000+i]['Title'])>100 for i in [103,104,105,106])

@@ -26,7 +26,7 @@ test('distribution installer: install, reinstall and uninstall preserve original
     for(let i=0;i<2;i++){
       run('install');
       const a=openAsar(asar),files=listFiles(a.header);
-      for(const file of ['nearby-loot-transform.cjs','loot-tags-transform.cjs','dungeon-transform.cjs','dungeon-live-transform.cjs','page/dfo_dungeon_model.js','page/dfo_dungeons.js','page/dfo_dungeon_live_model.js','page/dfo_dungeon_live.js','loot-store.cjs','page/dfo_loot_rules.js','page/dfo_loot_ui.js','page/dfo_loot.js','transforms.cjs']){
+      for(const file of ['nearby-loot-transform.cjs','loot-tags-transform.cjs','dungeon-transform.cjs','dungeon-live-transform.cjs','dungeon-nav-transform.cjs','page/dfo_dungeon_model.js','page/dfo_dungeons.js','page/dfo_dungeon_live_model.js','page/dfo_dungeon_live.js','page/dfo_dungeon_nav_model.js','page/dfo_dungeon_nav.js','loot-store.cjs','page/dfo_loot_rules.js','page/dfo_loot_ui.js','page/dfo_loot.js','transforms.cjs']){
         assert.ok(files.has('dfo-mod/'+file));assert.deepEqual(readFile(a,'dfo-mod/'+file),fs.readFileSync(path.join(dist,'mod',file)));
       }
       assert.match(readFile(a,'main.cjs').toString(),/dfo-mod\/hook.cjs/);

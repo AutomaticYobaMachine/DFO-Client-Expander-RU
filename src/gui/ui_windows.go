@@ -454,7 +454,7 @@ func (a *app) paintRows(hdc uintptr, r rect) {
 			badge = lootBindingBadge(a.lootKey)
 		}
 		if f.ID == idDungeons {
-			badge = "КЛАВИША " + lootKeyLabel(a.dungeonKey) + " · СВОДКА"
+			badge = "КЛАВИША " + lootKeyLabel(a.dungeonKey) + " · НАВИГАЦИЯ"
 		}
 		text(hdc, badge, rect{P(40), row.top + P(53), P(246), row.top + P(73)}, a.font("badge", 10, 600), colDim, dtSingleLine|dtVCenter|dtEndEllipsis)
 	}

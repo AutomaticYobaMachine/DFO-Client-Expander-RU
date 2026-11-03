@@ -1,5 +1,6 @@
 'use strict';
 const { transformDungeonLive } = require('./dungeon-live-transform.cjs');
+const { transformDungeonNav } = require('./dungeon-nav-transform.cjs');
 // Bind by native property names and function bodies, never release-specific minified names.
 const ID = '[\\w$]+', rx = s => new RegExp(s);
 const need = (text, re) => { const m = re.exec(text); if (!m) throw new Error(`unsupported signature: ${re.source.slice(0, 100)}`); return m; };
@@ -156,6 +157,6 @@ function transformDungeons(rel, source, log) {
     try { text = run(text) + `\n/*${id}*/\n`; log.push([id, 1]); }
     catch (e) { log.push([`${id}!error ${e.message}`, 0]); }
   }
-  return transformDungeonLive(rel, text, log);
+  return transformDungeonNav(rel, transformDungeonLive(rel, text, log), log);
 }
 module.exports = { transformDungeons };

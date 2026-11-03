@@ -1,4 +1,4 @@
-# Установщик DFO-Client-Expander-RU 1.14.2
+# Установщик DFO-Client-Expander-RU 1.14.3
 
 Автор: **AutomaticYobaMachine**. Создано специально для русского сообщества
 DFO Online. Имя используется в окне, именах дистрибутива, свойствах PE/EXE,
@@ -6,7 +6,7 @@ DFO Online. Имя используется в окне, именах дистр
 
 ## Для игрока
 
-Готовый EXE можно [скачать напрямую](https://github.com/AutomaticYobaMachine/DFO-Client-Expander-RU/releases/download/v1.14.2/DFO-Client-Expander-RU-1.14.2.exe).
+Готовый EXE можно [скачать напрямую](https://github.com/AutomaticYobaMachine/DFO-Client-Expander-RU/releases/download/v1.14.3/DFO-Client-Expander-RU-1.14.3.exe).
 EXE и ZIP также публикуются в
 [GitHub Releases](https://github.com/AutomaticYobaMachine/DFO-Client-Expander-RU/releases/latest).
 Скачивайте файл с именем программы; стандартные архивы GitHub `Source code`
@@ -185,3 +185,10 @@ NumPad Enter и арифметику, X11-кнопки мыши 8/9 как Windo
 экран, прокрутку, фильтры/пресеты, пять вкладок и штатное путешествие.
 Собранный EXE прошёл нативный сценарий Wine с NumPad, мышью 4/5 и восстановлением
 кнопки после удаления основного конфига; кеш при этом не изменялся.
+
+Для **1.14.3** прошли семь Go-тестов, 60 проверок логики/нативных функций/
+сетевого стенда и оба браузерных сценария на ассетах **0.1.14517**. Регрессия
+пустого списка воспроизводилась на настоящих координатах PlayerMotor до
+исправления; после него работают привязки world, exterior и worldModes.
+На этой базе найдены все ожидаемые хуки, 372 изменённых модуля без ошибок
+синтаксиса. Упаковка проверяет установку, обновление, удаление и сохранность кеша.

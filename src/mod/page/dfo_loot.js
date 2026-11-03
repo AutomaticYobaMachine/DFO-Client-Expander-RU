@@ -5,7 +5,11 @@
   const DEFAULT_SETTINGS = Rules.cleanSettings();
   const RADIUS = 15;
   const allowed = (key) => /^(?:loot|corpse|foeCorpse|guardCorpse|droppedLoot):/.test(key);
-  const distance = (a, b) => a?.length === 3 && b?.length === 3 ? Math.hypot(...a.map((v, i) => v - b[i])) : Infinity;
+  // PlayerMotor.pos is Float32Array in the world, town and interior hosts.
+  // Dungeon feet may be a plain array; both are coordinates, never game entities.
+  const vector3 = v => (Array.isArray(v) || ArrayBuffer.isView(v)) && v.length === 3
+    && Number.isFinite(v[0]) && Number.isFinite(v[1]) && Number.isFinite(v[2]);
+  const distance = (a, b) => vector3(a) && vector3(b) ? Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]) : Infinity;
   const position = (target) => target.pos ?? (target.aabb && [
     (target.aabb.min[0] + target.aabb.max[0]) / 2, target.aabb.min[1],
     (target.aabb.min[2] + target.aabb.max[2]) / 2,
@@ -14,10 +18,12 @@
   // A direct, supported walking corridor in the LIVE collision world. Sight alone would
   // admit loot through windows, across pits and in an open stairwell on another storey.
   function canReach(feet, target, collider) {
-    if (!Array.isArray(feet) || feet.length !== 3 || !Array.isArray(target) || target.length !== 3
-      || !feet.every(Number.isFinite) || !target.every(Number.isFinite)
+    if (!vector3(feet) || !vector3(target)
       || distance(feet, target) > RADIUS || Math.abs(feet[1] - target[1]) > MAX_VERTICAL
       || typeof collider?.raycast !== 'function') return false;
+    // Keep interpolation in JS number precision; TypedArray.map would round every
+    // corridor sample back to float32 and must never mutate the motor's buffer.
+    feet = Array.from(feet); target = Array.from(target);
     try {
       const horizontal = Math.hypot(target[0] - feet[0], target[2] - feet[2]);
       const steps = Math.max(1, Math.ceil(horizontal / 0.75)), path = [];

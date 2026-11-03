@@ -9,10 +9,10 @@ DFO Online.
 
 ## Скачать готовую программу
 
-**[Скачать установщик EXE для Windows 10/11 x64](https://github.com/AutomaticYobaMachine/DFO-Client-Expander-RU/releases/download/v1.14.2/DFO-Client-Expander-RU-1.14.2.exe)**
+**[Скачать установщик EXE для Windows 10/11 x64](https://github.com/AutomaticYobaMachine/DFO-Client-Expander-RU/releases/download/v1.14.3/DFO-Client-Expander-RU-1.14.3.exe)**
 
-[ZIP с программой, инструкцией и лицензиями](https://github.com/AutomaticYobaMachine/DFO-Client-Expander-RU/releases/download/v1.14.2/DFO-Client-Expander-RU-1.14.2.zip)
-· [Страница релиза](https://github.com/AutomaticYobaMachine/DFO-Client-Expander-RU/releases/tag/v1.14.2)
+[ZIP с программой, инструкцией и лицензиями](https://github.com/AutomaticYobaMachine/DFO-Client-Expander-RU/releases/download/v1.14.3/DFO-Client-Expander-RU-1.14.3.zip)
+· [Страница релиза](https://github.com/AutomaticYobaMachine/DFO-Client-Expander-RU/releases/tag/v1.14.3)
 
 EXE уже содержит все компоненты. В ZIP находятся только EXE, инструкция и лицензии.
 
@@ -34,11 +34,12 @@ EXE уже содержит все компоненты. В ZIP находятс
 **0.1.14487**. Это историческая отметка из архива, а не подтверждение совместимости
 с последним релизом игры.
 
-## Установщик 1.14.2
+## Установщик 1.14.3
 
-Локальные исправления объединены с основной версией: кнопка лута резервируется
-в кеше, исправлен лутер в данжах, обновлены окна фильтров и карточки данжей,
-добавлен оставшийся срок исчезновения. [Подробности объединения](docs/local-fixes-import.md).
+Исправлен пустой список лута вне данжей: детектор принимает настоящие координаты
+персонажа (`Float32Array`) во внешнем мире, городе и зданиях. Ограничения 15 м,
+стен, дверей и соседних этажей сохраняются. Кнопка в кеше и обновлённые окна из
+1.14.2 сохранены. [Подробности прежнего объединения](docs/local-fixes-import.md).
 
 **DFO-Client-Expander-RU.exe** — один файл со всеми компонентами внутри.
 Игроку не нужны отдельные Node.js, Go или папки с данными установщика.
@@ -98,8 +99,8 @@ NumPad отличается от обычных цифр и Enter, включа�
 Подробности, источники, формулы и границы доступных данных:
 [docs/dungeon-intel.md](docs/dungeon-intel.md).
 
-В версии 1.14.2 проверены исходники оригинала
-`a3eb1605ea1dc391b691fe314377458a7e63e483` и опубликованные ассеты **0.1.14516**:
+В версии 1.14.3 проверены исходники оригинала
+`a3eb1605ea1dc391b691fe314377458a7e63e483` и опубликованные ассеты **0.1.14517**:
 все ожидаемые хуки, автоматические тесты и оба браузерных сценария. EXE проверен
 под Wine. Живая игровая сессия и физическая Windows-машина здесь не проверялись.
 
@@ -250,9 +251,9 @@ python3 -I tools/build-ru-pack.py
 того, что хуки находят ожидаемые места и изменённый JavaScript разбирается:
 
 ```sh
-# Проверенная при разработке 1.14.2 версия; перед новой адаптацией проверьте релиз оригинала.
-NODE_USE_ENV_PROXY=1 node tools/fetch-build.mjs 0.1.14516 /tmp/dfo-build-0.1.14516
-node tools/check-build.cjs /tmp/dfo-build-0.1.14516
+# Проверенная при разработке 1.14.3 версия; перед новой адаптацией проверьте релиз оригинала.
+NODE_USE_ENV_PROXY=1 node tools/fetch-build.mjs 0.1.14517 /tmp/dfo-build-0.1.14517
+node tools/check-build.cjs /tmp/dfo-build-0.1.14517
 ```
 
 Эта проверка требует доступа к GitHub Releases и не заменяет проверку в игре.

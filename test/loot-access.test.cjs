@@ -1,6 +1,6 @@
 'use strict';
 const { test } = require('node:test'), assert = require('node:assert/strict');
-const { canReach, createSession } = require('../src/mod/page/dfo_loot.js');
+const { canReach, createSession, distance } = require('../src/mod/page/dfo_loot.js');
 const { flatCollider } = require('./helpers/loot-geometry.cjs');
 const native = { skip: !process.env.DFO_UPSTREAM_DIR };
 const identity = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
@@ -11,6 +11,45 @@ async function world(height = () => 0) {
 }
 const quad = (c, key, points, move = null) => c.addMesh(key, new Float32Array(points.flat()), new Uint16Array([0, 1, 2, 0, 2, 3]), identity, move);
 const wall = (c, key, x, low = -1, high = 3, z0 = -3, z1 = 3, move = null) => quad(c, key, [[x, low, z0], [x, high, z0], [x, high, z1], [x, low, z1]], move);
+
+test('native typed coordinates work for terrain and source positions without changing either vector', () => {
+  for (const Vector of [Array, Float32Array, Float64Array]) for (const Target of [Array, Float32Array, Float64Array]) {
+    const feet = Vector.from([100, 12, -20]), target = Target.from([109, 12, -8]);
+    const collider = { ...flatCollider, surfaceHit: p => ({ dist: p[1] - 12, normal: [0, 1, 0] }) };
+    assert.equal(distance(feet, target), 15);
+    assert.equal(canReach(feet, target, collider), true, `${Vector.name} feet / ${Target.name} target`);
+    assert.deepEqual([...feet], [100, 12, -20]);assert.deepEqual([...target], [109, 12, -8]);
+    assert.equal(canReach(feet, Target.from([109, 15, -8]), collider), false, 'typed coordinates cannot bypass the floor limit');
+  }
+  for (const invalid of [new Float32Array([NaN, 0, 0]), new Float64Array([0, Infinity, 0]), new Float32Array(2), new DataView(new ArrayBuffer(12)), [0, , 0], { 0: 0, 1: 0, 2: 0, length: 3 }, '000']) {
+    assert.equal(canReach(invalid, [0, 0, 0], flatCollider), false);
+    assert.equal(canReach([0, 0, 0], invalid, flatCollider), false);
+    assert.equal(distance(invalid, [0, 0, 0]), Infinity);
+  }
+});
+
+test('real player motor: the street loot list and native transfers work at terrain height and after movement', native, async () => {
+  const { pathToFileURL } = require('node:url'), path = require('node:path');
+  const load = file => import(pathToFileURL(path.join(process.env.DFO_UPSTREAM_DIR, file)).href);
+  const { PlayerMotor } = await load('src/player/motor.js');
+  const { corpseLootTargets } = await load('src/scenes/corpseMarker.js');
+  const { planTake, applyTransfer } = await load('src/systems/item/itemTransfer.js');
+  const c = await world(() => 12), player = new PlayerMotor(c);player.pinFeet(100, 12, -20);
+  assert.ok(player.pos instanceof Float32Array);
+  const item = { name: 'Gold pieces', templateIndex: 276, group: 'Currency', stackCount: 7 };
+  const body = { id: 9, feet: new Float32Array([105, 12, -20]), items: [item] }, entity = { items: [], goldPieces: 0, stats: { strength: 50, endurance: 50 } };
+  const pool = {
+    lootTargets: () => corpseLootTargets([body], 'foeCorpse', { isCorpse: () => true, feetOf: e => e.feet, idOf: e => e.id }),
+    hoverContents: () => body.items,
+    takeLoot: (_key, _say, visit) => visit({ items: () => body.items }),
+  };
+  const loot = createSession({ entity, feet: () => player.pos, collider: () => c, pools: () => [pool] }, { tools: () => ({ planTake, applyTransfer }) });
+  assert.deepEqual(loot.items(), [item], 'live motor feet must not hide outdoor bodies');
+  player.pinFeet(85, 12, -20);assert.deepEqual(loot.items(), [], 'the same typed buffer moved outside 15 m');
+  player.pinFeet(100, 12, -20);assert.deepEqual(loot.items(), [item]);
+  assert.equal(loot.commit('take', item, 7), true);assert.equal(entity.goldPieces, 7);assert.deepEqual(body.items, []);
+  assert.equal(loot.commit('take', item, 7), false);loot.closed();
+});
 
 test('access fails closed for missing/invalid geometry and excludes vertical floors within the 15 m sphere', () => {
   assert.equal(canReach([0, 0, 0], [0, 0, 15], flatCollider), true);

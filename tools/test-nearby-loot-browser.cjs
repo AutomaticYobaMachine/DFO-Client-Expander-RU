@@ -21,13 +21,14 @@ const mk=(name,templateIndex,extra={})=>({name,templateIndex,group:'Weapons',sta
 const rare=mk('Longsword',120,{rarity:'rare'}),plain=mk('Dagger',113),arrows=mk('Arrow',131,{stackCount:10});
 const a=[plain],b=[rare,arrows];
 const entity={name:'Loot check',career:{name:'Spellsword'},stats:{strength:50,endurance:50},items:[],goldPieces:0};
+const feet=new Float32Array([0,0,0]); // Same storage as the live PlayerMotor in world/town/buildings.
 let mounts=0,view=null,win=null;
 const source=(key,items,pos)=>({key,pos,items:()=>items,visit:fn=>fn(items)});
 const scene={wall:false,upper:false},collider={raycast:(_p,dir)=>scene.wall&&dir[2]>.5?3:Infinity,surfaceHit:p=>({dist:p[1],normal:[0,1,0]})};
-window.fixture={entity,a,b,rare,plain,arrows,scene,get mounts(){return mounts},get view(){return view}};
+window.fixture={entity,a,b,rare,plain,arrows,scene,feet,get mounts(){return mounts},get view(){return view}};
 // The real hosts prevent browser back/forward on both mouse edges too.
 for(const type of ['mousedown','mouseup']) addEventListener(type,e=>{if(e.button===3||e.button===4)e.preventDefault()});
-__dfoLoot.register('test',{entity,collider:()=>collider,feet:()=>[0,0,0],blocked:()=>!!win&&!win.done,sources:()=>[source('corpse:0',a,[1,0,0]),source('loot:0',b,scene.upper?[0,3,5]:[0,0,15]),source('search:0',[mk('Excluded grave',113)],[0,0,0])],open(loot){
+__dfoLoot.register('test',{entity,collider:()=>collider,feet:()=>feet,blocked:()=>!!win&&!win.done,sources:()=>[source('corpse:0',a,[1,0,0]),source('loot:0',b,scene.upper?[0,3,5]:[0,0,15]),source('search:0',[mk('Excluded grave',113)],[0,0,0])],open(loot){
  mounts++; const host=document.createElement('div');host.id='enhanced-inventory';document.body.append(host);
  win={done:false};
  const close=()=>{if(win.done)return;win.done=true;view.unmount();host.remove();loot.closed()};

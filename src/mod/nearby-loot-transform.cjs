@@ -70,6 +70,11 @@ function inventory(text) {
   const sort = need(text.slice(gate.index, gate.index + 350), rx(`!(${ID})\\(${ID}\\(${gate[5]},${ID}\\(\\)\\),\\{nameOf:(${ID})\\}`));
   const plan = need(text, rx(`(${ID})\\((${ID}),\\{bag:(${ID}),entity:${gate[5]}\\.entity,mode:\`remove\``));
   let out = text.replace(gate[0], `${gate[1]}=()=>${gate[5]}.loot?.nearby||(${gate[2]}.has(${gate[3]}?.kind)&&!${gate[4]}(${gate[5]}))`);
+  // Keep the native two-column frame for the detector even as a take reduces
+  // the source count. Ordinary corpses/stores retain the game's adaptive fit.
+  const fit = /`loot-win\$\{([\w$]+)\.count>([\w$]+)\?` wide`:``\}/;
+  need(out, fit);
+  out = out.replace(fit, (_all, remote, limit) => '`loot-win${' + gate[5] + '.loot?.nearby?` wide dfo-nearby-loot`:' + remote + '.count>' + limit + '?` wide`:``}');
   const title = rx(`(${ID})===\`storage\`&&typeof (${ID})\\.loot\\?\\.title`);
   const titleMatch = need(out, title);
   out = out.replace(title, `(${titleMatch[1]}===\`storage\`||${titleMatch[2]}.loot?.nearby)&&typeof ${titleMatch[2]}.loot?.title`);

@@ -9,7 +9,7 @@ import (
 
 const (
 	appName      = "DFO-Client-Expander-RU"
-	appVersion   = "1.14.3"
+	appVersion   = "1.14.4"
 	appAuthor    = "AutomaticYobaMachine"
 	appCommunity = "Создано специально для русского сообщества DFO Online."
 )

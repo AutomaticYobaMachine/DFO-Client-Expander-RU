@@ -1,8 +1,8 @@
 # Готовый установщик
 
-**[Скачать DFO-Client-Expander-RU 1.14.3 — Windows x64 EXE](https://github.com/AutomaticYobaMachine/DFO-Client-Expander-RU/releases/download/v1.14.3/DFO-Client-Expander-RU-1.14.3.exe)**
+**[Скачать DFO-Client-Expander-RU 1.14.4 — Windows x64 EXE](https://github.com/AutomaticYobaMachine/DFO-Client-Expander-RU/releases/download/v1.14.4/DFO-Client-Expander-RU-1.14.4.exe)**
 
-[ZIP с программой, инструкцией и лицензиями](https://github.com/AutomaticYobaMachine/DFO-Client-Expander-RU/releases/download/v1.14.3/DFO-Client-Expander-RU-1.14.3.zip)
+[ZIP с программой, инструкцией и лицензиями](https://github.com/AutomaticYobaMachine/DFO-Client-Expander-RU/releases/download/v1.14.4/DFO-Client-Expander-RU-1.14.4.zip)
 
 Автор: **AutomaticYobaMachine**. Создано специально для русского сообщества DFO Online.
 

@@ -25,14 +25,14 @@ const feet=new Float32Array([0,0,0]); // Same storage as the live PlayerMotor in
 let mounts=0,view=null,win=null;
 const source=(key,items,pos)=>({key,pos,items:()=>items,visit:fn=>fn(items)});
 const scene={wall:false,upper:false},collider={raycast:(_p,dir)=>scene.wall&&dir[2]>.5?3:Infinity,surfaceHit:p=>({dist:p[1],normal:[0,1,0]})};
-window.fixture={entity,a,b,rare,plain,arrows,scene,feet,get mounts(){return mounts},get view(){return view}};
+window.fixture={entity,a,b,rare,plain,arrows,scene,feet,ordinary:false,get mounts(){return mounts},get view(){return view}};
 // The real hosts prevent browser back/forward on both mouse edges too.
 for(const type of ['mousedown','mouseup']) addEventListener(type,e=>{if(e.button===3||e.button===4)e.preventDefault()});
 __dfoLoot.register('test',{entity,collider:()=>collider,feet:()=>feet,blocked:()=>!!win&&!win.done,sources:()=>[source('corpse:0',a,[1,0,0]),source('loot:0',b,scene.upper?[0,3,5]:[0,0,15]),source('search:0',[mk('Excluded grave',113)],[0,0,0])],open(loot){
  mounts++; const host=document.createElement('div');host.id='enhanced-inventory';document.body.append(host);
  win={done:false};
  const close=()=>{if(win.done)return;win.done=true;view.unmount();host.remove();loot.closed()};
- view=mountEnhancedInventory(host,{entity,items:()=>entity.items,loot,owner:win,onExit:close});
+ view=mountEnhancedInventory(host,{entity,items:()=>entity.items,loot:fixture.ordinary?{...loot,nearby:false}:loot,owner:win,onExit:close});
  return win;
 }});
 window.ready=true;
@@ -76,6 +76,15 @@ const server = http.createServer(async (req, res) => {
     assert.equal(await page.locator('#enhanced-inventory').count(),1);
     assert.match(await page.locator('.loot-win').innerText(),/Лут рядом/i);
     assert.equal(await page.evaluate(()=>fixture.mounts),1);
+    const frame=page.locator('.loot-win'), fixed=await frame.boundingBox();
+    const skin=await frame.evaluate(n=>{const s=getComputedStyle(n);return [s.backgroundColor,s.borderTopColor,s.borderTopWidth,s.fontFamily]});
+    async function stableFrame() {
+      const box=await frame.boundingBox();assert.ok(Math.abs(box.width-fixed.width)<1&&Math.abs(box.height-fixed.height)<1,'item count/search/takes must not resize the detector');
+      assert.equal(await frame.locator('.remotelist').evaluate(n=>getComputedStyle(n).gridTemplateColumns.split(' ').length),2,'detector retains two item columns');
+    }
+    await stableFrame();
+    const first=await frame.locator('.itemrow').nth(0).boundingBox(), second=await frame.locator('.itemrow').nth(1).boundingBox();
+    assert.ok(Math.abs(first.y-second.y)<1&&second.x>first.x+first.width-1,'few items actually occupy both columns');
     if(process.env.DFO_SCREENSHOT_DIR){fs.mkdirSync(process.env.DFO_SCREENSHOT_DIR,{recursive:true});await page.screenshot({path:path.join(process.env.DFO_SCREENSHOT_DIR,'loot-window.png')});}
     // Native sort: click twice; verify identity, stable ordering, and original containers unchanged.
     assert.equal(await page.locator('.loot-win .sortbtn').count(),1);
@@ -91,10 +100,12 @@ const server = http.createServer(async (req, res) => {
     assert.equal(await page.evaluate(()=>fixture.mounts),1);
     await search.fill('Longsword');
     assert.equal(await page.locator('.loot-win .itemrow').count(),1);
+    await stableFrame();
     await page.locator('.loot-win .itemrow').first().click();
     await page.waitForFunction(()=>fixture.entity.items.some(x=>x.templateIndex===120));
     assert.deepEqual(await page.evaluate(()=>fixture.a.map(x=>x.name)),['Dagger']);
     assert.deepEqual(await page.evaluate(()=>fixture.b.map(x=>x.name)),['Arrow']);
+    await stableFrame();
     await page.locator('.loot-win input.storesearch').fill('');
     const cat=page.locator('.loot-win select.storecat');
     for (let i=0;i<15;i++) { await cat.selectOption('all'); await page.keyboard.press('j'); }
@@ -116,6 +127,7 @@ const server = http.createServer(async (req, res) => {
     const scroller=page.locator('.loot-win .remotelist');
     await scroller.evaluate(el=>{el.scrollTop=el.scrollHeight;el.dispatchEvent(new Event('scroll'));});
     assert.ok(await page.locator('.loot-win .itemrow').count()<100,'the native list virtualizes 1200+ items');
+    await stableFrame();
     assert.equal(await page.evaluate(()=>fixture.mounts),2);
     const actualTags=await page.evaluate(()=>__dfoLootRules.tagsOf(fixture.rare,__dfoLootTools));
     for(const expected of ['group:Weapons','page:weapons','rarity:rare','kind:Weapons','material:Iron','state:identified']) assert.ok(actualTags.includes(expected),expected);
@@ -150,6 +162,7 @@ const server = http.createServer(async (req, res) => {
     assert.ok(await page.evaluate(()=>__dfoLootRules.catalog(__dfoLootTools).length)>300,'catalog is game-wide, not just nearby drops');
     if(process.env.DFO_SCREENSHOT_DIR){fs.mkdirSync(process.env.DFO_SCREENSHOT_DIR,{recursive:true});await page.screenshot({path:path.join(process.env.DFO_SCREENSHOT_DIR,'loot-filter.png')});}
     await page.setViewportSize({width:720,height:600});
+    assert.equal(await frame.evaluate(n=>{const r=n.getBoundingClientRect();return r.left>=0&&r.right<=innerWidth&&r.top>=0&&r.bottom<=innerHeight}),true,'fixed loot frame fits a small screen');
     assert.equal(await filter.evaluate(n=>{const r=n.getBoundingClientRect();return r.left>=0&&r.right<=innerWidth&&r.top>=0&&r.bottom<=innerHeight}),true,'filter stays within a small viewport');
     assert.equal(await filter.getByRole('button',{name:'Закрыть',exact:true}).evaluate(n=>{const r=n.getBoundingClientRect();return r.top>=0&&r.bottom<=innerHeight}),true,'filter footer remains reachable');
     assert.equal(await filter.locator('.wb').evaluate(n=>n.scrollWidth<=n.clientWidth),true,'filter body must not overflow horizontally');
@@ -310,8 +323,26 @@ const server = http.createServer(async (req, res) => {
       await sideMouse(button);await page.waitForSelector('.loot-win');
       assert.equal(await page.evaluate(()=>fixture.mounts),2);
     }
+    await page.keyboard.press('Escape');await page.locator('#enhanced-inventory').waitFor({state:'hidden'});
+    await page.goto(address+'/');await page.waitForFunction(()=>window.ready);
+    await page.evaluate(async()=>{await __dfoLootSettings.load();await __dfoLootSettings.update({filter:{mode:'black',tags:[]},autoLoot:{enabled:false}});fixture.b.length=0});
+    await page.keyboard.press('j');await page.waitForSelector('.loot-win');
+    assert.equal(await frame.locator('.itemrow').count(),1);await stableFrame();
+    if(process.env.DFO_SCREENSHOT_DIR)await page.screenshot({path:path.join(process.env.DFO_SCREENSHOT_DIR,'loot-single.png')});
+    await page.keyboard.press('Escape');await page.locator('#enhanced-inventory').waitFor({state:'hidden'});
+    await page.evaluate(()=>fixture.a.length=0);await page.keyboard.press('j');await page.waitForSelector('.loot-win');
+    assert.equal(await frame.locator('.itemrow').count(),0);await stableFrame();
+    if(process.env.DFO_SCREENSHOT_DIR)await page.screenshot({path:path.join(process.env.DFO_SCREENSHOT_DIR,'loot-empty.png')});
+    // Scope: with the mod's stylesheet still loaded, an ordinary corpse keeps
+    // its adaptive frame and the same native colors, border and typography.
+    await page.keyboard.press('Escape');await page.locator('#enhanced-inventory').waitFor({state:'hidden'});
+    await page.evaluate(()=>{fixture.ordinary=true;fixture.a.push(fixture.plain)});
+    await page.keyboard.press('j');await page.waitForSelector('.loot-win');
+    const ordinary=await frame.boundingBox();assert.ok(ordinary.width<fixed.width&&ordinary.height<fixed.height);
+    assert.equal(await frame.locator('.dfo-loot-actions').count(),0);
+    assert.deepEqual(await frame.evaluate(n=>{const s=getComputedStyle(n);return [s.backgroundColor,s.borderTopColor,s.borderTopWidth,s.fontFamily]}),skin,'native styling stays unchanged');
     assert.deepEqual(errors,[]);
-    console.log('PASS: actual upstream inventory: sorting/search, filtered Take all, one overlay, 1200+ virtualized items, nested dialogs/Escape/cancel, failed writes visibly roll back, double-submit and duplicate names, disk/export presets and restart, independent auto-loot, live wall/door/floor restrictions, no page errors');
+    console.log('PASS: actual upstream inventory: fixed two-column detector for 0/1/1200+ items, native container styling/fit unchanged, sorting/search, filtered Take all, one overlay, virtualized lists, nested dialogs/Escape/cancel, failed writes visibly roll back, double-submit and duplicate names, disk/export presets and restart, independent auto-loot, live wall/door/floor restrictions, no page errors');
   } catch(e) {
     if(page) console.error('Browser state:',await page.evaluate(()=>({text:document.querySelector('.loot-win')?.textContent.slice(-1400),items:window.fixture?.entity.items.map(it=>it.name),pageErrors:document.querySelectorAll('.dfo-loot-dialog').length})).catch(()=>null));
     throw e;

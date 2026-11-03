@@ -97,6 +97,7 @@
     function styles() {
       if (doc.getElementById('dfo-loot-styles')) return;
       const style = el('style'); style.id = 'dfo-loot-styles'; style.textContent = `
+.loot-win.dfo-nearby-loot{height:min(700px,86dvh)}
 .dfo-loot-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px;align-items:center}
 .dfo-loot-button{font-family:var(--data,'Pixelify Sans',system-ui,sans-serif);font-size:12px;letter-spacing:.03em;cursor:pointer;padding:5px 12px;border:1px solid rgba(192,138,62,.45);border-radius:2px;background:rgba(43,50,59,.65);color:var(--bone,#f1e6c8);transition:background .15s,border-color .15s}
 .dfo-loot-button:hover{background:rgba(78,127,114,.35);border-color:rgba(192,138,62,.85);color:#fff}

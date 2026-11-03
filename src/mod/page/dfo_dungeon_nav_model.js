@@ -6,7 +6,7 @@
   // The AI's 35-degree slope / 40 cm voxel step is not the player's 70-degree / 50 cm step.
   // Erosion supplies candidates only; the live body-width probes below decide what is passable.
   const agent = Object.freeze({radius:0,height:1.7,maxStep:.6,maxSlope:Math.tan(70*Math.PI/180),cs:.25,ch:.1});
-  const controls = new Set([61027,61028,74037]), placements = new WeakMap(), geometryViews = new WeakMap();
+  const controls = new Set([61027,61028,74037]), placements = new WeakMap(), geometryViews = new WeakMap(), geometryVersions = new WeakMap();
   function notePlacement(col,key,model) {
     if(!controls.has(Number(model?.modelIdNum)))return;
     let parts=placements.get(col);if(!parts)placements.set(col,parts=new Map());
@@ -33,8 +33,20 @@
       query._buckets.set(key,{...b,rayMark:null,sight:mask});
       bake.set(key,ignored?{...b,tris:b.tris.filter((_,i)=>!mask[i])}:b);
     }
-    const view={_buckets:bake,raycastHit:(...args)=>query.raycastHit(...args)};
+    const view={source:col,_buckets:bake,raycastHit:(...args)=>query.raycastHit(...args)};
     geometryViews.set(col,{entries,sizes:entries.map(([,b])=>b.tris.length),view});return view;
+  }
+  function geometryVersion(col,skip=[]) {
+    const source=col?.source||col;if(!source?._buckets)return 0;
+    const ignored=new Set(skip),entries=[];
+    for(const [key,b]of source._buckets){
+      if(ignored.has(key))continue;
+      const pose=b.moves?[...(b.t?.()||[]),...(b.r?.()||[])]:[];
+      entries.push([key,b,b.tris.length,b.parts,...pose]);
+    }
+    const old=geometryVersions.get(source),same=old&&entries.length===old.entries.length&&entries.every((row,i)=>row.length===old.entries[i].length&&row.every((v,k)=>v===old.entries[i][k]));
+    if(same)return old.version;
+    const version=(old?.version||0)+1;geometryVersions.set(source,{entries,version});return version;
   }
   const regions = new WeakMap();
   function components(chf) {
@@ -95,11 +107,14 @@
   }
   function clearance(col,a,b,skip=[],wide=true) {
     const dx=b[0]-a[0],dy=b[1]-a[1],dz=b[2]-a[2],len=Math.hypot(dx,dy,dz);
-    if(len<.001)return null;
+    if(len<1e-6)return null;
     const dir=[dx/len,dy/len,dz/len],h=Math.hypot(dx,dz)||1,side=[-dz/h*.32,dx/h*.32];
-    for(const off of wide?[-1,0,1]:[0])for(const y of [.53,1.35]){
-      const hit=ray(col,[a[0]+off*side[0],a[1]+y,a[2]+off*side[1]],dir,len+.015,skip);
-      if(Number.isFinite(hit?.dist)&&hit.dist<len-.005)return{key:hit.key,dist:hit.dist};
+    const skin=.002;
+    for(const off of wide?[-1,0,1]:[0])for(const y of [.53,.9,1.35,1.6]){
+      // Include BOTH ends: a grid node exactly on a wall cannot enter at one edge's end and
+      // leave through a zero-distance hit ignored by the next ray's triangle epsilon.
+      const hit=ray(col,[a[0]+off*side[0]-dir[0]*skin,a[1]+y-dir[1]*skin,a[2]+off*side[1]-dir[2]*skin],dir,len+2*skin,skip);
+      if(Number.isFinite(hit?.dist)&&hit.dist<=len+skin+.0002)return{key:hit.key,dist:Math.max(0,hit.dist-skin)};
     }
     return null;
   }
@@ -155,6 +170,7 @@
     return out.length>1?out:null;
   }
   function nativeRoute(mesh,native,from,to,col,skip) {
+    if(!mesh?.mesh?.polys?.length||!native?.locate||!native.height||!native.solve)return null;
     const a=grounded(mesh,native,from,col,skip),b=grounded(mesh,native,to,col,skip);if(!a||!b)return null;
     const ids=components(mesh),ia=native.locate(mesh,a[0],a[2],a[1]),ib=native.locate(mesh,b[0],b[2],b[1]);if(ia<0||ib<0||ids[ia]!==ids[ib])return null;
     const result=native.solve(mesh,a,b);return result?.polys?.length&&result.points?.length?{...result,from:a,to:b}:null;
@@ -181,17 +197,24 @@
       const key=[...from,...to].map(x=>Math.round(x*20)).join(',');if(seen.has(key))continue;seen.add(key);out.push({i:out.length,from,to});}
     return out;
   }
+  async function portalTail(links,target,checkpoint,approach=0) {
+    const walk=(a,b)=>Math.max(0,distance(a,b)-approach),tail=links.map(l=>walk(l.to,target.at));
+    for(let pass=0;pass<links.length;pass++){
+      let changed=false;for(let i=0;i<links.length;i++)for(let j=0;j<links.length;j++){const d=walk(links[i].to,links[j].from)+.1+tail[j];if(d<tail[i]){tail[i]=d;changed=true;}}
+      if(!changed)break;if(pass%4===0)await checkpoint();
+    }
+    return tail;
+  }
   // Collider A*: this layer does not depend on the automap's reveal state, polygon contours or AI erosion.
   // Nodes retain Y, so stacked floors never become neighbours just because X/Z match.
   async function surfaceRoute(from,target,col,skip,transitions,checkpoint,search=null) {
     const support=search?.support||(p=>floor(col,p,skip)),cs=.5,start=support(from);if(!start)return null;
-    const links=transitionLinks(col,skip,transitions),nodes=search?.own||new Map(),closed=new Set(),heap=[];
+    const links=transitionLinks(col,skip,transitions),nodes=search?.own||new Map(),closed=new Set(),edges=search?.edges||new Map(),heap=[];
     const key=p=>Math.round(p[0]/(cs/4))+','+Math.round(p[2]/(cs/4))+','+Math.round(p[1]*20);
     const push=n=>{heap.push(n);let i=heap.length-1;while(i){const p=(i-1)>>1;if(heap[p].f<=n.f)break;heap[i]=heap[p];i=p;}heap[i]=n;};
     const pop=()=>{const n=heap[0],last=heap.pop();if(heap.length){let i=0;while(i*2+1<heap.length){let c=i*2+1;if(c+1<heap.length&&heap[c+1].f<heap[c].f)c++;if(heap[c].f>=last.f)break;heap[i]=heap[c];i=c;}heap[i]=last;}return n;};
     // The lower bound includes chains of portals; plain Euclidean distance would wrongly prune a detour to one.
-    const tail=links.map(l=>distance(l.to,target.at));
-    for(let pass=0;pass<links.length;pass++){let changed=false;for(let i=0;i<links.length;i++)for(let j=0;j<links.length;j++){const d=distance(links[i].to,links[j].from)+.1+tail[j];if(d<tail[i]){tail[i]=d;changed=true;}}if(!changed)break;if(pass%4===0)await checkpoint();}
+    const tail=await portalTail(links,target,checkpoint);
     const heuristic=p=>Math.min(distance(p,target.at),...links.map((l,i)=>distance(p,l.from)+.1+tail[i]));
     const add=(p,g,parent,jump=null,via=[])=>{const id=key(p),prev=nodes.get(id);if(closed.has(id)||prev&&prev.g<=g+1e-6)return;const n={p,g,f:g+heuristic(p),parent,jump,via,id};nodes.set(id,n);push(n);};
     const trace=chain=>chain.flatMap((n,i)=>i?[...(n.via||[]),n.p]:[n.p]);
@@ -222,10 +245,19 @@
       }
       const ix=Math.round(p[0]/cs),iz=Math.round(p[2]/cs);
       const edge=q=>{
-        if(!q||Math.abs(q[1]-p[1])>.505||clearance(col,p,q,skip))return false;
+        if(!q||Math.abs(q[1]-p[1])>.505)return false;
+        const a=p.map(v=>v.toFixed(5)).join(','),b=q.map(v=>v.toFixed(5)).join(','),id=a<b?a+'|'+b:b+'|'+a,known=edges.get(id);
+        if(known===false)return false;if(known&&closed.has(key(q)))return true;
+        if(known!==true&&clearance(col,p,q,skip)){edges.set(id,false);return false;}
         let prev=p;const count=Math.max(2,Math.ceil(distance(p,q)/.16)),via=[];
-        for(let i=1;i<count;i++){const mid=support(p.map((v,k)=>v+(q[k]-v)*i/count));if(!mid||Math.abs(mid[1]-prev[1])>.505)return false;prev=mid;via.push(mid);}
-        if(Math.abs(q[1]-prev[1])>.505)return false;
+        for(let i=1;i<count;i++){const mid=support(p.map((v,k)=>v+(q[k]-v)*i/count));if(!mid||Math.abs(mid[1]-prev[1])>.505){edges.set(id,false);return false;}prev=mid;via.push(mid);}
+        if(Math.abs(q[1]-prev[1])>.505){edges.set(id,false);return false;}
+        // A chord can be clear while its draped treads cut sideways under a neighbouring flight.
+        // Check the actual bent trace; flat/ramp chords have already passed the cheaper sweep above.
+        if(known!==true&&via.some((v,i)=>Math.abs(v[1]-(p[1]+(q[1]-p[1])*(i+1)/count))>.03)){
+          const trace=[p,...via,q];for(let i=1;i<trace.length;i++)if(segmentHit(trace,i,col,skip)){edges.set(id,false);return false;}
+        }
+        edges.set(id,true);
         add(q,cur.g+length([p,...via,q]),cur,null,via);return true;
       };
       for(const [sx,sz]of [[1,0],[0,1],[-1,0],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]]){
@@ -237,32 +269,38 @@
     return null;
   }
   async function walkRoute(from,target,col,skip=[],transitions=[],checkpoint=async()=>{}) {
+    from=point(from);target={...target,at:point(target.at)};if(!from||!target.at)return null;
     // Meeting in the middle avoids scanning every side room when the goal is on a nearby, different floor.
     // Portals stay directed, so those queries use the single forward graph with portal-aware lower bounds.
-    const maps=[new Map(),new Map()],finished={},cancelled={},terrain=new Map();let done=false;
+    const maps=[new Map(),new Map()],finished={},cancelled={},terrain=new Map(),edges=new Map();let done=false;
     const support=p=>{const key=p[0].toFixed(5)+','+p[2].toFixed(5)+','+Math.round(p[1]*10);if(!terrain.has(key))terrain.set(key,floor(col,p,skip));return terrain.get(key);};
-    if(transitions.length||!floor(col,target.at,skip))return surfaceRoute(from,target,col,skip,transitions,checkpoint,{support});
+    if(transitions.length||!floor(col,target.at,skip))return surfaceRoute(from,target,col,skip,transitions,checkpoint,{support,edges});
     const pause=async()=>{if(done)throw cancelled;await checkpoint();if(done)throw cancelled;};
-    const run=async(reverse)=>{try{const result=await surfaceRoute(reverse?target.at:from,reverse?{...target,at:from}:target,col,skip,[],pause,{own:maps[+reverse],other:maps[+!reverse],reverse,support});if(result){done=true;finished.result={...result,target};}}catch(e){if(e!==cancelled)throw e;}};
+    const run=async(reverse)=>{try{const result=await surfaceRoute(reverse?target.at:from,reverse?{...target,at:from}:target,col,skip,[],pause,{own:maps[+reverse],other:maps[+!reverse],reverse,support,edges});if(result){done=true;finished.result={...result,target};}}catch(e){if(e!==cancelled)throw e;}};
     await Promise.all([run(false),run(true)]);return finished.result||null;
   }
   async function planConnected(mesh,native,from,target,col,skip=[],transitions=[],checkpoint=async()=>{},fallback=true) {
+    from=point(from);target={...target,at:point(target.at)};if(!from||!target.at)return null;
     const direct=await plan(mesh,native,from,target,col,skip,checkpoint);
-    const links=transitionLinks(col,skip,transitions),queue=[{at:from,cost:0,first:null}],best=new Map();let queries=0,result=direct;
+    const links=transitionLinks(col,skip,transitions),tail=await portalTail(links,target,checkpoint,1.1),queue=[{at:from,cost:0,first:null}],best=new Map();let queries=0,result=direct,missing=Infinity;
     while(queue.length){
       queue.sort((a,b)=>a.cost-b.cost);const cur=queue.shift();
       if(result&&cur.cost>=result.distance)continue;
-      const end=cur.first&&(!result||cur.cost+distance(cur.at,target.at)<result.distance)?await plan(mesh,native,cur.at,target,col,skip,checkpoint):null;
+      const endBound=cur.cost+Math.max(0,distance(cur.at,target.at)-1.1),tryEnd=cur.first&&(!result||endBound<result.distance);
+      const end=tryEnd?await plan(mesh,native,cur.at,target,col,skip,checkpoint):null;if(tryEnd&&!end)missing=Math.min(missing,endBound);
       if(end&&(!result||cur.cost+end.distance<result.distance)){const leg=await plan(mesh,native,from,{...target,at:cur.first.from,transitionGoal:true},col,skip,checkpoint);if(leg)result={...leg,target,transition:cur.first,distance:cur.cost+end.distance};}
       for(const link of links){
         if(++queries%4===0)await checkpoint();
-        const route=await plan(mesh,native,cur.at,{...target,at:link.from,transitionGoal:true},col,skip,checkpoint);if(!route)continue;
+        const lower=cur.cost+Math.max(0,distance(cur.at,link.from)-1.1)+.1;
+        if((result&&lower+tail[link.i]>=result.distance)||lower>=(best.get(link.i)??Infinity))continue;
+        const route=await plan(mesh,native,cur.at,{...target,at:link.from,transitionGoal:true},col,skip,checkpoint);if(!route){missing=Math.min(missing,lower+tail[link.i]);continue;}
         const cost=cur.cost+route.distance+.1;if((best.get(link.i)??Infinity)<=cost)continue;
         best.set(link.i,cost);queue.push({at:link.to,cost,first:cur.first||link});
       }
     }
-    if(result||!fallback)return result;
-    return await walkRoute(from,target,col,skip,transitions,checkpoint);
+    if(!fallback||result&&missing>=result.distance)return result;
+    const surface=await walkRoute(from,target,col,skip,transitions,checkpoint);
+    return surface&&(!result||surface.distance<result.distance)?surface:result;
   }
   function trim(points,feet) {
     if(!points?.length)return{points:[],distance:Infinity,off:Infinity};
@@ -273,28 +311,44 @@
     }
     const pts=[at,...points.slice(index+1)];return{points:pts,distance:length(pts),off:best};
   }
+  function bodyLift(points,index) {
+    const p=points[index];let lift=0;
+    // A capsule's feet stand above the centre floor on a steep stair, before the next tread
+    // reaches its centre. The floor ribbon stays down; its body-clearance envelope must not.
+    for(let j=Math.max(0,index-4);j<=Math.min(points.length-1,index+4);j++){
+      const q=points[j],run=Math.hypot(q[0]-p[0],q[2]-p[2]),rise=Math.abs(q[1]-p[1]);
+      if(run>.015&&run<.45&&rise>.03&&rise<=.51)lift=Math.max(lift,Math.min(.45,.35*(Math.sqrt(1+(rise/run)**2)-1)));
+    }
+    return lift;
+  }
+  function segmentHit(points,i,col,skip) {
+    const a=points[i-1],b=points[i];let hit=clearance(col,a,b,skip);
+    if(hit){const lift=Math.max(bodyLift(points,i-1),bodyLift(points,i));if(lift>.01)hit=clearance(col,[a[0],a[1]+lift,a[2]],[b[0],b[1]+lift,b[2]],skip);}
+    return hit;
+  }
   function visible(points,col,actions,native,limit=45) {
     if(!points?.length)return{points:[],blocked:null};
     const out=[points[0]],skip=[...passable(actions)];let walked=0;
-    const bodyLift=index=>{
-      const p=points[index];let lift=0;
-      // A capsule's feet stand above the centre floor on a steep stair, before the next tread
-      // reaches its centre. The floor ribbon stays down; its body-clearance envelope must not.
-      for(let j=Math.max(0,index-4);j<=Math.min(points.length-1,index+4);j++){
-        const q=points[j],run=Math.hypot(q[0]-p[0],q[2]-p[2]),rise=Math.abs(q[1]-p[1]);
-        if(run>.015&&run<.45&&rise>.03&&rise<=.51)lift=Math.max(lift,Math.min(.45,.35*(Math.sqrt(1+(rise/run)**2)-1)));
-      }
-      return lift;
-    };
     for(let i=1;i<points.length;i++){
-      const a=points[i-1],b=points[i];let hit=clearance(col,a,b,skip);
-      if(hit){const lift=Math.max(bodyLift(i-1),bodyLift(i));if(lift>.01)hit=clearance(col,[a[0],a[1]+lift,a[2]],[b[0],b[1]+lift,b[2]],skip);}
+      const a=points[i-1],b=points[i],hit=segmentHit(points,i,col,skip);
       if(hit){const o=actions?.objects?.get(hit.key);return{points:out,blocked:native.isDoor?.(o)?'door':'geometry'};}
       const p=floor(col,b,skip);if(!p||Math.abs(p[1]-b[1])>.35)return{points:out,blocked:'geometry'};
       out.push(b);walked+=distance(a,b);if(walked>=limit)break;
     }
     return{points:out,blocked:null};
   }
-  const api={point,distance,length,agent,notePlacement,passable,navigationGeometry,targets,exitPoint,ended,floor,clearance,grounded,transitionPoint,transitionLinks,components,corridorPoints,drape,plan,planConnected,walkRoute,trim,visible,nativeRoute};
+  function rejoin(points,feet,col,actions,native) {
+    if(!points?.length)return null;const skip=[...passable(actions)],start=floor(col,feet,skip),end=points[0];if(!start||distance(start,end)>1.8)return null;
+    const connector=[start],count=Math.max(1,Math.ceil(distance(start,end)/.14));let prev=start;
+    for(let i=1;i<=count;i++){
+      const p=floor(col,start.map((v,k)=>v+(end[k]-v)*i/count),skip);if(!p||Math.abs(p[1]-prev[1])>.505)return null;
+      connector.push(p);prev=p;
+    }
+    if(distance(prev,end)>.1)return null;
+    const proof=visible([...connector,...points.slice(1,5)],col,actions,native,Infinity);
+    if(proof.points.length<connector.length)return null;
+    return[...connector.slice(0,-1),...points];
+  }
+  const api={point,distance,length,agent,notePlacement,passable,navigationGeometry,geometryVersion,targets,exitPoint,ended,floor,clearance,grounded,transitionPoint,transitionLinks,components,corridorPoints,drape,plan,planConnected,walkRoute,trim,visible,rejoin,nativeRoute};
   if(typeof module==='object'&&module.exports)module.exports=api;else root.__dfoDungeonNavModel=api;
 })(globalThis);

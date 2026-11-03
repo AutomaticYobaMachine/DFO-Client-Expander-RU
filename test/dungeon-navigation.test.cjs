@@ -31,12 +31,27 @@ test('a failed worker never falls back to baking the dungeon on the main thread'
   assert.equal(api.start('exit'),true);await new Promise(r=>setTimeout(r,0));assert.equal(api.state().phase,'unavailable');assert.match(api.state().message,/Фоновый расчёт/);assert.equal(baked,0);assert.equal(disposed,1);assert.equal(api.points().length,0);
   for(let i=0;i<10;i++){time+=5000;api.tick();await new Promise(r=>setTimeout(r,0));}assert.equal(disposed,1,'an unchanged failed request must not start expensive background work forever');
 });
+test('a missing, failed or empty worker mesh still allows cooperative navigation over real geometry',native,async()=>{
+  const r=await room();
+  for(const makeClient of [()=>({_hadWorker:false,bake(){assert.fail('must not bake synchronously')},dispose(){}}),()=>{throw Error('worker creation refused')},()=>({bake:async()=>{throw Error('worker died')},dispose(){}}),()=>({bake:async()=>({chf:{mesh:{polys:[]}}}),dispose(){}})]){
+    const h=controller(r,{makeClient});h.nav.mesh=null;h.api.start('exit');const state=await settle(h.api);assert.equal(state.phase,'following');assert.ok(h.api.points().length>1);h.api.stop(true);
+  }
+});
+test('surface routing does not require a native navigation mesh',native,async()=>{
+  const r=await room({pillar:true}),result=await M.planConnected(null,{},r.from,{at:[12,0,6]},r.col);
+  assert.ok(result);assert.ok(result.points.some(p=>p[2]<3||p[2]>9));
+});
 test('native navmesh and collider route around a wall, and every displayed segment stays on the floor',native,async()=>{
   const r=await room({pillar:true}),target={key:'goal',at:[12,0,6]};
   const result=await M.plan(r.mesh,r.native,r.from,target,r.col);
   assert.ok(result,'a supported path exists around the pillar');assert.ok(result.points.some(p=>p[2]<3||p[2]>9));
   for(const p of result.points)assert.ok(Math.abs(p[1])<.05);
   for(let i=1;i<result.points.length;i++)assert.equal(M.clearance(r.col,result.points[i-1],result.points[i]),null);
+});
+test('a wall exactly at a segment endpoint or grid node blocks both adjacent segments',native,async()=>{
+  const r=await room();wall(r.col,'grid-wall',7,0,12);
+  assert.ok(M.clearance(r.col,[6.5,0,6],[7,0,6]));assert.ok(M.clearance(r.col,[7,0,6],[7.5,0,6]));
+  assert.equal(await M.planConnected(r.mesh,r.native,[6,0,6],{at:[8,0,6]},r.col),null);
 });
 test('stacked floors are never joined by a straight line; a connected ramp reaches its own upper floor',native,async()=>{
   const split=await room({stacked:true});assert.equal(await M.plan(split.mesh,split.native,[2,0,6],{at:[2,3,6]},split.col),null);
@@ -88,6 +103,13 @@ test('floor validation rejects gaps and a newly lowered ceiling even when the ol
   assert.equal(await M.plan(r.mesh,r.native,r.from,{at:[12,0,6]},r.col),null);
   const before=JSON.stringify(r.from);assert.equal(M.floor({raycastHit:()=>({dist:Infinity})},r.from),null);assert.equal(JSON.stringify(r.from),before);
 });
+test('body clearance sees a waist or head obstacle between the original two probe heights',native,async()=>{
+  for(const [bottom,top]of [[.8,1.1],[1.5,1.75]]){
+    const r=await room();wall(r.col,'crossbar',7,0,12,bottom,top-bottom);
+    assert.ok(M.clearance(r.col,[6,0,6],[8,0,6]));assert.equal(M.visible([[6,0,6],[8,0,6]],r.col,r.actions,r.native).blocked,'geometry');
+    assert.equal(await M.walkRoute([6,0,6],{at:[8,0,6]},r.col),null,'a standing route may not pass through the suspended solid');
+  }
+});
 test('known teleporter edges keep their direction and show only the leg before the transition',native,async()=>{
   const r=await room({stacked:true}),target={at:[2,3,6],key:'up'},transition={entrance:{pos:[11,1,6],yawDeg:0},exit:{pos:[8,3.2,6],yawDeg:0}};
   const result=await M.planConnected(r.mesh,r.native,[2,0,6],target,r.col,[],[transition]);
@@ -106,10 +128,20 @@ test('a shorter available portal is considered even when a direct walking route 
   const r=await room(),links=[{entrance:{pos:[3,1,6]},exit:{pos:[11,.2,6]}}],result=await M.planConnected(r.mesh,r.native,[2,0,6],{at:[12,0,6]},r.col,[],links);
   assert.ok(result?.transition);assert.ok(result.distance<4);assert.ok(result.points.at(-1)[0]<4);
 });
+test('a shorter portal omitted by the native mesh is not hidden by an available long walking route',native,async()=>{
+  const r=await room(),locate=r.native.locate,partial={...r.native,locate:(mesh,x,z,y)=>x>2.2&&x<4.6?-1:locate(mesh,x,z,y)},links=[{entrance:{pos:[3.4,1,6]},exit:{pos:[11,.2,6]}}];
+  const result=await M.planConnected(r.mesh,partial,r.from,{at:[12,0,6]},r.col,[],links);
+  assert.ok(result?.transition);assert.ok(result.distance<4.5);assert.ok(result.points.at(-1)[0]<4.5);
+});
 test('long surface searches yield and cancel without changing the collider',native,async()=>{
   const r=await room({stacked:true}),keys=[...r.col._buckets.keys()];let yielded=0;
   await assert.rejects(M.walkRoute([2,0,6],{at:[2,3,6]},r.col,[],[],async()=>{if(++yielded>=3)throw new Error('cancelled')}),/cancelled/);
   assert.ok(yielded>=3);assert.deepEqual([...r.col._buckets.keys()],keys);
+});
+test('asynchronous path queries retain the input pose and goal even if their live buffers move',native,async()=>{
+  const r=await room({pillar:true}),feet=new Float32Array([2,0,6]),goal=new Float32Array([12,0,6]);let moved=false;
+  const result=await M.walkRoute(feet,{at:goal},r.col,[],[],async()=>{if(!moved){moved=true;feet.set([2,0,10]);goal.set([12,0,10]);}});
+  assert.ok(moved);assert.ok(result);assert.deepEqual(result.points[0],[2,0,6]);assert.deepEqual(result.points.at(-1),[12,0,6]);
 });
 test('original Privateer’s Hold geometry connects stair flights and a room seam without revealing a map',{skip:!process.env.ARENA2_PATH||!process.env.DFO_UPSTREAM_DIR},async()=>{
   const {realDungeon}=require('./helpers/dungeon-navigation.cjs'),r=await realDungeon(),skip=[...M.passable(r.actions)];
@@ -126,7 +158,35 @@ test('controller tracks target movement/death, chooses reachable elite by walkin
   const s=await settle(h.api);assert.equal(s.phase,'following');assert.ok(s.distance<6,'nearby reachable elite wins over one behind a wall');
   h.ctx.foes[1].dead=true;h.advance();await settle(h.api);assert.ok(h.api.state().distance>8);
   h.ctx.foes[0].ai.feet=[12,0,2];h.advance();assert.equal(h.api.points().length,0,'old line is hidden during a replan');await settle(h.api);assert.equal(h.api.state().phase,'following');
+  h.ctx.foes[0].entity.properName='Новое имя цели';h.advance();assert.equal(h.api.state().name,'Новое имя цели');
   h.current=null;h.advance();assert.equal(h.api.state().phase,'idle');assert.equal(h.api.points().length,0);
+});
+test('deviating to a parallel corridor behind a wall cannot report arrival through that wall',native,async()=>{
+  const r=await room(),h=controller(r);h.api.start('exit');await settle(h.api);
+  quad(r.col,'parallel-wall',[[0,0,6.4],[14,0,6.4],[14,3,6.4],[0,3,6.4]]);h.nav.feet.set([12,0,6.8]);h.advance();
+  assert.notEqual(h.api.state().phase,'arrived');assert.equal(h.api.points().length,0);assert.equal((await settle(h.api)).phase,'unavailable');
+});
+test('joining an existing route checks support across the lateral gap',native,async()=>{
+  const r=await room();r.col.removeBucket('floor');quad(r.col,'first',[[0,0,0],[14,0,0],[14,0,6.2],[0,0,6.2]]);quad(r.col,'second',[[0,0,6.8],[14,0,6.8],[14,0,12],[0,0,12]]);
+  assert.equal(M.rejoin([[7,0,6],[8,0,6]],[7,0,7],r.col,r.actions,r.native),null);
+});
+test('a failed route retries after real geometry changes without requiring the player to move',native,async()=>{
+  const r=await room(),h=controller(r);wall(r.col,'blocking-wall',7,0,12);h.api.start('exit');assert.equal((await settle(h.api)).phase,'unavailable');
+  r.col.removeBucket('blocking-wall');h.advance(5000);assert.equal((await settle(h.api)).phase,'following');assert.ok(h.api.points().at(-1)[0]>10);
+});
+test('a passage opening during a failed query cannot be cached as a final failure for the new world',native,async()=>{
+  const r=await room(),h=controller(r),original=M.planConnected;wall(r.col,'late-wall',7,0,12);h.nav.mesh=null;let changed=false;
+  M.planConnected=async(...args)=>{const result=await original(...args);if(!changed&&!result){changed=true;r.col.removeBucket('late-wall');}return result;};
+  try{h.api.start('exit');assert.equal((await settle(h.api)).phase,'following');assert.ok(changed);assert.ok(h.api.points().length>1);}finally{M.planConnected=original;h.api.stop(true);}
+});
+test('the geometry revision tracks real support but ignores unlocked door animation and query bookkeeping',native,async()=>{
+  const r=await room({door:true}),skip=M.passable(r.actions),before=M.geometryVersion(r.col,skip);
+  r.col.raycastHit([2,1,6],[1,0,0],12);assert.equal(M.geometryVersion(r.col,skip),before);
+  r.shift[2]=10;assert.equal(M.geometryVersion(r.col,skip),before);quad(r.col,'new-floor',[[0,3,0],[4,3,0],[4,3,4],[0,3,4]]);assert.notEqual(M.geometryVersion(r.col,skip),before);
+});
+test('waiting at a portal keeps the remaining distance to the actual goal',native,async()=>{
+  const r=await room({stacked:true}),h=controller(r);h.ctx.exitDoors=[{pos:[2,3,6]}];h.nav.transitions=[{entrance:{pos:[11,1,6]},exit:{pos:[8,3.2,6]}}];
+  h.api.start('exit');await settle(h.api);h.nav.feet.set([10.5,0,6]);h.advance();assert.equal(h.api.state().phase,'transition');assert.ok(h.api.state().distance>=5);
 });
 test('an elite omitted by the AI mesh is checked on the real floor before choosing a farther foe',native,async()=>{
   const r=await room(),locate=r.native.locate;const partial={...r,native:{...r.native,locate:(mesh,x,z,y)=>x>4.8&&x<7.2?-1:locate(mesh,x,z,y)}},h=controller(partial);

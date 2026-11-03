@@ -13,8 +13,8 @@ done
 rm -rf dist
 mkdir -p "$PAYLOAD/patcher" "$PAYLOAD/mod/page" "$PAYLOAD/data" "$OUT/licenses"
 cp src/patcher.cjs src/asar.cjs src/ru-build.cjs "$PAYLOAD/patcher/"
-cp src/mod/hook.cjs src/mod/transforms.cjs src/mod/nearby-loot-transform.cjs src/mod/loot-tags-transform.cjs src/mod/dungeon-transform.cjs src/mod/loot-store.cjs src/mod/version.json "$PAYLOAD/mod/"
-cp src/mod/page/dfo_dungeon_model.js src/mod/page/dfo_dungeons.js src/mod/page/dfo_loot_rules.js src/mod/page/dfo_loot_ui.js src/mod/page/dfo_loot.js src/mod/page/dfo_marks.js src/mod/page/dfo_town.js src/mod/page/ru_locale.js src/mod/page/ru_items.js "$PAYLOAD/mod/page/"
+cp src/mod/hook.cjs src/mod/transforms.cjs src/mod/nearby-loot-transform.cjs src/mod/loot-tags-transform.cjs src/mod/dungeon-transform.cjs src/mod/dungeon-live-transform.cjs src/mod/loot-store.cjs src/mod/version.json "$PAYLOAD/mod/"
+cp src/mod/page/dfo_dungeon_model.js src/mod/page/dfo_dungeons.js src/mod/page/dfo_dungeon_live_model.js src/mod/page/dfo_dungeon_live.js src/mod/page/dfo_loot_rules.js src/mod/page/dfo_loot_ui.js src/mod/page/dfo_loot.js src/mod/page/dfo_marks.js src/mod/page/dfo_town.js src/mod/page/ru_locale.js src/mod/page/ru_items.js "$PAYLOAD/mod/page/"
 cp -r data/ru data/ru-pack data/ru_shell.json "$PAYLOAD/data/"
 cp README.txt "$PAYLOAD/"
 python3 - <<'PY'

@@ -8,6 +8,25 @@ import (
 )
 
 const defaultLootKey = "KeyJ"
+const defaultDungeonKey = "KeyK"
+
+func resolveDungeonKey(st *gameStatus) string {
+	if st == nil {
+		return defaultDungeonKey
+	}
+	if validLootKey(st.CachedDungeonKey) {
+		return st.CachedDungeonKey
+	}
+	var cfg struct {
+		Options struct {
+			Code string `json:"keyCode"`
+		} `json:"dungeonOptions"`
+	}
+	if json.Unmarshal(st.Cfg, &cfg) == nil && validLootKey(cfg.Options.Code) {
+		return cfg.Options.Code
+	}
+	return defaultDungeonKey
+}
 
 var simpleLootKey = regexp.MustCompile(`^(Key[A-Z]|Digit[0-9]|F([1-9]|1[0-9]|2[0-4])|Numpad[0-9]|Mouse[345])$`)
 var lootKeyNames = map[string]string{

@@ -9,7 +9,7 @@ import (
 
 const (
 	appName      = "DFO-Client-Expander-RU"
-	appVersion   = "1.14.4"
+	appVersion   = "1.15.0"
 	appAuthor    = "AutomaticYobaMachine"
 	appCommunity = "Создано специально для русского сообщества DFO Online."
 )
@@ -35,6 +35,7 @@ const (
 	idPane
 	idReadme
 	idLootKey
+	idDungeonKey
 )
 
 type feature struct {
@@ -46,21 +47,22 @@ var features = []feature{
 	{idRu, "ru", "Русификация", "ИГРА НА РУССКОМ", "Перевод интерфейса, предметов, квестов и книг. Русские названия и описания помогают ориентироваться в игре; собственные имена мест сохраняются там, где это нужно для поиска на карте."},
 	{idMarks, "marks", "Метки и карта города", "ОРИЕНТИРОВАНИЕ", "Метки таверн, магазинов, гильдий и других заведений на Overworld. Подробная карта города помогает найти нужное место. «Только посещённые» скрывает здания, в которых вы ещё не были."},
 	{idLoot, "nearbyLoot", "Лут рядом", "КЛАВИША J · 15 МЕТРОВ", "Дроп противников и предметы на полу — в одном окне с фильтрами, пресетами, сортировкой и «Забрать все». Автолут настраивается отдельно. Стены и соседние этажи исключены; вещи подбираются из исходных куч и трупов."},
-	{idDungeons, "dungeons", "Сведения о данжах", "КАРТОЧКИ И ЛИЧНЫЕ ОЦЕНКИ", "Трёхстрочные метки найденных данжей: тип, ранг, размер и оценки для вашего персонажа. ЛКМ открывает карточку с врагами, добычей, ресурсами и мини-гайдом. Путешествие запускается кнопкой «В путь» внутри карточки."},
+	{idDungeons, "dungeons", "Сведения о данжах", "КАРТОЧКИ И СВОДКА ВНУТРИ", "Метки и личные оценки данжей на Overworld. Внутри — отдельное окно со счётчиками врагов и элитников, игроками, квестами, аурумом и ближайшим регеном. Вторая вкладка показывает оставшихся врагов и их свойства. По умолчанию K; свою кнопку назначьте ниже."},
 }
 
 type gameStatus struct {
-	Asar          string          `json:"asar"`
-	Shell         string          `json:"shell"`
-	Installed     bool            `json:"installed"`
-	WithRu        bool            `json:"withRu"`
-	ModVersion    *string         `json:"modVersion"`
-	CleanCopy     bool            `json:"cleanCopy"`
-	OldRu         bool            `json:"oldRu"`
-	Running       bool            `json:"running"`
-	UserData      string          `json:"userData"`
-	Cfg           json.RawMessage `json:"cfg"`
-	CachedLootKey string          `json:"cachedLootKey,omitempty"`
+	Asar             string          `json:"asar"`
+	Shell            string          `json:"shell"`
+	Installed        bool            `json:"installed"`
+	WithRu           bool            `json:"withRu"`
+	ModVersion       *string         `json:"modVersion"`
+	CleanCopy        bool            `json:"cleanCopy"`
+	OldRu            bool            `json:"oldRu"`
+	Running          bool            `json:"running"`
+	UserData         string          `json:"userData"`
+	Cfg              json.RawMessage `json:"cfg"`
+	CachedLootKey    string          `json:"cachedLootKey,omitempty"`
+	CachedDungeonKey string          `json:"cachedDungeonKey,omitempty"`
 }
 
 func defaults() map[int]bool {
@@ -102,7 +104,7 @@ func selectedCount(choices map[int]bool) int {
 	return n
 }
 
-func operationArgs(what string, choices map[int]bool, lootKey string) []string {
+func operationArgs(what string, choices map[int]bool, lootKey string, dungeonKeys ...string) []string {
 	args := []string{what}
 	if what != "install" {
 		return args
@@ -112,6 +114,9 @@ func operationArgs(what string, choices map[int]bool, lootKey string) []string {
 	}
 	if validLootKey(lootKey) {
 		args = append(args, "--loot-key", lootKey)
+	}
+	if len(dungeonKeys) > 0 && validLootKey(dungeonKeys[0]) {
+		args = append(args, "--dungeon-key", dungeonKeys[0])
 	}
 	args = append(args, "--set", "enabled=1")
 	for _, f := range features {

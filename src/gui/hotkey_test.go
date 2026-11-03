@@ -41,6 +41,24 @@ func TestPhysicalLootKeySeparatesNumpadWithEitherNumLockState(t *testing.T) {
 	}
 }
 
+func TestDungeonShortcutUsesCacheAndHasIndependentDefault(t *testing.T) {
+	if resolveDungeonKey(nil) != "KeyK" {
+		t.Fatal("default dungeon shortcut must be K")
+	}
+	st := &gameStatus{Cfg: json.RawMessage(`{"dungeonOptions":{"keyCode":"NumpadEnter"},"nearbyLootOptions":{"keyCode":"Mouse5"}}`)}
+	if resolveDungeonKey(st) != "NumpadEnter" {
+		t.Fatal("profile shortcut was lost")
+	}
+	st.CachedDungeonKey = "Mouse4"
+	if resolveDungeonKey(st) != "Mouse4" || resolveLootKey(st) != "Mouse5" {
+		t.Fatal("cache and loot bindings must stay independent")
+	}
+	args := operationArgs("install", defaults(), "Mouse5", "NumpadEnter")
+	if !slices.Contains(args, "--dungeon-key") || !slices.Contains(args, "NumpadEnter") {
+		t.Fatalf("missing dungeon binding: %v", args)
+	}
+}
+
 func TestLootKeyChoiceReachesInstallWithoutReplacingAnUnchangedBinding(t *testing.T) {
 	for _, code := range []string{"Mouse3", "Mouse4", "Mouse5", "Numpad0", "NumpadEnter", "NumpadAdd", "KeyJ", "Tab"} {
 		args := operationArgs("install", defaults(), code)

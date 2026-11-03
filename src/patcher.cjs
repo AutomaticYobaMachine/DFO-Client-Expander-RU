@@ -22,7 +22,7 @@ const MOD = path.join(ROOT, 'mod');
 const DATA = path.join(ROOT, 'data');
 const BAK = '.dfo-mod-original.bak';
 const VERSION = JSON.parse(fs.readFileSync(path.join(MOD, 'version.json'), 'utf8')).version;
-const { createLootStore, validLootKey: validKey, cachedLootKey } = require(path.join(MOD, 'loot-store.cjs'));
+const { createLootStore, validLootKey: validKey, cachedLootKey, cachedDungeonKey } = require(path.join(MOD, 'loot-store.cjs'));
 
 const args = process.argv.slice(2);
 const cmd = args.find((a) => !a.startsWith('--')) ?? 'install';
@@ -113,6 +113,8 @@ function writeConfig(ud, withRu) {
   if (!chosenKey) chosenKey = 'KeyJ';
 
   cfg.nearbyLootOptions = { ...(cfg.nearbyLootOptions ?? {}), keyCode: chosenKey };
+  const dungeonKey = opt('dungeon-key') ?? store.dungeonKey() ?? (validKey(cfg.dungeonOptions?.keyCode) ? cfg.dungeonOptions.keyCode : 'KeyK');
+  cfg.dungeonOptions = { ...(cfg.dungeonOptions ?? {}), keyCode: dungeonKey };
   for (let i = 0; i < args.length; i++) {
     if (args[i] !== '--set') continue;
     const [k, v] = String(args[i + 1] ?? '').split('=');
@@ -127,17 +129,18 @@ function writeConfig(ud, withRu) {
     fs.writeFileSync(tmp, `${JSON.stringify(cfg, null, 2)}\n`);
     // Cache is authoritative for the binding. Validate/preserve every other
     // namespace and confirm its atomic write before publishing the config.
-    store.saveHotkeys({ loot: chosenKey });
+    store.saveHotkeys({ loot: chosenKey, dungeon: dungeonKey });
     fs.renameSync(tmp, file);
   } catch (e) {
     try { fs.unlinkSync(tmp); } catch {}
-    stop(`Не удалось сохранить настройки и кнопку лута: ${e.message}`);
+    stop(`Не удалось сохранить настройки и назначенные кнопки: ${e.message}`);
   }
 
   return file;
 }
 
 function install() {
+  if (args.includes('--dungeon-key') && !validKey(opt('dungeon-key'))) stop('Некорректная кнопка сведений о данже. Назначьте клавишу заново в установщике.');
   const lootKey = opt('loot-key');
   if (args.includes('--loot-key') && (lootKey === null || !validKey(lootKey))) stop('Некорректная кнопка лута. Назначьте клавишу заново в установщике.');
   const asarPath = findAsar();
@@ -224,7 +227,7 @@ function install() {
   put.set('main.cjs', Buffer.from(hooked));
 
   // the mod itself
-  for (const rel of ['hook.cjs', 'transforms.cjs', 'nearby-loot-transform.cjs', 'loot-tags-transform.cjs', 'dungeon-transform.cjs', 'page/dfo_dungeon_model.js', 'page/dfo_dungeons.js', 'loot-store.cjs', 'page/dfo_loot_rules.js', 'page/dfo_loot_ui.js', 'page/dfo_loot.js', 'version.json', 'page/dfo_marks.js', 'page/dfo_town.js', 'page/ru_locale.js', 'page/ru_items.js']) put.set(`dfo-mod/${rel}`, fs.readFileSync(path.join(MOD, ...rel.split('/'))));
+  for (const rel of ['hook.cjs', 'transforms.cjs', 'nearby-loot-transform.cjs', 'loot-tags-transform.cjs', 'dungeon-transform.cjs', 'dungeon-live-transform.cjs', 'page/dfo_dungeon_model.js', 'page/dfo_dungeons.js', 'page/dfo_dungeon_live_model.js', 'page/dfo_dungeon_live.js', 'loot-store.cjs', 'page/dfo_loot_rules.js', 'page/dfo_loot_ui.js', 'page/dfo_loot.js', 'version.json', 'page/dfo_marks.js', 'page/dfo_town.js', 'page/ru_locale.js', 'page/ru_items.js']) put.set(`dfo-mod/${rel}`, fs.readFileSync(path.join(MOD, ...rel.split('/'))));
 
   say('Пересобираю app.asar...');
   const tmp = `${asarPath}.dfo-tmp`;
@@ -287,7 +290,7 @@ function status() {
   const a = openAsar(asarPath);
   const files = listFiles(a.header);
   const st = { asar: asarPath, shell: versionOf(a), installed: files.has('dfo-mod/hook.cjs'), withRu: files.has('dfo-mod/page/ru_dict.js'),
-    modVersion: null, cleanCopy: fs.existsSync(asarPath + BAK), oldRu: files.has('dist/assets/ru_dict.js'), running: gameRunning(), cfg: null, userData: ud, cachedLootKey: null };
+    modVersion: null, cleanCopy: fs.existsSync(asarPath + BAK), oldRu: files.has('dist/assets/ru_dict.js'), running: gameRunning(), cfg: null, userData: ud, cachedLootKey: null, cachedDungeonKey: null };
   try { st.modVersion = JSON.parse(readFile(a, 'dfo-mod/version.json')?.toString('utf8') ?? 'null')?.version ?? null; } catch { st.modVersion = null; }
   a.close();
   try { st.cfg = JSON.parse(fs.readFileSync(path.join(ud, 'dfo-mod.json'), 'utf8')); } catch { st.cfg = null; }
@@ -299,12 +302,17 @@ function status() {
       const cache = JSON.parse(fs.readFileSync(cacheFile, 'utf8'));
       if (cache && typeof cache === 'object') {
         st.cachedLootKey = cachedLootKey(cache);
+        st.cachedDungeonKey = cachedDungeonKey(cache);
       }
     }
   } catch {}
   if (st.cachedLootKey) {
     st.cfg = st.cfg || {};
     st.cfg.nearbyLootOptions = { ...(st.cfg.nearbyLootOptions || {}), keyCode: st.cachedLootKey };
+  }
+  if (st.cachedDungeonKey) {
+    st.cfg = st.cfg || {};
+    st.cfg.dungeonOptions = { ...(st.cfg.dungeonOptions || {}), keyCode: st.cachedDungeonKey };
   }
 
   if (flag('json')) { say(JSON.stringify(st)); return; }

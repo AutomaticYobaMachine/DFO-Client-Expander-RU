@@ -25,16 +25,16 @@ test('cached hotkey survives city replacement, loot settings and dungeon notes w
 test('live hook uses the same cached binding as the installer, even if the config vanished or was reset',async()=>{
   const dir=fs.mkdtempSync(path.join(os.tmpdir(),'dfo-import-hook-'));
   try {
-    const store=createLootStore(dir);store.saveHotkeys({loot:'Mouse4'});
+    const store=createLootStore(dir);store.saveHotkeys({loot:'Mouse4',dungeon:'NumpadEnter'});
     const cfg=path.join(dir,'dfo-mod.json');fs.writeFileSync(cfg,JSON.stringify({nearbyLootOptions:{keyCode:'KeyJ',custom:123}}));
     const html='<html><head></head><body></body></html>';
     const page=async()=>{
       const handler=wrap(async()=>new Response(html,{headers:{'Content-Type':'text/html'}}),{app:{getPath:()=>dir}});
       return (await handler(new Request('dagger://game/play/index.html'))).text();
     };
-    const first=await page();assert.match(first,/"keyCode":"Mouse4"/);assert.match(first,/"custom":123/);
+    const first=await page();assert.match(first,/"keyCode":"Mouse4"/);assert.match(first,/"custom":123/);assert.match(first,/"dungeons":\{"keyCode":"NumpadEnter","enabled":true\}/);
     assert.equal(JSON.parse(fs.readFileSync(cfg)).nearbyLootOptions.keyCode,'KeyJ','runtime reads must not rewrite preferences');
-    fs.unlinkSync(cfg);assert.match(await page(),/"keyCode":"Mouse4"/);assert.equal(fs.existsSync(cfg),false);
+    fs.unlinkSync(cfg);const restored=await page();assert.match(restored,/"keyCode":"Mouse4"/);assert.match(restored,/"keyCode":"NumpadEnter"/);assert.equal(fs.existsSync(cfg),false);
     fs.writeFileSync(path.join(dir,'dfo-mod-cache.json'),'{broken');
     const fallback=await page();assert.match(fallback,/dfo_loot\.js/,'bad optional cache must not stop the game');
     assert.equal(fs.readFileSync(path.join(dir,'dfo-mod-cache.json'),'utf8'),'{broken');

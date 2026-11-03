@@ -127,6 +127,7 @@ def main():
         for i in [103,104,105,106]:
             assert s['by_id'][i]['Rect']['Top']>=pane['Top'] and s['by_id'][1000+i]['Rect']['Bottom']<=pane['Bottom'], 'all four features and descriptions should fit the initial test screen'
         shot('installer-components.png')
+        assert s['by_id'][121]['Title']=='Клавиша: K' and s['by_id'][121]['Enabled'], 'dungeon shortcut should default to K independently of loot'
 
         assert s['by_id'][120]['Title']=='Клавиша: K', f'uninstalled client lost its saved binding: {s["by_id"][120]["Title"]}; game={s["by_id"][117]["Title"]}; config={config}; log={s["by_id"][112]["Title"]}'
         r=s['by_id'][120]['Rect']
@@ -180,6 +181,18 @@ def main():
         assert state()['by_id'][120]['Title']=='Клавиша: Мышь 5', 'changing tabs should cancel capture'
         print('PASS capture: real clicks, Escape, Space/Tab/Enter, physical NumPad and both Windows Num Lock VK forms, mouse 4/5, refresh and tab cancellation',flush=True)
 
+        state('click',121);key('KP_Add')
+        wait(lambda:state()['by_id'][121]['Title']=='Клавиша: NumPad +')
+        assert state()['by_id'][120]['Title']=='Клавиша: Мышь 5', 'dungeon capture overwrote loot'
+        state('click',121);key('Escape')
+        assert state()['by_id'][121]['Title']=='Клавиша: NumPad +', 'cancel lost the dungeon binding'
+        state('click',121)
+        r=state()['by_id'][121]['Rect']
+        subprocess.run([XDO,'mousemove','--sync',str((r['Left']+r['Right'])//2),str((r['Top']+r['Bottom'])//2),'click','8'],env=env,check=True)
+        wait(lambda:state()['by_id'][121]['Title']=='Клавиша: Мышь 4')
+        assert state()['by_id'][120]['Title']=='Клавиша: Мышь 5'
+        assert 'dungeonOptions' not in json.loads(config.read_text()), 'recording must wait for Apply'
+
         picker=subprocess.Popen([WINE,winpath(probe),'click','101'],env=env,stdout=log,stderr=log)
         wait(lambda:state('dialog'));state('cancel-save');picker.wait(timeout=10)
         picker=subprocess.Popen([WINE,winpath(probe),'click','101'],env=env,stdout=log,stderr=log)
@@ -221,8 +234,9 @@ def main():
         assert cfg['marksOptions']['onlyVisited'] is False
         assert cfg['nearbyLootOptions']['keyCode']=='Mouse5' and cfg['custom']==123
         assert cfg['nearbyLootOptions']['customOption']==456
+        assert cfg['dungeonOptions']['keyCode']=='Mouse4'
         assert archive.read_bytes()!=original
-        assert json.loads(cache.read_text())=={**json.loads(cached), 'hotkeys': {'loot':'Mouse5'}}
+        assert json.loads(cache.read_text())=={**json.loads(cached), 'hotkeys': {'loot':'Mouse5','dungeon':'Mouse4'}}
         print('PASS install: chosen mouse binding and unrelated options/cache survive repeated game selection and installation',flush=True)
 
         state('close'); app.wait(timeout=15)
@@ -231,6 +245,7 @@ def main():
         s = state()
         assert [s['by_id'][i]['Checked'] for i in [103,104,105,106,107]] == [0,1,0,0,0], 'restart lost saved checkboxes'
         assert s['by_id'][120]['Title']=='Клавиша: Мышь 5' and not s['by_id'][120]['Enabled'], 'restart lost the saved mouse binding or ignored the disabled feature'
+        assert s['by_id'][121]['Title']=='Клавиша: Мышь 4' and not s['by_id'][121]['Enabled'], 'restart lost the independent dungeon shortcut'
         for i in [103,104,105,106]:
             state('click', i)
         state('click',120);key('KP_Enter')
@@ -241,6 +256,7 @@ def main():
         cfg = json.loads(config.read_text())
         assert [cfg[k] for k in ['ru','marks','nearbyLoot','dungeons']] == [True,False,True,True]
         assert cfg['nearbyLootOptions']['keyCode']=='NumpadEnter'
+        assert cfg['dungeonOptions']['keyCode']=='Mouse4'
         state('click', 111)
         s=state()
         assert s['by_id'][112]['Visible'] and not s['by_id'][118]['Visible']
@@ -260,13 +276,14 @@ def main():
         state('click', 109)
         wait(lambda: archive.read_bytes()==original)
         wait(lambda: state()['by_id'][108]['Enabled'])
-        assert json.loads(cache.read_text())=={**json.loads(cached), 'hotkeys': {'loot':'NumpadEnter'}}
+        assert json.loads(cache.read_text())=={**json.loads(cached), 'hotkeys': {'loot':'NumpadEnter','dungeon':'Mouse4'}}
         assert not archive.with_name(archive.name+'.dfo-mod-original.bak').exists()
         state('close'); app.wait(timeout=15); app=None
         config.unlink()
         app=launch()
         wait(lambda:(s:=state()) and s['by_id'][108]['Visible'] and s['by_id'][108]['Enabled'] and s['by_id'][117]['Title']==winpath(game/'DFO Online.exe'))
         assert state()['by_id'][120]['Title']=='Клавиша: NumPad Enter', 'cached binding must survive a missing config'
+        assert state()['by_id'][121]['Title']=='Клавиша: Мышь 4', 'cached dungeon binding must survive a missing config'
         assert not config.exists(), 'status must not recreate or change the config'
         assert archive.read_bytes()==original
         state('close');app.wait(timeout=15);app=None

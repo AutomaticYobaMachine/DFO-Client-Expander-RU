@@ -20,31 +20,35 @@ test('distribution installer: install, reinstall and uninstall preserve original
       ['untouched.bin',Buffer.from([0,10,42,255])],
     ])});blank.close();
     const original=fs.readFileSync(asar);
-    fs.mkdirSync(user);fs.writeFileSync(path.join(user,'dfo-mod.json'),JSON.stringify({nearbyLootOptions:{keyCode:'KeyK',customOption:123},marks:false}));
+    fs.mkdirSync(user);fs.writeFileSync(path.join(user,'dfo-mod.json'),JSON.stringify({nearbyLootOptions:{keyCode:'KeyK',customOption:123},dungeonOptions:{customOption:456},marks:false}));
     const cache=Buffer.from(JSON.stringify({towns:{kept:true},loot:{revision:7,presets:[]},dungeons:{'12345':{at:1}}}));fs.writeFileSync(path.join(user,'dfo-mod-cache.json'),cache);
     const run=(cmd,...args)=>cp.execFileSync(process.execPath,[path.join(dist,'patcher/patcher.cjs'),cmd,'--no-proc-check','--asar',asar,'--user-data',user,...args],{encoding:'utf8'});
     for(let i=0;i<2;i++){
       run('install');
       const a=openAsar(asar),files=listFiles(a.header);
-      for(const file of ['nearby-loot-transform.cjs','loot-tags-transform.cjs','dungeon-transform.cjs','page/dfo_dungeon_model.js','page/dfo_dungeons.js','loot-store.cjs','page/dfo_loot_rules.js','page/dfo_loot_ui.js','page/dfo_loot.js','transforms.cjs']){
+      for(const file of ['nearby-loot-transform.cjs','loot-tags-transform.cjs','dungeon-transform.cjs','dungeon-live-transform.cjs','page/dfo_dungeon_model.js','page/dfo_dungeons.js','page/dfo_dungeon_live_model.js','page/dfo_dungeon_live.js','loot-store.cjs','page/dfo_loot_rules.js','page/dfo_loot_ui.js','page/dfo_loot.js','transforms.cjs']){
         assert.ok(files.has('dfo-mod/'+file));assert.deepEqual(readFile(a,'dfo-mod/'+file),fs.readFileSync(path.join(dist,'mod',file)));
       }
       assert.match(readFile(a,'main.cjs').toString(),/dfo-mod\/hook.cjs/);
       assert.deepEqual(readFile(a,'untouched.bin'),Buffer.from([0,10,42,255]));a.close();
       const cfg=JSON.parse(fs.readFileSync(path.join(user,'dfo-mod.json')));
       assert.equal(cfg.nearbyLoot,true);assert.equal(cfg.dungeons,true);assert.equal(cfg.nearbyLootOptions.keyCode,'KeyK');assert.equal(cfg.marks,false);
+      assert.equal(cfg.dungeonOptions.keyCode,'KeyK');assert.equal(cfg.dungeonOptions.customOption,456);
     }
-    run('install','--no-ru','--loot-key','Mouse4','--set','ru=0','--set','marks=1','--set','nearbyLoot=0','--set','dungeons=0','--set','onlyVisited=0','--set','enabled=1');
+    run('install','--no-ru','--loot-key','Mouse4','--dungeon-key','NumpadAdd','--set','ru=0','--set','marks=1','--set','nearbyLoot=0','--set','dungeons=0','--set','onlyVisited=0','--set','enabled=1');
     let cfg=JSON.parse(fs.readFileSync(path.join(user,'dfo-mod.json')));
     assert.equal(cfg.enabled,true);assert.equal(cfg.ru,false);assert.equal(cfg.marks,true);assert.equal(cfg.nearbyLoot,false);assert.equal(cfg.dungeons,false);assert.equal(cfg.marksOptions.onlyVisited,false);assert.equal(cfg.nearbyLootOptions.keyCode,'Mouse4');
     let current=openAsar(asar);assert.equal(listFiles(current.header).has('dfo-mod/page/ru_dict.js'),false);current.close();
     run('install','--loot-key','NumpadEnter','--set','ru=1','--set','marks=0','--set','nearbyLoot=1','--set','dungeons=1','--set','onlyVisited=1');
     cfg=JSON.parse(fs.readFileSync(path.join(user,'dfo-mod.json')));assert.equal(cfg.ru,true);assert.equal(cfg.marks,false);assert.equal(cfg.nearbyLoot,true);assert.equal(cfg.dungeons,true);assert.equal(cfg.marksOptions.onlyVisited,true);assert.equal(cfg.nearbyLootOptions.keyCode,'NumpadEnter');
-    run('install','--loot-key','Mouse5');run('install');
+    run('install','--loot-key','Mouse5','--dungeon-key','Mouse4');run('install');
     cfg=JSON.parse(fs.readFileSync(path.join(user,'dfo-mod.json')));assert.equal(cfg.nearbyLootOptions.keyCode,'Mouse5');assert.equal(cfg.nearbyLootOptions.customOption,123);
     const beforeInvalid=fs.readFileSync(asar),configBeforeInvalid=fs.readFileSync(path.join(user,'dfo-mod.json'));
     const invalid=cp.spawnSync(process.execPath,[path.join(dist,'patcher/patcher.cjs'),'install','--no-proc-check','--asar',asar,'--user-data',user,'--loot-key','Mouse6'],{encoding:'utf8'});
     assert.notEqual(invalid.status,0);assert.match(invalid.stdout+invalid.stderr,/Некорректная кнопка лута/);
+    assert.deepEqual(fs.readFileSync(asar),beforeInvalid);assert.deepEqual(fs.readFileSync(path.join(user,'dfo-mod.json')),configBeforeInvalid);
+    const invalidDungeon=cp.spawnSync(process.execPath,[path.join(dist,'patcher/patcher.cjs'),'install','--no-proc-check','--asar',asar,'--user-data',user,'--dungeon-key','Mouse6'],{encoding:'utf8'});
+    assert.notEqual(invalidDungeon.status,0);assert.match(invalidDungeon.stdout+invalidDungeon.stderr,/Некорректная кнопка/);
     assert.deepEqual(fs.readFileSync(asar),beforeInvalid);assert.deepEqual(fs.readFileSync(path.join(user,'dfo-mod.json')),configBeforeInvalid);
     current=openAsar(asar);assert.equal(listFiles(current.header).has('dfo-mod/page/ru_dict.js'),true);current.close();
     assert.deepEqual(fs.readFileSync(asar+'.dfo-mod-original.bak'),original);
@@ -52,18 +56,22 @@ test('distribution installer: install, reinstall and uninstall preserve original
     const finalCache=JSON.parse(fs.readFileSync(path.join(user,'dfo-mod-cache.json'),'utf8'));
     assert.deepEqual(finalCache.towns,{kept:true});assert.equal(finalCache.loot?.revision,7);assert.deepEqual(finalCache.dungeons,{'12345':{at:1}});
     assert.equal(finalCache.hotkeys?.loot,'Mouse5','hotkey must be saved in cache across installer operations');
+    assert.equal(finalCache.hotkeys?.dungeon,'Mouse4');
 
     // Verify that status and reinstall without --loot-key restore previously assigned hotkey from cache
     const statusWithCache=JSON.parse(run('status','--json'));
     assert.equal(statusWithCache.cachedLootKey,'Mouse5','status must read cached hotkey');
     assert.equal(statusWithCache.cfg.nearbyLootOptions.keyCode,'Mouse5');
+    assert.equal(statusWithCache.cachedDungeonKey,'Mouse4');assert.equal(statusWithCache.cfg.dungeonOptions.keyCode,'Mouse4');
     fs.unlinkSync(path.join(user,'dfo-mod.json'));
     const statusNoConfig=JSON.parse(run('status','--json'));
     assert.equal(statusNoConfig.cachedLootKey,'Mouse5','status must read cached hotkey even if config is absent');
     assert.equal(statusNoConfig.cfg.nearbyLootOptions.keyCode,'Mouse5');
+    assert.equal(statusNoConfig.cachedDungeonKey,'Mouse4');assert.equal(statusNoConfig.cfg.dungeonOptions.keyCode,'Mouse4');
     run('install');
     const restoredCfg=JSON.parse(fs.readFileSync(path.join(user,'dfo-mod.json'),'utf8'));
     assert.equal(restoredCfg.nearbyLootOptions.keyCode,'Mouse5','install must restore previously assigned hotkey from cache');
+    assert.equal(restoredCfg.dungeonOptions.keyCode,'Mouse4','dungeon shortcut must restore independently from the same cache');
     const beforeCacheFailure=fs.readFileSync(path.join(user,'dfo-mod-cache.json'));
     const beforeCfgFailure=fs.readFileSync(path.join(user,'dfo-mod.json'));
     fs.mkdirSync(path.join(user,'dfo-mod-cache.json.tmp'));

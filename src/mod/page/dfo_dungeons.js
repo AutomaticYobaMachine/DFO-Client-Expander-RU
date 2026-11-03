@@ -1,7 +1,7 @@
 (function (root) {
   'use strict';
   if (root.__dfoDungeons || root.__DFO_MOD_CFG__?.dungeons?.enabled === false) return;
-  const M = root.__dfoDungeonModel, doc = root.document, stack = [], modelCache = new WeakMap(), sprites = new Map(), distances = new Map();
+  const M = root.__dfoDungeonModel, doc = root.document, stack = [], modelCache = new WeakMap(), sprites = new Map(), distances = new Map(), markHeadings = new Map();
   let host = null, notes = {}, current = null, loadStarted = false, readError = '', cacheError = '', lastObservation = '', lastSaved = 0, retryObservationAt = 0;
   let questMarks = [];
   const tr = text => { try { return root.__translate?.(text) || text; } catch { return text; } };
@@ -42,6 +42,7 @@
       const distance = /[\d.,]+\s*(?:km|m|км|м)$/.exec(mark.sub || '')?.[0];
       if (distance) distances.set(mark.key, distance);
       const metadata = value.metadata, rating = scoreText(value);
+      markHeadings.set(keyOf(p.loc), { title: value.title, subtitle: metadata, rating, model: value });
       const signature = JSON.stringify([value.title, metadata, rating, value.color]);
       return { ...mark, label: value.title, sub: `${metadata}; ${rating}`, pick: true,
         dfoDungeon: { model: value, metadata, distance, signature },
@@ -559,7 +560,18 @@
     lastObservation = signature; lastSaved = Date.now(); notes[value.id] = value;
     root.fetch('/dfo-mod/dungeon-notes', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(value) }).then(r => { if (!r.ok) throw new Error('Не удалось сохранить журнал посещений.'); cacheError = ''; }).catch(e => { cacheError = e.message; lastObservation = ''; retryObservationAt = Date.now() + 30000; });
   }
-  root.__dfoDungeons = { register(value) { if (host && host !== value) { closeAll(); distances.clear(); } host = value; lastObservation = ''; retryObservationAt = 0; void loadNotes(); }, decorate, sprite, box, open, closeAll,
+  function liveInfo(details = true) {
+    const t = tools(), modes = t.modes?.();
+    if (modes?.mode !== 'dungeon' || modes.transitioning) return null;
+    const live = modes.dungeonCtx?.dfoDungeonLive;if (!live) return null;
+    if (!details) return { live, world: t, tools: t, heading: null };
+    const p = [...records().values()].find(p => keyOf(p.loc) === keyOf(live.location));
+    const value = p ? safe(() => model(p)) : null;
+    const heading = value ? { title: value.title, subtitle: value.metadata, rating: scoreText(value), model: value }
+      : markHeadings.get(keyOf(live.location)) || safe(() => { const m = M.forecast({loc:live.location}, t.player?.(), t);return {title:m.title,subtitle:m.metadata,rating:scoreText(m),model:m}; });
+    return { live, world: t, tools: t, heading };
+  }
+  root.__dfoDungeons = { register(value) { if (host && host !== value) { closeAll(); distances.clear(); markHeadings.clear(); } host = value; lastObservation = ''; retryObservationAt = 0; void loadNotes(); }, decorate, sprite, box, open, closeAll, ensureStyles: styles, liveInfo,
     isOpen: () => stack.length > 0, state: () => ({ key: current?.key ?? null, tab: current?.tab ?? null }) };
   root.setInterval(() => { if (!host) return; safe(observe); if (current) { if (!viewReady()) closeAll(); else safe(() => render()); } }, 1500);
 })(globalThis);

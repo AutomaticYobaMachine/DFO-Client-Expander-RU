@@ -18,10 +18,12 @@ const VERSION = (() => { try { return JSON.parse(fs.readFileSync(path.join(__dir
 const DEFAULTS = Object.freeze({
   enabled: true, ru: true, marks: true, nearbyLoot: true, dungeons: true,
   nearbyLootOptions: { keyCode: 'KeyJ' },
+  dungeonOptions: { keyCode: 'KeyK' },
   marksOptions: { onlyVisited: true, markRadiusM: 1200, nameRadiusM: 300, maxMarks: 60 },
 });
 const OWN = Object.freeze({   // served at dagger://game/dfo-mod/<name>
   'dfo_dungeon_model.js': 'page/dfo_dungeon_model.js', 'dfo_dungeons.js': 'page/dfo_dungeons.js',
+  'dfo_dungeon_live_model.js': 'page/dfo_dungeon_live_model.js', 'dfo_dungeon_live.js': 'page/dfo_dungeon_live.js',
   'dfo_loot_rules.js': 'page/dfo_loot_rules.js', 'dfo_loot_ui.js': 'page/dfo_loot_ui.js', 'dfo_loot.js': 'page/dfo_loot.js', 'dfo_marks.js': 'page/dfo_marks.js', 'dfo_town.js': 'page/dfo_town.js', 'ru_dict.js': 'page/ru_dict.js', 'ru_i18n.js': 'page/ru_i18n.js',
   'ru_locale.js': 'page/ru_locale.js', 'ru_items.js': 'page/ru_items.js',
 });
@@ -40,6 +42,8 @@ function wrap(handleDagger, { app = null } = {}) {
   try {
     const keyCode = lootStore.lootKey();
     if (keyCode) cfg.nearbyLootOptions = { ...DEFAULTS.nearbyLootOptions, ...cfg.nearbyLootOptions, keyCode };
+    const dungeonKey = lootStore.dungeonKey();
+    if (dungeonKey) cfg.dungeonOptions = { ...DEFAULTS.dungeonOptions, ...cfg.dungeonOptions, keyCode: dungeonKey };
   } catch { /* An unreadable optional cache must not prevent the game starting. */ }
   const hasRu = fs.existsSync(path.join(__dirname, 'page', 'ru_dict.js'));
   const ru = !!cfg.ru && hasRu;
@@ -65,7 +69,7 @@ function wrap(handleDagger, { app = null } = {}) {
     let pack = null;
     if (ru) { try { pack = JSON.parse(fs.readFileSync(path.join(__dirname, 'ru-pack', 'index.json'), 'utf8')); } catch { pack = null; } }
     ctx = { ru, marks: !!cfg.marks, nearbyLoot: cfg.nearbyLoot !== false, dungeons: cfg.dungeons !== false, fontB64, quests, ql,
-      pageCfg: { dungeons: { enabled: cfg.dungeons !== false }, nearbyLoot: { ...cfg.nearbyLootOptions, enabled: cfg.nearbyLoot !== false }, marks: { marks: !!cfg.marks, ...cfg.marksOptions }, ru: { on: ru, pack, gameLanguage: cfg.gameLanguage !== false } } };
+      pageCfg: { dungeons: { ...cfg.dungeonOptions, enabled: cfg.dungeons !== false }, nearbyLoot: { ...cfg.nearbyLootOptions, enabled: cfg.nearbyLoot !== false }, marks: { marks: !!cfg.marks, ...cfg.marksOptions }, ru: { on: ru, pack, gameLanguage: cfg.gameLanguage !== false } } };
     return ctx;
   };
   const cache = new Map();   // rel -> { key, text }

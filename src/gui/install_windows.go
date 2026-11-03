@@ -139,8 +139,15 @@ func (a *app) requestStatus(restoreChoices bool) {
 		if st != nil && !a.lootKeyDirty {
 			a.lootKey = resolveLootKey(st)
 		}
+		if st != nil && !a.dungeonKeyDirty {
+			a.dungeonKey = resolveDungeonKey(st)
+		}
 		if st == nil {
 			a.note = "Не удалось проверить клиент. Нажмите «Проверить» или выберите игру заново."
+			a.noteCol = colRed
+		}
+		if st != nil && a.toggles[idLoot] && a.toggles[idDungeons] && a.lootKey == a.dungeonKey {
+			a.note = "Для лута и сведений о данже выбрана одна кнопка. Назначьте разные; до этого сводку можно открыть кнопкой в игре."
 			a.noteCol = colRed
 		}
 		a.mu.Unlock()
@@ -184,7 +191,7 @@ func (a *app) run(what string) {
 	a.stage = "Подготовка файлов…"
 	exe := a.exe
 	keyOverride := a.lootKey
-	args := operationArgs(what, a.toggles, keyOverride)
+	args := operationArgs(what, a.toggles, keyOverride, a.dungeonKey)
 	a.mu.Unlock()
 	a.syncControls()
 	invalidate(a.hwnd)

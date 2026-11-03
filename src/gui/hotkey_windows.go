@@ -2,11 +2,16 @@ package main
 
 // Recording happens inside our window's message loop, before dialog navigation.
 // No global hooks: leaving the application cancels recording.
-func (a *app) startLootKeyCapture() {
+func (a *app) startLootKeyCapture(targets ...int) {
 	a.mu.Lock()
-	allowed := !a.busy && !a.querying && a.status != nil && a.toggles[idLoot]
+	target, feature := idLootKey, idLoot
+	if len(targets) > 0 && targets[0] == idDungeonKey {
+		target, feature = idDungeonKey, idDungeons
+	}
+	allowed := !a.busy && !a.querying && a.status != nil && a.toggles[feature]
 	if allowed {
-		a.capturingKey = !a.capturingKey
+		a.capturingKey = !a.capturingKey || a.captureTarget != target
+		a.captureTarget = target
 	}
 	a.mu.Unlock()
 	a.syncControls()
@@ -15,8 +20,13 @@ func (a *app) startLootKeyCapture() {
 func (a *app) finishLootKeyCapture(code string) {
 	a.mu.Lock()
 	if a.capturingKey && validLootKey(code) {
-		a.lootKey = code
-		a.lootKeyDirty = true
+		if a.captureTarget == idDungeonKey {
+			a.dungeonKey = code
+			a.dungeonKeyDirty = true
+		} else {
+			a.lootKey = code
+			a.lootKeyDirty = true
+		}
 	}
 	a.capturingKey = false
 	a.mu.Unlock()
@@ -95,7 +105,7 @@ func (a *app) captureInput(m *msg) bool {
 		a.finishLootKeyCapture(code)
 		return true
 	case wmLButtonDown, wmRButtonDown:
-		if m.message == wmLButtonDown && m.hwnd == a.ctl[idLootKey] {
+		if m.message == wmLButtonDown && m.hwnd == a.ctl[a.captureTarget] {
 			// Let the record button's own click toggle the recording off.
 			return false
 		}

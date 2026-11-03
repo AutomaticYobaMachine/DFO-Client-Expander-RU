@@ -1,4 +1,5 @@
 'use strict';
+const { transformDungeonLive } = require('./dungeon-live-transform.cjs');
 // Bind by native property names and function bodies, never release-specific minified names.
 const ID = '[\\w$]+', rx = s => new RegExp(s);
 const need = (text, re) => { const m = re.exec(text); if (!m) throw new Error(`unsupported signature: ${re.source.slice(0, 100)}`); return m; };
@@ -34,8 +35,9 @@ function world(text) {
   const reset = need(tail, rx(`if\\((${ID})=null,${handler[2]}\\.startsWith\\(\`bounty:\`\\)\\)`));
   const luck = need(text, rx(`luck:(${ID})\\(${inv[4]},\`luck\`\\)`))[1];
   const weapon = need(text, rx(`(${ID})\\.playerWeapon\\.strikingWeapon`))[1];
+  const presence = need(text, rx(`get online\\(\\)\\{return (${ID})\\}`))[1];
   const viewOpen = `["rising","up"].includes(${view}?.state)`;
-  const native = `{player:()=>${inv[4]},modes:()=>${modes},viewOpen:()=>${viewOpen},now:()=>Date.now(),serverNow:()=>Date.now()+${wall[3]},wallTime:m=>${wall[2]}(m)-${wall[3]},luck:p=>${luck}(p,"luck"),weapon:()=>${weapon}.playerWeapon?.strikingWeapon??null,spawnRecord:p=>{const k=p.px+","+p.py;if(!${ledger}.has(k,${clockRead}()))return null;const r=${ledger}.wireRow(k);return r?{seen:r[2],cleared:r[3]}:null},travel:p=>${viewOpen}&&(p.loc.spawned?${spawn}(p.key):p.summary&&${route[2]}()?${route[3]}(p.summary):false)}`;
+  const native = `{player:()=>${inv[4]},presence:()=>${presence},modes:()=>${modes},viewOpen:()=>${viewOpen},now:()=>Date.now(),serverNow:()=>Date.now()+${wall[3]},wallTime:m=>${wall[2]}(m)-${wall[3]},luck:p=>${luck}(p,"luck"),weapon:()=>${weapon}.playerWeapon?.strikingWeapon??null,spawnRecord:p=>{const k=p.px+","+p.py;if(!${ledger}.has(k,${clockRead}()))return null;const r=${ledger}.wireRow(k);return r?{seen:r[2],cleared:r[3]}:null},travel:p=>${viewOpen}&&(p.loc.spawned?${spawn}(p.key):p.summary&&${route[2]}()?${route[3]}(p.summary):false)}`;
   let out = text.replace('({TV_PLACE_LIFT:', `({__dfoWorld:${native},TV_PLACE_LIFT:`);
   if (out === text) throw new Error('missing marks host construction');
   out = out.replace(ctor[0], ctor[0].replace('{let{', `{globalThis.__dfoDungeons?.register(${ctor[2]});let{`));
@@ -154,6 +156,6 @@ function transformDungeons(rel, source, log) {
     try { text = run(text) + `\n/*${id}*/\n`; log.push([id, 1]); }
     catch (e) { log.push([`${id}!error ${e.message}`, 0]); }
   }
-  return text;
+  return transformDungeonLive(rel, text, log);
 }
 module.exports = { transformDungeons };

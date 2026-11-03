@@ -6,11 +6,11 @@
   function createNavigation(deps) {
     let state={phase:'idle',kind:null,uid:null,name:'',distance:null,message:''};
     let owner=null,wanted=null,mesh=null,meshSource='',meshLocks='',failedLocks=null,client=null;
-    let seq=0,calculating=false,route=null,showing=[],plannedAt=-Infinity,lastAttempt=-Infinity,readKey='',cancelPlan=null;
+    let seq=0,calculating=false,route=null,showing=[],plannedAt=-Infinity,lastAttempt=-Infinity,readKey='',cancelPlan=null,failedView='';
     const expansions=new Set();
     const now=()=>deps.now?.()??Date.now(),native=()=>deps.native();
     const notify=next=>{const value={...state,...next};if(JSON.stringify(value)!==JSON.stringify(state)){state=value;deps.changed?.({...state});}};
-    const read=(details=true)=>{try{return deps.read(details)??null;}catch{return null;}};
+    const read=(details=true)=>{try{const v=deps.read(details);return v?{...v,nav:{...v.nav,collider:M.navigationGeometry(v.nav.collider)}}:null;}catch{return null;}};
     const groups=v=>M.targets(v.live,v.sources,v.tools,v.questIds);
     const candidates=v=>{
       let list=groups(v)[wanted.kind]||[];
@@ -20,11 +20,12 @@
       }
       return list;
     };
-    const locks=v=>JSON.stringify([...(v.live.ctx.actions?.objects?.values?.()??[])].filter(o=>native().isDoor(o)).map(o=>[o.key,o.currentLockValue>0]).sort((a,b)=>String(a[0]).localeCompare(String(b[0]))));
+    const locks=v=>JSON.stringify([...M.passable(v.live.ctx.actions)].sort());
+    const attemptKey=v=>JSON.stringify([v.nav.feet.map(x=>Math.round(x)),candidates(v).map(t=>[t.key,...t.at.map(x=>Math.round(x))]),[...(v.live.ctx.actions?.objects?.values?.()||[])].filter(o=>o.kind==='action').map(o=>[o.key,o.state])]);
     const clearClient=()=>{try{client?.dispose();}catch{}client=null;};
     const invalidate=()=>{seq++;cancelPlan?.();cancelPlan=null;calculating=false;};
     function stop(hard=false){
-      invalidate();wanted=null;route=null;showing=[];
+      invalidate();wanted=null;route=null;showing=[];failedView='';
       if(hard){clearClient();mesh=null;owner=null;meshSource='';meshLocks=readKey='';failedLocks=null;expansions.clear();}
       notify({phase:'idle',kind:null,uid:null,name:'',distance:null,message:''});
     }
@@ -36,7 +37,7 @@
     async function acquire(v,token,cancelled,force=false){
       const key=locks(v);
       if(mesh&&meshLocks===key&&!(force&&meshSource==='native')){
-        const skip=[...native().openDoors(v.live.ctx.actions)];
+        const skip=[...M.passable(v.live.ctx.actions)];
         if(M.grounded(mesh,native(),v.nav.feet,v.nav.collider,skip)||!M.floor(v.nav.collider,v.nav.feet,skip))return mesh;
         const cell=key+'|'+v.nav.feet.map(x=>Math.round(x)).join(',');
         if(expansions.has(cell))return mesh;
@@ -51,22 +52,29 @@
       const anchors=[],add=p=>{const q=M.point(p);if(q)anchors.push(q);};
       for(const e of v.live.ctx.enemies||[])add([e.x,e.y,e.z]);
       for(const list of Object.values(groups(v)))for(const t of list)add(t.at);
-      for(const t of v.nav.transitions||[]){add(M.transitionPoint(v.nav.collider,t.entrance?.pos));add(M.transitionPoint(v.nav.collider,t.exit?.pos));}
+      for(const t of v.nav.transitions||[]){add(M.transitionPoint(v.nav.collider,t.entrance?.pos,[...M.passable(v.live.ctx.actions)]));add(M.transitionPoint(v.nav.collider,t.exit?.pos,[...M.passable(v.live.ctx.actions)]));}
       let hash=2166136261;for(const c of key)hash=Math.imul(hash^c.charCodeAt(0),16777619);
-      const baked=await Promise.race([mine.bake({collider:v.nav.collider,anchor:[...v.nav.feet],anchors,exclude:native().openDoors(v.live.ctx.actions),key:'dfo-navigation:1:'+v.nav.key+':'+(hash>>>0)}),cancelled]);
+      const baked=await Promise.race([mine.bake({collider:v.nav.collider,anchor:[...v.nav.feet],anchors,exclude:M.passable(v.live.ctx.actions),agent:M.agent,key:'dfo-navigation:2:'+v.nav.key+':'+(hash>>>0)}),cancelled]);
       check(v,token);
       if(!baked?.chf?.mesh?.polys?.length){failedLocks=key;throw new Error('Не удалось подготовить проходы этого данжа.');}
       mesh=baked.chf;meshLocks=key;meshSource='own';return mesh;
     }
     async function select(v,token){
       const list=candidates(v).sort((a,b)=>M.distance(v.nav.feet,a.at)-M.distance(v.nav.feet,b.at));
-      const skip=[...native().openDoors(v.live.ctx.actions)],pause=checkpoint(v,token);let best=null;
+      const skip=[...M.passable(v.live.ctx.actions)],pause=checkpoint(v,token),missing=[];let best=null;
       for(const target of list){
         check(v,token);
         if(best&&!v.nav.transitions?.length&&M.distance(v.nav.feet,target.at)>best.distance+1.2)continue;
-        const result=await M.planConnected(mesh,native(),v.nav.feet,target,v.nav.collider,skip,v.nav.transitions||[],pause);
+        const result=await M.planConnected(mesh,native(),v.nav.feet,target,v.nav.collider,skip,v.nav.transitions||[],pause,meshSource==='own');
         if(result&&(!best||result.distance<best.distance))best=result;
+        if(!result&&meshSource==='native')missing.push(target);
         await pause();
+      }
+      // A route to another foe must not hide a nearer candidate merely omitted by the AI's mesh.
+      if(best)for(const target of missing){
+        check(v,token);if(!v.nav.transitions?.length&&M.distance(v.nav.feet,target.at)>best.distance+1.2)continue;
+        const result=await M.planConnected(mesh,native(),v.nav.feet,target,v.nav.collider,skip,v.nav.transitions||[],pause,true);
+        if(result&&result.distance<best.distance)best=result;await pause();
       }
       return best;
     }
@@ -78,16 +86,16 @@
         let result=await select(v,token);
         if(!result&&meshSource==='native'){await acquire(v,token,cancelled,true);result=await select(v,token);}
         check(v,token);
-        if(!result){route=null;showing=[];notify({phase:'unavailable',distance:null,message:'Проходимый путь не найден. Возможно, нужен рычаг, лифт или ещё не исследованный переход.'});return;}
+        if(!result){route=null;showing=[];failedView=attemptKey(v);notify({phase:'unavailable',distance:null,message:'Проходимый путь в загруженной геометрии не найден. Попробуйте подойти к проходу и выбрать цель снова.'});return;}
         const latest=read(),fresh=candidates(latest).find(t=>t.key===result.target.key);
         if(!fresh||M.distance(fresh.at,result.target.at)>1.5){route=null;showing=[];lastAttempt=-Infinity;return;}
         route=result;notify({phase:'following',name:result.target.name,message:'',distance:Math.ceil(result.distance)});
       }catch(e){
-        if(!e.cancelled&&token===seq){route=null;showing=[];notify({phase:'unavailable',distance:null,message:e.message||'Не удалось проложить путь.'});}
-      }finally{if(token===seq){calculating=false;cancelPlan=null;}}
+        if(!e.cancelled&&token===seq){route=null;showing=[];failedView=attemptKey(v);notify({phase:'unavailable',distance:null,message:e.message||'Не удалось проложить путь.'});}
+      }finally{if(token===seq){calculating=false;cancelPlan=null;lastAttempt=now();}}
     }
     function request(v){
-      invalidate();const token=seq,cancelled=new Promise(resolve=>cancelPlan=()=>resolve(null));route=null;showing=[];
+      invalidate();const token=seq,cancelled=new Promise(resolve=>cancelPlan=()=>resolve(null));route=null;showing=[];failedView='';
       notify({phase:mesh?'routing':'building',name:labels[wanted.kind],message:'Прокладываю путь…',distance:null});
       void solve(v,token,cancelled);
     }
@@ -106,7 +114,7 @@
       if(!wanted||!v||calculating||!M.point(v.nav.feet))return;
       const list=candidates(v);
       if(!list.length){route=null;showing=[];notify({phase:'unavailable',distance:null,message:none[wanted.kind]});return;}
-      if(!route){if(now()-lastAttempt>2500)request(v);return;}
+      if(!route){if(now()-lastAttempt>2500&&(!failedView||failedView!==attemptKey(v)))request(v);return;}
       const target=list.find(t=>t.key===route.target.key),trimmed=M.trim(route.points,v.nav.feet);
       if(!target||M.distance(target.at,route.target.at)>1.1||locks(v)!==meshLocks||trimmed.off>1.6){
         showing=[];if(now()-plannedAt>600)request(v);return;

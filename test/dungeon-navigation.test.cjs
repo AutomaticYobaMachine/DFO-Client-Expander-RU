@@ -1,7 +1,7 @@
 'use strict';
 const {test}=require('node:test'),assert=require('node:assert/strict');
 const M=require('../src/mod/page/dfo_dungeon_nav_model.js'),{createNavigation}=require('../src/mod/page/dfo_dungeon_nav.js');
-const {room,quad}=require('./helpers/dungeon-navigation.cjs');
+const {room,quad,wall}=require('./helpers/dungeon-navigation.cjs');
 const native={skip:!process.env.DFO_UPSTREAM_DIR};
 const settle=async(c,predicate=s=>['following','unavailable'].includes(s.phase))=>{for(let i=0;i<200;i++){await new Promise(r=>setTimeout(r,2));c.tick();if(predicate(c.state()))return c.state();}assert.fail('navigation did not settle: '+JSON.stringify(c.state()));};
 function controller(r,extra={}){
@@ -25,10 +25,11 @@ test('navigation targets keep individual elites and exact active quest identitie
   live.aurum.open=true;assert.equal(M.targets(live,sources,{}).aurum.length,0);
 });
 test('a failed worker never falls back to baking the dungeon on the main thread',async()=>{
-  let baked=0,disposed=0;const ctx={exitDoors:[{pos:[5,0,0]}],actions:{objects:new Map()},people:[],foes:[]};
+  let baked=0,disposed=0,time=0;const ctx={exitDoors:[{pos:[5,0,0]}],actions:{objects:new Map()},people:[],foes:[]};
   const view={live:{ctx,foes:[]},nav:{feet:[0,0,0],key:'test',mesh:null,collider:{}},room:'dungeon:m1',sources:{},tools:{}};
-  const api=createNavigation({read:()=>view,native:()=>({solve(){assert.fail('no query without a mesh')},Draw:class{},isDoor:()=>false}),makeClient:()=>({_hadWorker:false,bake(){baked++;},dispose(){disposed++;}})});
+  const api=createNavigation({read:()=>view,now:()=>time,native:()=>({solve(){assert.fail('no query without a mesh')},Draw:class{},isDoor:()=>false}),makeClient:()=>({_hadWorker:false,bake(){baked++;},dispose(){disposed++;}})});
   assert.equal(api.start('exit'),true);await new Promise(r=>setTimeout(r,0));assert.equal(api.state().phase,'unavailable');assert.match(api.state().message,/Фоновый расчёт/);assert.equal(baked,0);assert.equal(disposed,1);assert.equal(api.points().length,0);
+  for(let i=0;i<10;i++){time+=5000;api.tick();await new Promise(r=>setTimeout(r,0));}assert.equal(disposed,1,'an unchanged failed request must not start expensive background work forever');
 });
 test('native navmesh and collider route around a wall, and every displayed segment stays on the floor',native,async()=>{
   const r=await room({pillar:true}),target={key:'goal',at:[12,0,6]};
@@ -42,14 +43,45 @@ test('stacked floors are never joined by a straight line; a connected ramp reach
   const r=await room({ramp:true}),result=await M.plan(r.mesh,r.native,[2,0,6],{at:[2,3,6]},r.col);
   assert.ok(result,'the route must use the ramp, not jump vertically');assert.ok(result.points.some(p=>p[0]>10));assert.ok(result.points.at(-1)[1]>2.9);
 });
-test('unlocked doors pause the visible line and opening resumes it; locked doors are walls',native,async()=>{
+test('all actionable doors stay in the route; ignoring them never removes the surrounding wall',native,async()=>{
   const r=await room({door:true}),target={at:[12,0,6]};
   const route=await M.plan(r.mesh,r.native,r.from,target,r.col,['door:1']);assert.ok(route);
-  const blocked=M.visible(route.points,r.col,r.actions,r.native);assert.equal(blocked.blocked,'door');assert.ok(blocked.points.at(-1)[0]<7);
+  const blocked=M.visible(route.points,r.col,r.actions,r.native);assert.equal(blocked.blocked,null);assert.ok(blocked.points.at(-1)[0]>10);
   r.shift[2]=20;assert.equal(M.visible(route.points,r.col,r.actions,r.native).blocked,null);
   r.shift[2]=0;r.actions.objects.get('door:1').currentLockValue=20;
   const locked=r.bake();assert.equal(await M.plan(locked,r.native,r.from,target,r.col),null);
+  for(const special of [false,true]){r.actions.objects.get('door:1').special=special;const skip=[...M.passable(r.actions)];assert.deepEqual(skip,['door:1']);assert.ok(await M.planConnected(locked,r.native,r.from,target,r.col,skip));}
   assert.equal(await M.plan(locked,r.native,[6,0,6],{at:[7.3,0,6]},r.col),null,'a nearby approach point across a thin locked door is not a reachable goal');
+});
+test('real stair treads and risers connect different floors even when the AI polygons do not',native,async()=>{
+  const r=await room({stairs:true}),shape=()=>JSON.stringify([r.mesh.mesh.verts,r.mesh.mesh.polys]),before=shape(),result=await M.planConnected(r.mesh,r.native,[2,0,6],{at:[2,3.6,6]},r.col);
+  assert.ok(result,'45 cm treads and room seams are walkable');assert.ok(result.points.some(p=>p[0]>12.4));assert.ok(result.points.some(p=>p[1]>.4&&p[1]<3.5));assert.ok(result.points.at(-1)[1]>3.5);assert.equal(shape(),before,'the AI mesh must not be changed');
+  for(let i=1;i<result.points.length;i++)assert.ok(Math.abs(result.points[i][1]-result.points[i-1][1])<=.505);
+  assert.equal(M.visible(result.points,r.col,r.actions,r.native,Infinity).blocked,null,'the line must remain visible through every stair flight');
+});
+test('adaptive sampling visits narrow intermediate treads instead of rejecting their combined rise',native,async()=>{
+  const r=await room({narrowStairs:true}),result=await M.walkRoute([2,0,6],{at:[2,4.2,6]},r.col);
+  assert.ok(result);assert.ok(result.points.at(-1)[1]>4.1);assert.ok(result.points.some(p=>p[1]>.1&&p[1]<4));
+  for(let i=1;i<result.points.length;i++)assert.ok(Math.abs(result.points[i][1]-result.points[i-1][1])<=.505);
+  assert.equal(M.visible(result.points,r.col,r.actions,r.native,Infinity).blocked,null);
+  wall(r.col,'new-wall',12.5,0,3,0,8);assert.equal(M.visible(result.points,r.col,r.actions,r.native,Infinity).blocked,'geometry','the stair envelope must never waive a real wall');
+});
+test('the displayed line retains intermediate treads even when both ends of a coarse edge are on the same floor',native,async()=>{
+  const r=await room();quad(r.col,'low-step',[[6.65,.4,0],[6.85,.4,0],[6.85,.4,12],[6.65,.4,12]]);
+  const result=await M.walkRoute([6,0,6],{at:[8,0,6]},r.col);assert.ok(result);assert.ok(result.points.some(p=>p[0]>=6.65&&p[0]<=6.85&&p[1]>.39),'the ribbon follows the intervening raised surface');
+  assert.equal(M.visible(result.points,r.col,r.actions,r.native,Infinity).blocked,null);
+});
+test('static levers and wheels in the shared dungeon bucket are ignored only by navigation',native,async()=>{
+  const r=await room(),model={modelIdNum:74037},hit=()=>r.col.raycastHit([6,.8,6],[1,0,0],2,{bodies:true});
+  M.notePlacement(r.col,'floor',model);wall(r.col,'floor',7,4,8,0,2);const before=hit();assert.ok(Number.isFinite(before.dist));
+  const nav=M.navigationGeometry(r.col);assert.equal(nav.raycastHit([6,.8,6],[1,0,0],2,{bodies:true}).dist,Infinity);assert.equal(hit().dist,before.dist,'physical collisions survive');
+  wall(r.col,'wall',8,4,8);const fresh=M.navigationGeometry(r.col);assert.ok(Number.isFinite(fresh.raycastHit([6,.8,6],[1,0,0],4,{bodies:true}).dist),'real walls are still solid');assert.notEqual(fresh,nav);
+});
+test('the capsule bridges centimetre room seams on a grid row but never an unsupported gap',native,async()=>{
+  const r=await room();r.col.removeBucket('floor');
+  quad(r.col,'first',[[0,0,0],[14,0,0],[14,0,6.23],[0,0,6.23]]);quad(r.col,'second',[[0,0,6.27],[14,0,6.27],[14,0,12],[0,0,12]]);
+  assert.ok(M.floor(r.col,[7,0,6.25]));const route=await M.walkRoute([7,0,4],{at:[7,0,8]},r.col);assert.ok(route,'a tiny seam cannot sever the whole room');
+  r.col.removeBucket('second');quad(r.col,'second',[[0,0,7],[14,0,7],[14,0,12],[0,0,12]]);assert.equal(M.floor(r.col,[7,0,6.6]),null);assert.equal(await M.walkRoute([7,0,4],{at:[7,0,8]},r.col),null);
 });
 test('floor validation rejects gaps and a newly lowered ceiling even when the old mesh has a route',native,async()=>{
   const r=await room();quad(r.col,'low-ceiling',[[5,1.4,0],[8,1.4,0],[8,1.4,12],[5,1.4,12]]);
@@ -62,6 +94,32 @@ test('known teleporter edges keep their direction and show only the leg before t
   assert.ok(result?.transition);assert.ok(result.points.every(p=>Math.abs(p[1])<.05));
   assert.equal(await M.planConnected(r.mesh,r.native,[2,3,6],{at:[2,0,6]},r.col,[],[transition]),null,'a one-way step cannot be used backwards');
 });
+test('surface search chains unvisited one-way portals between three floors without drawing across a jump',native,async()=>{
+  const r=await room({stacked:true});quad(r.col,'third-floor',[[0,6,0],[10,6,0],[10,6,12],[0,6,12]]);
+  const links=[{entrance:{pos:[11,1,6]},exit:{pos:[8,3.2,6]}},{entrance:{pos:[2,4,6]},exit:{pos:[8,6.2,6]}}];
+  const result=await M.walkRoute([2,0,6],{at:[2,6,6]},r.col,[],links);
+  assert.ok(result?.transition);assert.ok(result.points.every(p=>Math.abs(p[1])<.05));assert.ok(result.distance>10);assert.ok(result.points.at(-1)[0]>10);
+  const next=await M.walkRoute([8,3,6],{at:[2,6,6]},r.col,[],links);assert.ok(next?.transition);assert.ok(next.points.every(p=>Math.abs(p[1]-3)<.05));
+  assert.equal(await M.walkRoute([2,6,6],{at:[2,0,6]},r.col,[],links),null,'the two directed portals do not create reverse passages');
+});
+test('a shorter available portal is considered even when a direct walking route exists',native,async()=>{
+  const r=await room(),links=[{entrance:{pos:[3,1,6]},exit:{pos:[11,.2,6]}}],result=await M.planConnected(r.mesh,r.native,[2,0,6],{at:[12,0,6]},r.col,[],links);
+  assert.ok(result?.transition);assert.ok(result.distance<4);assert.ok(result.points.at(-1)[0]<4);
+});
+test('long surface searches yield and cancel without changing the collider',native,async()=>{
+  const r=await room({stacked:true}),keys=[...r.col._buckets.keys()];let yielded=0;
+  await assert.rejects(M.walkRoute([2,0,6],{at:[2,3,6]},r.col,[],[],async()=>{if(++yielded>=3)throw new Error('cancelled')}),/cancelled/);
+  assert.ok(yielded>=3);assert.deepEqual([...r.col._buckets.keys()],keys);
+});
+test('original Privateer’s Hold geometry connects stair flights and a room seam without revealing a map',{skip:!process.env.ARENA2_PATH||!process.env.DFO_UPSTREAM_DIR},async()=>{
+  const {realDungeon}=require('./helpers/dungeon-navigation.cjs'),r=await realDungeon(),skip=[...M.passable(r.actions)];
+  assert.ok(M.floor(r.geometry,[55.5,19.2,32],skip),'the real centimetre seam remains supported');
+  // Landings of a long native stair flight and the next room, previously cut exactly on Z=32.
+  const from=[53.5,19.69,31.25],target={at:[56.1,19.2,33.04]};
+  const result=await M.walkRoute(from,target,r.geometry,skip,[],async()=>{await new Promise(setImmediate)});
+  assert.ok(result);assert.ok(result.points.some(p=>p[2]>32));assert.ok(result.points.at(-1)[2]>33);
+  for(let i=1;i<result.points.length;i++)assert.equal(M.clearance(r.geometry,result.points[i-1],result.points[i],skip),null);
+});
 test('controller tracks target movement/death, chooses reachable elite by walking distance and tears down on exit',native,async()=>{
   const r=await room({pillar:true}),h=controller(r),mk=p=>({entity:{eliteFoe:true},ai:{feet:p}});
   h.ctx.foes.push(mk([8,0,6]),mk([2,0,10]));assert.equal(h.api.start('elite'),true);
@@ -69,6 +127,11 @@ test('controller tracks target movement/death, chooses reachable elite by walkin
   h.ctx.foes[1].dead=true;h.advance();await settle(h.api);assert.ok(h.api.state().distance>8);
   h.ctx.foes[0].ai.feet=[12,0,2];h.advance();assert.equal(h.api.points().length,0,'old line is hidden during a replan');await settle(h.api);assert.equal(h.api.state().phase,'following');
   h.current=null;h.advance();assert.equal(h.api.state().phase,'idle');assert.equal(h.api.points().length,0);
+});
+test('an elite omitted by the AI mesh is checked on the real floor before choosing a farther foe',native,async()=>{
+  const r=await room(),locate=r.native.locate;const partial={...r,native:{...r.native,locate:(mesh,x,z,y)=>x>4.8&&x<7.2?-1:locate(mesh,x,z,y)}},h=controller(partial);
+  h.ctx.foes.push({entity:{eliteFoe:true,properName:'Ближе'},ai:{feet:[6,0,6]}},{entity:{eliteFoe:true,properName:'Дальше'},ai:{feet:[12,0,6]}});
+  h.api.start('elite');const state=await settle(h.api);assert.equal(state.name,'Ближе');assert.ok(state.distance<=5);
 });
 test('cancelled worker results cannot restore a route after exit or replace a newer request',native,async()=>{
   const r=await room();let finish,disposed=0;const h=controller(r,{makeClient:()=>({bake:()=>new Promise(res=>finish=res),dispose(){disposed++;}})});h.nav.mesh=null;
@@ -92,8 +155,9 @@ test('published navigation getters use live context geometry, feet, quest stands
   const deep=load('deepWaterRuntime-');assert.ok(deep.log.some(([id])=>id==='dungeon.navContext'));assert.ok(deep.log.some(([id])=>id==='dungeon.navQueries'));
   const start=deep.text.indexOf('get dfoDungeonNavigation(){'),end=deep.text.indexOf('get dfoDungeonLive(){',start),getter=deep.text.slice(start,end).replace(/,$/,'');
   const ast=parse('({'+getter+'})',{ecmaVersion:'latest'}),obj=ast.body[0].expression.properties[0].value.body.body[0].argument,props=new Map(obj.properties.map(p=>[p.key.name,p.value]));
-  const col={raycastHit(){}},feet=new Float32Array([1,0,2]),context={};context[props.get('collider').name]=col;context[props.get('key').name]='d1';context[props.get('mesh').object.name]={chf:{native:true}};context[props.get('transitions').body.callee.name]=()=>[];context[props.get('transitions').body.arguments[0].name]={};context.feet=feet;
+  const col={raycastHit(){}},feet=new Float32Array([1,0,2]),context={},[portals,walked]=props.get('transitions').body.elements.map(e=>e.argument);context[props.get('collider').name]=col;context[props.get('key').name]='d1';context[props.get('mesh').object.name]={chf:{native:true}};context[portals.callee.object.callee.name]=()=>new Map([['unvisited',{entrance:{pos:[3,1,2]},exit:{pos:[8,3.2,6]}}]]);context[walked.callee.name]=()=>[];context[walked.arguments[0].name]={revealed:new Set(),teleporters:new Map()};context.feet=feet;
   const api=vm.runInNewContext('({swimmer(){return{feet}},'+getter+'})',context);assert.equal(api.dfoDungeonNavigation.collider,col);assert.equal(api.dfoDungeonNavigation.feet,feet);assert.equal(api.dfoDungeonNavigation.key,'d1');context[props.get('mesh').object.name].chf={next:true};assert.equal(api.dfoDungeonNavigation.mesh.next,true);
+  assert.equal(api.dfoDungeonNavigation.transitions().length,1,'all level portals are available before the automap reveals anything');assert.match(deep.text,/notePlacement\(/);
   const at=deep.text.indexOf('globalThis.__dfoDungeonNavigation?.draw(');assert.ok(at>=0);assert.ok(deep.text.indexOf('.drawWater(',at)>at,'line is drawn before the world pass is resolved by HUD quads');
   const modes=load('arenaGate-');assert.ok(modes.log.some(([id])=>id==='dungeon.navQuests'));
   const world=load('world-');assert.ok(world.log.some(([id])=>id==='dungeon.navDraw'));assert.match(world.text,/dfoContinuous\?\{dash:1e9,gap:0/);

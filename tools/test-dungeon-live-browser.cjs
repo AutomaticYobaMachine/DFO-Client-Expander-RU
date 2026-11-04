@@ -1,11 +1,11 @@
 'use strict';
 const fs = require('node:fs'), path = require('node:path'), http = require('node:http'), assert = require('node:assert/strict');
-const upstream = path.resolve(process.argv[2] || '/tmp/dfo-upstream'), dist = path.resolve(process.argv[3] || '/tmp/dfo-release-0.1.14517');
+const upstream = path.resolve(process.argv[2] || '/tmp/dfo-upstream'), dist = path.resolve(process.argv[3] || '/tmp/dfo-release-0.1.14520');
 const { chromium } = require(path.join(upstream, 'node_modules/playwright'));
 const { transformAsset } = require('../src/mod/transforms.cjs');
 const assets = path.join(dist, 'assets'), chronicle = fs.readdirSync(assets).find(f => /^enhancedChronicle-/.test(f));
 assert.ok(chronicle);
-const html = `<!doctype html><html><head><meta charset="utf-8"><script>const p=new URLSearchParams(location.search);window.__DFO_MOD_CFG__={dungeons:{enabled:!p.has('disabled'),keyCode:p.get('key')||'KeyK'},nearbyLoot:{enabled:false}};</script>
+const html = `<!doctype html><html><head><meta charset="utf-8"><style>body{margin:0;background:#10151c}canvas{position:fixed;inset:0;width:100vw;height:100vh}</style><script>const p=new URLSearchParams(location.search);window.__DFO_MOD_CFG__={dungeons:{enabled:!p.has('disabled'),keyCode:p.get('key')||'KeyK'},nearbyLoot:{enabled:false}};</script>
 ${['dfo_dungeon_model.js','dfo_dungeons.js','dfo_dungeon_live_model.js','dfo_dungeon_live.js'].map(f => '<script src="/'+f+'"></script>').join('')}
 </head><body><canvas></canvas><script type="module">
 import {mountEnhancedChronicle} from '/assets/${chronicle}';
@@ -13,11 +13,12 @@ const loc={name:'Castle of Many Shadows',hasDungeon:true,mapTableData:{mapId:123
 const mk=(name,type=1,extra={})=>({mobileType:type,src:{mobileType:type},ai:{isHostile:true},entity:{name,level:12,health:15,maxHealth:20,...extra}});
 const foes=[mk('Rat'),mk('Rat'),mk('Rat',1,{eliteFoe:true,bossTraits:['Swift']}),mk('Vampire',28),{...mk('Dead'),dead:true},{...mk('Ally'),companion:1}];
 const quests=new Map([1,2].map(uid=>[uid,{uid,displayName:'Задание в крепости',questName:'Quest'+uid,resources:new Map([['place',{siteDetails:{siteType:2,mapId:12345}}]])}]));
-const questLog=()=>({active:[...quests.values()].filter(q=>!q.questComplete).map(q=>({id:q.uid,name:q.displayName,questName:q.questName,messages:[[{formatting:'text',text:'Подробное описание задания номер '+q.uid}]]})),finished:[]});
+let questReads=0,regenReads=0;
+const questLog=()=>{questReads++;return{active:[...quests.values()].filter(q=>!q.questComplete).map(q=>({id:q.uid,name:q.displayName,questName:q.questName,messages:[[{formatting:'text',text:'Подробное описание задания номер '+q.uid}]]})),finished:[]}};
 const session={room:'dungeon:m12345',status:'open',peers:new Map([['a',{}],['b',{}]]),_rooms:new Map([['dungeon:m12345',new Set(['a','b'])]])};
 let overlay=null, mountCount=0, questOwner=null, journalView=null, journalHost=null, mapCount=0, keys=0;
 const clock={now:10000000,interval:1200000,stamps:[9700000]};
-const ctx={foes},live={ctx,location:loc,foes,questBridge:{machine:{quests},questLog},aurum:{id:'d12345',open:false},regen:()=>clock,blocked:()=>!!overlay&&!overlay.done,
+const ctx={foes},live={ctx,location:loc,foes,questBridge:{machine:{quests},questLog},aurum:{id:'d12345',open:false},regen:()=>{regenReads++;return clock},blocked:()=>!!overlay&&!overlay.done,
  owns:w=>overlay===w,mount:w=>{if(overlay&&!overlay.done)return false;overlay=w;mountCount++;return true},unmount:w=>{if(overlay===w)overlay=null},journal:uid=>{
  if(overlay)return false;questOwner={done:false};overlay=questOwner;
  journalHost=document.createElement('div');journalHost.id='enhanced-chronicle';journalHost.style.cssText='position:fixed;inset:0;z-index:11';document.body.append(journalHost);
@@ -31,7 +32,7 @@ const place={key:'place:12345',loc,found:true,px:1,py:2};
 const host={params:new URLSearchParams('online'),__dfoWorld:tools,travelViewPlaces:()=>[],travelViewFarPlaces:()=>[],travelViewDungeons:()=>[place]};
 if(window.__dfoDungeons)__dfoDungeons.register(host);
 const mark=window.__dfoDungeons?.decorate([{key:'place:12345',label:'Castle of Many Shadows'}])[0];
-window.fixture={modes,live,foes,quests,session,mark,mk,questLog,clock,get mounts(){return mountCount},get overlay(){return overlay},replaceOverlay(w){overlay=w},get mapCount(){return mapCount},get keys(){return keys},closeJournal(){journalView?.destroy();journalHost?.remove();overlay=null}};
+window.fixture={modes,live,foes,quests,session,mark,mk,questLog,clock,get mounts(){return mountCount},get questReads(){return questReads},get regenReads(){return regenReads},get overlay(){return overlay},replaceOverlay(w){overlay=w},get mapCount(){return mapCount},get keys(){return keys},closeJournal(){journalView?.destroy();journalHost?.remove();overlay=null}};
 addEventListener('keydown',()=>keys++,true);window.ready=true;
 </script></body></html>`;
 const cache = new Map();
@@ -54,8 +55,25 @@ const server = http.createServer((req, res) => {
   browser=await chromium.launch({executablePath:process.env.DFO_CHROMIUM||'/usr/bin/chromium',headless:true,args:['--no-sandbox']});page=await browser.newPage({viewport:{width:1400,height:900}});
   const errors=[];page.on('pageerror',e=>{errors.push(String(e));console.error('Page error:',String(e))});await page.goto(address);await page.waitForFunction(()=>window.ready);
   await page.keyboard.press('k');assert.equal(await page.locator('.dfo-dungeon-live').count(),0,'no dungeon window outside');
+  const hud=page.locator('.dfo-dungeon-hud'),values=hud.locator('dd');assert.equal(await hud.isVisible(),false,'no counters outside a dungeon');
   await page.evaluate(()=>fixture.modes.mode='dungeon');await page.locator('.dfo-dungeon-launch').waitFor({state:'visible'});
+  assert.deepEqual(await values.allTextContents(),['4','1','3']);const bounds=await hud.boundingBox();assert.ok(bounds.x>1100&&bounds.y<30&&bounds.x+bounds.width<=1400);
+  assert.equal(await hud.evaluate(n=>{const r=n.querySelector('dl').getBoundingClientRect();return !n.contains(document.elementFromPoint(r.x+10,r.y+10))}),true,'counters allow game clicks to pass through');
+  await page.waitForTimeout(600);assert.deepEqual(await page.evaluate(()=>[fixture.questReads,fixture.regenReads]),[0,0],'closed-window HUD does not poll journal or timers');
+  await page.evaluate(()=>{fixture.foes[2].dead=true;fixture.session._rooms.get(fixture.session.room).add('distant-player')});
+  await page.waitForFunction(()=>document.querySelector('[data-counter=enemies]')?.textContent==='3'&&document.querySelector('[data-counter=elites]')?.textContent==='0'&&document.querySelector('[data-counter=players]')?.textContent==='4');
+  await page.evaluate(()=>{fixture.foes[2].dead=false;fixture.session._rooms.get(fixture.session.room).delete('distant-player');fixture.session.status='connecting'});
+  await page.waitForFunction(()=>document.querySelector('[data-counter=players]')?.textContent==='—');
+  await page.evaluate(()=>{fixture.session.status='open';fixture.session._rooms.set(fixture.session.room,new Set(Array.from({length:64},(_,i)=>String(i))));fixture.foes.push({...fixture.mk('Syncing'),_pupMismatch:true})});
+  await page.waitForFunction(()=>document.querySelector('[data-counter=players]')?.textContent==='65+'&&document.querySelector('[data-counter=enemies]')?.textContent==='4+');
+  await page.evaluate(()=>{fixture.session._rooms.set(fixture.session.room,new Set(['a','b']));fixture.foes.pop();fixture.modes.transitioning=true});await hud.waitFor({state:'hidden'});
+  await page.evaluate(()=>fixture.modes.transitioning=false);await hud.waitFor({state:'visible'});assert.deepEqual(await values.allTextContents(),['4','1','3']);
+  await page.setViewportSize({width:320,height:240});assert.equal(await hud.evaluate(n=>{const r=n.getBoundingClientRect();return r.left>=0&&r.top>=0&&r.right<=innerWidth&&r.bottom<=innerHeight}),true);await page.setViewportSize({width:1400,height:900});
+  if(process.env.DFO_SCREENSHOT_DIR){fs.mkdirSync(process.env.DFO_SCREENSHOT_DIR,{recursive:true});await page.screenshot({path:path.join(process.env.DFO_SCREENSHOT_DIR,'dungeon-hud.png')});}
+  await page.evaluate(()=>{const n=document.createElement('script');n.src='/dfo_dungeon_live.js';document.head.append(n)});await page.waitForTimeout(200);assert.equal(await hud.count(),1,'loading the module twice does not duplicate the HUD');
+  await page.evaluate(()=>dispatchEvent(new Event('pagehide')));assert.equal(await hud.isVisible(),false);await page.waitForTimeout(600);assert.equal(await hud.isVisible(),false);await page.evaluate(()=>dispatchEvent(new Event('pageshow')));await hud.waitFor({state:'visible'});
   await page.keyboard.press('k');const dialog=page.locator('.dfo-dungeon-live');await dialog.waitFor();assert.equal(await page.evaluate(()=>fixture.mounts),1);
+  assert.equal(await hud.isVisible(),true);assert.equal(await hud.locator('.dfo-dungeon-launch').isVisible(),false);
   assert.equal(await dialog.locator('.dfo-dungeon-title').innerText(),await page.evaluate(()=>fixture.mark.label),'full title is inherited from the Overworld mark');
   assert.deepEqual(await dialog.locator('.dfo-live-stat strong').allTextContents(),['4','1','3']);assert.match(await dialog.innerText(),/15 мин/);assert.match(await dialog.innerText(),/7 Aurum/);assert.equal(await dialog.locator('[data-quest]').count(),2);
   const before=await page.evaluate(()=>fixture.keys);await page.keyboard.press('j');assert.equal(await page.evaluate(()=>fixture.keys),before,'dialog blocks gameplay keys');
@@ -87,7 +105,8 @@ const server = http.createServer((req, res) => {
   await dialog.getByRole('button',{name:'Автокарта',exact:true}).click();await dialog.waitFor({state:'hidden'});assert.equal(await page.evaluate(()=>fixture.mapCount),1);
   await page.keyboard.press('k');await dialog.waitFor();await page.evaluate(()=>fixture.replaceOverlay({done:false,nativePopup:true}));await dialog.waitFor({state:'hidden'});
   assert.equal(await page.evaluate(()=>fixture.overlay.nativePopup),true,'teardown must not clear a newer native popup');await page.evaluate(()=>fixture.replaceOverlay(null));
-  await page.keyboard.press('k');await dialog.waitFor();await page.evaluate(()=>fixture.modes.mode='exterior');await dialog.waitFor({state:'hidden'});assert.equal(await page.evaluate(()=>fixture.overlay),null,'leaving releases the native overlay');
+  await page.keyboard.press('k');await dialog.waitFor();await page.evaluate(()=>fixture.modes.mode='exterior');await dialog.waitFor({state:'hidden'});await hud.waitFor({state:'hidden'});assert.equal(await page.evaluate(()=>fixture.overlay),null,'leaving releases the native overlay');
+  await page.evaluate(()=>{const live={...fixture.live,ctx:{},location:{mapTableData:{mapId:999}},foes:[]};live.ctx.dfoDungeonLive=live;fixture.modes.dungeonCtx=live.ctx;fixture.modes.mode='dungeon'});await hud.waitFor({state:'visible'});assert.deepEqual(await values.allTextContents(),['0','0','—'],'a new dungeon never displays old scene counts');
   for(const key of ['NumpadEnter','Numpad1','Mouse4','Mouse5']){
    await page.goto(address+'/?key='+key);await page.waitForFunction(()=>window.ready);await page.evaluate(()=>fixture.modes.mode='dungeon');
    let press;
@@ -98,8 +117,8 @@ const server = http.createServer((req, res) => {
    await page.evaluate(()=>{const url=location.href;history.replaceState(null,'',url+'&previous=1');history.pushState(null,'',url);history.pushState(null,'',url+'&next=1');history.back()});await page.waitForURL(address+'/?key='+key);
    await press();await dialog.waitFor();await dialog.getByRole('tab',{name:'Сводка',exact:true}).focus();await press();assert.equal(await dialog.count(),1);await page.keyboard.press('Escape');await dialog.waitFor({state:'hidden'});await press();await dialog.waitFor();assert.equal(await page.evaluate(()=>fixture.mounts),2);assert.equal(page.url(),address+'/?key='+key,'side button must not navigate history');
   }
-  await page.goto(address+'/?disabled=1');await page.waitForFunction(()=>window.ready);await page.evaluate(()=>fixture.modes.mode='dungeon');await page.keyboard.press('k');assert.equal(await page.locator('.dfo-dungeon-launch').count(),0);
-  assert.deepEqual(errors,[]);console.log('PASS: live dungeon tabs/counters, inherited mark title, fixed footer/small screen, safe names, exact native journal UID focus, live changes, reconnect/exit teardown, keyboard/NumPad/mouse shortcuts and no duplicates/page errors');
+  await page.goto(address+'/?disabled=1');await page.waitForFunction(()=>window.ready);await page.evaluate(()=>fixture.modes.mode='dungeon');await page.keyboard.press('k');assert.equal(await page.locator('.dfo-dungeon-launch').count(),0);assert.equal(await hud.count(),0);
+  assert.deepEqual(errors,[]);console.log('PASS: compact live dungeon HUD, click-through counters, closed-window cost, partial/reconnecting data, transition/scene/page lifecycle; live tabs, journal, footer, NumPad/mouse and no duplicates/page errors');
  }catch(e){if(page)console.error('Browser state:',await page.evaluate(()=>({text:document.body.innerText.slice(-2400),ready:window.ready,tools:Object.keys(window.__dfoDungeonTools||{})})).catch(()=>null));throw e}
  finally{await browser?.close();server.close()}
 })().catch(e=>{console.error(e);process.exitCode=1});

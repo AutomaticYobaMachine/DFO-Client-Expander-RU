@@ -25,7 +25,12 @@
 .dfo-live-quest{display:block;text-align:left;background:transparent;border:0;padding:5px 0;color:#f1cd70;text-decoration:underline;cursor:pointer;font:inherit}
 .dfo-dungeon-live td{overflow-wrap:anywhere}.dfo-dungeon-live .acts{gap:4px}
 .dfo-dungeon-live .dfo-dungeon-footer-btns{flex-wrap:wrap;justify-content:flex-end}
-.dfo-dungeon-launch{position:fixed;right:16px;top:16px;z-index:8;cursor:pointer;font:12px var(--data,'Pixelify Sans',system-ui,sans-serif);color:var(--bone,#f1e6c8);background:rgba(16,20,25,.88);border:1px solid rgba(192,138,62,.5);padding:8px 12px}
+.dfo-dungeon-hud{position:fixed;right:16px;top:16px;z-index:8;width:min(210px,calc(100vw - 32px));display:grid;gap:6px;pointer-events:none;font:12px var(--data,'Pixelify Sans',system-ui,sans-serif);color:var(--bone,#f1e6c8);line-height:1.4}
+.dfo-dungeon-counters{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:5px 14px;margin:0;padding:10px 12px;background:rgba(16,20,25,.88);border:1px solid rgba(192,138,62,.5);box-shadow:0 3px 12px rgba(0,0,0,.3)}
+.dfo-dungeon-counters dt,.dfo-dungeon-counters dd{margin:0}
+.dfo-dungeon-counters dd{color:#f1cd70;font-weight:bold;font-variant-numeric:tabular-nums;text-align:right}
+.dfo-dungeon-launch{pointer-events:auto;cursor:pointer;font:inherit;line-height:inherit;color:inherit;background:rgba(16,20,25,.88);border:1px solid rgba(192,138,62,.5);padding:8px 10px;width:100%}
+.dfo-dungeon-hud[hidden]{display:none}
 .dfo-dungeon-launch[hidden]{display:none}
 .dfo-nav-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin:8px 0}
 .dfo-nav-actions button,.dfo-nav-stop{cursor:pointer;padding:8px 10px;font:inherit;color:var(--bone,#f1e6c8);background:rgba(31,47,59,.8);border:1px solid rgba(95,158,189,.45);text-align:left}
@@ -180,7 +185,27 @@
   styles();
   const label = ({ Space: 'Пробел', NumpadEnter: 'NumPad Enter' })[code] || code.replace(/^Key|^Digit/, '').replace(/^Numpad/, 'NumPad ').replace(/^Mouse/, 'Мышь ');
   const launcher = button('Сведения о данже · ' + label, open);launcher.className = 'dfo-dungeon-launch';launcher.hidden = true;
-  if (doc.body) doc.body.append(launcher);else doc.addEventListener('DOMContentLoaded', () => doc.body.append(launcher), { once: true });
+  const hud = el('aside', 'dfo-dungeon-hud'), counterList = el('dl', 'dfo-dungeon-counters'), counterValues = new Map();
+  hud.hidden = true;hud.setAttribute('aria-label', 'Счётчики данжа');
+  for (const [id, text] of [['enemies', 'Живые враги'], ['elites', 'Элитные враги'], ['players', 'Игроки']]) {
+    const value = el('dd', '', '—');value.dataset.counter = id;counterValues.set(id, value);counterList.append(el('dt', '', text), value);
+  }
+  hud.append(counterList, launcher);
+  if (doc.body) doc.body.append(hud);else doc.addEventListener('DOMContentLoaded', () => doc.body.append(hud), { once: true });
+  let pageActive = true;
+  function refresh() {
+    if (!pageActive) return;
+    const n = info(false), data = n && M.counters(n.live, n.world, n.tools);
+    hud.hidden = !data;
+    if (data) for (const [id, value, partial] of [['enemies', data.enemies.count, data.enemies.syncing], ['elites', data.enemies.elites, data.enemies.syncing], ['players', data.players.count, !data.players.complete]]) {
+      const node = counterValues.get(id), text = value == null ? '—' : String(value) + (partial ? '+' : '');
+      if (node.textContent !== text) node.textContent = text;
+      const description = value == null ? 'Данные пока неизвестны' : partial ? `Известно: ${value}. Состав ещё уточняется.` : String(value);
+      if (node.getAttribute('aria-label') !== description) node.setAttribute('aria-label', description);
+    }
+    launcher.hidden = !n || !!current || n.live.blocked();
+    if (current) render();
+  }
   const editing = e => { const selector = 'input,textarea,select,[contenteditable]:not([contenteditable="false"]),[role="textbox"]';return !!(e.target?.closest?.(selector) || doc.activeElement?.closest?.(selector)); };
   const consume = e => { e.preventDefault();e.stopImmediatePropagation(); };
   const conflict = root.__DFO_MOD_CFG__?.nearbyLoot?.enabled !== false && (root.__DFO_MOD_CFG__?.nearbyLoot?.keyCode || 'KeyJ') === code;
@@ -213,7 +238,9 @@
   root.addEventListener('blur', () => { held = mouseOwned = mouseHeld = false;if (current) current.pressing = false; });
   root.addEventListener('pointerup', () => { if (current) current.pressing = false; }, true);
   root.addEventListener('pointercancel', () => { mouseOwned = mouseHeld = false;if (current) current.pressing = false; }, true);
-  root.setInterval(() => { const n = info(!!current);launcher.hidden = !n || !!current || n.live.blocked();if (current) render(); }, 500);
+  root.setInterval(refresh, 500);
+  root.addEventListener('pagehide', () => { pageActive = false;hud.hidden = true; });
+  root.addEventListener('pageshow', () => { pageActive = true;refresh(); });
   root.addEventListener('dfo-navigation-change', () => { if (current) render(); });
   root.__dfoDungeonLive = { open, close, isOpen: () => !!current,
     focusJournal(uid) {

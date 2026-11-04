@@ -7,16 +7,23 @@
   const alive = f => !!f?.entity && !f.dead && !f.corpse && !f._gone && !f._absentHere && !f.removed
     && !f.src?.allied && f.companion == null && f.entity.team !== 'PlayerAlly' && f.entity.mobileTeam !== 'PlayerAlly'
     && !(f.src?.reaction === 'passive' && !f.ai?.isHostile);
-  function enemies(foes, tools = {}) {
-    if (!Array.isArray(foes)) return { count: null, elites: null, rows: [], syncing: true };
-    const groups = new Map(); let count = 0, elites = 0, syncing = false;
+  function enemyCounts(foes, visit = null) {
+    if (!Array.isArray(foes)) return { count: null, elites: null, syncing: true };
+    let count = 0, elites = 0, syncing = false;
     const seen = new Set();
     for (const f of foes) {
       if (f?._pupMismatch) { syncing = true; continue; }
       if (!alive(f) || seen.has(f)) continue;
       seen.add(f);count++;
+      if (f.entity.eliteFoe === true) elites++;
+      visit?.(f);
+    }
+    return { count, elites, syncing };
+  }
+  function enemies(foes, tools = {}) {
+    const groups = new Map();
+    const counts = enemyCounts(foes, f => {
       const e = f.entity, elite = e.eliteFoe === true;
-      if (elite) elites++;
       const type = f.mobileType ?? f.src?.mobileType ?? e.mobileType;
       const base = read(() => tools.enemyName?.(type), `Враг ${type ?? '?'}`);
       const name = e.revenant?.name || e.champion?.name || e.properName || base;
@@ -35,8 +42,8 @@
       row.count++;
       if (level != null) { row.minLevel = row.minLevel == null ? level : Math.min(row.minLevel, level);row.maxLevel = row.maxLevel == null ? level : Math.max(row.maxLevel, level); }
       if (finite(e.health) && finite(e.maxHealth)) { row.health += Math.max(0, e.health);row.maxHealth += Math.max(0, e.maxHealth); } else row.healthKnown = false;
-    }
-    return { count, elites, rows: [...groups.values()].sort((a, b) => Number(b.elite) - Number(a.elite) || names.compare(a.name, b.name) || names.compare(a.key, b.key)), syncing };
+    });
+    return { ...counts, rows: [...groups.values()].sort((a, b) => Number(b.elite) - Number(a.elite) || names.compare(a.name, b.name) || names.compare(a.key, b.key)) };
   }
   function players(session, mapId, online) {
     if (!online) return { count: 1, complete: true, connected: false, note: 'Одиночная игра.' };
@@ -80,6 +87,12 @@
       quests: quests(live.questBridge, live.location, live.foes), regen: regen(read(() => live.regen())), aurum: aurum(live.aurum, tools, live.location, online),
       synced: !enemy.syncing, online };
   }
-  const api = { alive, enemies, players, quests, regen, aurum, snapshot };
+  // The always-visible HUD reads counts only: no quest scan, forecast, names,
+  // modifiers, regeneration timers or chest state while the big window is closed.
+  function counters(live, world, tools = {}) {
+    if (!live?.location) return null;
+    return { enemies: enemyCounts(live.foes), players: players(read(() => world.presence?.()), live.location.mapTableData?.mapId, read(() => tools.online?.(), false)) };
+  }
+  const api = { alive, enemies, players, quests, regen, aurum, snapshot, counters };
   if (typeof module === 'object' && module.exports) module.exports = api; else root.__dfoDungeonLiveModel = api;
 })(globalThis);

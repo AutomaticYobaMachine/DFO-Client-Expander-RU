@@ -28,6 +28,18 @@ test('quests match active UIDs and exact dungeon map IDs without touching tracki
   assert.deepEqual(M.quests(bridge, { mapTableData: { mapId: 123 } }, []).map(q => q.uid), ['1', '2']);
   assert.equal(a.questComplete, undefined);assert.equal(bridge.machine.quests.size, 5);
 });
+test('compact counters share live filtering without evaluating journal, forecast, names or chest state', () => {
+  const elite=foe(1,{eliteFoe:true}),ordinary=foe(2),room='dungeon:m123.i9',session={room,status:'open',_rooms:new Map([[room,new Set(['far-away'])]]),peers:new Map()};
+  const forbidden=()=>assert.fail('compact HUD must only read live counts'),live={location:{mapTableData:{mapId:123}},foes:[ordinary,ordinary,elite,{...foe(3),dead:true},{...foe(4),companion:0}],regen:forbidden};
+  Object.defineProperties(live,{questBridge:{get:forbidden},aurum:{get:forbidden}});
+  const tools={online:()=>true,enemyName:forbidden,traits:forbidden,aurumAmount:forbidden},world={presence:()=>session};
+  const a=M.counters(live,world,tools);assert.deepEqual(a.enemies,{count:2,elites:1,syncing:false});assert.equal(a.players.count,2);
+  elite.dead=true;session._rooms.get(room).clear();assert.equal(M.counters(live,world,tools).enemies.elites,0);assert.equal(M.counters(live,world,tools).players.count,1);
+  ordinary._pupMismatch=true;assert.deepEqual(M.counters(live,world,tools).enemies,{count:0,elites:0,syncing:true});
+  session.status='connecting';assert.equal(M.counters(live,world,tools).players.count,null);
+  assert.equal(M.counters(live,world,{online:()=>false}).players.count,1);assert.equal(M.counters(null,world,tools),null);
+  live.foes=null;assert.deepEqual(M.counters(live,world,tools).enemies,{count:null,elites:null,syncing:true});
+});
 test('regen is the next individual known recovery in minutes, never a fabricated full dungeon reset', () => {
   assert.equal(M.regen({ now: 10e6, interval: 1200000, stamps: [10e6 - 60000, 10e6 - 300000] }).minutes, 15);
   assert.equal(M.regen({ now: 10e6, interval: 1200000, stamps: [] }).state, 'idle');

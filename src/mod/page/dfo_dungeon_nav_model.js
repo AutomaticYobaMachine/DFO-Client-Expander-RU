@@ -1,5 +1,7 @@
 (function (root) {
   'use strict';
+  const G=typeof module==='object'&&module.exports?require('./dfo_dungeon_graph.js'):root.__dfoDungeonGraph;
+  const BODY=G.BODY;
   const point = p => p && p.length >= 3 && [p[0],p[1],p[2]].every(Number.isFinite) ? [p[0],p[1],p[2]] : null;
   const distance = (a,b) => Math.hypot(a[0]-b[0],a[1]-b[1],a[2]-b[2]);
   const length = pts => pts.slice(1).reduce((n,p,i)=>n+distance(pts[i],p),0);
@@ -10,27 +12,18 @@
     let ignored=parts.get(key);if(!ignored)parts.set(key,ignored=new Set());
     ignored.add(col._buckets.get(key)?.parts??0);
   }
-  function passable(actions) {
-    const keys=new Set();
-    for(const o of actions?.objects?.values?.()||[]){
-      // Keep lift/bridge decks as support. A door (including a secret or locked one) is an actionable passage.
-      const box=o.aabb,deck=box?.min&&box?.max&&box.max[1]-box.min[1]<.65;
-      if(o.kind==='door'||controls.has(Number(o.modelIdNum))||(o.kind==='action'&&!deck))keys.add(o.key);
-    }
-    return keys;
-  }
   function navigationGeometry(col) {
     const parts=placements.get(col);if(!parts?.size)return col;
     const entries=[...col._buckets],old=geometryViews.get(col);
     if(old&&entries.length===old.entries.length&&entries.every(([k,b],i)=>k===old.entries[i][0]&&b===old.entries[i][1]&&b.tris.length===old.sizes[i]))return old.view;
     // A separate query index shares immutable triangles, never the game's mutable bucket bookkeeping.
-    const query=new col.constructor(()=>-Infinity),bake=new Map();
+    const query=new col.constructor(()=>-Infinity),buckets=new Map();
     for(const [key,b]of entries){
       const ignored=parts.get(key),mask=ignored?Uint8Array.from(b.tris,(_,i)=>b.sight?.[i]||ignored.has(b.part[i])?1:0):b.sight;
       query._buckets.set(key,{...b,rayMark:null,sight:mask});
-      bake.set(key,ignored?{...b,tris:b.tris.filter((_,i)=>!mask[i]),part:b.part?.filter((_,i)=>!mask[i]),sight:null}:b);
+      buckets.set(key,ignored?{...b,tris:b.tris.filter((_,i)=>!mask[i]),part:b.part?.filter((_,i)=>!mask[i]),sight:null}:b);
     }
-    const view={source:col,_buckets:bake,raycastHit:(...args)=>query.raycastHit(...args)};
+    const view={source:col,_buckets:buckets,_bodyBuckets:query._buckets,raycastHit:(...args)=>query.raycastHit(...args)};
     geometryViews.set(col,{entries,sizes:entries.map(([,b])=>b.tris.length),view});return view;
   }
   const ended = b => { const q=b?.targetQuest??b?.targetResource?.parentQuest;return !!(q?.questComplete||q?.questTombstoned||q?.shelvedAt!=null); };
@@ -72,7 +65,7 @@
   const ray = (col,origin,dir,max,skip=[]) => col.raycastHit(origin,dir,max,{skip,bodies:true});
   function floor(col,p,skip=[]) {
     if(!point(p)||!col?.raycastHit)return null;
-    const probe=(x,z)=>{const h=ray(col,[x,p[1]+.62,z],[0,-1,0],1.3,skip);return Number.isFinite(h?.dist)&&(!h.normal||h.normal[1]>=.34)?p[1]+.62-h.dist:null;};
+    const probe=(x,z)=>{const h=ray(col,[x,p[1]+BODY.floorUp,z],[0,-1,0],BODY.floorDown,skip);return Number.isFinite(h?.dist)&&(!h.normal||h.normal[1]>=.34)?p[1]+BODY.floorUp-h.dist:null;};
     let y=probe(p[0],p[2]);
     if(y==null){
       // Classic room seams have centimetre-wide cracks, often exactly on a grid row. The player's
@@ -80,18 +73,30 @@
       for(const [dx,dz]of [[.1,0],[0,.1]]){const a=probe(p[0]-dx,p[2]-dz),b=probe(p[0]+dx,p[2]+dz);if(a!=null&&b!=null&&Math.abs(a-b)<=.5){y=(a+b)/2;break;}}
       if(y==null)return null;
     }
-    const at=[p[0],y,p[2]],head=ray(col,[at[0],at[1]+.08,at[2]],[0,1,0],1.62,skip);
-    return Number.isFinite(head?.dist)&&head.dist<1.6?null:at;
+    const at=[p[0],y,p[2]],head=ray(col,[at[0],at[1]+.08,at[2]],[0,1,0],BODY.height-.09,skip);
+    return Number.isFinite(head?.dist)?null:at;
   }
-  function clearance(col,a,b,skip=[],wide=true) {
+  function clearance(col,a,b,skip=[],wide=true,grounded=false) {
+    if(wide&&col?._buckets){
+      const hit=G.bodyBlocked(col,a,b,skip,grounded);if(!hit||!grounded)return hit;
+      let rest=0;
+      for(const p of [a,b])for(const [x,z]of [[.18,0],[-.18,0],[0,.18],[0,-.18]]){
+        const q=floor(col,[p[0]+x,p[1],p[2]+z],skip),rise=q&&Math.abs(q[1]-p[1]);
+        if(q&&rise<=BODY.step)rest=Math.max(rest,BODY.radius*(Math.sqrt(1+(rise/.18)**2)-1));
+      }
+      const top=BODY.step+rest;
+      if(rest>.001)for(let lift=.1;lift<top+.1;lift+=.1)if(!G.bodyBlocked(col,a,b,skip,true,Math.min(top,lift)))return null;
+      return hit;
+    }
     const dx=b[0]-a[0],dy=b[1]-a[1],dz=b[2]-a[2],len=Math.hypot(dx,dy,dz);
     if(len<1e-6)return null;
-    const dir=[dx/len,dy/len,dz/len],h=Math.hypot(dx,dz)||1,side=[-dz/h*.32,dx/h*.32];
+    const dir=[dx/len,dy/len,dz/len],h=Math.hypot(dx,dz),radius=BODY.radius-.01,side=h>.00001?[-dz/h*radius,dx/h*radius]:[radius,0];
     const skin=.002;
-    for(const off of wide?[-1,0,1]:[0])for(const y of [.53,.9,1.35,1.6]){
+    const offsets=!wide?[[0,0]]:h>.00001?[side,side.map(x=>-x),[0,0]]:[[radius,0],[-radius,0],[0,radius],[0,-radius],[0,0]];
+    for(const off of offsets)for(const y of BODY.probes){
       // Include BOTH ends: a grid node exactly on a wall cannot enter at one edge's end and
       // leave through a zero-distance hit ignored by the next ray's triangle epsilon.
-      const hit=ray(col,[a[0]+off*side[0]-dir[0]*skin,a[1]+y-dir[1]*skin,a[2]+off*side[1]-dir[2]*skin],dir,len+2*skin,skip);
+      const hit=ray(col,[a[0]+off[0]-dir[0]*skin,a[1]+y-dir[1]*skin,a[2]+off[1]-dir[2]*skin],dir,len+2*skin,skip);
       if(Number.isFinite(hit?.dist)&&hit.dist<=len+skin+.0002)return{key:hit.key,dist:Math.max(0,hit.dist-skin)};
     }
     return null;
@@ -108,7 +113,7 @@
     const pts=[at,...points.slice(index+1)];return{points:pts,distance:length(pts),off:best,index};
   }
   function routingSkip(actions) {
-    return [...new Set([...passable(actions),...[...(actions?.objects?.values?.()||[])].filter(o=>o.kind==='action').map(o=>o.key)])];
+    return [...new Set([...(actions?.objects?.values?.()||[])].filter(o=>o.kind==='door'||o.kind==='action'||controls.has(Number(o.modelIdNum))).map(o=>o.key))];
   }
   function follow(route,feet,col,actions,limit=45) {
     const support=ray(col,[feet[0],feet[1]+.15,feet[2]],[0,-1,0],.4),riding=actions?.objects?.get(support?.key)?.kind==='action';
@@ -126,7 +131,7 @@
         const p=floor(col,start.map((x,k)=>x+(cut.points[0][k]-x)*i/steps));if(!p||Math.abs(p[1]-prev[1])>.505)return null;
         const run=Math.hypot(p[0]-prev[0],p[2]-prev[2]),rise=Math.abs(p[1]-prev[1]);
         const lift=run>.01&&rise>.03?Math.min(.45,.35*(Math.sqrt(1+(rise/run)**2)-1)):0;
-        if(clearance(col,[prev[0],prev[1]+lift,prev[2]],[p[0],p[1]+lift,p[2]],skip))return null;
+        if(clearance(col,[prev[0],prev[1]+lift,prev[2]],[p[0],p[1]+lift,p[2]],skip,true,true))return null;
         connector.push(p);prev=p;
       }
     }else{
@@ -141,6 +146,6 @@
     }
     return {points:out,remaining:length(all),off:cut.off};
   }
-  const api={point,distance,length,notePlacement,passable,routingSkip,navigationGeometry,targets,exitPoint,ended,floor,clearance,trim,follow};
+  const api={point,distance,length,notePlacement,routingSkip,navigationGeometry,targets,exitPoint,ended,floor,clearance,trim,follow};
   if(typeof module==='object'&&module.exports)module.exports=api;else root.__dfoDungeonNavModel=api;
 })(globalThis);

@@ -7,19 +7,18 @@ function drawTools(text) {
   const cls = need(text, rx(`(${ID})=class\\{constructor\\((${ID})\\)\\{this\\.gl=\\2,this\\.program=${ID}\\(\\2,${ID},${ID},\`party ping\`\\)`))[1];
   const ribbon = need(text.slice(text.indexOf(`this.program=`)), rx(`(${ID})\\.pts&&\\1\\.pts\\.length>1\\?(${ID})\\(\\1\\.pts\\):\\[\\]`));
   const out = text.replace(ribbon[0], `${ribbon[1]}.pts&&${ribbon[1]}.pts.length>1?(${ribbon[1]}.dfoContinuous?globalThis.__dfoDungeonGraph.ribbon(${ribbon[1]}.pts,${ribbon[1]}.dfoWidth||.055):${ribbon[2]}(${ribbon[1]}.pts)):[]`);
-  return out + `\n;globalThis.__dfoNavNative={...globalThis.__dfoNavNative,Draw:${cls}};\n`;
+  return out + `\n;globalThis.__dfoDungeonRender={Draw:${cls}};\n`;
 }
 function context(text) {
   const api = need(text, rx(`(${ID})=${ID}\\((${ID}),${ID},${ID},\\{meshes:${ID}\\}\\)`))[2];
-  const nav = need(text, rx(`navMesh:\\(\\)=>(${ID})\\.chf`))[1];
-  const bake = need(text, rx(`${nav}\\.client\\.bake\\(\\{collider:(${ID}),anchor:\\[[^]{0,140}?\\],anchors:[^]{0,900}?key:(${ID})\\}\\)`));
+  const placement = need(text, rx(`(${ID})\\.addMesh\\(\`dungeon\`,(${ID})\\.positions,\\2\\.indices,(${ID})\\)`));
+  const collider = placement[1], model = placement[2];
   const renderer = need(text, rx(`(${ID})\\.drawWater\\(`))[1];
   const late = need(text, rx(`(${ID})\\.lateWorldDraw\\?\\.\\(\\)`));
   const portals = need(text, rx(`portals:(${ID}),fires:`))[1];
-  const placement = need(text, rx(`${bake[1]}\\.addMesh\\(\`dungeon\`,(${ID})\\.positions,\\1\\.indices,${ID}\\)`));
-  const getter = `get dfoDungeonNavigation(){return{collider:${bake[1]},key:${bake[2]},feet:this.swimmer?.()?.feet,transitions:()=>[...${portals}().values()]}},`;
+  const getter = `get dfoDungeonNavigation(){return{collider:${collider},key:this.dfoDungeonLive?.location?.mapTableData?.mapId??'',feet:this.swimmer?.()?.feet,transitions:()=>[...${portals}().values()]}},`;
   let out = text.replace('get dfoDungeonLive(){', getter + 'get dfoDungeonLive(){');
-  out = out.replace(placement[0], `(globalThis.__dfoDungeonNavModel?.notePlacement(${bake[1]},\`dungeon\`,${placement[1]}),${placement[0]})`);
+  out = out.replace(placement[0], `(globalThis.__dfoDungeonNavModel?.notePlacement(${collider},\`dungeon\`,${model}),${placement[0]})`);
   out = out.replace(late[0], `${late[0]},(()=>{try{globalThis.__dfoDungeonNavigation?.draw(${api},${renderer})}catch(_dfoNav){}})()`);
   return out;
 }

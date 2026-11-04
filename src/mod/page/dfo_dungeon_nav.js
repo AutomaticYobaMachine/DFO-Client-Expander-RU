@@ -6,12 +6,13 @@
   const G = typeof module === 'object' && module.exports ? require('./dfo_dungeon_graph.js') : root.__dfoDungeonGraph;
   function createNavigation(deps) {
     let state={phase:'idle',kind:null,uid:null,name:'',distance:null,message:''};
-    let owner=null,wanted=null,client=null,building=null,graphRevision=null,readKey='';
+    let owner=null,ownerSource=null,wanted=null,client=null,building=null,graphRevision=null,readKey='';
     let seq=0,calculating=false,route=null,showing=[],plannedAt=-Infinity,lastAttempt=-Infinity,failedView='';
     const now=()=>deps.now?.()??Date.now();
     const notify=next=>{const value={...state,...next};if(JSON.stringify(value)!==JSON.stringify(state)){state=value;deps.changed?.({...state});}};
     const read=(details=true)=>{try{const v=deps.read(details);return v?{...v,nav:{...v.nav,collider:M.navigationGeometry(v.nav.collider)}}:null;}catch{return null;}};
     const groups=v=>M.targets(v.live,v.sources,v.tools,v.questIds);
+    const source=v=>v.nav.collider?.source||v.nav.collider;
     const candidates=v=>{
       let list=groups(v)[wanted.kind]||[];
       if(wanted.kind==='quest'){
@@ -25,12 +26,12 @@
     const disposeClient=()=>{client?.dispose();client=null;building=null;graphRevision=null;};
     function stop(hard=false){
       seq++;calculating=false;wanted=null;route=null;showing=[];failedView='';
-      if(hard){disposeClient();owner=null;readKey='';}
+      if(hard){disposeClient();owner=ownerSource=null;readKey='';}
       notify({phase:'idle',kind:null,uid:null,name:'',distance:null,message:''});
     }
     function checkScene(v){
       const latest=read(false);
-      if(!latest||latest.live.ctx!==v.live.ctx||latest.nav.key!==v.nav.key||latest.room!==v.room)throw Object.assign(new Error('cancelled'),{cancelled:true});
+      if(!latest||latest.live.ctx!==v.live.ctx||source(latest)!==source(v)||latest.nav.key!==v.nav.key||latest.room!==v.room)throw Object.assign(new Error('cancelled'),{cancelled:true});
     }
     function check(v,token){if(token!==seq||!wanted)throw Object.assign(new Error('cancelled'),{cancelled:true});checkScene(v);}
     async function acquire(v){
@@ -68,15 +69,15 @@
     }
     function start(kind,uid=null){
       const v=read();if(!G||!labels[kind]||!v||!M.point(v.nav?.feet)||!v.nav.collider?._buckets)return false;
-      if(owner&&(owner!==v.live.ctx||readKey!==v.nav.key+'|'+v.room))stop(true);
-      wanted={kind,uid:uid==null?null:String(uid)};owner=v.live.ctx;readKey=v.nav.key+'|'+v.room;
+      if(owner&&(owner!==v.live.ctx||ownerSource!==source(v)||readKey!==v.nav.key+'|'+v.room))stop(true);
+      wanted={kind,uid:uid==null?null:String(uid)};owner=v.live.ctx;ownerSource=source(v);readKey=v.nav.key+'|'+v.room;
       notify({kind,uid:wanted.uid,name:labels[kind]});
       if(!candidates(v).length){seq++;calculating=false;route=null;showing=[];notify({phase:'unavailable',distance:null,message:none[kind]});return false;}
       request(v);return true;
     }
     function tick(){
       const v=read(!!wanted);
-      if(owner&&(!v||owner!==v.live.ctx||readKey!==v.nav.key+'|'+v.room)){stop(true);return;}
+      if(owner&&(!v||owner!==v.live.ctx||ownerSource!==source(v)||readKey!==v.nav.key+'|'+v.room)){stop(true);return;}
       if(!wanted||!v||calculating||!M.point(v.nav.feet))return;
       const list=candidates(v);
       if(!list.length){route=null;showing=[];notify({phase:'unavailable',distance:null,message:none[wanted.kind]});return;}
@@ -94,7 +95,7 @@
     }
     return{
       start,stop,tick,state:()=>({...state}),points:()=>showing,context:()=>owner,
-      matches:v=>!!v&&owner===v.live.ctx&&readKey===v.nav.key+'|'+v.room,
+      matches:v=>!!v&&owner===v.live.ctx&&ownerSource===source(v)&&readKey===v.nav.key+'|'+v.room,
       availability(){const v=read();if(!G||!v?.nav.collider?._buckets)return{ready:false};const all=groups(v);return{ready:true,...Object.fromEntries(Object.entries(all).map(([k,a])=>[k,a.length]))};}
     };
   }
@@ -116,7 +117,7 @@
   const style=doc.createElement('style');style.textContent='.dfo-navigation-hud{position:fixed;left:50%;bottom:16vh;transform:translateX(-50%);max-width:80vw;z-index:7;pointer-events:none;text-align:center;white-space:pre-line;padding:8px 14px;border:1px solid rgba(83,191,255,.5);background:rgba(11,22,31,.78);color:#b4e8ff;font:13px var(--data,system-ui,sans-serif);line-height:1.5}.dfo-navigation-hud[hidden]{display:none}';
   doc.head.append(style);if(doc.body)doc.body.append(hud);else doc.addEventListener('DOMContentLoaded',()=>doc.body.append(hud),{once:true});
   const controller=createNavigation({
-    read,native:()=>root.__dfoNavNative,now:()=>performance.now(),
+    read,now:()=>performance.now(),
     async checkpoint(){if(performance.now()-budgetAt<4)return;await new Promise(r=>root.requestAnimationFrame(r));budgetAt=performance.now();},
     changed(s){if(s.phase==='idle')disposeDraw();root.dispatchEvent(new CustomEvent('dfo-navigation-change'));}
   });
@@ -131,7 +132,7 @@
       if(controller.context()!==ctx)return;const pts=controller.points();if(pts.length<2)return;
       const v=read(false);if(!controller.matches(v)){controller.stop(true);return;}if(v.live.ctx!==ctx||v.live.blocked()||M.distance(v.nav.feet,pts[0])>2.5)return;
       try{
-        if(drawGL!==renderer.gl){disposeDraw();drawGL=renderer.gl;drawPass=new root.__dfoNavNative.Draw(drawGL);}
+        if(drawGL!==renderer.gl){disposeDraw();drawGL=renderer.gl;drawPass=new root.__dfoDungeonRender.Draw(drawGL);}
         drawPass.draw(renderer,[],[{pts,color:[.12,.55,1],alpha:.18,dfoContinuous:true,dfoWidth:.15},{pts,color:[.28,.76,1],alpha:1,dfoContinuous:true,dfoWidth:.045}]);
       }catch(e){disposeDraw();controller.stop();console.warn('[dfo-mod] navigation draw:',e);}
     },

@@ -11,7 +11,7 @@ function controller(r,extra={}){
   const live={ctx,foes:ctx.foes,aurum:{id:'d1',open:false,foot:[11,0,8]}};
   const nav={feet:Float32Array.from(r.from),collider:r.col,key:'d1',transitions:[]};
   current={live,nav,sources:{},tools:{enemyName:()=> 'Enemy'},room:'dungeon:m1'};
-  const api=createNavigation({read:()=>current,native:()=>({solve(){assert.fail('NPC solver must never run')},NavClient:class{constructor(){assert.fail('NPC navmesh must never bake')}},Draw:class{}}),now:()=>time,...extra});
+  const api=createNavigation({read:()=>current,now:()=>time,...extra});
   return{api,ctx,live,nav,get current(){return current},set current(x){current=x},advance(n=1000){time+=n;api.tick();}};
 }
 test('navigation targets keep individual elites and exact active quest identities without changing the game',()=>{
@@ -36,6 +36,13 @@ test('a request at the goal reports arrival without a repeated zero-length searc
   const r=await room(),h=controller(r);h.ctx.exitDoors=[{pos:[...h.nav.feet]}];h.api.start('exit');await settle(h.api,s=>s.phase==='arrived');
   for(let i=0;i<5;i++)h.advance(5000);assert.equal(h.api.state().phase,'arrived');assert.equal(h.api.state().distance,0);assert.equal(h.api.points().length,0);
 });
+test('replacing the collider cannot reuse an old graph even when context, room and revision number match',native,async()=>{
+  const r=await room(),h=controller(r);h.api.start('exit');await settle(h.api);
+  const replacement=await room();wall(replacement.col,'closed',7,0,12,0,8);
+  assert.equal(G.revision(r.col,r.actions),G.revision(replacement.col,r.actions));
+  h.nav.collider=replacement.col;assert.equal(h.api.matches(h.current),false);h.advance();assert.equal(h.api.state().phase,'idle');assert.equal(h.api.points().length,0);
+  h.api.start('exit');assert.equal((await settle(h.api)).phase,'unavailable');
+});
 test('controller tracks the nearest reachable elite, movement, death, name and exact quest UID',native,async()=>{
   const r=await room({pillar:true}),h=controller(r),mk=p=>({entity:{eliteFoe:true},ai:{feet:p}});
   h.ctx.foes.push(mk([8,0,6]),mk([2,0,10]));h.api.start('elite');assert.ok((await settle(h.api)).distance<6);
@@ -50,6 +57,13 @@ test('a parallel corridor or another floor cannot count as arrival through a wal
   const r=await room(),h=controller(r);h.api.start('exit');await settle(h.api);
   quad(r.col,'parallel-wall',[[0,0,6.4],[14,0,6.4],[14,3,6.4],[0,3,6.4]]);h.nav.feet.set([12,0,6.8]);h.advance();
   assert.notEqual(h.api.state().phase,'arrived');assert.equal(h.api.points().length,0);assert.equal((await settle(h.api)).phase,'unavailable');
+});
+test('rejoining a route refuses an overhead crossbar that intersects the standing player head',native,async()=>{
+  for(const [y,height]of [[1.68,.1],[.92,.01]]){
+    const r=await room();quad(r.col,'crossbar',[[0,y,6.4],[14,y,6.4],[14,y+height,6.4],[0,y+height,6.4]]);
+    const route={points:[[2,0,6],[12,0,6]],kinds:['walk','walk']};
+    assert.equal(M.follow(route,[7,0,6.85],r.col,r.actions),null);
+  }
 });
 test('failed routes stay quiet until real static geometry, target or position changes',native,async()=>{
   const r=await room(),h=controller(r);wall(r.col,'blocking-wall',7,0,12,0,8);h.api.start('exit');assert.equal((await settle(h.api)).phase,'unavailable');
@@ -91,11 +105,20 @@ test('published navigation getters use live context geometry, feet, quest stands
   const deep=load('deepWaterRuntime-');assert.ok(deep.log.some(([id])=>id==='dungeon.navContext'));
   const start=deep.text.indexOf('get dfoDungeonNavigation(){'),end=deep.text.indexOf('get dfoDungeonLive(){',start),getter=deep.text.slice(start,end).replace(/,$/,'');
   const ast=parse('({'+getter+'})',{ecmaVersion:'latest'}),obj=ast.body[0].expression.properties[0].value.body.body[0].argument,props=new Map(obj.properties.map(p=>[p.key.name,p.value]));
-  const col={raycastHit(){}},feet=new Float32Array([1,0,2]),context={},[portals]=props.get('transitions').body.elements.map(e=>e.argument);context[props.get('collider').name]=col;context[props.get('key').name]='d1';context[portals.callee.object.callee.name]=()=>new Map([['unvisited',{entrance:{pos:[3,1,2]},exit:{pos:[8,3.2,6]}}]]);context.feet=feet;
-  const api=vm.runInNewContext('({swimmer(){return{feet}},'+getter+'})',context);assert.equal(api.dfoDungeonNavigation.collider,col);assert.equal(api.dfoDungeonNavigation.feet,feet);assert.equal(api.dfoDungeonNavigation.key,'d1');assert.equal('mesh' in api.dfoDungeonNavigation,false);
+  const col={raycastHit(){}},feet=new Float32Array([1,0,2]),context={},[portals]=props.get('transitions').body.elements.map(e=>e.argument);context[props.get('collider').name]=col;context[portals.callee.object.callee.name]=()=>new Map([['unvisited',{entrance:{pos:[3,1,2]},exit:{pos:[8,3.2,6]}}]]);context.feet=feet;
+  const api=vm.runInNewContext('({dfoDungeonLive:{location:{mapTableData:{mapId:123}}},swimmer(){return{feet}},'+getter+'})',context);assert.equal(api.dfoDungeonNavigation.collider,col);assert.equal(api.dfoDungeonNavigation.feet,feet);assert.equal(api.dfoDungeonNavigation.key,123);assert.equal('mesh' in api.dfoDungeonNavigation,false);
   assert.equal(api.dfoDungeonNavigation.transitions().length,1,'all level portals are available before the automap reveals anything');assert.match(deep.text,/notePlacement\(/);
   const at=deep.text.indexOf('globalThis.__dfoDungeonNavigation?.draw(');assert.ok(at>=0);assert.ok(deep.text.indexOf('.drawWater(',at)>at,'line is drawn before the world pass is resolved by HUD quads');
   const modes=load('arenaGate-');assert.ok(modes.log.some(([id])=>id==='dungeon.navQuests'));
   const world=load('world-');assert.ok(world.log.some(([id])=>id==='dungeon.navDraw'));assert.match(world.text,/dfoContinuous\?globalThis\.__dfoDungeonGraph\.ribbon/);
+  assert.match(world.text,/__dfoDungeonRender=/);assert.equal(world.text.includes('__dfoNavNative'),false);
   for(const changed of [deep,modes,world])parse(changed.text,{ecmaVersion:'latest',sourceType:'module'});
+});
+test('navigation hooks still attach when every AI bake and navmesh signature is absent',{skip:!process.env.DFO_BUILD_DIR},()=>{
+  const fs=require('node:fs'),path=require('node:path'),{transformDungeonNav}=require('../src/mod/dungeon-nav-transform.cjs');
+  const dir=path.join(process.env.DFO_BUILD_DIR,'assets'),file=fs.readdirSync(dir).find(f=>f.startsWith('deepWaterRuntime-'));
+  const {transformAsset}=require('../src/mod/transforms.cjs'),raw=fs.readFileSync(path.join(dir,file),'utf8'),transformed=transformAsset('assets/'+file,raw,{dungeons:true,ru:false,marks:false,nearbyLoot:false}).text;
+  const start=transformed.indexOf('get dfoDungeonNavigation(){'),end=transformed.indexOf('get dfoDungeonLive(){',start);
+  const stripped=(transformed.slice(0,start)+transformed.slice(end)).replace('/*dungeon.navContext*/','').replaceAll('navMesh:','removedAiMesh:').replaceAll('.client.bake(','.unusedAiBake('),log=[];
+  const next=transformDungeonNav('assets/'+file,stripped,log);assert.ok(log.some(([id,n])=>id==='dungeon.navContext'&&n===1));assert.ok(next.includes('get dfoDungeonNavigation(){'));
 });

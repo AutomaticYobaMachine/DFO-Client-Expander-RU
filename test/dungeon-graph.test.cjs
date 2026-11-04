@@ -39,6 +39,16 @@ test('a climb accepted at a real wall can be completed by the original player mo
   for(let i=0;i<1500;i++){motor.update(1/60,{forward:1,strafe:0,run:false,jump:false,crouch:false},Math.PI/2);if(motor.grounded&&motor.pos[1]>3.8)break;}
   assert.ok(motor.grounded&&motor.pos[1]>3.8,JSON.stringify([...motor.pos]));
 });
+test('a low ledge above step height is reachable by a mantle instead of requiring a chest-high wall',native,async()=>{
+  const r=await room();for(const k of ['edge-left','edge-right','edge-front','edge-back'])r.col.removeBucket(k);
+  quad(r.col,'ledge',[[7,.8,0],[14,.8,0],[14,.8,12],[7,.8,12]]);wall(r.col,'ledge-face',7,0,12,0,.8);
+  const g=await build(r);assert.ok(g.geo.climb([6.58,0,6],[7.42,.8,6]));
+  const p=await g.route([2,0,6],[target([10,.8,6])]);assert.ok(p);assert.ok(p.distance<10);
+  const {PlayerMotor}=await require('./helpers/dungeon-navigation.cjs').playerModules();
+  const motor=new PlayerMotor(r.col,{speed:50,running:30},{parkour:{enabled:()=>true,inputs:()=>({climbing:100,fatigue:1}),tally(){},say(){}}});motor.spawn(6.58,.02,6);
+  for(let i=0;i<600;i++){motor.update(1/60,{forward:1,strafe:0,run:false,jump:i===1,crouch:false},Math.PI/2);if(motor.grounded&&motor.pos[0]>7.2&&motor.pos[1]>.7)break;}
+  assert.ok(motor.grounded&&motor.pos[0]>7.2&&motor.pos[1]>.7,JSON.stringify([...motor.pos]));
+});
 test('descending through an open shaft does not invent an upward climb on air',native,async()=>{
   const r=await room();r.col.removeBucket('edge-left');r.col.removeBucket('edge-right');r.col.removeBucket('edge-front');r.col.removeBucket('edge-back');
   quad(r.col,'upper',[[7,4,0],[14,4,0],[14,4,12],[7,4,12]]);const g=await build(r);
@@ -51,8 +61,8 @@ test('solid floor slabs, headroom, body width and a wall at a segment endpoint r
   assert.equal(await g.route([6,0,6],[target([8,0,6])]),null);
   const s=await room({stacked:true}),gs=await build(s);
   assert.equal(gs.geo.climb([2,0,6],[2,3,6]),null);assert.equal(gs.geo.drop([2,3,6],[2,0,6]),null);
-  for(const y of [.8,1.5]){
-    const c=await room();wall(c.col,'bar',7,0,12,y,.25);const gc=await build(c);
+  for(const y of [.72,.8,.92,1.04,1.2,1.5,1.68]){
+    const c=await room();wall(c.col,'bar',7,0,12,y,.01);const gc=await build(c);
     assert.equal(await gc.route([6,0,6],[target([8,0,6])]),null,'a crossbar cannot be walked through');
   }
   const c=await room();quad(c.col,'ceiling',[[5,1.7,0],[8,1.7,0],[8,1.7,12],[5,1.7,12]]);const gc=await build(c);

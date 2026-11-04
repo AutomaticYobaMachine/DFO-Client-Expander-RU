@@ -1,0 +1,229 @@
+{
+  "version": "1.17.1",
+  "measuredAt": "2026-11-04",
+  "runtime": "v24.19.0",
+  "source": "Lattymoy/daggerfall-js-source a3eb1605ea1dc391b691fe314377458a7e63e483, classic ARENA2",
+  "command": "DFO_UPSTREAM_DIR=... ARENA2_PATH=... node tools/benchmark-dungeon-navigation.cjs --complex",
+  "scope": "Node geometry benchmark; durations depend on scene and machine",
+  "engine": "player milestone graph",
+  "scenes": [
+    {
+      "name": "Privateer's Hold",
+      "triangles": 8430,
+      "parts": 309,
+      "nodes": 22838,
+      "prepareMs": 468,
+      "queries": [
+        {
+          "goal": "enemy-marker-0",
+          "cached": false,
+          "ms": 194,
+          "distance": 94.8,
+          "heightSpan": 6.4,
+          "blocks": [
+            0
+          ],
+          "kinds": [
+            "walk"
+          ],
+          "testedEdges": 8694
+        },
+        {
+          "goal": "enemy-marker-0",
+          "cached": true,
+          "ms": 11,
+          "distance": 94.8,
+          "heightSpan": 6.4,
+          "blocks": [
+            0
+          ],
+          "kinds": [
+            "walk"
+          ],
+          "testedEdges": 8694
+        },
+        {
+          "goal": "enemy-marker-1",
+          "cached": false,
+          "ms": 335,
+          "distance": 133.5,
+          "heightSpan": 12.8,
+          "blocks": [
+            0
+          ],
+          "kinds": [
+            "walk",
+            "drop"
+          ],
+          "testedEdges": 19719
+        },
+        {
+          "goal": "enemy-marker-1",
+          "cached": true,
+          "ms": 16,
+          "distance": 133.5,
+          "heightSpan": 12.8,
+          "blocks": [
+            0
+          ],
+          "kinds": [
+            "walk",
+            "drop"
+          ],
+          "testedEdges": 19719
+        }
+      ]
+    },
+    {
+      "name": "S0000140.RDB elevator 74013",
+      "triangles": 3966,
+      "parts": 164,
+      "nodes": 9020,
+      "prepareMs": 200,
+      "queries": [
+        {
+          "goal": "down",
+          "cached": false,
+          "ms": 3,
+          "distance": 13.7,
+          "heightSpan": 12.8,
+          "blocks": [],
+          "kinds": [
+            "walk",
+            "lift"
+          ],
+          "testedEdges": 39
+        },
+        {
+          "goal": "down",
+          "cached": true,
+          "ms": 4,
+          "distance": 13.7,
+          "heightSpan": 12.8,
+          "blocks": [],
+          "kinds": [
+            "walk",
+            "lift"
+          ],
+          "testedEdges": 39
+        },
+        {
+          "goal": "up",
+          "cached": false,
+          "ms": 2,
+          "distance": 13.7,
+          "heightSpan": 12.8,
+          "blocks": [],
+          "kinds": [
+            "walk",
+            "lift"
+          ],
+          "testedEdges": 62
+        },
+        {
+          "goal": "up",
+          "cached": true,
+          "ms": 2,
+          "distance": 13.7,
+          "heightSpan": 12.8,
+          "blocks": [],
+          "kinds": [
+            "walk",
+            "lift"
+          ],
+          "testedEdges": 62
+        }
+      ]
+    },
+    {
+      "name": "The Convocation of Elona",
+      "triangles": 21135,
+      "parts": 841,
+      "nodes": 68279,
+      "prepareMs": 939,
+      "queries": [
+        {
+          "goal": "enemy-marker-21",
+          "cached": false,
+          "ms": 6747,
+          "distance": 421.4,
+          "heightSpan": 32.1,
+          "blocks": [
+            8,
+            7,
+            6,
+            5
+          ],
+          "kinds": [
+            "walk",
+            "drop"
+          ],
+          "testedEdges": 258698
+        },
+        {
+          "goal": "enemy-marker-21",
+          "cached": true,
+          "ms": 307,
+          "distance": 421.4,
+          "heightSpan": 32.1,
+          "blocks": [
+            8,
+            7,
+            6,
+            5
+          ],
+          "kinds": [
+            "walk",
+            "drop"
+          ],
+          "testedEdges": 258698
+        }
+      ]
+    },
+    {
+      "name": "Ruins of Old Carololda's Farm",
+      "triangles": 19599,
+      "parts": 857,
+      "nodes": 59728,
+      "prepareMs": 846,
+      "queries": [
+        {
+          "goal": "enemy-marker-97",
+          "cached": false,
+          "ms": 1579,
+          "distance": 309,
+          "heightSpan": 32,
+          "blocks": [
+            6,
+            5,
+            4,
+            9,
+            12
+          ],
+          "kinds": [
+            "walk"
+          ],
+          "testedEdges": 77351
+        },
+        {
+          "goal": "enemy-marker-97",
+          "cached": true,
+          "ms": 69,
+          "distance": 309,
+          "heightSpan": 32,
+          "blocks": [
+            6,
+            5,
+            4,
+            9,
+            12
+          ],
+          "kinds": [
+            "walk"
+          ],
+          "testedEdges": 77351
+        }
+      ]
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 'use strict';
 const fs=require('node:fs'),path=require('node:path'),http=require('node:http'),assert=require('node:assert/strict');
-const upstream=path.resolve(process.argv[2]||'/tmp/dfo-upstream'),dist=path.resolve(process.argv[3]||'/tmp/dfo-release-0.1.14517');
+const upstream=path.resolve(process.argv[2]||'/tmp/dfo-upstream'),dist=path.resolve(process.argv[3]||'/tmp/dfo-release-0.1.14520');
 const {chromium}=require(path.join(upstream,'node_modules/playwright')),{parse}=require(path.join(upstream,'node_modules/acorn'));
 const {transformAsset}=require('../src/mod/transforms.cjs'),assets=path.join(dist,'assets');
 const world=fs.readdirSync(assets).find(f=>/^world-[^.]+\.js$/.test(f)),deep=fs.readdirSync(assets).find(f=>/^deepWaterRuntime-/.test(f));
@@ -32,7 +32,7 @@ function fixture(Collider,mat4){
  const foes=[{mobileType:1,src:{},entity:{eliteFoe:true,properName:'За стеной',health:20,maxHealth:20},ai:{feet:[8,0,6],isHostile:true}},{mobileType:1,src:{},entity:{eliteFoe:true,properName:'Ближний',health:20,maxHealth:20},ai:{feet:[3,0,10],isHostile:true}}];
  let overlay=null,passes=0,draws=0,questReads=0;
  const ctx={foes,actions,people:[],enemies:foes.map(f=>({x:f.ai.feet[0],y:0,z:f.ai.feet[2]})),exitDoors:[{centre:{x:0,y:1,z:0},normal:{x:-1,y:0,z:0},size:{y:2},matrix:mat4.trs(13,0,6,0,0,0)}]};
- const nav={collider:col,key:'navigation-fixture',mesh:null,feet,transitions:[]};Object.defineProperty(ctx,'dfoDungeonNavigation',{get:()=>nav});
+ const nav={collider:col,key:'navigation-fixture',feet,transitions:[]};Object.defineProperty(ctx,'dfoDungeonNavigation',{get:()=>nav});
  const questLog=()=>{questReads++;return{active:[...quests.values()].filter(q=>!q.questComplete).map(q=>({id:q.uid,name:q.displayName}))};};
  const live={ctx,location:loc,foes,aurum:{id:'d12345',foot:[11,0,2],open:false},questBridge:{machine:{quests},questLog},regen:()=>null,blocked:()=>!!overlay&&!overlay.done,owns:w=>overlay===w,mount:w=>{if(overlay&&!overlay.done)return false;overlay=w;return true},unmount:w=>{if(overlay===w)overlay=null},journal:()=>false};
  Object.defineProperty(ctx,'dfoDungeonLive',{get:()=>live});
@@ -54,16 +54,25 @@ function fixture(Collider,mat4){
    for(const [i,data]of [geometry,colors].entries()){gl.bindBuffer(gl.ARRAY_BUFFER,buffers[i]);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(data),gl.STATIC_DRAW);}
    nav.transitions=[];ctx.exitDoors=[{pos:[10,4,6]}];feet.set([2,0,6]);renderer._camPos=[4,2,8];renderer._view=mat4.lookAt([4,2,8],[7,2.5,6],[0,1,0]);
  }
- window.fixture={ctx,live,nav,modes,foes,quests,sources,stands,session,feet,shift,draw,renderer,gl,gpuCheck,shaft,get draws(){return draws},get passes(){return passes},get questReads(){return questReads}};
+ function lookAlong(p,q){renderer._camPos=[p[0],p[1]+1.7,p[2]];renderer._view=mat4.lookAt(renderer._camPos,[q[0],q[1]+.1,q[2]],[0,1,0]);}
+ function loadComplex(data){
+   for(const key of [...col._buckets.keys()])col.removeBucket(key);geometry.length=colors.length=0;actions.objects.clear();
+   for(const part of data.parts){const indices=new Uint32Array(part.positions.length/3);for(let i=0;i<indices.length;i++)indices[i]=i;col.addMesh(part.key,new Float32Array(part.positions),indices,I);geometry.push(...part.positions);for(let i=0;i<indices.length;i++)colors.push(.22,.24,.27);}
+   for(const o of data.actions)actions.objects.set(o.key,o);
+   for(const [i,values]of [geometry,colors].entries()){gl.bindBuffer(gl.ARRAY_BUFFER,buffers[i]);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(values),gl.STATIC_DRAW);}
+   nav.key=data.key;nav.transitions=[];ctx.exitDoors=[{pos:data.goal}];feet.set(data.from);lookAlong(data.from,[14,0,6]);
+ }
+ window.fixture={ctx,live,nav,modes,foes,quests,sources,stands,session,feet,shift,draw,renderer,gl,gpuCheck,shaft,loadComplex,lookAlong,get draws(){return draws},get passes(){return passes},get questReads(){return questReads}};
  function frame(){draw();requestAnimationFrame(frame);}requestAnimationFrame(frame);window.ready=true;
 }
-const scripts=['dfo_dungeon_model.js','dfo_dungeons.js','dfo_dungeon_live_model.js','dfo_dungeon_nav_model.js','dfo_dungeon_graph.js','dfo_dungeon_nav.js','dfo_dungeon_live.js'];
+const scripts=['dfo_dungeon_model.js','dfo_dungeons.js','dfo_dungeon_live_model.js','dfo_dungeon_graph.js','dfo_dungeon_nav_model.js','dfo_dungeon_nav.js','dfo_dungeon_live.js'];
 const html='<!doctype html><html><head><meta charset="utf-8"><style>body{margin:0;background:#0d1118}canvas{position:fixed;inset:0;width:100vw;height:100vh}</style><script>if(new URLSearchParams(location.search).has("no-worker"))window.Worker=undefined;window.__DFO_MOD_CFG__={dungeons:{enabled:true,keyCode:"KeyK"},nearbyLoot:{enabled:false}};</script>'+scripts.map(f=>'<script src="/'+f+'"></script>').join('')+'</head><body><canvas width="960" height="640"></canvas><script type="module">import "/assets/'+world+'";import {FixtureCollider} from "/assets/'+colliderFile+'";import * as mat4 from "/fixture-mat4.js";('+fixture.toString()+')(FixtureCollider,mat4);</script></body></html>';
-const cache=new Map();let workerRequests=0,graphWorkers=0;
+const cache=new Map(),labs=new Map();let workerRequests=0,graphWorkers=0;
 const server=http.createServer((req,res)=>{try{
  const url=new URL(req.url,'http://localhost');
  if(url.pathname==='/'){res.setHeader('Content-Type','text/html;charset=utf-8');return res.end(html);}
  if(url.pathname==='/fixture-mat4.js'){res.setHeader('Content-Type','text/javascript');return res.end(fs.readFileSync(path.join(upstream,'src/world/mat4.js')));}
+ if(labs.has(url.pathname)){res.setHeader('Content-Type','application/json');return res.end(labs.get(url.pathname));}
  if(url.pathname.startsWith('/dfo-mod/dungeon-notes')){res.setHeader('Content-Type','application/json');return res.end('{"notes":[]}');}
  if(/^\/dfo_.*\.js$/.test(url.pathname)){if(req.headers['sec-fetch-dest']==='worker')graphWorkers++;res.setHeader('Content-Type','text/javascript');return res.end(fs.readFileSync(path.join(__dirname,'../src/mod/page',url.pathname.slice(1))));}
  const file=path.resolve(dist,'.'+url.pathname);if(!file.startsWith(dist+path.sep))throw Error('bad path');let body=fs.readFileSync(file);
@@ -72,6 +81,8 @@ const server=http.createServer((req,res)=>{try{
  res.end(body);
 }catch(e){res.statusCode=404;res.end(e.message);}});
 (async()=>{let browser,page;try{
+ process.env.DFO_UPSTREAM_DIR=upstream;const {multiblock}=require('../test/helpers/dungeon-complex.cjs');
+ for(const sealed of [false,true]){const r=await multiblock({sealed}),parts=[];for(const [key,b]of r.col._buckets){const groups=new Map();for(let i=0;i<b.tris.length;i++){const part=b.part[i];if(!groups.has(part))groups.set(part,[]);groups.get(part).push(...b.tris[i].slice(0,3).flat());}for(const positions of groups.values())parts.push({key,positions});}labs.set('/fixture-complex'+(sealed?'-sealed':'')+'.json',JSON.stringify({key:'complex:'+sealed,parts,actions:[...r.actions.objects.values()],from:r.from,goal:r.goal,blocks:r.blocks}));}
  await new Promise(r=>server.listen(0,'127.0.0.1',r));const address='http://127.0.0.1:'+server.address().port;
  browser=await chromium.launch({executablePath:process.env.DFO_CHROMIUM||'/usr/bin/chromium',headless:true,args:['--no-sandbox','--enable-unsafe-swiftshader']});page=await browser.newPage({viewport:{width:1200,height:800}});
  const errors=[];page.on('pageerror',e=>{errors.push(String(e));console.error('PAGE',e)});await page.goto(address);await page.waitForFunction(()=>window.ready);await page.waitForTimeout(700);assert.equal(await page.evaluate(()=>fixture.questReads),0,'idle navigation must not scan the quest journal');await page.keyboard.press('k');const dialog=page.locator('.dfo-dungeon-live');await dialog.waitFor();
@@ -100,5 +111,21 @@ const server=http.createServer((req,res)=>{try{
  assert.ok((await page.evaluate(()=>fixture.gpuCheck())).blue>20,'the vertical ribbon is visible in real WebGL');
  await page.evaluate(()=>{const ps=window.lastRoute,i=ps.findIndex((p,i)=>i&&p[1]-ps[i-1][1]>2);fixture.feet.set(ps[i].map((x,k)=>(x+ps[i-1][k])/2));});
  await page.waitForTimeout(350);assert.equal(await page.evaluate(()=>__dfoDungeonNavigation.state().phase),'following');assert.ok((await page.evaluate(()=>fixture.gpuCheck())).blue>20,'climbing in midair does not erase the route');
- assert.deepEqual(errors,[]);console.log('PASS: first-tab navigation controls; published Collider; own graph worker and continuous 3D WebGL ribbon; floor/wall depth and GL restoration; cached profile reload/repair and vertical climb rendering; elite death, exact quest UID, coffer change, doors, stop, small screen and scene/room teardown');
-}catch(e){if(page)console.error('STATE',await page.evaluate(()=>({ready:window.ready,state:window.__dfoDungeonNavigation?.state(),text:document.body.innerText.slice(-2200),native:Object.keys(window.__dfoNavNative||{})})).catch(()=>null));throw e;}finally{await browser?.close();server.close();}})().catch(e=>{console.error(e);process.exitCode=1;});
+ for(const fallback of [false,true]){
+   await page.goto(address+(fallback?'/?no-worker=1':'/'));await page.waitForFunction(()=>window.ready);
+   await page.evaluate(async()=>{fixture.loadComplex(await(await fetch('/fixture-complex.json')).json());const make=__dfoDungeonGraph.client;__dfoDungeonGraph.client=(...args)=>{const c=make(...args),route=c.route;c.route=async(...query)=>window.fullRoute=await route(...query);return c;};__dfoDungeonNavigation.start('exit');});
+   await page.waitForFunction(()=>__dfoDungeonNavigation.state().phase==='following'&&window.fullRoute?.distance>150,null,{timeout:30000});
+   await page.waitForFunction(()=>fixture.passes>0);
+   const report=await page.evaluate(()=>({height:Math.max(...fullRoute.points.map(p=>p[1])),blocks:[...new Set(fullRoute.points.map(p=>Math.floor(p[0]/51.2)))],gpu:fixture.gpuCheck()}));
+   assert.ok(report.height>7.1);assert.deepEqual(report.blocks,[0,1,2]);assert.ok(report.gpu.blue>20,JSON.stringify(report));
+   let previous=await page.evaluate(()=>__dfoDungeonNavigation.state().distance);
+   for(const block of [1,2]){
+     await page.evaluate(block=>{const ps=fullRoute.points,i=ps.findIndex(p=>p[0]>block*51.2+4&&p[1]>(block===1?3.5:7.1));if(i<0)throw Error('missing block waypoint');fixture.feet.set(ps[i]);fixture.lookAlong(ps[i],ps[i+1]||ps[i]);},block);
+     await page.waitForFunction(before=>__dfoDungeonNavigation.state().phase==='following'&&__dfoDungeonNavigation.state().distance<before,previous);previous=await page.evaluate(()=>__dfoDungeonNavigation.state().distance);
+     assert.ok((await page.evaluate(()=>fixture.gpuCheck())).blue>20,'route remains visible on floor/block '+block);
+   }
+   const cleared=await page.evaluate(async()=>{fixture.loadComplex(await(await fetch('/fixture-complex-sealed.json')).json());const before=fixture.passes;fixture.draw();const draws=fixture.passes-before;__dfoDungeonNavigation.start('exit');return draws;});assert.equal(cleared,0,'replacing the layout removes the old route before the next tick');
+   await page.waitForFunction(()=>__dfoDungeonNavigation.state().phase==='unavailable',null,{timeout:30000});assert.equal((await page.evaluate(()=>fixture.gpuCheck())).blue,0,'disconnected floors never get a fabricated line');
+ }
+ assert.equal(workerRequests,0);assert.deepEqual(errors,[]);console.log('PASS: published Collider and own graph worker/fallback; exact quest and live UI; cache repair; real WebGL depth and vertical ribbon; three floors across three blocks with stairs, ramp, rotated geometry and disconnected-floor control');
+}catch(e){if(page)console.error('STATE',await page.evaluate(()=>({ready:window.ready,state:window.__dfoDungeonNavigation?.state(),text:document.body.innerText.slice(-2200),render:Object.keys(window.__dfoDungeonRender||{})})).catch(()=>null));throw e;}finally{await browser?.close();server.close();}})().catch(e=>{console.error(e);process.exitCode=1;});

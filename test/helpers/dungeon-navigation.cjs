@@ -2,17 +2,17 @@
 const fs=require('node:fs'),path=require('node:path'),{pathToFileURL}=require('node:url');
 const identity=[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1];
 let loaded;
-async function nativeModules(){
+async function playerModules(){
   if(!loaded)loaded=(async()=>{
     const dir=process.env.DFO_UPSTREAM_DIR,load=f=>import(pathToFileURL(path.join(dir,f)).href);
-    const [{Collider}]=await Promise.all([load('src/player/collider.js'),load('src/player/motor.js')]);
-    return{Collider,native:{Draw:class{}}};
+    const [{Collider},{PlayerMotor}]=await Promise.all([load('src/player/collider.js'),load('src/player/motor.js')]);
+    return{Collider,PlayerMotor};
   })();return loaded;
 }
 const quad=(col,key,ps,translation=null)=>col.addMesh(key,new Float32Array(ps.flat()),new Uint16Array([0,1,2,0,2,3]),identity,translation);
 function wall(col,key,x,z0,z1,y=0,high=3,move=null){quad(col,key,[[x,y,z0],[x,y+high,z0],[x,y+high,z1],[x,y,z1]],move);}
 async function room({pillar=false,door=false,stacked=false,ramp=false,stairs=false,narrowStairs=false}={}){
-  const {Collider,native}=await nativeModules(),col=new Collider(()=>-Infinity),shift=[0,0,0],actions={objects:new Map()};
+  const {Collider}=await playerModules(),col=new Collider(()=>-Infinity),shift=[0,0,0],actions={objects:new Map()};
   quad(col,'floor',[[0,0,0],[14,0,0],[14,0,12],[0,0,12]]);
   wall(col,'edge-left',0,0,12);wall(col,'edge-right',14,0,12);
   quad(col,'edge-front',[[0,0,0],[14,0,0],[14,3,0],[0,3,0]]);quad(col,'edge-back',[[0,0,12],[14,0,12],[14,3,12],[0,3,12]]);
@@ -22,18 +22,17 @@ async function room({pillar=false,door=false,stacked=false,ramp=false,stairs=fal
   if(ramp){quad(col,'upper-floor',[[0,3,0],[7,3,0],[7,3,12],[0,3,12]]);quad(col,'ramp',[[7,3,0],[13,0,0],[13,0,3],[7,3,3]]);}
   if(stairs||narrowStairs){const run=narrowStairs ? .18 : .45,rise=narrowStairs ? .35 : .45,count=narrowStairs?12:8,end=13-count*run,top=count*rise;quad(col,'upper-floor',[[0,top,0],[end,top,0],[end,top,12],[0,top,12]]);for(let i=0;i<count;i++){const x=13-i*run,y=(i+1)*rise;quad(col,'stairs',[[x-run,y,0],[x,y,0],[x,y,3],[x-run,y,3]]);wall(col,'risers',x,0,3,i*rise,rise);}}
   const from=[2,0,6],anchors=[[12,0,6],...(stacked?[[2,3,6]]:[]),...(ramp?[[2,3,6],[10,1.5,1.5]]:[]),...(stairs?[[2,3.6,6]]:[]),...(narrowStairs?[[2,4.2,6]]:[])];
-  const bake=()=>null;
-  return{col,actions,shift,from,native,bake,mesh:bake()};
+  return{col,actions,shift,from};
 }
-async function realDungeon(name="Privateer's Hold") {
+async function realDungeon(name="Privateer's Hold",region="Daggerfall") {
   const load=f=>import(pathToFileURL(path.join(process.env.DFO_UPSTREAM_DIR,f)).href);
   const [{MapsFile},{BlocksFile},{Arch3dFile},{dfMeshToModel},{customModelFor,emptyModel},{layoutDungeon},{trs,multiply},{ActionSystem,classifyPlacementAction},{floorLanding},{collectDungeonEnemies},{patchSeams},{worldAabb},{ACTION_FLAGS},{teleporterConnection}]=await Promise.all([
     'src/formats/mapsFile.js','src/formats/blocksFile.js','src/formats/arch3dFile.js','src/world/meshReader.js','src/world/customModels.js','src/world/dungeon/dungeonLayout.js','src/world/mat4.js','src/world/actionSystem.js','src/player/enterExit.js','src/characters/dungeonEnemies.js','src/world/arch3dSeams.js','src/player/activate.js','src/world/rdbLayout.js','src/systems/automap/automap.js'
   ].map(load));
-  const {Collider,native}=await nativeModules(),M=require('../../src/mod/page/dfo_dungeon_nav_model.js');
+  const {Collider}=await playerModules(),M=require('../../src/mod/page/dfo_dungeon_nav_model.js');
   const rd=f=>new Uint8Array(fs.readFileSync(path.join(process.env.ARENA2_PATH,f))),maps=new MapsFile(),blocks=new BlocksFile(),arch=new Arch3dFile();
   maps.load(rd('MAPS.BSA'),rd('CLIMATE.PAK'),rd('POLITIC.PAK'));blocks.load(rd('BLOCKS.BSA'));arch.load(rd('ARCH3D.BSA'));
-  const loc=maps.getLocationByName('Daggerfall',name),models=new Map();
+  const loc=maps.getLocationByName(region,name),models=new Map();
   const model=id=>{if(!models.has(id)){const c=customModelFor(id),i=c?-1:arch.getRecordIndex(id),cpu=c??(i<0?null:dfMeshToModel(patchSeams(id,arch.getMesh(i)),()=>({width:1,height:1})));models.set(id,cpu?{...cpu,modelIdNum:id}:null);}return models.get(id);};
   const dungeon=layoutDungeon(loc,blocks,id=>model(id)??emptyModel()),col=new Collider(()=>-Infinity),actions=new ActionSystem(col,{}),positions=new Map();
   for(const [bi,b]of dungeon.blocks.entries()){
@@ -49,12 +48,11 @@ async function realDungeon(name="Privateer's Hold") {
     for(const d of b.layout.actionDoors){if(d.disabled)continue;const cpu=model(d.modelIdNum);if(cpu)actions.addDoor(cpu,multiply(origin,d.matrix),{ns:bi,positionKey:d.position,action:d.action,startingLockValue:d.startingLockValue});}
   }
   actions.resolvePosition=(ns,key)=>positions.get(`${ns}:${key}`)??null;
-  const transitions=[];for(const o of actions.objects.values())if(o.actionFlag===ACTION_FLAGS.Teleport){const a=actions.resolvePosition(o.ns,o.positionKey),b=actions.resolvePosition(o.ns,o.nextKey),c=a&&b?teleporterConnection(a,b):null;if(c)transitions.push(c.conn);}
+  const transitions=[];for(const [ns,b]of dungeon.blocks.entries())for(const [key,link]of b.layout.actionLinks)if(link.action?.actionFlag===ACTION_FLAGS.Teleport){const a=actions.resolvePosition(ns,key),target=actions.resolvePosition(ns,link.nextKey),c=a&&target?teleporterConnection(a,target):null;if(c)transitions.push(c.conn);}
   const enemies=collectDungeonEnemies(dungeon.blocks.map(b=>({markers:b.layout.markers,waterLevel:b.layout.waterLevel,originX:b.originX,originZ:b.originZ})),{locationId:loc.dungeon.recordElement.header.locationId,dungeonType:loc.mapTableData.dungeonType,playerLevel:1});
   const s=dungeon.startMarker,from=floorLanding(col,[s.x,s.y+1.08,s.z]),anchors=enemies.map(e=>floorLanding(col,[e.x,e.y+.2,e.z]));
-  const geometry=M.navigationGeometry(col),skip=[...M.passable(actions)];
-  const bake=()=>null;
-  return{col,geometry,actions,dungeon,from,anchors,transitions,native,bake};
+  const geometry=M.navigationGeometry(col);
+  return{col,geometry,actions,dungeon,from,anchors,transitions};
 }
 async function realBlock(name){
   const load=f=>import(pathToFileURL(path.join(process.env.DFO_UPSTREAM_DIR,f)).href);
@@ -64,7 +62,7 @@ async function realBlock(name){
   const rd=f=>new Uint8Array(fs.readFileSync(path.join(process.env.ARENA2_PATH,f))),blocks=new BlocksFile(),arch=new Arch3dFile(),cache=new Map();blocks.load(rd('BLOCKS.BSA'));arch.load(rd('ARCH3D.BSA'));
   const model=id=>{if(!cache.has(id)){const c=customModelFor(id),i=c?-1:arch.getRecordIndex(id),cpu=c??(i<0?null:dfMeshToModel(patchSeams(id,arch.getMesh(i)),()=>({width:1,height:1})));cache.set(id,cpu?{...cpu,modelIdNum:id}:null);}return cache.get(id);};
   const index=blocks.getBlockIndex(name);if(index<0)throw Error('unknown block '+name);
-  const layout=layoutRdbBlock(blocks.getBlock(index),index,true,id=>model(id)??emptyModel()),{Collider}=await nativeModules(),col=new Collider(()=>-Infinity),actions=new ActionSystem(col,{}),M=require('../../src/mod/page/dfo_dungeon_nav_model.js');
+  const layout=layoutRdbBlock(blocks.getBlock(index),index,true,id=>model(id)??emptyModel()),{Collider}=await playerModules(),col=new Collider(()=>-Infinity),actions=new ActionSystem(col,{}),M=require('../../src/mod/page/dfo_dungeon_nav_model.js');
   for(const p of layout.placements){const cpu=model(p.modelIdNum);if(!cpu)continue;const box=worldAabb(cpu.positions,p.matrix),cls=p.action?classifyPlacementAction(p.action.actionFlag,false):null;
     if(cls==='move'){actions.addAction(0,p.position,cpu,p.matrix,p.action).aabb=box;continue;}
     if(cls==='specialDoor'){actions.addSpecialDoor(0,p.position,cpu,p.matrix,p.action).aabb=box;continue;}
@@ -74,4 +72,4 @@ async function realBlock(name){
   for(const d of layout.actionDoors){const cpu=model(d.modelIdNum);if(cpu)actions.addDoor(cpu,d.matrix,{ns:0,positionKey:d.position,action:d.action,startingLockValue:d.startingLockValue});}
   return{col,actions,layout};
 }
-module.exports={nativeModules,quad,wall,room,realDungeon,realBlock};
+module.exports={playerModules,quad,wall,room,realDungeon,realBlock};

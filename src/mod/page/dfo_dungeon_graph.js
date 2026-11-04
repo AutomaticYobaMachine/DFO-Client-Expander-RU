@@ -1,14 +1,101 @@
 (function dungeonGraphModule(root) {
   'use strict';
   // Player navigation only. No NavClient, NPC navmesh, world mutations or action dispatch.
-  const VERSION = 1, CELL = 2, STEP = .505, RADIUS = .35;
+  const BODY=Object.freeze({height:1.8,radius:.35,step:.505,slope:70,floorUp:.56,floorDown:1.24,probes:Object.freeze([.54,1.05,1.55,1.72]),centres:Object.freeze([.35,.9,1.45])});
+  const VERSION = 1, CELL = 2, STEP = BODY.step, RADIUS = BODY.radius;
   const url = root.document?.currentScript?.src;
   const dist = (a,b) => Math.hypot(a[0]-b[0],a[1]-b[1],a[2]-b[2]);
   const lerp = (a,b,t) => a.map((x,k)=>x+(b[k]-x)*t);
   const length = ps => ps.slice(1).reduce((s,p,i)=>s+dist(ps[i],p),0);
   const xyz = p => p?.length>=3&&[p[0],p[1],p[2]].every(Number.isFinite)?[p[0],p[1],p[2]]:null;
   const cell = (x,z,size=CELL) => `${Math.floor(x/size)},${Math.floor(z/size)}`;
+  const spatial = (p,size) => `${Math.floor(p[0]/size)},${Math.floor(p[1]/size)},${Math.floor(p[2]/size)}`;
   const put = (map,key,value) => {let a=map.get(key);if(!a)map.set(key,a=[]);a.push(value);};
+  // The standing motor resolves three overlapping radius-.35 spheres. Sweep their
+  // volumes, not a handful of rays: a thin rail can sit between every ray height.
+  const dot=(a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
+  function faceOf(a,b,c){
+    const e=b.map((x,k)=>x-a[k]),f=c.map((x,k)=>x-a[k]),n=[e[1]*f[2]-e[2]*f[1],e[2]*f[0]-e[0]*f[2],e[0]*f[1]-e[1]*f[0]],nl=Math.hypot(...n);
+    if(nl<1e-8)return null;
+    return{a,b,c,e,f,n:n.map(x=>x/nl),ny:Math.abs(n[1])/nl,ee:dot(e,e),ef:dot(e,f),ff:dot(f,f),lo:a.map((x,k)=>Math.min(x,b[k],c[k])),hi:a.map((x,k)=>Math.max(x,b[k],c[k]))};
+  }
+  function pointTriangle2(p,t){
+    const v=p.map((x,k)=>x-t.a[k]),d1=dot(t.e,v),d2=dot(t.f,v),d3=d1-t.ee,d4=d2-t.ef,d5=d1-t.ef,d6=d2-t.ff;
+    let u=0,w=0;
+    if(d1<=0&&d2<=0){}
+    else if(d3>=0&&d4<=d3)u=1;
+    else if(d6>=0&&d5<=d6)w=1;
+    else{const vc=d1*d4-d3*d2,vb=d5*d2-d1*d6,va=d3*d6-d5*d4;
+      if(vc<=0&&d1>=0&&d3<=0)u=d1/(d1-d3);
+      else if(vb<=0&&d2>=0&&d6<=0)w=d2/(d2-d6);
+      else if(va<=0&&d4-d3>=0&&d5-d6>=0){w=(d4-d3)/(d4-d3+d5-d6);u=1-w;}
+      else{const den=1/(va+vb+vc);u=vb*den;w=vc*den;}
+    }
+    return (v[0]-u*t.e[0]-w*t.f[0])**2+(v[1]-u*t.e[1]-w*t.f[1])**2+(v[2]-u*t.e[2]-w*t.f[2])**2;
+  }
+  function segments2(a,b,c,d){
+    const ux=b[0]-a[0],uy=b[1]-a[1],uz=b[2]-a[2],vx=d[0]-c[0],vy=d[1]-c[1],vz=d[2]-c[2],wx=a[0]-c[0],wy=a[1]-c[1],wz=a[2]-c[2];
+    const aa=ux*ux+uy*uy+uz*uz,bb=ux*vx+uy*vy+uz*vz,cc=vx*vx+vy*vy+vz*vz,dd=ux*wx+uy*wy+uz*wz,ee=vx*wx+vy*wy+vz*wz,den=aa*cc-bb*bb;
+    let s=aa<1e-18?0:den>1e-18?Math.max(0,Math.min(1,(bb*ee-cc*dd)/den)):0,t=cc>1e-18?(bb*s+ee)/cc:0;
+    if(t<0){t=0;s=aa>1e-18?Math.max(0,Math.min(1,-dd/aa)):0;}
+    else if(t>1){t=1;s=aa>1e-18?Math.max(0,Math.min(1,(bb-dd)/aa)):0;}
+    return(wx+s*ux-t*vx)**2+(wy+s*uy-t*vy)**2+(wz+s*uz-t*vz)**2;
+  }
+  function sphereSweep(a,b,t,r){
+    const s0=(a[0]-t.a[0])*t.n[0]+(a[1]-t.a[1])*t.n[1]+(a[2]-t.a[2])*t.n[2],s1=(b[0]-t.a[0])*t.n[0]+(b[1]-t.a[1])*t.n[1]+(b[2]-t.a[2])*t.n[2];
+    if(Math.min(s0,s1)>r||Math.max(s0,s1)<-r)return false;
+    if(s0*s1<=0&&Math.abs(s0-s1)>1e-12){
+      const at=s0/(s0-s1),v=a.map((x,k)=>x+(b[k]-x)*at-t.a[k]),ve=dot(v,t.e),vf=dot(v,t.f),den=t.ee*t.ff-t.ef*t.ef,u=(ve*t.ff-vf*t.ef)/den,w=(vf*t.ee-ve*t.ef)/den;
+      if(u>=0&&w>=0&&u+w<=1)return true;
+    }
+    const r2=r*r;
+    return pointTriangle2(a,t)<r2||pointTriangle2(b,t)<r2||segments2(a,b,t.a,t.b)<r2||segments2(a,b,t.b,t.c)<r2||segments2(a,b,t.c,t.a)<r2;
+  }
+  function stepSupport(t,a,b){
+    return t.hi[1]<=Math.max(a[1],b[1])+STEP||t.ny>=.34&&[a,b].every(v=>t.a[1]-(t.n[0]*(v[0]-t.a[0])+t.n[2]*(v[2]-t.a[2]))/t.n[1]<=v[1]+STEP);
+  }
+  function ceilingAcross(t,a,b,lift){
+    if(t.ny<.34||lift<=0)return false;
+    // A step retry cannot lift a body THROUGH an overhead floor. Intersect
+    // floor-like faces with the continuous vertical curtain over the centre
+    // path, above the allowed step, including ceilings between floor samples.
+    const dx=b[0]-a[0],dz=b[2]-a[2],run2=dx*dx+dz*dz,low=STEP+.01,high=BODY.height+lift-.005;
+    if(run2<1e-14){const y=t.a[1]-(t.n[0]*(a[0]-t.a[0])+t.n[2]*(a[2]-t.a[2]))/t.n[1];return y>a[1]+low&&y<a[1]+high&&pointTriangle2([a[0],y,a[2]],t)<1e-12;}
+    const vertices=[t.a,t.b,t.c],side=vertices.map(p=>(p[0]-a[0])*dz-(p[2]-a[2])*dx),hits=[];
+    for(let i=0;i<3;i++){const j=(i+1)%3;if(side[i]*side[j]>0||Math.abs(side[i]-side[j])<1e-14)continue;const v=lerp(vertices[i],vertices[j],side[i]/(side[i]-side[j])),s=((v[0]-a[0])*dx+(v[2]-a[2])*dz)/run2;hits.push([s,v[1]-a[1]-(b[1]-a[1])*s]);}
+    if(hits.length<2)return false;
+    let enter=0,leave=1;const p=hits[0],q=hits[1];
+    for(const [k,min,max]of [[0,0,1],[1,low,high]]){const v=q[k]-p[k];if(Math.abs(v)<1e-14){if(p[k]<min||p[k]>max)return false;}else{const u=(min-p[k])/v,w=(max-p[k])/v;enter=Math.max(enter,Math.min(u,w));leave=Math.min(leave,Math.max(u,w));if(enter>leave)return false;}}
+    return true;
+  }
+  const liveFaces=new WeakMap();
+  // Use the physical collider's existing read-only triangle filing for short live
+  // connectors. No second full-dungeon index or AI data is built on the UI thread.
+  function bodyBlocked(col,a,b,skip=[],grounded=false,lift=0){
+    const omitted=new Set(skip),radius=RADIUS-.005;
+    for(const [key,bucket]of col._bodyBuckets||col._buckets||[]){
+      if(omitted.has(key))continue;
+      const shift=bucket.t?.()||[0,0,0],rot=bucket.r?.(),local=p=>{const v=p.map((x,k)=>x-shift[k]);return rot?[dot(rot.slice(0,3),v),dot(rot.slice(3,6),v),dot(rot.slice(6,9),v)]:v;};
+      const paths=BODY.centres.map(y=>[local([a[0],a[1]+y+lift,a[2]]),local([b[0],b[1]+y+lift,b[2]])]),ends=paths.flat();
+      if(grounded&&lift>0)for(const p of [a,b])ends.push(local([p[0],p[1]+STEP+.01,p[2]]));
+      const lo=[0,1,2].map(k=>Math.min(...ends.map(p=>p[k]))-radius),hi=[0,1,2].map(k=>Math.max(...ends.map(p=>p[k]))+radius);
+      if(bucket.min&&bucket.max&&lo.some((x,k)=>x>bucket.max[k]||hi[k]<bucket.min[k]))continue;
+      const seen=new Set(),pa=local(a),pb=local(b),test=id=>{
+        if(seen.has(id)||bucket.sight?.[id])return false;seen.add(id);const tri=bucket.tris[id];if(!tri)return false;
+        let t=liveFaces.get(tri);if(!t){t=faceOf(...tri.slice(0,3));if(!t)return false;liveFaces.set(tri,t);}
+        if(t.hi.some((x,k)=>x<lo[k])||t.lo.some((x,k)=>x>hi[k]))return false;
+        if(grounded&&lift>0){const world=rot?faceOf(...[t.a,t.b,t.c].map(p=>[rot[0]*p[0]+rot[3]*p[1]+rot[6]*p[2]+shift[0],rot[1]*p[0]+rot[4]*p[1]+rot[7]*p[2]+shift[1],rot[2]*p[0]+rot[5]*p[1]+rot[8]*p[2]+shift[2]])):null;if(ceilingAcross(world||t,rot?a:pa,rot?b:pb,lift))return true;}
+        return paths.some(([p,q],i)=>!(grounded&&i===0&&!rot&&stepSupport(t,pa,pb))&&sphereSweep(p,q,t,radius));
+      };
+      // Current Collider uses 2 m cells and a numeric X/Z key. Fall back to
+      // triangles if an upstream revision changes that filing representation.
+      if(bucket.grid&&typeof bucket.grid.keys().next().value==='number'){
+        for(let x=Math.floor(lo[0]/2);x<=Math.floor(hi[0]/2);x++)for(let z=Math.floor(lo[2]/2);z<=Math.floor(hi[2]/2);z++)for(const id of bucket.grid.get((x+0x100000)*0x200000+(z+0x100000))||[])if(test(id))return{key,dist:0};
+        for(const id of bucket.wide||[])if(test(id))return{key,dist:0};
+      }else for(let i=0;i<bucket.tris.length;i++)if(test(i))return{key,dist:0};
+    }
+    return null;
+  }
   // ActionSystem applies world translation * base * Ry * Rx * Rz (degrees).
   function turn(v,angles){
     const [x,y,z]=angles.map(a=>a*Math.PI/180),cx=Math.cos(x),sx=Math.sin(x),cy=Math.cos(y),sy=Math.sin(y),cz=Math.cos(z),sz=Math.sin(z);
@@ -62,42 +149,42 @@
       const data=this.data;
       for(let i=0;i<data.length;i+=9){
         const a=Array.from(data.subarray(i,i+3)),b=Array.from(data.subarray(i+3,i+6)),c=Array.from(data.subarray(i+6,i+9));
-        const e=b.map((x,k)=>x-a[k]),f=c.map((x,k)=>x-a[k]);
-        const n=[e[1]*f[2]-e[2]*f[1],e[2]*f[0]-e[0]*f[2],e[0]*f[1]-e[1]*f[0]],nl=Math.hypot(...n);if(nl<1e-8)continue;
-        const lo=a.map((x,k)=>Math.min(x,b[k],c[k])),hi=a.map((x,k)=>Math.max(x,b[k],c[k]));
-        const id=this.faces.length;this.faces.push({a,e,f,ny:Math.abs(n[1])/nl,lo,hi,support:!!this.support?.[i/9]});
-        const x0=Math.floor(lo[0]/CELL),x1=Math.floor(hi[0]/CELL),z0=Math.floor(lo[2]/CELL),z1=Math.floor(hi[2]/CELL);
-        if((x1-x0+1)*(z1-z0+1)>1024)this.wide.push(id);
-        else for(let x=x0;x<=x1;x++)for(let z=z0;z<=z1;z++)put(this.grid,`${x},${z}`,id);
+        const face=faceOf(a,b,c);if(!face)continue;const {lo,hi}=face;
+        const id=this.faces.length;this.faces.push({...face,support:!!this.support?.[i/9]});
+        const x0=Math.floor(lo[0]/CELL),x1=Math.floor(hi[0]/CELL),y0=Math.floor(lo[1]/CELL),y1=Math.floor(hi[1]/CELL),z0=Math.floor(lo[2]/CELL),z1=Math.floor(hi[2]/CELL);
+        if((x1-x0+1)*(y1-y0+1)*(z1-z0+1)>1024)this.wide.push(id);
+        else for(let x=x0;x<=x1;x++)for(let y=y0;y<=y1;y++)for(let z=z0;z<=z1;z++)put(this.grid,`${x},${y},${z}`,id);
         if(i%9216===0)await checkpoint();
       }
       this.marks=new Int32Array(this.faces.length);
     }
-    ray(o,d,max,support=false){
+    ray(o,d,max,support=false,any=false){
       const faces=this.faces,marks=this.marks,stamp=++this.stamp;if(stamp>=0x7ffffffe){marks.fill(0);this.stamp=1;}
       let best=max+.00001,face=null;
       const y0=Math.min(o[1],o[1]+d[1]*max)-.0001,y1=Math.max(o[1],o[1]+d[1]*max)+.0001;
+      const x0=Math.min(o[0],o[0]+d[0]*max)-.0001,x1=Math.max(o[0],o[0]+d[0]*max)+.0001,z0=Math.min(o[2],o[2]+d[2]*max)-.0001,z1=Math.max(o[2],o[2]+d[2]*max)+.0001;
       const test=id=>{
-        if(marks[id]===stamp)return;marks[id]=stamp;const t=faces[id];if((t.support&&!support)||t.hi[1]<y0||t.lo[1]>y1)return;
+        if(marks[id]===stamp)return false;marks[id]=stamp;const t=faces[id];if((t.support&&!support)||t.hi[0]<x0||t.lo[0]>x1||t.hi[1]<y0||t.lo[1]>y1||t.hi[2]<z0||t.lo[2]>z1)return false;
         const px=d[1]*t.f[2]-d[2]*t.f[1],py=d[2]*t.f[0]-d[0]*t.f[2],pz=d[0]*t.f[1]-d[1]*t.f[0],det=t.e[0]*px+t.e[1]*py+t.e[2]*pz;
         if(Math.abs(det)<1e-9)return;
-        const vx=o[0]-t.a[0],vy=o[1]-t.a[1],vz=o[2]-t.a[2],inv=1/det,u=(vx*px+vy*py+vz*pz)*inv;if(u<-.00001||u>1.00001)return;
+        const vx=o[0]-t.a[0],vy=o[1]-t.a[1],vz=o[2]-t.a[2],inv=1/det,u=(vx*px+vy*py+vz*pz)*inv;if(u<0||u>1)return;
         const qx=vy*t.e[2]-vz*t.e[1],qy=vz*t.e[0]-vx*t.e[2],qz=vx*t.e[1]-vy*t.e[0],w=(d[0]*qx+d[1]*qy+d[2]*qz)*inv;
-        if(w<-.00001||u+w>1.00001)return;
-        const hit=(t.f[0]*qx+t.f[1]*qy+t.f[2]*qz)*inv;if(hit>.00001&&hit<best){best=hit;face=t;}
+        if(w<0||u+w>1)return;
+        const hit=(t.f[0]*qx+t.f[1]*qy+t.f[2]*qz)*inv;if(hit>.0001&&hit<best){best=hit;face=t;return true;}return false;
       };
-      let x=Math.floor(o[0]/CELL),z=Math.floor(o[2]/CELL),at=0;
-      const sx=d[0]>=0?1:-1,sz=d[2]>=0?1:-1,dx=Math.abs(d[0])<1e-10?Infinity:CELL/Math.abs(d[0]),dz=Math.abs(d[2])<1e-10?Infinity:CELL/Math.abs(d[2]);
-      let tx=dx===Infinity?Infinity:((x+(sx>0?1:0))*CELL-o[0])/d[0],tz=dz===Infinity?Infinity:((z+(sz>0?1:0))*CELL-o[2])/d[2];
+      let x=Math.floor(o[0]/CELL),y=Math.floor(o[1]/CELL),z=Math.floor(o[2]/CELL),at=0;
+      const sx=d[0]>=0?1:-1,sy=d[1]>=0?1:-1,sz=d[2]>=0?1:-1,dx=Math.abs(d[0])<1e-10?Infinity:CELL/Math.abs(d[0]),dy=Math.abs(d[1])<1e-10?Infinity:CELL/Math.abs(d[1]),dz=Math.abs(d[2])<1e-10?Infinity:CELL/Math.abs(d[2]);
+      let tx=dx===Infinity?Infinity:((x+(sx>0?1:0))*CELL-o[0])/d[0],ty=dy===Infinity?Infinity:((y+(sy>0?1:0))*CELL-o[1])/d[1],tz=dz===Infinity?Infinity:((z+(sz>0?1:0))*CELL-o[2])/d[2];
       for(let steps=0;steps<10000&&at<=max&&at<=best;steps++){
-        for(const id of this.grid.get(`${x},${z}`)||[])test(id);
-        if(tx===Infinity&&tz===Infinity)break;
-        if(tx<tz){at=tx;x+=sx;tx+=dx;}else{at=tz;z+=sz;tz+=dz;}
+        for(const id of this.grid.get(`${x},${y},${z}`)||[])if(test(id)&&any)return{dist:best,face};
+        if(tx===Infinity&&ty===Infinity&&tz===Infinity)break;
+        if(tx<=ty&&tx<=tz){at=tx;x+=sx;tx+=dx;}else if(ty<=tz){at=ty;y+=sy;ty+=dy;}else{at=tz;z+=sz;tz+=dz;}
       }
-      for(const id of this.wide)test(id);
+      for(const id of this.wide)if(test(id)&&any)return{dist:best,face};
       return face?{dist:best,face}:null;
     }
-    ground(p,up=.56,down=1.24){
+    blocked(o,d,max){return !!this.ray(o,d,max,false,true);}
+    ground(p,up=BODY.floorUp,down=BODY.floorDown){
       const h=this.ray([p[0],p[1]+up,p[2]],[0,-1,0],down,true);
       return h&&h.face.ny>=.34?[p[0],p[1]+up-h.dist,p[2]]:null;
     }
@@ -110,36 +197,70 @@
       return at;
     }
     fits(p,lift=0){
-      const h=this.ray([p[0],p[1]+.08+lift,p[2]],[0,1,0],1.71);if(h)return false;
-      for(let i=0;i<8;i++){
-        const a=i*Math.PI/4,d=[Math.cos(a),0,Math.sin(a)];
-        for(const y of [.54,1.05,1.55])if(this.ray([p[0],p[1]+y+lift,p[2]],d,.345))return false;
-      }
-      return true;
+      return this.clear(p,p,lift,true,true);
     }
-    clear(a,b,lift=0,wide=true){
+    bodyClear(a,b,lift,grounded){
+        const r=RADIUS-.005,lo=a.map((x,k)=>Math.min(x,b[k])-r),hi=a.map((x,k)=>Math.max(x,b[k])+r);lo[1]+=BODY.centres[0]+lift;hi[1]+=BODY.centres.at(-1)+lift;
+        if(grounded&&lift>0)lo[1]=Math.min(lo[1],Math.min(a[1],b[1])+STEP+.01);
+        const stamp=++this.stamp;if(stamp>=0x7ffffffe){this.marks.fill(0);this.stamp=1;}
+        const paths=BODY.centres.map(y=>[[a[0],a[1]+y+lift,a[2]],[b[0],b[1]+y+lift,b[2]]]);
+        const test=id=>{if(this.marks[id]===stamp)return false;this.marks[id]=stamp;const t=this.faces[id];if(t.support||t.hi.some((x,k)=>x<lo[k])||t.lo.some((x,k)=>x>hi[k]))return false;
+          if(grounded&&ceilingAcross(t,a,b,lift))return true;
+          return paths.some(([p,q],i)=>{
+            // The motor's grounded lower sphere stands on slopes and steps up
+            // ledges <= STEP. Upper spheres, ceilings and airborne sweeps stay solid.
+            if(grounded&&i===0){
+              if(stepSupport(t,a,b))return false;
+            }
+            return sphereSweep(p,q,t,r);
+          });};
+        for(let x=Math.floor(lo[0]/CELL);x<=Math.floor(hi[0]/CELL);x++)for(let y=Math.floor(lo[1]/CELL);y<=Math.floor(hi[1]/CELL);y++)for(let z=Math.floor(lo[2]/CELL);z<=Math.floor(hi[2]/CELL);z++)for(const id of this.grid.get(`${x},${y},${z}`)||[])if(test(id))return false;
+        for(const id of this.wide)if(test(id))return false;
+        return true;
+    }
+    clear(a,b,lift=0,wide=true,grounded=false){
+      if(wide){
+        if(this.bodyClear(a,b,lift,grounded))return true;
+        // Like the motor's step retry, raise the whole capsule (head included),
+        // at most one step above the local slope's resting height. Short treads lift a body above its
+        // centre's floor; merely ignoring its lower half would miss real rails.
+        if(grounded){
+          let rest=lift;
+          for(const p of [a,b])for(const [x,z]of [[.18,0],[-.18,0],[0,.18],[0,-.18]]){
+            const q=this.floor([p[0]+x,p[1],p[2]+z]),rise=q&&Math.abs(q[1]-p[1]);
+            if(q&&rise<=STEP)rest=Math.max(rest,RADIUS*(Math.sqrt(1+(rise/.18)**2)-1));
+          }
+          const top=STEP+rest;
+          if(rest>.001)for(let extra=lift+.1;extra<top+.1;extra+=.1)if(this.bodyClear(a,b,Math.min(top,extra),true))return true;
+        }
+        return false;
+      }
       const d=b.map((x,k)=>x-a[k]),len=Math.hypot(...d);if(len<.0001)return true;
       for(let i=0;i<3;i++)d[i]/=len;
-      const run=Math.hypot(d[0],d[2]),side=run>.00001?[-d[2]/run*.34,0,d[0]/run*.34]:[.34,0,0];
-      const offsets=!wide?[[0,0,0]]:run>.00001?[side,side.map(x=>-x),[0,0,0]]:[[.34,0,0],[-.34,0,0],[0,0,.34],[0,0,-.34],[0,0,0]];
-      for(const off of offsets)for(const y of [.54,1.05,1.55,1.72]){
-        const p=a.map((x,k)=>x+off[k]-d[k]*.002);p[1]+=y+lift;
-        if(this.ray(p,d,len+.004))return false;
+      for(const y of BODY.probes){
+        const p=a.map((x,k)=>x-d[k]*.002);p[1]+=y+lift;
+        if(this.blocked(p,d,len+.004))return false;
       }
       return true;
     }
     walk(a,b){
-      if(Math.hypot(a[0]-b[0],a[2]-b[2])+.02<Math.abs(a[1]-b[1])/Math.tan(70*Math.PI/180))return null;
-      const points=[a],count=Math.max(1,Math.ceil(dist(a,b)/.18));let prev=a;
+      if(Math.hypot(a[0]-b[0],a[2]-b[2])+.02<Math.abs(a[1]-b[1])/Math.tan(BODY.slope*Math.PI/180))return null;
+      const points=[a],sweeps=[],count=Math.max(1,Math.ceil(dist(a,b)/.18));let prev=a;
       for(let i=1;i<=count;i++){
         const p=this.floor(lerp(a,b,i/count));if(!p||Math.abs(p[1]-prev[1])>STEP)return null;
         const run=Math.hypot(p[0]-prev[0],p[2]-prev[2]),rise=Math.abs(p[1]-prev[1]);
         const lift=run>.01&&rise>.03?Math.min(.45,RADIUS*(Math.sqrt(1+(rise/run)**2)-1)):0;
-        if(!this.clear(prev,p,lift))return null;
+        // Adjacent straight sweeps with the same capsule lift are one continuous
+        // volume. Prove that volume once instead of recasting the same walls at
+        // every 18 cm floor sample. Stair corners/lift changes stay separate.
+        const last=sweeps.at(-1),v=last&&last.b.map((x,k)=>x-last.a[k]),w=last&&p.map((x,k)=>x-last.b[k]);
+        if(last&&Math.abs(last.lift-lift)<1e-8&&Math.hypot(v[1]*w[2]-v[2]*w[1],v[2]*w[0]-v[0]*w[2],v[0]*w[1]-v[1]*w[0])<1e-8)last.b=p;
+        else sweeps.push({a:prev,b:p,lift});
         if(points.length>1){const x=points.at(-2),y=points.at(-1),v=y.map((n,k)=>n-x[k]),w=p.map((n,k)=>n-y[k]);
           if(Math.hypot(v[1]*w[2]-v[2]*w[1],v[2]*w[0]-v[0]*w[2],v[0]*w[1]-v[1]*w[0])<.000001)points.pop();}
         points.push(p);prev=p;
       }
+      for(const sweep of sweeps)if(!this.clear(sweep.a,sweep.b,sweep.lift,true,true))return null;
       return dist(prev,b)<.12?points:null;
     }
     drop(a,b){
@@ -154,7 +275,7 @@
     climb(a,b){
       if(b[1]-a[1]<=STEP||b[1]-a[1]>64||Math.hypot(a[0]-b[0],a[2]-b[2])>1.8)return null;
       for(let i=0;i<12;i++){
-        const ang=i*Math.PI/6,d=[Math.cos(ang),0,Math.sin(ang)],h=this.ray([a[0],a[1]+1,a[2]],d,.85);
+        const ang=i*Math.PI/6,d=[Math.cos(ang),0,Math.sin(ang)],probeY=Math.min(1,(b[1]-a[1])*.5),h=this.ray([a[0],a[1]+probeY,a[2]],d,.85);
         if(!h||h.face.ny>.5)continue;
         const wall=[a[0]+d[0]*Math.max(0,h.dist-.37),a[1],a[2]+d[2]*Math.max(0,h.dist-.37)];
         const top=[wall[0],b[1]+.06,wall[2]];
@@ -246,7 +367,7 @@
         const p=this.geo.floor(hint);if(!p||Math.abs(p[1]-hint[1])>.55)return -1;
         const key=[Math.round(p[0]*2),Math.round(p[1]*16),Math.round(p[2]*2)].join(',');if(seen.has(key))return seen.get(key);
         if(!this.geo.fits(p))return -1;
-        const id=this.nodes.length;seen.set(key,id);this.nodes.push({p,links:new Set()});put(this.grid,cell(p[0],p[2],3),id);put(this.columns,cell(p[0],p[2],1),id);return id;
+        const id=this.nodes.length;seen.set(key,id);this.nodes.push({p,links:new Set()});put(this.grid,spatial(p,3),id);put(this.columns,cell(p[0],p[2],1),id);return id;
       };
       let n=0;
       for(const part of input.parts){
@@ -269,9 +390,11 @@
       this.serial++;return this;
     }
     near(p,r=6,cap=32,vertical=false){
-      const map=vertical?this.columns:this.grid,size=vertical?1:3,found=[];
-      for(let x=Math.floor((p[0]-r)/size);x<=Math.floor((p[0]+r)/size);x++)for(let z=Math.floor((p[2]-r)/size);z<=Math.floor((p[2]+r)/size);z++)for(const id of map.get(`${x},${z}`)||[]){
-        const q=this.nodes[id].p,d=vertical?Math.hypot(q[0]-p[0],q[2]-p[2]):dist(p,q);if(d<=r)found.push({id,d:vertical?d+Math.abs(q[1]-p[1])*.015:d});
+      const map=vertical?this.columns:this.grid,size=vertical?1:3,found=[],limit=r*r;
+      const take=key=>{for(const id of map.get(key)||[]){const q=this.nodes[id].p,dx=q[0]-p[0],dy=q[1]-p[1],dz=q[2]-p[2],squared=dx*dx+dz*dz+(vertical?0:dy*dy);if(squared<=limit)found.push({id,d:Math.sqrt(squared)+(vertical?Math.abs(dy)*.015:0)});}};
+      for(let x=Math.floor((p[0]-r)/size);x<=Math.floor((p[0]+r)/size);x++)for(let z=Math.floor((p[2]-r)/size);z<=Math.floor((p[2]+r)/size);z++){
+        if(vertical)take(`${x},${z}`);
+        else for(let y=Math.floor((p[1]-r)/size);y<=Math.floor((p[1]+r)/size);y++)take(`${x},${y},${z}`);
       }
       found.sort((a,b)=>a.d-b.d);return found.slice(0,cap).map(x=>x.id);
     }
@@ -285,7 +408,11 @@
     edge(a,b){
       const key=`${a}:${b}`;if(this.edges.has(key))return this.edges.get(key);
       const p=this.nodes[a].p,q=this.nodes[b].p,result=this.connect(p,q);this.edges.set(key,result);this.tested++;
-      if(this.edges.size>101000){let left=1000;for(const [k,e]of this.edges)if(e?.kind!=='lift'){this.edges.delete(k);if(!--left)break;}}
+      // A multi-block search may prove more than 100k edges. A fixed smaller
+      // FIFO cache evicts its own beginning before the next identical query,
+      // causing every repeat to recompute everything. Bound it by graph size.
+      const limit=Math.max(101000,Math.min(600000,this.nodes.length*8));
+      if(this.edges.size>limit){let left=1000;for(const [k,e]of this.edges)if(e?.kind!=='lift'){this.edges.delete(k);if(!--left)break;}}
       return result;
     }
     connect(a,b){
@@ -411,7 +538,7 @@
     }
     return out;
   }
-  const api={VERSION,Geometry,Graph,profile,snapshot,revision,client,dist,length,xyz,ribbon};
+  const api={VERSION,BODY,Geometry,Graph,profile,snapshot,revision,client,dist,length,xyz,ribbon,bodyBlocked};
   if(typeof module==='object'&&module.exports)module.exports=api;
   else if(!root.document&&typeof root.postMessage==='function'){
     let graph=null,queue=Promise.resolve(),latest=0;

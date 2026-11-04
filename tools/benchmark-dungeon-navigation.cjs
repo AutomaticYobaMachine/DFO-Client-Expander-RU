@@ -3,6 +3,7 @@
 // DFO_UPSTREAM_DIR=... ARENA2_PATH=... node tools/benchmark-dungeon-navigation.cjs
 const G=require('../src/mod/page/dfo_dungeon_graph.js'),M=require('../src/mod/page/dfo_dungeon_nav_model.js');
 const {realDungeon,realBlock}=require('../test/helpers/dungeon-navigation.cjs');
+const {crossedBlocks}=require('../test/helpers/dungeon-complex.cjs');
 if(!process.env.DFO_UPSTREAM_DIR||!process.env.ARENA2_PATH)throw Error('Set DFO_UPSTREAM_DIR and ARENA2_PATH to the original source and your ARENA2 files.');
 (async()=>{
   const out={engine:'player milestone graph',scenes:[]},pause=async()=>new Promise(setImmediate);
@@ -11,12 +12,14 @@ if(!process.env.DFO_UPSTREAM_DIR||!process.env.ARENA2_PATH)throw Error('Set DFO_
     const scene={name,triangles:input.total/9,parts:input.parts.length,nodes:g.nodes.length,prepareMs:Math.round(performance.now()-at),queries:[]};
     for(const q of queries)for(let run=0;run<2;run++){
       const t=performance.now(),route=await g.route(q.from,[{key:q.key,at:q.at}],r.transitions||[],pause);
-      scene.queries.push({goal:q.key,cached:!!run,ms:Math.round(performance.now()-t),distance:route?Math.round(route.distance*10)/10:null,kinds:route?[...new Set(route.kinds)]:[],testedEdges:g.tested});
+      const ys=route?.points.map(p=>p[1])||[];
+      scene.queries.push({goal:q.key,cached:!!run,ms:Math.round(performance.now()-t),distance:route?Math.round(route.distance*10)/10:null,heightSpan:route?Math.round((Math.max(...ys)-Math.min(...ys))*10)/10:null,blocks:route&&r.dungeon?crossedBlocks(route.points,r.dungeon.blocks.map((b,index)=>({...b,index}))):[],kinds:route?[...new Set(route.kinds)]:[],testedEdges:g.tested});
       if(!route)throw Error('No route for '+name+' '+q.key);
     }
     out.scenes.push(scene);
   }
   const dungeon=await realDungeon();await measure("Privateer's Hold",dungeon,dungeon.anchors.slice(0,2).map((at,i)=>({key:'enemy-marker-'+i,from:dungeon.from,at})));
   const block=await realBlock('S0000140.RDB');await measure('S0000140.RDB elevator 74013',block,[{key:'down',from:[24,12.8,25.6],at:[24,0,25.6]},{key:'up',from:[24,0,25.6],at:[24,12.8,25.6]}]);
+  if(process.argv.includes('--complex'))for(const [name,index]of [["The Convocation of Elona",21],["Ruins of Old Carololda's Farm",97]]){const r=await realDungeon(name);await measure(name,r,[{key:'enemy-marker-'+index,from:r.from,at:r.anchors[index]}]);}
   console.log(JSON.stringify(out,null,2));
 })().catch(e=>{console.error(e);process.exitCode=1;});

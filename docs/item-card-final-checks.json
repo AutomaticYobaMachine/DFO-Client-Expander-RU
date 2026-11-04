@@ -1,0 +1,166 @@
+{
+  "gameVersion": "0.1.14525",
+  "modVersion": "1.19.0",
+  "moduleSource": "dist/payload/mod (same bytes embedded in Windows EXE)",
+  "stateChecks": {
+    "checked": 13760,
+    "axes": {
+      "template states": 9018,
+      "rarity/identity": 112,
+      "condition thresholds": 80,
+      "crafting": 40,
+      "extended tier labels": 64,
+      "heirloom": 8,
+      "long metadata": 8,
+      "equipped": 8,
+      "realm restrictions": 8,
+      "armor materials": 130,
+      "weapon materials": 100,
+      "money edge cases": 32,
+      "enchantment catalog": 852,
+      "affix catalog": 852,
+      "sockets": 246,
+      "techniques": 48,
+      "legendary records": 80,
+      "aetheric records": 180,
+      "gilded records": 10,
+      "sigil/set stages": 1512,
+      "active set tiers": 336,
+      "rarity disabled": 16,
+      "lighting": 20
+    },
+    "images": 5110,
+    "failures": [],
+    "stats": {
+      "dressed": 14765,
+      "failures": 0,
+      "lastError": "",
+      "layouts": 14766,
+      "placements": 14799,
+      "observerCallbacks": 206,
+      "ready": true,
+      "active": 1,
+      "pending": 0
+    },
+    "lifecycle": {
+      "cycles": 1000,
+      "heapGrowthBytes": 303540,
+      "repeatedNativeFits": {
+        "layouts": 0,
+        "mutations": 0
+      }
+    }
+  },
+  "windowChecks": {
+    "catalog": {
+      "templates": 483,
+      "checked": 501,
+      "groups": [
+        "Armor",
+        "Books",
+        "CreatureIngredients1",
+        "CreatureIngredients2",
+        "CreatureIngredients3",
+        "Currency",
+        "Deeds",
+        "Drugs",
+        "Furniture",
+        "Gems",
+        "Jewellery",
+        "Maps",
+        "MensClothing",
+        "MetalIngredients",
+        "MiscItems",
+        "MiscellaneousIngredients1",
+        "MiscellaneousIngredients2",
+        "Paintings",
+        "PlantIngredients1",
+        "PlantIngredients2",
+        "QuestItems",
+        "ReligiousItems",
+        "Transportation",
+        "UselessItems1",
+        "UselessItems2",
+        "Weapons",
+        "WomensClothing"
+      ],
+      "customFixtures": [
+        513,
+        514,
+        515,
+        516,
+        517,
+        518,
+        519,
+        520,
+        521,
+        522,
+        523,
+        524,
+        525,
+        526,
+        563,
+        1330,
+        1342,
+        1800,
+        1830,
+        9001,
+        9002,
+        9003,
+        9004,
+        9005,
+        9006,
+        9007
+      ],
+      "skipped": [],
+      "failures": []
+    },
+    "viewportCases": 132,
+    "scales": 40,
+    "renderTiming": {
+      "medianMs": 3.100000001490116,
+      "p95Ms": 5.299999997019768,
+      "maxMs": 5.5
+    },
+    "performance": {
+      "dressed": 635,
+      "failures": 0,
+      "lastError": "",
+      "layouts": 651,
+      "placements": 824,
+      "observerCallbacks": 336,
+      "ready": true,
+      "active": 1,
+      "pending": 0
+    },
+    "errors": []
+  },
+  "startupTransform": {
+    "modules": 1027,
+    "sourceMiB": 93.96121120452881,
+    "beforeMs": 902.717706,
+    "afterMs": 140.98849100000007,
+    "byteIdentical": true,
+    "hookMatches": [
+      [
+        "itemCards.inventory",
+        1
+      ],
+      [
+        "itemCards.values",
+        1
+      ],
+      [
+        "itemCards.materials",
+        1
+      ]
+    ]
+  },
+  "startupOptimizationProof": "All 1027 original JS outputs and full-RU worker/UI chunks are byte-identical; renderer module unchanged.",
+  "exeSha256": "6e3d17207d3fc6350444a2fc4251afb1e16c2808fbd96dad182a93aa19f1e31b",
+  "limits": [
+    "Real published native renderer in local Chromium, not a live multiplayer session.",
+    "Declared state axes and important combinations; not the infinite Cartesian product of arbitrary item fields.",
+    "Memory/timings are local measurements, not full 3D scene FPS guarantees."
+  ]
+}

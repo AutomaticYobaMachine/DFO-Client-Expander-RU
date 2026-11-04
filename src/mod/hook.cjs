@@ -16,12 +16,13 @@ const { createLootStore } = require('./loot-store.cjs');
 
 const VERSION = (() => { try { return JSON.parse(fs.readFileSync(path.join(__dirname, 'version.json'), 'utf8')).version; } catch { return '?'; } })();
 const DEFAULTS = Object.freeze({
-  enabled: true, ru: true, marks: true, nearbyLoot: true, dungeons: true,
+  enabled: true, ru: true, marks: true, nearbyLoot: true, dungeons: true, itemCards: true,
   nearbyLootOptions: { keyCode: 'KeyJ' },
   dungeonOptions: { keyCode: 'KeyK' },
   marksOptions: { onlyVisited: true, markRadiusM: 1200, nameRadiusM: 300, maxMarks: 60 },
 });
 const OWN = Object.freeze({   // served at dagger://game/dfo-mod/<name>
+  'dfo_item_cards.js': 'page/dfo_item_cards.js',
   'dfo_dungeon_model.js': 'page/dfo_dungeon_model.js', 'dfo_dungeons.js': 'page/dfo_dungeons.js',
   'dfo_dungeon_live_model.js': 'page/dfo_dungeon_live_model.js',
   'dfo_dungeon_graph.js': 'page/dfo_dungeon_graph.js',
@@ -70,8 +71,8 @@ function wrap(handleDagger, { app = null } = {}) {
     // the pack the game's language system reads, as the page lists it (ru_locale.js): its credits and its files
     let pack = null;
     if (ru) { try { pack = JSON.parse(fs.readFileSync(path.join(__dirname, 'ru-pack', 'index.json'), 'utf8')); } catch { pack = null; } }
-    ctx = { ru, marks: !!cfg.marks, nearbyLoot: cfg.nearbyLoot !== false, dungeons: cfg.dungeons !== false, fontB64, quests, ql,
-      pageCfg: { dungeons: { ...cfg.dungeonOptions, enabled: cfg.dungeons !== false }, nearbyLoot: { ...cfg.nearbyLootOptions, enabled: cfg.nearbyLoot !== false }, marks: { marks: !!cfg.marks, ...cfg.marksOptions }, ru: { on: ru, pack, gameLanguage: cfg.gameLanguage !== false } } };
+    ctx = { ru, marks: !!cfg.marks, nearbyLoot: cfg.nearbyLoot !== false, dungeons: cfg.dungeons !== false, itemCards: cfg.itemCards !== false, fontB64, quests, ql,
+      pageCfg: { itemCards: { enabled: cfg.itemCards !== false }, dungeons: { ...cfg.dungeonOptions, enabled: cfg.dungeons !== false }, nearbyLoot: { ...cfg.nearbyLootOptions, enabled: cfg.nearbyLoot !== false }, marks: { marks: !!cfg.marks, ...cfg.marksOptions }, ru: { on: ru, pack, gameLanguage: cfg.gameLanguage !== false } } };
     return ctx;
   };
   const cache = new Map();   // rel -> { key, text }
@@ -80,7 +81,7 @@ function wrap(handleDagger, { app = null } = {}) {
   let summaryTimer = null;
   /** Once the game's files have come (no new one for a few seconds): which expected hooks found no place at all. */
   const summary = () => {
-    const want = [...(ctx?.dungeons ? EXPECTED.dungeons : []), ...(ctx?.nearbyLoot ? EXPECTED.nearbyLoot : []), ...(ctx?.marks ? EXPECTED.marks : []), ...(ctx?.ru ? EXPECTED.ru : [])];
+    const want = [...(ctx?.itemCards ? EXPECTED.itemCards : []), ...(ctx?.dungeons ? EXPECTED.dungeons : []), ...(ctx?.nearbyLoot ? EXPECTED.nearbyLoot : []), ...(ctx?.marks ? EXPECTED.marks : []), ...(ctx?.ru ? EXPECTED.ru : [])];
     const lost = want.filter((id) => !(seenHooks.get(id) > 0));
     log(lost.length ? `NOT FOUND in this game version (these features are off): ${lost.join(', ')}` : `all ${want.length} expected hooks found`);
   };

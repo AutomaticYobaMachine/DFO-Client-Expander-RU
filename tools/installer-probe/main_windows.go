@@ -85,7 +85,7 @@ func main() {
 		v, _, _ := visible.Call(c)
 		e, _, _ := enabled.Call(c)
 		checked := -1
-		if id >= 103 && id <= 107 {
+		if (id >= 103 && id <= 107) || id == 122 {
 			n, _, _ := send.Call(c, 0xf0, 0, 0)
 			checked = int(n)
 		}

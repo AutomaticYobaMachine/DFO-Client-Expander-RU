@@ -1,0 +1,94 @@
+'use strict';
+const {test}=require('node:test'),assert=require('node:assert/strict');
+const fs=require('node:fs'),path=require('node:path'),os=require('node:os');
+const {derive}=require('../src/mod/page/dfo_item_cards.js');
+const {transformItemCards}=require('../src/mod/item-cards-transform.cjs');
+const {transformAsset,injectIndex,EXPECTED}=require('../src/mod/transforms.cjs');
+const {wrap}=require('../src/mod/hook.cjs');
+const native={isAmmo:item=>item.templateIndex===131,isHandWraps:item=>item.templateIndex===527,
+  saysMaterial:()=>true,variantWord:()=>'',material:()=> 'Steel',materialLabel:word=>word,
+  template:index=>index===120?{basePrice:15}:null,value:()=>1440};
+const line={weight:1.25,material:'Steel'},known={known:()=>true};
+const sword={group:'Weapons',templateIndex:120,material:5,value:3425,affixes:[{id:'damage',value:19}],enchantments:[{type:0,param:0}]};
+
+test('stored worth includes improvements once; tooltip is a read-only projection',()=>{
+  const item=Object.freeze({...sword,affixes:Object.freeze(sword.affixes),enchantments:Object.freeze(sword.enchantments)});
+  const data=derive(item,line,{...native,value:()=>assert.fail('Do not recalculate an already priced item')},known);
+  assert.equal(data.unitValue,3425);assert.equal(data.total,3425);assert.equal(data.source,'stored');assert.equal(data.perKg,2740);
+  assert.equal(item.value,3425);assert.equal(derive({...item,stackCount:3},line,native,known).total,10275);
+  assert.equal(derive({...item,stackCount:3},{weight:3.75},native,known).perKg,2740,'Stack weight is already the total, not the unit weight');
+});
+test('fallback is explicitly a template estimate; missing data is never the native placeholder price 1',()=>{
+  const {value,...item}=sword;
+  assert.equal(derive(item,line,native,known).source,'base');assert.equal(derive(item,line,native,known).total,1440);
+  assert.equal(derive({...item,templateIndex:999999},line,native,known).total,null);
+  assert.equal(derive({...item,value:0},line,native,known).total,0);
+  assert.equal(derive({...item,value:NaN},line,native,known).total,1440);
+});
+test('unknown identity, malformed stacks, zero weight and unsafe totals do not leak or fabricate money',()=>{
+  const hidden=derive(sword,line,{...native,value:()=>assert.fail('unknown must not price')},{known:()=>false});
+  assert.equal(hidden.unitValue,null);assert.equal(hidden.perKg,null);
+  for(const count of [0,-1,1.5,'2',NaN,Infinity,Number.MAX_SAFE_INTEGER+1])assert.equal(derive({...sword,stackCount:count},line,native,known).total,null);
+  for(const weight of [0,-1,NaN,Infinity])assert.equal(derive(sword,{...line,weight},native,known).perKg,null);
+  assert.equal(derive({...sword,stackCount:Number.MAX_SAFE_INTEGER},line,native,known).total,null);
+  assert.equal(derive({...sword,value:Number.MAX_SAFE_INTEGER+1},line,{...native,value:item=>item.value},known).unitValue,null,'Do not print imprecise unit prices');
+  assert.equal(derive({group:'UselessItems2',value:10},line,native,known).perKg,null);
+});
+test('credit nominal is native face value, distinct from paper price and merchant offers',()=>{
+  const item={group:'MiscItems',templateIndex:171,value:20000};
+  const data=derive(item,{weight:0},native,{...known,credit:()=> '20,000 gold'});
+  assert.equal(data.total,20000);assert.equal(data.source,'credit');assert.equal(data.perKg,null);
+  assert.equal(derive({...item,value:20000.75},{weight:0},native,{...known,credit:()=> '20,000 gold'}).total,20000,'Credit face value truncates exactly as the native reader');
+});
+test('construction, metal and absent material remain distinct and obey native visibility',()=>{
+  const armor={...sword,group:'Armor',templateIndex:102,material:513};
+  assert.equal(derive(armor,line,native,known).material,'Steel');
+  assert.equal(derive({...armor,material:521},line,{...native,material:()=> 'Daedric',materialLabel:()=> 'Язык даэдра'},known).material,'Даэдрический металл');
+  assert.equal(derive({...armor,material:520},line,{...native,material:()=> 'Orcish',materialLabel:()=> 'Орочий язык'},known).material,'Орочий металл');
+  assert.equal(derive({...armor,material:undefined},line,native,known).material,'Нет данных');
+  assert.equal(derive({...armor,material:256},line,{...native,material:()=> 'Chain'},known).material,'Металл не указан');
+  assert.equal(derive({...armor,templateIndex:520},line,{...native,variantWord:()=> 'Fur '},known).material,'Мех');
+  const mail=derive({...armor,templateIndex:515},line,{...native,variantWord:()=> 'Mail '},known);
+  assert.equal(mail.material,'Steel');assert.equal(mail.construction,'Кольчужная');
+  assert.equal(derive(armor,{...line,material:null},{...native,saysMaterial:()=>false},known).material,'Не указан');
+  assert.equal(derive({...sword,templateIndex:527},line,native,known).material,'Ткань');
+  assert.equal(derive({...sword,templateIndex:131},line,native,known).material,null);
+});
+
+test('feature configuration and script route work independently of every other feature',async()=>{
+  const dir=fs.mkdtempSync(path.join(os.tmpdir(),'dfo-item-card-hook-'));
+  try {
+    const file=path.join(dir,'dfo-mod.json');
+    const html='<html><head></head><body></body></html>';
+    const read=async(on)=>{
+      fs.writeFileSync(file,JSON.stringify({ru:false,marks:false,nearbyLoot:false,dungeons:false,itemCards:on}));
+      const handle=wrap(async()=>new Response(html,{headers:{'Content-Type':'text/html'}}),{app:{getPath:()=>dir}});
+      const page=await(await handle(new Request('dagger://game/play/index.html'))).text();
+      const script=await handle(new Request('dagger://game/dfo-mod/dfo_item_cards.js'));
+      assert.equal(script.status,200);assert.match(await script.text(),/__dfoItemCards/);return page;
+    };
+    const on=await read(true);assert.match(on,/dfo_item_cards\.js/);assert.match(on,/"itemCards":\{"enabled":true\}/);
+    const off=await read(false);assert.doesNotMatch(off,/src="[^"]*dfo_item_cards\.js/);assert.match(off,/"itemCards":\{"enabled":false\}/);
+  }finally{fs.rmSync(dir,{recursive:true,force:true});}
+});
+
+test('all three hooks match current published game assets, parse and apply once; bad signatures fall back atomically',
+ {skip:!process.env.DFO_BUILD_DIR},()=>{
+  const acorn=require(process.env.DFO_ACORN_MODULE||'acorn');
+  const assets=path.join(process.env.DFO_BUILD_DIR,'assets'),seen=[];
+  for(const file of fs.readdirSync(assets).filter(f=>f.endsWith('.js'))){
+    const src=fs.readFileSync(path.join(assets,file),'utf8'),log=[];
+    const out=transformItemCards('assets/'+file,src,log);
+    if(out===src)continue;
+    assert.equal(transformItemCards('assets/itemWorker-test.js',src,[]),src,'Worker entries must not receive a DOM card bridge');
+    seen.push(...log.filter(x=>x[1]>0).map(x=>x[0]));acorn.parse(out,{ecmaVersion:'latest',sourceType:'module'});
+    assert.equal(transformItemCards('assets/'+file,out,[]),out,'Idempotent hook');
+    assert.equal(transformAsset('assets/'+file,src,{ru:false,marks:false,nearbyLoot:false,dungeons:false,itemCards:false}).text,src);
+    if(log.some(x=>x[0]==='itemCards.inventory')){
+      const broken=src.replace('-16){','-17){'),badlog=[];
+      assert.notEqual(broken,src);assert.equal(transformItemCards('assets/'+file,broken,badlog),broken,'Never partially wrap a card whose fit cannot be replaced');
+      assert.ok(badlog.some(x=>x[0].includes('!error')));
+    }
+  }
+  assert.deepEqual(seen.sort(),[...EXPECTED.itemCards].sort());
+});

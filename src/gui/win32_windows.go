@@ -119,6 +119,7 @@ const (
 	wmDone            = 0x8002
 	wmStatus          = 0x8003
 	wmSearch          = 0x8004
+	wmUpdater         = 0x8005
 	wsCaption         = 0x00c00000
 	wsSysMenu         = 0x00080000
 	wsThickFrame      = 0x00040000

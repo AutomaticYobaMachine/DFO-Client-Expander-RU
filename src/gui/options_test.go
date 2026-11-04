@@ -13,7 +13,7 @@ func TestOptionsSurviveOldInstallAndExplicitDisable(t *testing.T) {
 	if on[idRu] || on[idMarks] || on[idVisited] || !on[idLoot] || !on[idDungeons] {
 		t.Fatalf("lost older-install defaults or explicit false: %v", on)
 	}
-	next := loadChoices(json.RawMessage(`{"nearbyLoot":false,"dungeons":false}`), on)
+	next := loadChoices(json.RawMessage(`{"nearbyLoot":false,"dungeons":false,"itemCards":false}`), on)
 	if selectedCount(next) != 0 {
 		t.Fatalf("disabled features re-enabled: %v", next)
 	}

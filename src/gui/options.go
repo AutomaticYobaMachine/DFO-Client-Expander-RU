@@ -9,7 +9,7 @@ import (
 
 const (
 	appName      = "DFO-Client-Expander-RU"
-	appVersion   = "1.18.0"
+	appVersion   = "1.19.0"
 	appAuthor    = "AutomaticYobaMachine"
 	appCommunity = "Создано специально для русского сообщества DFO Online."
 )
@@ -36,6 +36,7 @@ const (
 	idReadme
 	idLootKey
 	idDungeonKey
+	idItemCards
 )
 
 type feature struct {
@@ -48,6 +49,7 @@ var features = []feature{
 	{idMarks, "marks", "Метки и карта города", "ОРИЕНТИРОВАНИЕ", "Метки таверн, магазинов, гильдий и других заведений на Overworld. Подробная карта города помогает найти нужное место. «Только посещённые» скрывает здания, в которых вы ещё не были."},
 	{idLoot, "nearbyLoot", "Лут рядом", "КЛАВИША J · 15 МЕТРОВ", "Дроп противников и предметы на полу — в одном окне с фильтрами, пресетами, сортировкой и «Забрать все». Автолут настраивается отдельно. Стены и соседние этажи исключены; вещи подбираются из исходных куч и трупов."},
 	{idDungeons, "dungeons", "Сведения о данжах", "КАРТОЧКИ И СВОДКА ВНУТРИ", "Карточки данжей на Overworld. Справа сверху — живые счётчики врагов, элит и игроков. По K — подробная сводка: квесты, аурум, реген и линия маршрута к выходу, ауруму, элитнику или цели задания. Свою кнопку назначьте ниже."},
+	{idItemCards, "itemCards", "Карточки предметов", "МАТЕРИАЛ · ЦЕННОСТЬ · СРАВНЕНИЕ", "Единая карточка в два столбца: материал отдельно от типа брони, свойства и эффекты списком, родные сигилы, наборы и сравнение с надетым. Ценность учитывает сохранённые улучшения. Без описаний и внутренней прокрутки. Для расширенного интерфейса игры."},
 }
 
 type gameStatus struct {
@@ -66,7 +68,7 @@ type gameStatus struct {
 }
 
 func defaults() map[int]bool {
-	return map[int]bool{idRu: true, idMarks: true, idLoot: true, idDungeons: true, idVisited: true}
+	return map[int]bool{idRu: true, idMarks: true, idLoot: true, idDungeons: true, idItemCards: true, idVisited: true}
 }
 
 // Missing options in an older install keep their defaults; explicit false survives.

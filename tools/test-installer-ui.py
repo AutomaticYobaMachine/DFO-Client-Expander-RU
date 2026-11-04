@@ -115,13 +115,13 @@ def main():
         shutil.copyfile(INSTALLER, executable)
 
         def launch():
-            return subprocess.Popen([WINE, winpath(executable), '--game', winpath(game/'DFO Online.exe')], env=env, stdout=log, stderr=log)
+            return subprocess.Popen([WINE, winpath(executable), '--no-self-update', '--game', winpath(game/'DFO Online.exe')], env=env, stdout=log, stderr=log)
 
         app = launch()
         s = wait(lambda: (v if (v := state()) and v['by_id'][108]['Enabled'] and v['by_id'][108]['Visible'] and v['by_id'][120]['Enabled'] and v['by_id'][121]['Enabled'] and v['by_id'][117]['Title']==winpath(game/'DFO Online.exe') else None))
         assert 'DFO-Client-Expander-RU' in s['Title']
-        assert all(s['by_id'][i]['Checked'] == 1 for i in [103,104,105,106,107])
-        assert all(len(s['by_id'][1000+i]['Title'])>100 for i in [103,104,105,106])
+        assert all(s['by_id'][i]['Checked'] == 1 for i in [103,104,105,106,107,122])
+        assert all(len(s['by_id'][1000+i]['Title'])>100 for i in [103,104,105,106,122])
         assert not any(c['Title']=='GitHub' for c in s['Controls'])
         pane=s['by_id'][118]['Rect']
         for i in [103,104,105,106]:
@@ -204,7 +204,7 @@ def main():
         key('Tab'); assert state()['Focus'] == 104, 'Tab order should follow the feature list'
         key('Tab'); assert state()['Focus'] == 107
         key('space'); assert state()['by_id'][107]['Checked'] == 0
-        for i in [104,105,106]:
+        for i in [104,105,106,122]:
             state('click', i)
         s = state()
         assert not s['by_id'][108]['Enabled'], 'empty feature choice must not start an install'
@@ -230,7 +230,7 @@ def main():
         wait(lambda: config.exists() and json.loads(config.read_text()).get('enabled') is True)
         wait(lambda: state()['by_id'][108]['Enabled'])
         cfg = json.loads(config.read_text())
-        assert [cfg[k] for k in ['ru','marks','nearbyLoot','dungeons']] == [False,True,False,False], cfg
+        assert [cfg[k] for k in ['ru','marks','nearbyLoot','dungeons','itemCards']] == [False,True,False,False,False], cfg
         assert cfg['marksOptions']['onlyVisited'] is False
         assert cfg['nearbyLootOptions']['keyCode']=='Mouse5' and cfg['custom']==123
         assert cfg['nearbyLootOptions']['customOption']==456
@@ -243,7 +243,7 @@ def main():
         app = launch()
         wait(lambda: (s := state()) and s['by_id'][108]['Enabled'] and s['by_id'][108]['Visible'] and s['by_id'][117]['Title']==winpath(game/'DFO Online.exe'))
         s = state()
-        assert [s['by_id'][i]['Checked'] for i in [103,104,105,106,107]] == [0,1,0,0,0], 'restart lost saved checkboxes'
+        assert [s['by_id'][i]['Checked'] for i in [103,104,105,106,107,122]] == [0,1,0,0,0,0], 'restart lost saved checkboxes'
         assert s['by_id'][120]['Title']=='Клавиша: Мышь 5' and not s['by_id'][120]['Enabled'], 'restart lost the saved mouse binding or ignored the disabled feature'
         assert s['by_id'][121]['Title']=='Клавиша: Мышь 4' and not s['by_id'][121]['Enabled'], 'restart lost the independent dungeon shortcut'
         for i in [103,104,105,106]:

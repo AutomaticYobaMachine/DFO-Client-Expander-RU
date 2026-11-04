@@ -9,13 +9,13 @@ const userData = fs.mkdtempSync(path.join(os.tmpdir(), 'dfo-browser-'));
 const handle = wrap(async () => new Response('not found', {status:404}), { app: {getPath:()=>userData} });
 const { transformAsset } = require('../src/mod/transforms.cjs');
 const upstream = path.resolve(process.argv[2] || '.');
-const { chromium } = require(path.join(upstream, 'node_modules/playwright'));
+const { chromium } = require(process.env.DFO_PLAYWRIGHT_MODULE || path.join(upstream, 'node_modules/playwright'));
 const dist = process.argv[3] ? path.resolve(process.argv[3]) : path.join(upstream, 'dist');
 const entry = fs.readdirSync(path.join(dist, 'assets')).find(f => f.startsWith('enhancedInventory-') && fs.readFileSync(path.join(dist, 'assets', f), 'utf8').includes('as mountEnhancedInventory'));
 assert(entry, 'Build upstream with Vite before running this check');
 const cache = new Map();
 let failNextSettings = false, failNextPreset = false, presetPosts = 0;
-const html = `<!doctype html><html><head><meta charset="utf-8"><script>window.__DFO_MOD_CFG__={nearbyLoot:{keyCode:new URLSearchParams(location.search).get('lootKey')||'KeyJ'}};</script><script src="/dfo_loot_rules.js"></script><script src="/dfo_loot_ui.js"></script><script src="/dfo_loot.js"></script></head><body><canvas></canvas><script type="module">
+const html = `<!doctype html><html><head><meta charset="utf-8"><script>window.__DFO_MOD_CFG__={nearbyLoot:{keyCode:new URLSearchParams(location.search).get('lootKey')||'KeyJ'}};</script><script src="/dfo_item_cards.js"></script><script src="/dfo_loot_rules.js"></script><script src="/dfo_loot_ui.js"></script><script src="/dfo_loot.js"></script></head><body><canvas></canvas><script type="module">
 import {mountEnhancedInventory} from '/assets/${entry}';
 const mk=(name,templateIndex,extra={})=>({name,templateIndex,group:'Weapons',stackCount:1,currentCondition:50,maxCondition:50,...extra});
 const rare=mk('Longsword',120,{rarity:'rare'}),plain=mk('Dagger',113),arrows=mk('Arrow',131,{stackCount:10});
@@ -50,13 +50,13 @@ const server = http.createServer(async (req, res) => {
       res.statusCode=response.status;response.headers.forEach((v,k)=>res.setHeader(k,v));return res.end(Buffer.from(await response.arrayBuffer()));
     }
     if (url.pathname === '/') { res.setHeader('Content-Type', 'text/html; charset=utf-8'); return res.end(html); }
-    if (['/dfo_loot.js','/dfo_loot_rules.js','/dfo_loot_ui.js'].includes(url.pathname)) { res.setHeader('Content-Type', 'text/javascript'); return res.end(fs.readFileSync(path.join(__dirname, '../src/mod/page',url.pathname.slice(1)))); }
+    if (['/dfo_item_cards.js','/dfo_loot.js','/dfo_loot_rules.js','/dfo_loot_ui.js'].includes(url.pathname)) { res.setHeader('Content-Type', 'text/javascript'); return res.end(fs.readFileSync(path.join(__dirname, '../src/mod/page',url.pathname.slice(1)))); }
     const file = path.resolve(dist, '.' + url.pathname);
     if (!file.startsWith(dist + path.sep)) { res.statusCode=403;return res.end(); }
     let body=fs.readFileSync(file);
     if (url.pathname.endsWith('.js')) {
       res.setHeader('Content-Type','text/javascript');
-      if (!cache.has(file)) cache.set(file, transformAsset(url.pathname.slice(1),body.toString(),{marks:false,ru:false,nearbyLoot:true}).text);
+      if (!cache.has(file)) cache.set(file, transformAsset(url.pathname.slice(1),body.toString(),{marks:false,ru:false,nearbyLoot:true,itemCards:true}).text);
       body=cache.get(file);
     } else if (url.pathname.endsWith('.css')) res.setHeader('Content-Type','text/css');
     res.end(body);
@@ -76,6 +76,10 @@ const server = http.createServer(async (req, res) => {
     assert.equal(await page.locator('#enhanced-inventory').count(),1);
     assert.match(await page.locator('.loot-win').innerText(),/Лут рядом/i);
     assert.equal(await page.evaluate(()=>fixture.mounts),1);
+    await page.locator('.loot-win .itemrow').first().hover();
+    await page.locator('.inv-tip .dfo-item-card').waitFor();
+    assert.equal(await page.evaluate(()=>__dfoItemCards.stats().failures),0);
+    await page.mouse.move(2,2);
     const frame=page.locator('.loot-win'), fixed=await frame.boundingBox();
     const skin=await frame.evaluate(n=>{const s=getComputedStyle(n);return [s.backgroundColor,s.borderTopColor,s.borderTopWidth,s.fontFamily]});
     async function stableFrame() {

@@ -75,12 +75,20 @@ func (a *app) startSearch() {
 }
 
 func (a *app) setGame(exe, how string) {
+	if absolute, err := filepath.Abs(exe); err == nil {
+		exe = absolute
+	}
 	a.mu.Lock()
 	sameGame := a.exe != "" && strings.EqualFold(filepath.Clean(a.exe), filepath.Clean(exe))
+	resuming := a.updateResume != nil && a.updateResume.Dirty && (a.updateResume.Game == "" || sameUpdatePath(a.updateResume.Game, exe))
+	if a.updateResume != nil && a.updateResume.Game != "" && !sameUpdatePath(a.updateResume.Game, exe) {
+		a.updateResume = nil
+		a.autoUpgrade = false
+	}
 	a.generation++
 	a.exe = exe
 	a.status = nil
-	if !sameGame {
+	if !sameGame && !resuming {
 		a.lootKey, a.lootKeyDirty = defaultLootKey, false
 	}
 	a.capturingKey = false
@@ -142,6 +150,7 @@ func (a *app) requestStatus(restoreChoices bool) {
 		if st != nil && !a.dungeonKeyDirty {
 			a.dungeonKey = resolveDungeonKey(st)
 		}
+		a.restoreUpdateChoices(st, exe)
 		if st == nil {
 			a.note = "Не удалось проверить клиент. Нажмите «Проверить» или выберите игру заново."
 			a.noteCol = colRed
@@ -169,11 +178,19 @@ var pctRe = regexp.MustCompile(`^\s*(\d{1,3})%\s*$`)
 
 func (a *app) run(what string) {
 	a.mu.Lock()
-	if a.busy || a.querying || a.capturingKey || a.exe == "" || a.status == nil || a.status.Running {
+	automatic := what == "upgrade"
+	if automatic {
+		what = "install"
+	}
+	if a.busy || a.updateHandoff || a.handedOff || a.resumePath != "" && !a.resumeCommitted || a.querying || a.capturingKey || a.exe == "" || a.status == nil || a.status.Running {
 		a.mu.Unlock()
 		return
 	}
-	if what == "install" && selectedCount(a.toggles) == 0 {
+	if automatic && (!a.autoUpgrade || !upgradeEligible(a.status, a.pendingChoices())) {
+		a.mu.Unlock()
+		return
+	}
+	if what == "install" && !automatic && selectedCount(a.toggles) == 0 {
 		a.note = "Выберите хотя бы один компонент."
 		a.noteCol = colDim
 		a.mu.Unlock()
@@ -185,6 +202,8 @@ func (a *app) run(what string) {
 		return
 	}
 	a.busy = true
+	a.autoUpgrade = false
+	a.updateText = ""
 	a.operation = what
 	a.progress = 0
 	a.note = ""
@@ -192,6 +211,9 @@ func (a *app) run(what string) {
 	exe := a.exe
 	keyOverride := a.lootKey
 	args := operationArgs(what, a.toggles, keyOverride, a.dungeonKey)
+	if automatic {
+		args = append(args, "--set", "enabled="+boolFlag(enabledSetting(a.status.Cfg)))
+	}
 	a.mu.Unlock()
 	a.syncControls()
 	invalidate(a.hwnd)
@@ -250,7 +272,12 @@ func (a *app) run(what string) {
 			a.noteCol = colGreen
 			if what == "install" {
 				a.lootKeyDirty = false
+				a.dungeonKeyDirty = false
+				a.savedChoiceRevision = a.choiceRevision
 				a.note = "Готово. Выбранные функции включены. Запускайте игру как обычно."
+				if automatic {
+					a.note = "Расширение обновлено автоматически. Ваши настройки сохранены."
+				}
 			} else {
 				a.note = "Расширение удалено. Исходный клиент восстановлен; ваши настройки сохранены."
 			}
@@ -267,6 +294,7 @@ func (a *app) run(what string) {
 }
 
 func (a *app) browse() {
+	defer a.updateModal()()
 	file := make([]uint16, 32768)
 	filter := dialogFilter("Клиент DFO Online", "DFO Online.exe;Daggerfall Online.exe;DaggerfallOnline.exe", "Программы (*.exe)", "*.exe")
 	ofn := openFileName{hwndOwner: a.hwnd, lpstrFilter: &filter[0], nFilterIndex: 1, lpstrFile: &file[0], nMaxFile: uint32(len(file)), lpstrTitle: u16("Выберите DFO Online.exe в папке установленной игры"), flags: 0x1000 | 0x0800 | 0x80000 | 0x0008}
@@ -283,6 +311,7 @@ func (a *app) browse() {
 }
 
 func (a *app) message(s string, kind uintptr) {
+	defer a.updateModal()()
 	pMessageBoxW.Call(a.hwnd, uintptr(unsafe.Pointer(u16(s))), uintptr(unsafe.Pointer(u16(appName))), kind)
 }
 func (a *app) openGuide() {
@@ -316,6 +345,7 @@ func (a *app) openFile(name string) {
 	pShellExecuteW.Call(a.hwnd, uintptr(unsafe.Pointer(u16("open"))), uintptr(unsafe.Pointer(u16(p))), 0, 0, 1)
 }
 func (a *app) saveLog() {
+	defer a.updateModal()()
 	file := make([]uint16, 32768)
 	copy(file, syscall.StringToUTF16(appName+"-install.log"))
 	filter := dialogFilter("Журнал (*.log)", "*.log", "Все файлы", "*.*")

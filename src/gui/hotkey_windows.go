@@ -8,7 +8,7 @@ func (a *app) startLootKeyCapture(targets ...int) {
 	if len(targets) > 0 && targets[0] == idDungeonKey {
 		target, feature = idDungeonKey, idDungeons
 	}
-	allowed := !a.busy && !a.querying && a.status != nil && a.toggles[feature]
+	allowed := !a.busy && !a.updateHandoff && !a.handedOff && !a.querying && a.status != nil && a.toggles[feature]
 	if allowed {
 		a.capturingKey = !a.capturingKey || a.captureTarget != target
 		a.captureTarget = target

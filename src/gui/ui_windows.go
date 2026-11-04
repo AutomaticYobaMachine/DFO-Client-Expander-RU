@@ -10,41 +10,53 @@ import (
 	"strings"
 	"sync"
 	"syscall"
+	"time"
 	"unsafe"
 )
 
 type app struct {
-	mu                                          sync.Mutex
-	wg                                          sync.WaitGroup
-	ctx                                         context.Context
-	cancel                                      context.CancelFunc
-	hwnd, pane                                  uintptr
-	dpi                                         int32
-	modDir, payloadDir, prefsDir                string
-	exe                                         string
-	status                                      *gameStatus
-	busy, querying, searching                   bool
-	lootKey, dungeonKey                         string
-	lootKeyDirty, dungeonKeyDirty, capturingKey bool
-	captureTarget                               int
-	recordedKey, recordedMouse                  uint32
-	generation, choiceRevision                  uint64
-	searchFound                                 []string
-	searchHow                                   string
-	searchReady                                 bool
-	note, stage, operation                      string
-	noteCol                                     uintptr
-	progress                                    int
-	page                                        int
-	pending, fullLog                            strings.Builder
-	toggles                                     map[int]bool
-	ctl, descriptions                           map[int]uintptr
-	fonts                                       map[string]uintptr
-	brushBg, brushCard, brushField, brushLog    uintptr
-	rows                                        map[int]rect
-	scroll, contentHeight, wheel                int32
-	anim                                        int32
-	auto                                        string
+	mu                                           sync.Mutex
+	wg                                           sync.WaitGroup
+	ctx                                          context.Context
+	cancel                                       context.CancelFunc
+	hwnd, pane                                   uintptr
+	dpi                                          int32
+	modDir, payloadDir, prefsDir                 string
+	exe                                          string
+	status                                       *gameStatus
+	busy, querying, searching                    bool
+	lootKey, dungeonKey                          string
+	lootKeyDirty, dungeonKeyDirty, capturingKey  bool
+	captureTarget                                int
+	recordedKey, recordedMouse                   uint32
+	generation, choiceRevision                   uint64
+	searchFound                                  []string
+	searchHow                                    string
+	searchReady                                  bool
+	note, stage, operation                       string
+	noteCol                                      uintptr
+	progress                                     int
+	page                                         int
+	pending, fullLog                             strings.Builder
+	toggles                                      map[int]bool
+	ctl, descriptions                            map[int]uintptr
+	fonts                                        map[string]uintptr
+	brushBg, brushCard, brushField, brushLog     uintptr
+	rows                                         map[int]rect
+	scroll, contentHeight, wheel                 int32
+	anim                                         int32
+	auto                                         string
+	updateChecking, updateChecked, updateHandoff bool
+	handedOff, autoUpgrade, resumeCommitted      bool
+	updateText, resumePath                       string
+	updateProgress                               int
+	updateReady                                  *downloadedUpdate
+	updateResume                                 *updateResume
+	updatePoll                                   time.Time
+	lastUserInput                                time.Time
+	modalDepth                                   int
+	updateWaitOthers                             bool
+	savedChoiceRevision, resumeRevision          uint64
 }
 
 var A = &app{dpi: 96, page: idComponents, lootKey: defaultLootKey, dungeonKey: defaultDungeonKey, toggles: defaults(), ctl: map[int]uintptr{}, descriptions: map[int]uintptr{}, fonts: map[string]uintptr{}, rows: map[int]rect{}}
@@ -123,7 +135,8 @@ func (a *app) syncControls() {
 	for id, on := range a.toggles {
 		choices[id] = on
 	}
-	busy, querying, searching, st, page, operation := a.busy, a.querying, a.searching, a.status, a.page, a.operation
+	busy, querying, searching, st, page, operation := a.busy || a.updateHandoff || a.handedOff, a.querying, a.searching, a.status, a.page, a.operation
+	resumePending := a.resumePath != "" && !a.resumeCommitted
 	key, dungeonKey, recording, target := a.lootKey, a.dungeonKey, a.capturingKey, a.captureTarget
 	a.mu.Unlock()
 	for _, f := range features {
@@ -133,7 +146,7 @@ func (a *app) syncControls() {
 	}
 	pSendMessageW.Call(a.ctl[idVisited], bmSetCheck, uintptrBool(choices[idVisited]), 0)
 	enable(a.ctl[idVisited], !busy && choices[idMarks])
-	ready := !busy && !querying && st != nil && !st.Running && !recording
+	ready := !busy && !resumePending && !querying && st != nil && !st.Running && !recording
 	enable(a.ctl[idLootKey], !busy && !querying && st != nil && choices[idLoot])
 	keyLabel := "Клавиша: " + lootKeyLabel(key)
 	if recording && target == idLootKey {
@@ -366,7 +379,11 @@ func (a *app) paint(hdc uintptr, r rect) {
 			}
 		}
 		if st.Running {
-			line += " · закройте игру и нажмите «Проверить»"
+			if a.autoUpgrade {
+				line += " · закройте игру для обновления"
+			} else {
+				line += " · закройте игру и нажмите «Проверить»"
+			}
 			col = colRed
 		} else {
 			line += " · клиент готов"
@@ -398,6 +415,9 @@ func (a *app) paint(hdc uintptr, r rect) {
 	} else if a.toggles[idLoot] && a.toggles[idDungeons] && a.lootKey == a.dungeonKey {
 		note = "Кнопки лута и сведений совпадают. Назначьте разные; сводка доступна кнопкой в игре."
 		ncol = colRed
+	} else if a.updateText != "" {
+		note = a.updateText
+		ncol = colDim
 	} else if note == "" {
 		note = "Выберите нужные функции. Резервная копия клиента создаётся автоматически."
 		ncol = colDim
@@ -412,10 +432,14 @@ func (a *app) paint(hdc uintptr, r rect) {
 	barY := footer + P(61)
 	bar := rect{P(24), barY, r.right - P(24), barY + P(3)}
 	fill(hdc, bar, colEdge)
-	if a.progress > 0 {
-		bar.right = bar.left + (bar.right-bar.left)*int32(a.progress)/100
+	progress := a.progress
+	if !a.busy && a.updateChecking {
+		progress = a.updateProgress
+	}
+	if progress > 0 {
+		bar.right = bar.left + (bar.right-bar.left)*int32(progress)/100
 		fill(hdc, bar, colBrass)
-	} else if a.busy {
+	} else if a.busy || a.updateChecking || a.updateHandoff {
 		width := bar.right - bar.left
 		start := (a.anim*a.px(14))%(width+a.px(130)) - a.px(130)
 		seg := rect{bar.left + start, bar.top, bar.left + start + a.px(130), bar.bottom}
@@ -543,6 +567,9 @@ func paneProc(hwnd uintptr, m uint32, wp, lp uintptr) uintptr {
 		paintWindow(hwnd, a.paintRows)
 		return 0
 	case wmCommand:
+		a.mu.Lock()
+		a.lastUserInput = time.Now()
+		a.mu.Unlock()
 		if wp>>16 == 6 {
 			a.focusRow(int(wp & 0xffff))
 			return 0
@@ -642,7 +669,7 @@ func wndProc(hwnd uintptr, m uint32, wp, lp uintptr) uintptr {
 		}
 	case wmTimer:
 		a.mu.Lock()
-		busy := a.busy
+		busy := a.busy || a.updateChecking || a.updateHandoff
 		a.mu.Unlock()
 		if busy {
 			a.anim++
@@ -650,6 +677,7 @@ func wndProc(hwnd uintptr, m uint32, wp, lp uintptr) uintptr {
 			r.top = r.bottom - a.px(136)
 			pInvalidateRect.Call(hwnd, uintptr(unsafe.Pointer(&r)), 0)
 		}
+		a.maybeUpdate()
 		return 0
 	case wmCommand:
 		id := int(wp & 0xffff)
@@ -677,7 +705,7 @@ func wndProc(hwnd uintptr, m uint32, wp, lp uintptr) uintptr {
 			} else {
 				a.startSearch()
 			}
-		case idRu, idMarks, idLoot, idDungeons, idVisited:
+		case idRu, idMarks, idLoot, idDungeons, idItemCards, idVisited:
 			on, _, _ := pSendMessageW.Call(a.ctl[id], bmGetCheck, 0, 0)
 			a.mu.Lock()
 			a.toggles[id] = on == 1
@@ -728,6 +756,18 @@ func wndProc(hwnd uintptr, m uint32, wp, lp uintptr) uintptr {
 		if auto != "" && ready {
 			a.run(auto)
 		}
+		a.maybeUpdate()
+		return 0
+	case wmUpdater:
+		a.mu.Lock()
+		exit := a.handedOff
+		a.mu.Unlock()
+		if exit {
+			pPostMessageW.Call(hwnd, wmClose, 0, 0)
+		} else {
+			a.syncControls()
+			a.maybeUpdate()
+		}
 		return 0
 	case wmSearch:
 		a.mu.Lock()
@@ -757,7 +797,7 @@ func wndProc(hwnd uintptr, m uint32, wp, lp uintptr) uintptr {
 		return 0
 	case wmClose:
 		a.mu.Lock()
-		busy := a.busy
+		busy := a.busy || a.updateHandoff
 		if busy {
 			a.note = "Дождитесь завершения операции, чтобы сохранить файлы клиента."
 			a.noteCol = colBrass
@@ -772,12 +812,31 @@ func wndProc(hwnd uintptr, m uint32, wp, lp uintptr) uintptr {
 		pKillTimer.Call(hwnd, 1)
 		pPostQuitMessage.Call(0)
 		return 0
+	case 0x0231: // WM_ENTERSIZEMOVE: defer restart during the native drag loop.
+		a.mu.Lock()
+		a.modalDepth++
+		a.mu.Unlock()
+		return 0
+	case 0x0232:
+		a.mu.Lock()
+		if a.modalDepth > 0 {
+			a.modalDepth--
+		}
+		a.lastUserInput = time.Now()
+		a.mu.Unlock()
+		return 0
 	}
 	r, _, _ := pDefWindowProcW.Call(hwnd, uintptr(m), wp, lp)
 	return r
 }
 
 func main() {
+	if handled, code := earlyUpdateMode(os.Args[1:]); handled {
+		if code != 0 {
+			os.Exit(code)
+		}
+		return
+	}
 	runtime.LockOSThread()
 	a := A
 	a.ctx, a.cancel = context.WithCancel(context.Background())
@@ -790,7 +849,8 @@ func main() {
 	self, _ := os.Executable()
 	a.modDir = filepath.Dir(self)
 	a.prefsDir = filepath.Join(os.Getenv("LOCALAPPDATA"), appName)
-	var gameArg string
+	var gameArg, resumeArg string
+	noUpdate := false
 	for i, arg := range os.Args[1:] {
 		if arg == "--auto-install" {
 			a.auto = "install"
@@ -798,6 +858,42 @@ func main() {
 			a.auto = "uninstall"
 		} else if arg == "--game" && i+2 < len(os.Args) {
 			gameArg = os.Args[i+2]
+		} else if arg == "--no-self-update" {
+			noUpdate = true
+		} else if arg == "--dfo-resume-update" && i+2 < len(os.Args) {
+			resumeArg = os.Args[i+2]
+		}
+	}
+	a.autoUpgrade = !noUpdate && a.auto == ""
+	a.updateChecked = noUpdate || a.auto != ""
+	if resumeArg != "" {
+		plan, rolledBack, e := loadResumeUpdate(resumeArg, self)
+		if e == nil {
+			a.resumePath = resumeArg
+			a.resumeCommitted = rolledBack
+			a.updateResume = &plan.Resume
+			a.autoUpgrade = plan.Resume.AutoApply && !rolledBack
+			a.updateChecked = true
+			if plan.Resume.Dirty {
+				a.toggles = resumeChoices(plan.Resume.Choices, a.toggles)
+				a.choiceRevision++
+				if validLootKey(plan.Resume.LootKey) {
+					a.lootKey = plan.Resume.LootKey
+					a.lootKeyDirty = true
+				}
+				if validLootKey(plan.Resume.DungeonKey) {
+					a.dungeonKey = plan.Resume.DungeonKey
+					a.dungeonKeyDirty = true
+				}
+			}
+			a.resumeRevision = a.choiceRevision
+			if rolledBack {
+				a.updateText = "Обновление не завершено. Запущена предыдущая рабочая версия."
+			}
+		} else {
+			a.autoUpgrade = false
+			a.updateChecked = true
+			a.updateText = "Не удалось восстановить состояние обновления. Проверьте настройки перед установкой."
 		}
 	}
 	var err error
@@ -855,9 +951,16 @@ func main() {
 		dark := int32(1)
 		pDwmSetWindowAttribute.Call(hwnd, 20, uintptr(unsafe.Pointer(&dark)), 4)
 	}
-	pShowWindow.Call(hwnd, 1)
+	background := a.updateResume != nil && a.updateResume.Background
+	showMode := uintptr(1)
+	if background {
+		showMode = 4
+	}
+	pShowWindow.Call(hwnd, showMode)
 	pUpdateWindow.Call(hwnd)
-	pSetFocus.Call(a.ctl[idRu])
+	if !background {
+		pSetFocus.Call(a.ctl[idRu])
+	}
 	a.appendLog(versionTitle() + "\r\nАвтор: " + appAuthor + "\r\n" + appCommunity + "\r\n\r\n")
 	if gameArg != "" {
 		if exe := gameIn(filepath.Dir(gameArg)); exe != "" {
@@ -869,11 +972,20 @@ func main() {
 	} else {
 		a.startSearch()
 	}
+	a.announceUpdateStartup()
+	if !noUpdate && a.auto == "" && resumeArg == "" {
+		a.startSelfUpdate()
+	}
 	var mm msg
 	for {
 		r, _, _ := pGetMessageW.Call(uintptr(unsafe.Pointer(&mm)), 0, 0, 0)
 		if r == 0 || int32(r) == -1 {
 			break
+		}
+		if mm.message == wmKeyDown || mm.message == wmSysKeyDown || mm.message == 0x201 || mm.message == 0x204 || mm.message == 0x207 || mm.message == 0x20b {
+			a.mu.Lock()
+			a.lastUserInput = time.Now()
+			a.mu.Unlock()
 		}
 		if a.captureInput(&mm) {
 			continue
@@ -881,7 +993,7 @@ func main() {
 		if mm.message == wmKeyDown && mm.wParam == 13 {
 			focus, _, _ := pGetFocus.Call()
 			id, _, _ := pGetDlgCtrlID.Call(focus)
-			if int(id) != idLog && int(id) != idPath && int(id) != idRu && int(id) != idMarks && int(id) != idLoot && int(id) != idDungeons && int(id) != idVisited {
+			if int(id) != idLog && int(id) != idPath && int(id) != idRu && int(id) != idMarks && int(id) != idLoot && int(id) != idDungeons && int(id) != idItemCards && int(id) != idVisited {
 				pSendMessageW.Call(focus, bmClick, 0, 0)
 				continue
 			}
@@ -894,6 +1006,9 @@ func main() {
 		pDispatchMessageW.Call(uintptr(unsafe.Pointer(&mm)))
 	}
 	a.wg.Wait()
+	if !a.handedOff && a.updateReady != nil {
+		_ = os.RemoveAll(a.updateReady.Dir)
+	}
 	for _, f := range a.fonts {
 		pDeleteObject.Call(f)
 	}

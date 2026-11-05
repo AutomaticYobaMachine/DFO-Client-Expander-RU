@@ -16,7 +16,7 @@ const entry = fs.readdirSync(assets).find(file => /^enhancedInventory-.*\.js$/.t
 assert.ok(entry, 'Need the actual published game assets');
 const html = `<!doctype html><html><head><meta charset="utf-8"><style>
 html,body{margin:0;background:#172029;height:100%;overflow:hidden}#hover-target{position:fixed;right:20px;bottom:20px;width:90px;height:45px;z-index:2147483647}
-</style><script>window.__DFO_MOD_CFG__={fonts:{enabled:${globalFonts}},itemCards:{enabled:!location.search.includes('off')},ru:{on:new URLSearchParams(location.search).has('ru')}};</script>${globalFonts?'<script src="/dfo-mod/dfo_fonts.js"></script>':''}<script src="/dfo-mod/dfo_item_cards.js"></script>
+</style><script>window.__DFO_MOD_CFG__={fonts:{enabled:${globalFonts}},itemCards:{enabled:!location.search.includes('off')},ru:{on:new URLSearchParams(location.search).has('ru')}};</script>${globalFonts?'<script src="/dfo-mod/dfo_font_data.js"></script><script src="/dfo-mod/dfo_fonts.js"></script>':''}<script src="/dfo-mod/dfo_item_cards.js"></script>
 <script>
 if(window.__dfoItemCards){
  const api=window.__dfoItemCards;window.auditNative={readers:{},calls:{}};
@@ -85,10 +85,16 @@ const server = http.createServer((req,res) => {
     if(url.pathname==='/dfo-mod/ru_dict.js'){res.setHeader('Content-Type','text/javascript');return res.end(buildDict(path.join(root,'data/ru')));}
     if(url.pathname==='/dfo-mod/ru_i18n.js'){res.setHeader('Content-Type','text/javascript');return res.end(buildI18n(path.join(root,'data/ru')));}
     if(url.pathname==='/dfo-mod/ru_items.js'){res.setHeader('Content-Type','text/javascript');return res.end(fs.readFileSync(path.join(modDir,'page/ru_items.js')));}
+    if(url.pathname==='/dfo-mod/dfo_font_data.js'){res.setHeader('Content-Type','text/javascript');return res.end(fs.readFileSync(path.join(modDir,'page/dfo_font_data.js')));}
     if(url.pathname==='/dfo-mod/dfo_fonts.js'){res.setHeader('Content-Type','text/javascript');return res.end(fs.readFileSync(path.join(modDir,'page/dfo_fonts.js')));}
     if (url.pathname === '/dfo-mod/dfo_item_cards.js') {res.setHeader('Content-Type','text/javascript');return res.end(fs.readFileSync(path.join(modDir,'page/dfo_item_cards.js')));}
     if (/^\/dfo-mod\/(?:item-font-(?:text|title|numbers|sigil|set|legendary)|book-font-text)\.(?:ttf|otf)$/.test(url.pathname)) {
-      res.setHeader('Content-Type',url.pathname.endsWith('.otf')?'font/otf':'font/ttf');return res.end(fs.readFileSync(path.join(modDir,'fonts',path.basename(url.pathname))));
+      res.setHeader('Content-Type',url.pathname.endsWith('.otf')?'font/otf':'font/ttf');if(url.searchParams.has('dfo'))res.setHeader('Cache-Control','public,max-age=31536000,immutable');return res.end(fs.readFileSync(path.join(modDir,'fonts',path.basename(url.pathname))));
+    }
+    if(url.pathname==='/assets/fontPolicyWorker-probe.js'){
+      const src=`const initial=new OffscreenCanvas(64,32).getContext('2d').font;globalThis.onmessage=async e=>{const previous=globalThis.__probeCount||0;await Promise.resolve();globalThis.__probeCount=previous+1;const c=new OffscreenCanvas(64,32),g=c.getContext('2d');const first=g.font;g.font='20px Times New Roman';const assigned=g.font;c.width=65;const reset=g.font;g.fillText('Герой Ёжик',0,20);globalThis.postMessage({id:e.data.id,sequence:globalThis.__probeCount,initial,first,assigned,reset,bytes:[...new Uint8Array(e.data.bytes)],faces:[...globalThis.fonts].map(f=>({family:f.family,status:f.status}))})};`;
+      const out=transformAsset(url.pathname.slice(1),src,{fonts:!url.searchParams.has('font-policy-off'),ru:false,marks:false,dungeons:false,nearbyLoot:false,itemCards:false});
+      res.setHeader('Content-Type','text/javascript');return res.end(out.text);
     }
     const file = path.resolve(build, '.' + decodeURIComponent(url.pathname));
     if (!file.startsWith(build + path.sep)) {res.writeHead(403);return res.end();}
@@ -96,15 +102,15 @@ const server = http.createServer((req,res) => {
     if (file.endsWith('.js')) {
       res.setHeader('Content-Type','text/javascript');
       const on = !req.headers.referer?.includes('?off');
-      const key = file + on;
+      const key = file + on + url.searchParams.has('font-policy-off');
       if (!cache.has(key)) {
-        const result = transformAsset(url.pathname.slice(1), body.toString(), {fonts:globalFonts,ru:fullRu,...ruContext,marks:process.env.DFO_CARD_PRICE_AUDIT==='1',nearbyLoot:false,dungeons:false,itemCards:on});
+        const result = transformAsset(url.pathname.slice(1), body.toString(), {fonts:globalFonts&&!url.searchParams.has('font-policy-off'),ru:fullRu,...ruContext,marks:process.env.DFO_CARD_PRICE_AUDIT==='1',nearbyLoot:false,dungeons:false,itemCards:on});
         // Test-only access to the published game's own online/renown setters (no replacement laws).
         const renown=/function ([\w$]+)\(([\w$]+)\)\{([\w$]+)=([\w$]+)&&Number.isSafeInteger\(\2\)&&\2>=1\?\2:null\}/.exec(body.toString());
         let extra='';
         if(globalFonts&&body.toString().includes('#sdf')&&!/Worker-/.test(file)){
           const raw=body.toString(),factory=/function ([\w$]+)\(([\w$]+),([\w$]+),([\w$]+)\)\{\3\.fontName\?\?=\4;/.exec(raw),measure=/function ([\w$]+)\([\w$]+,[\w$]+\)\{let [\w$]+=0;if\(/.exec(raw),draw=/function ([\w$]+)\([\w$]+,[\w$]+,[\w$]+,[\w$]+,[\w$]+,[\w$]+=1,[\w$]+=\[1,1,1,1\]\)\{/.exec(raw);
-          const fnt=/var ([\w$]+)=class\{load\([\w$]+\)\{let [\w$]+=new DataView[^;]+;this\.fixedWidth=/.exec(raw);assert.ok(factory&&measure&&draw&&fnt);extra+='\n;window.nativeFontTest={makeFont:'+factory[1]+',measure:'+measure[1]+',draw:'+draw[1]+',FntFile:'+fnt[1]+'};';
+          const fnt=/var ([\w$]+)=class\{load\([\w$]+\)\{let [\w$]+=new DataView[^;]+;this\.fixedWidth=/.exec(raw);assert.ok(factory&&measure&&draw&&fnt);extra+='\n;globalThis.nativeFontTest={makeFont:'+factory[1]+',measure:'+measure[1]+',draw:'+draw[1]+',FntFile:'+fnt[1]+'};';
         }
         if(globalFonts&&/\/bookReader-[^/]+\.js$/.test(url.pathname)){
           const raw=body.toString(),place=/function ([\w$]+)\(([\w$]+),([\w$]+),([\w$]+)=[\w$]+\)\{let [\w$]+=\[\],[\w$]+=0;for\(let [\w$]+ of \2\)/.exec(raw),reader=/var ([\w$]+)=class\{constructor\([\w$]+\)\{this\.book=/.exec(raw);
@@ -114,6 +120,7 @@ const server = http.createServer((req,res) => {
           const face=/function ([\w$]+)\([\w$]+,[\w$]+=400,[\w$]+=[\w$]+\)/.exec(body.toString());assert.ok(face);
           extra+='\n;{const f='+face[1]+';'+face[1]+'=function(...a){globalThis.__bookFaceCalls=(globalThis.__bookFaceCalls||0)+1;return f(...a)}}';
         }
+        if(/\/vanillaEnhancedDecodeWorker-[^/]+\.js$/.test(url.pathname))extra+='\n;{const send=globalThis.postMessage.bind(globalThis);globalThis.postMessage=(data,...args)=>send({...data,auditCanvasChanges:globalThis.__dfoFonts?.stats?.().canvasChanges??-1},...args)}';
         if(process.env.DFO_CARD_PRICE_AUDIT==='1'&&body.toString().includes('modeActionEnabled:')){
           const raw=body.toString(),head=/function ([\w$]+)\([\w$]+,[\w$]+=\[\],\{quality:[\w$]+=0,priceAdjustment:[\w$]+=(?:1e3|1000),/.exec(raw);
           const sale=/case`Sell`:\{[^}]{0,150}?([\w$]+)\(([\w$]+)\(([\w$]+)\),[\w$]+,[\w$]+,([\w$]+)\(\3,\{online:[\w$]+\}\)\)/.exec(raw);

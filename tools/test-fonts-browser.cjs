@@ -110,7 +110,7 @@ async function main(){
   }finally{await page.evaluate(()=>{bookRenderingTest.view.destroy();bookRenderingTest.restore();bookRenderingTest.canvas.remove();delete window.bookRenderingTest})}
   assert.deepEqual(errors,[]);assert.deepEqual(external,[]);
   const damaged=await browser.newPage();
-  await damaged.route('**/book-font-text.ttf',r=>r.abort());await damaged.goto('http://127.0.0.1:'+server.address().port+'/?ru&online');
+  await damaged.route('**/book-font-text.ttf*',r=>r.abort());await damaged.goto('http://127.0.0.1:'+server.address().port+'/?ru&online');
   await damaged.waitForFunction(()=>window.ready&&window.__dfoFonts);
   report.missingBookFont=await damaged.evaluate(()=>({ready:window.ready,enabled:__dfoFonts.enabled,failures:__dfoFonts.stats().failures.map(f=>f.font)}));
   assert.equal(report.missingBookFont.ready,true);assert.equal(report.missingBookFont.enabled,true);assert.deepEqual(report.missingBookFont.failures,['Hangyaku']);await damaged.close();

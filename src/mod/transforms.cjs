@@ -297,6 +297,7 @@ const FONT_TAIL = "format('woff2'); }`";
 const fontFace = (b64) => `format('woff2'); } @font-face { font-family: 'Pixelify Sans'; font-style: normal; font-weight: 400 700; font-display: swap; src: url(data:font/woff2;base64,${b64}) format('woff2'); unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116; }\``;
 
 function ruFont(text, log, ctx) {
+  if(ctx.fonts===true)return text;
   if (!ctx.fontB64 || !text.includes(FONT_TAIL) || text.includes('U+0400-045F')) { log.push(['ru.font', 0]); return text; }
   log.push(['ru.font', 1]);
   return text.replace(FONT_TAIL, fontFace(ctx.fontB64));
@@ -451,7 +452,7 @@ function injectPage(html, prefix, ctx) {
   if (html.includes('dfo-mod/dfo_marks.js')) return html;
   const tags = [];
   tags.push(`<script>window.__DFO_MOD_CFG__=${JSON.stringify(ctx.pageCfg ?? {})};</script>`);
-  if (ctx.fonts === true) tags.push(`<script src="${prefix}dfo-mod/dfo_fonts.js"></script>`);
+  if (ctx.fonts === true) tags.push(`<script src="${prefix}dfo-mod/dfo_font_data.js?dfo=1.21.0"></script>`,`<script src="${prefix}dfo-mod/dfo_fonts.js?dfo=1.21.0"></script>`);
   if (ctx.ru && !html.includes('ru_dict.js')) tags.push(`<script src="${prefix}dfo-mod/ru_dict.js"></script>`, `<script src="${prefix}dfo-mod/ru_i18n.js"></script>`);
   tags.push(`<script src="${prefix}dfo-mod/ru_locale.js"></script>`, `<script src="${prefix}dfo-mod/ru_items.js"></script>`);
   if (ctx.itemCards === true) tags.push(`<script src="${prefix}dfo-mod/dfo_item_cards.js"></script>`);
@@ -466,7 +467,7 @@ function injectPage(html, prefix, ctx) {
 /** The hooks a working install finds somewhere in the game's files - one missing from every file means that feature is
  *  off in this version of the game (the log says which). The other ids are older shapes of the same places. */
 const EXPECTED = Object.freeze({
-  fonts: ['fonts.classic','fonts.choices','fonts.network','fonts.bookClassic','fonts.bookCanvas'],
+  fonts: ['fonts.classic','fonts.choices','fonts.network','fonts.bookClassic','fonts.bookCanvas','fonts.fnt','fonts.pixels','fonts.resources','fonts.worker'],
   itemCards: ['itemCards.inventory', 'itemCards.values', 'itemCards.materials', 'itemCards.powers', 'itemCards.prices', 'itemCards.currency', 'itemCards.effectLabels'],
   dungeons: ['dungeon.world', 'dungeon.hud', 'dungeon.travelView', 'dungeon.bestiary', 'dungeon.tables', 'dungeon.scaling', 'dungeon.rewards', 'dungeon.runtime', 'dungeon.lifetime', 'dungeon.aurum', 'dungeon.ore', 'dungeon.renown', 'dungeon.respawn', 'dungeon.layout', 'dungeon.sizes', 'dungeon.elites', 'dungeon.live', 'dungeon.journalDoor', 'dungeon.journalClassic', 'dungeon.journalFocus', 'dungeon.traits', 'dungeon.navContext', 'dungeon.navDraw', 'dungeon.navQuests'],
   nearbyLoot: ['loot.tags', 'loot.types', 'loot.kinds', 'loot.identified', 'loot.bound', 'loot.bootstrap', 'loot.world', 'loot.exterior', 'loot.modes', 'loot.dungeon', 'loot.inventory', 'loot.transfer', 'loot.arrows'],
@@ -476,4 +477,7 @@ const EXPECTED = Object.freeze({
   ru: ['ru.packs', 'ru.faces', 'ru.hallNames', 'ru.itemName', 'ru.itemMaker', 'ru.itemPotent', 'ru.itemHouse', 'ru.font', 'ru.charset', 'ru.drawText', 'ru.measureText', 'ru.drawLabel', 'ru.justify', 'ru.chargenRows', 'ru.questRefresh', 'ru.questRestore', 'ru.quest', 'ru.ql', 'ru.questPatches', 'ru.portBooks'],
 });
 
-module.exports = { EXPECTED, transformAsset, injectPage, TRANSFORMS, MARK_GROUPS, CHARSET_OLD, CHARSET_NEW, QUEST_FILE, ruQuest };
+function expectedHooks(ctx={}){
+ return [...(ctx.fonts?EXPECTED.fonts:[]),...(ctx.itemCards?EXPECTED.itemCards:[]),...(ctx.marks?EXPECTED.marks:[]),...(ctx.nearbyLoot!==false?EXPECTED.nearbyLoot:[]),...(ctx.dungeons!==false?EXPECTED.dungeons:[]),...(ctx.ru?EXPECTED.ru.filter(id=>!(ctx.fonts&&id==='ru.font')):[])];
+}
+module.exports = { EXPECTED, expectedHooks, transformAsset, injectPage, TRANSFORMS, MARK_GROUPS, CHARSET_OLD, CHARSET_NEW, QUEST_FILE, ruQuest };

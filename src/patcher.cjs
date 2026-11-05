@@ -233,19 +233,34 @@ function install() {
     put.set(`dfo-mod/fonts/${file}`, fs.readFileSync(path.join(MOD, 'fonts', file)));
   put.set('dfo-mod/fonts-transform.cjs',fs.readFileSync(path.join(MOD,'fonts-transform.cjs')));
   put.set('dfo-mod/page/dfo_fonts.js',fs.readFileSync(path.join(MOD,'page/dfo_fonts.js')));
+  put.set('dfo-mod/page/dfo_font_data.js',fs.readFileSync(path.join(MOD,'page/dfo_font_data.js')));
+  put.set('dfo-mod/font-assets.cjs',fs.readFileSync(path.join(MOD,'font-assets.cjs')));
   let fonts=true;
   try{fonts=JSON.parse(fs.readFileSync(path.join(ud,'dfo-mod.json'),'utf8')).fonts!==false}catch{}
   for(let i=0;i<args.length;i++)if(args[i]==='--set'&&String(args[i+1]).startsWith('fonts='))fonts=/^fonts=(?:1|true)$/.test(args[i+1]);
+  const fontDrop=new Set(),fontRecovery={},allowedFontFiles=new Set(Object.values(require(path.join(MOD,'page/dfo_fonts.js')).files).map(f=>'dfo-mod/fonts/'+f));
+  if(fonts){
+    for(const [rel,entry]of listFiles(base.header)){
+      if(!allowedFontFiles.has(rel)&&/\.(?:ttf|otf|woff2?)$/i.test(rel)){
+        fontDrop.add(rel);
+        const unpacked=asarPath+'.unpacked/'+rel;
+        const bytes=entry.unpacked?(fs.existsSync(unpacked)&&!rel.includes('..')?fs.readFileSync(unpacked):null):readFile(base,rel);
+        if(bytes){fontRecovery[rel]=bytes.toString('base64');fontDrop.add(rel);}
+      }
+    }
+    for(const rel of [...put.keys()])if(!allowedFontFiles.has(rel)&&/\.(?:ttf|otf|woff2?)$/i.test(rel)){put.delete(rel);fontDrop.add(rel);}
+    put.set('dfo-mod/font-recovery.json',Buffer.from(JSON.stringify(fontRecovery)));
+  }
   if(fonts&&listFiles(base.header).has('launcher/launcher.css')){
     const key='launcher/launcher.css',source=put.get(key)??readFile(base,key);if(!put.has(`dfo-mod/orig/${key}`))orig(key,readFile(base,key));
-    const {launcherCss}=require(path.join(MOD,'fonts-transform.cjs'));
-    put.set(key,Buffer.from(String(source)+'\n'+launcherCss()));
+    const {launcherCss,stripFaces}=require(path.join(MOD,'fonts-transform.cjs'));
+    put.set(key,Buffer.from(stripFaces(String(source)).text+'\n'+launcherCss()));
   }
 
   say('Пересобираю app.asar...');
   const tmp = `${asarPath}.dfo-tmp`;
   let last = -1;
-  writeAsar(base, tmp, { put }, (d, n) => { const p = Math.floor((d / n) * 10); if (p !== last) { last = p; say(`  ${p * 10}%`); } });
+  writeAsar(base, tmp, { put,drop:fontDrop }, (d, n) => { const p = Math.floor((d / n) * 10); if (p !== last) { last = p; say(`  ${p * 10}%`); } });
   base.close();
   if (cur !== base) cur.close();
   replaceFile(tmp, asarPath);
@@ -286,6 +301,8 @@ function uninstall() {
   }
   // no clean copy: the originals the mod kept inside, put back, and the mod taken out
   const put = new Map(), drop = new Set();
+  const recovered=readFile(a,'dfo-mod/font-recovery.json');
+  if(recovered)for(const [rel,bytes]of Object.entries(JSON.parse(recovered.toString())))if(!rel.includes('..')&&!path.isAbsolute(rel))put.set(rel,Buffer.from(bytes,'base64'));
   for (const rel of files.keys()) {
     if (rel.startsWith('dfo-mod/orig/')) put.set(rel.slice('dfo-mod/orig/'.length), readFile(a, rel));
     if (rel.startsWith('dfo-mod/')) drop.add(rel);

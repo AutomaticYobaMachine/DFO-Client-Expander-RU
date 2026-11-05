@@ -1,7 +1,7 @@
 'use strict';
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
 const {mapFont,css}=require('../src/mod/page/dfo_fonts.js');
-const {transformFonts,preparePage}=require('../src/mod/fonts-transform.cjs');
+const {transformFonts,preparePage,stripFaces}=require('../src/mod/fonts-transform.cjs');
 const {transformAsset,injectPage,EXPECTED}=require('../src/mod/transforms.cjs');
 test('font mapping preserves canvas size and emphasis while replacing legacy families',()=>{
  for(const value of ['italic 700 24px Georgia,serif','12px monospace','400 64px Cormorant']){
@@ -11,7 +11,7 @@ test('font mapping preserves canvas size and emphasis while replacing legacy fam
  assert.match(mapFont("20px 'DFO Wolga',Georgia"),/DFO Wolga/);
  assert.match(mapFont("20px 'DFO Greengoth',Georgia"),/DFO Greengoth/);
  assert.match(mapFont("italic 600 24px 'DFO Hangyaku',serif"),/^italic 600 24px 'DFO Hangyaku'/);
- assert.doesNotMatch(mapFont("20px 'DFO Flexi',Georgia"),/Greengoth|Hangyaku/);
+ assert.match(mapFont("20px 'DFO Flexi',Georgia"),/^20px 'DFO Flexi'/);
  assert.equal(mapFont('not a font'),'not a font');
  assert.match(css('../dfo-mod/fonts/'),/@layer dfo-community-fonts/);
 });
@@ -33,10 +33,10 @@ test('all font hooks match actual assets with and without Russian, parse and app
    assert.equal(log.some(([id])=>id.includes('!error')),false,JSON.stringify(log));found.push(...log.filter(([,n])=>n>0).map(([id])=>id));
    acorn.parse(result.text,{ecmaVersion:'latest',sourceType:'module'});
    assert.equal(transformFonts('assets/'+file,result.text,[]),result.text);
-   assert.equal(transformFonts('assets/textWorker-probe.js',src,[]),src);
+   const worker=transformFonts('assets/textWorker-probe.js',src,[]);assert.ok(worker.includes(stripFaces(src).text));assert.match(worker,/installWorker/);acorn.parse(worker,{ecmaVersion:'latest',sourceType:'module'});
    if(log.some(([id])=>id==='fonts.classic')){
     const head=/function [\w$]+\([\w$]+,[\w$]+,[\w$]+,[\w$]+,[\w$]+,[\w$]+=1,[\w$]+=\[1,1,1,1\]\)\{/.exec(src)[0];
-    const bad=src.replace(head,head.replace('=1,','=2,')),notes=[];assert.notEqual(bad,src);assert.equal(transformFonts('assets/'+file,bad,notes),bad);assert.ok(notes.some(([id])=>id.includes('!error')));
+    const bad=src.replace(head,head.replace('=1,','=2,')),notes=[];assert.notEqual(bad,src);const failed=transformFonts('assets/'+file,bad,notes);assert.doesNotMatch(failed,/register\(\{glyphFace:/);assert.ok(notes.some(([id])=>id.includes('fonts.classic!error')));acorn.parse(failed,{ecmaVersion:'latest',sourceType:'module'});
    }
    if(log.some(([id])=>id==='fonts.bookClassic')){
     const bad=src.replaceAll('_drawFallback(', '_removedBookFallback('),notes=[];
@@ -47,6 +47,6 @@ test('all font hooks match actual assets with and without Russian, parse and app
     assert.equal(transformFonts('assets/'+file,bad,notes),bad);assert.ok(notes.some(([id])=>id.includes('!error')));
    }
   }
-  assert.deepEqual(found.sort(),[...EXPECTED.fonts].sort());
+  assert.deepEqual([...new Set(found)].sort(),[...EXPECTED.fonts].sort());
  }
 });

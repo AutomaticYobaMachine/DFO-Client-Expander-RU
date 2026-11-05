@@ -1,10 +1,10 @@
 {
-  "modVersion": "1.20.1",
+  "modVersion": "1.21.0",
   "gameVersion": "0.1.14545",
   "original": "https://github.com/Lattymoy/daggerfall-js-source",
   "date": "2026-11-06",
-  "checkedAtUTC": "2026-11-05T19:05:42.748947+00:00",
-  "moduleSource": "Tests execute the final installer payload with full Russian transforms and current verified released assets",
+  "checkedAtUTC": "2026-11-05T20:34:49.955434+00:00",
+  "moduleSource": "Final 1.21.0 installer payload; actual 0.1.14545 assets and full Russian transforms",
   "matchingPayloadFiles": [
     {
       "path": "mod/dungeon-live-transform.cjs",
@@ -19,8 +19,12 @@
       "sha256": "d56730730e319f1ea13b3740a83d3ec6d583e95bcd61fbab6511acd3b89e557b"
     },
     {
+      "path": "mod/font-assets.cjs",
+      "sha256": "8ec5a374c466306309a8dbb9a7394660198bb5a193a0a95047ce2dd91999997c"
+    },
+    {
       "path": "mod/fonts/FONT-NOTICES.txt",
-      "sha256": "1f2043c64ab847bd39ab426c2670b23079d39b567677ff741d712d458d5f7e9a"
+      "sha256": "4f8cadcbf931f1b41eb5ca15cc0615416fa9260e94431ee396ed40455c9d5db6"
     },
     {
       "path": "mod/fonts/book-font-text.ttf",
@@ -52,11 +56,11 @@
     },
     {
       "path": "mod/fonts-transform.cjs",
-      "sha256": "7f90135f3eca83cded011e05174dc7a5ac4e2026e81c95cf74d4a47dd442a556"
+      "sha256": "a1f23929a3dc4e0f4ab04d9ec6012942c292beb6db9f51b85364106e01b9eb63"
     },
     {
       "path": "mod/hook.cjs",
-      "sha256": "b56637b90c3e2edb568109053a39f653416aa58480d3013886e360e81f7f16f1"
+      "sha256": "b729413c6d3652bed9529a98009a451a6dcde6f1b20581786969f0b18d649e9a"
     },
     {
       "path": "mod/item-cards-transform.cjs",
@@ -103,8 +107,12 @@
       "sha256": "d87103af96da1e4b2519721cf0520f1062e181a1a09b4a4ffcdd4a58bb9c5eab"
     },
     {
+      "path": "mod/page/dfo_font_data.js",
+      "sha256": "0c91dea2da66f889b3bca2a2a226dd3053e672d43ba0480899fd9d0d87910953"
+    },
+    {
       "path": "mod/page/dfo_fonts.js",
-      "sha256": "8edf0769eab68615916bcdaf2a8920eea5348a3ece498c27d6b4fd431055d807"
+      "sha256": "c2712bfdb1050f3a0c71b0c4d80ee29b66a4e075020685cb23efc7343bd0b46d"
     },
     {
       "path": "mod/page/dfo_item_cards.js",
@@ -140,54 +148,54 @@
     },
     {
       "path": "mod/transforms.cjs",
-      "sha256": "4f9aeca3cbfd1c8c26cdd5baf7854b361434ae60b0227161739055f244f6548a"
+      "sha256": "5c4fb87268c17e765cb8df2f400f171f140ab615fda4140632d1c2a398adfcdd"
     },
     {
       "path": "mod/version.json",
-      "sha256": "c2851b95f8d2079fca5f47996d5aee5129e072149bbbd1b3896ae4ca397dea6c"
+      "sha256": "e7c06cdcfbc70f9d6c1d55a0ae52941d772a9053669d4c987351588da98edf9c"
     }
   ],
   "fonts": {
     "nodes": [
       {
         "text": "ШРИФТЫ СООБЩЕСТВА · DFO Online · вложенный заголовок",
-        "font": "\"DFO Greengoth\", \"DFO Gabin\", \"DFO Flexi\", sans-serif"
+        "font": "\"DFO Greengoth\", \"DFO Gabin\", \"DFO Flexi\", \"DFO Hangyaku\", \"DFO Ckazka\", \"DFO Ritalin\", \"DFO Wolga\", sans-serif"
       },
       {
         "text": "Игрок Dragonborn №5. Ёжик и йод. ~40 зол. [10–20] → ± × ∞",
-        "font": "\"DFO Gabin\", \"DFO Flexi\", \"DFO Ritalin\", sans-serif"
+        "font": "\"DFO Gabin\", \"DFO Flexi\", \"DFO Ritalin\", \"DFO Greengoth\", \"DFO Hangyaku\", \"DFO Ckazka\", \"DFO Wolga\", sans-serif"
       },
       {
         "text": "Текст с заданным в игре шрифтом тоже заменён.",
-        "font": "\"DFO Gabin\", \"DFO Flexi\", \"DFO Ritalin\", sans-serif"
+        "font": "\"DFO Gabin\", \"DFO Flexi\", \"DFO Ritalin\", \"DFO Greengoth\", \"DFO Hangyaku\", \"DFO Ckazka\", \"DFO Wolga\", sans-serif"
       },
       {
         "text": "Проверка латиницы и кириллицы",
-        "font": "\"DFO Gabin\", \"DFO Flexi\", \"DFO Ritalin\", sans-serif"
+        "font": "\"DFO Gabin\", \"DFO Flexi\", \"DFO Ritalin\", \"DFO Greengoth\", \"DFO Hangyaku\", \"DFO Ckazka\", \"DFO Wolga\", sans-serif"
       },
       {
         "text": "Продолжить",
-        "font": "\"DFO Gabin\", \"DFO Flexi\", \"DFO Ritalin\", sans-serif"
+        "font": "\"DFO Gabin\", \"DFO Flexi\", \"DFO Ritalin\", \"DFO Greengoth\", \"DFO Hangyaku\", \"DFO Ckazka\", \"DFO Wolga\", sans-serif"
       },
       {
         "text": "Название сигила",
-        "font": "\"DFO Gabin\", \"DFO Flexi\", \"DFO Ritalin\", sans-serif"
+        "font": "\"DFO Gabin\", \"DFO Flexi\", \"DFO Ritalin\", \"DFO Greengoth\", \"DFO Hangyaku\", \"DFO Ckazka\", \"DFO Wolga\", sans-serif"
       },
       {
         "text": "Название сигила",
-        "font": "\"DFO Ckazka\", \"DFO Gabin\", \"DFO Flexi\", sans-serif"
+        "font": "\"DFO Ckazka\", \"DFO Gabin\", \"DFO Flexi\", \"DFO Greengoth\", \"DFO Hangyaku\", \"DFO Ritalin\", \"DFO Wolga\", sans-serif"
       },
       {
         "text": "Название набора",
-        "font": "\"DFO Gabin\", \"DFO Flexi\", \"DFO Ritalin\", sans-serif"
+        "font": "\"DFO Gabin\", \"DFO Flexi\", \"DFO Ritalin\", \"DFO Greengoth\", \"DFO Hangyaku\", \"DFO Ckazka\", \"DFO Wolga\", sans-serif"
       },
       {
         "text": "Название набора",
-        "font": "\"DFO Ritalin\", \"DFO Gabin\", \"DFO Flexi\", sans-serif"
+        "font": "\"DFO Ritalin\", \"DFO Gabin\", \"DFO Flexi\", \"DFO Greengoth\", \"DFO Hangyaku\", \"DFO Ckazka\", \"DFO Wolga\", sans-serif"
       },
       {
         "text": "Легендарное свойство",
-        "font": "\"DFO Wolga\", \"DFO Gabin\", \"DFO Flexi\", sans-serif"
+        "font": "\"DFO Wolga\", \"DFO Gabin\", \"DFO Flexi\", \"DFO Greengoth\", \"DFO Hangyaku\", \"DFO Ckazka\", \"DFO Ritalin\", sans-serif"
       }
     ],
     "classic": [
@@ -237,11 +245,11 @@
         "nativeBitmapUnused": true
       }
     ],
-    "defaultFont": "10px \"DFO Gabin\", \"DFO Flexi\", \"DFO Ritalin\", sans-serif",
-    "resetFont": "10px \"DFO Gabin\", \"DFO Flexi\", \"DFO Ritalin\", sans-serif",
-    "invalidFont": "10px \"DFO Gabin\", \"DFO Flexi\", \"DFO Ritalin\", sans-serif",
-    "mapped": "italic bold 24px \"DFO Gabin\", \"DFO Flexi\", \"DFO Ritalin\", sans-serif",
-    "offscreen": "12px \"DFO Gabin\", \"DFO Flexi\", \"DFO Ritalin\", sans-serif",
+    "defaultFont": "10px \"DFO Gabin\", \"DFO Flexi\", \"DFO Ritalin\", \"DFO Greengoth\", \"DFO Hangyaku\", \"DFO Ckazka\", \"DFO Wolga\", sans-serif",
+    "resetFont": "10px \"DFO Gabin\", \"DFO Flexi\", \"DFO Ritalin\", \"DFO Greengoth\", \"DFO Hangyaku\", \"DFO Ckazka\", \"DFO Wolga\", sans-serif",
+    "invalidFont": "10px \"DFO Gabin\", \"DFO Flexi\", \"DFO Ritalin\", \"DFO Greengoth\", \"DFO Hangyaku\", \"DFO Ckazka\", \"DFO Wolga\", sans-serif",
+    "mapped": "italic bold 24px \"DFO Gabin\", \"DFO Flexi\", \"DFO Ritalin\", \"DFO Greengoth\", \"DFO Hangyaku\", \"DFO Ckazka\", \"DFO Wolga\", sans-serif",
+    "offscreen": "12px \"DFO Gabin\", \"DFO Flexi\", \"DFO Ritalin\", \"DFO Greengoth\", \"DFO Hangyaku\", \"DFO Ckazka\", \"DFO Wolga\", sans-serif",
     "uploads": 5,
     "releases": 0,
     "warm": {
@@ -316,17 +324,17 @@
         "height": 56
       },
       "canvas": {
-        "family": "'DFO Hangyaku','DFO Gabin','DFO Flexi',sans-serif",
-        "font": "24px \"DFO Hangyaku\", \"DFO Gabin\", \"DFO Flexi\", sans-serif",
+        "family": "'DFO Hangyaku','DFO Gabin','DFO Flexi','DFO Greengoth','DFO Ckazka','DFO Ritalin','DFO Wolga',sans-serif",
+        "font": "24px \"DFO Hangyaku\", \"DFO Gabin\", \"DFO Flexi\", \"DFO Greengoth\", \"DFO Ckazka\", \"DFO Ritalin\", \"DFO Wolga\", sans-serif",
         "measured": 203.109375,
         "nativeWidth": 203.109375
       },
       "window": {
         "spreads": 3,
         "fonts": [
-          "600 36px \"DFO Hangyaku\", \"DFO Gabin\", \"DFO Flexi\", sans-serif",
-          "26px \"DFO Hangyaku\", \"DFO Gabin\", \"DFO Flexi\", sans-serif",
-          "23px \"DFO Hangyaku\", \"DFO Gabin\", \"DFO Flexi\", sans-serif"
+          "600 36px \"DFO Hangyaku\", \"DFO Gabin\", \"DFO Flexi\", \"DFO Greengoth\", \"DFO Ckazka\", \"DFO Ritalin\", \"DFO Wolga\", sans-serif",
+          "26px \"DFO Hangyaku\", \"DFO Gabin\", \"DFO Flexi\", \"DFO Greengoth\", \"DFO Ckazka\", \"DFO Ritalin\", \"DFO Wolga\", sans-serif",
+          "23px \"DFO Hangyaku\", \"DFO Gabin\", \"DFO Flexi\", \"DFO Greengoth\", \"DFO Ckazka\", \"DFO Ritalin\", \"DFO Wolga\", sans-serif"
         ],
         "paints": 55,
         "facesBuilt": 6,
@@ -343,23 +351,23 @@
       "DFO Wolga": 1
     },
     "repeatedFontAssignments": 0,
-    "restored": "16px \"DFO Gabin\", \"DFO Flexi\", \"DFO Ritalin\", sans-serif",
+    "restored": "16px \"DFO Gabin\", \"DFO Flexi\", \"DFO Ritalin\", \"DFO Greengoth\", \"DFO Hangyaku\", \"DFO Ckazka\", \"DFO Wolga\", sans-serif",
     "performance": {
-      "hot1000NamesMs": 8.800000000745058,
+      "hot1000NamesMs": 25.5,
       "canvas10000": {
         "nativeMs": [
-          10.899999998509884,
-          16.600000001490116,
-          15.400000002235174,
-          14.5,
-          28.5
+          17.800000000745058,
+          17.799999997019768,
+          18,
+          47.5,
+          19.5
         ],
         "wrappedMs": [
-          29.5,
-          29.599999997764826,
-          35.5,
-          36.399999998509884,
-          41.600000001490116
+          95.40000000223517,
+          99.90000000223517,
+          96.19999999925494,
+          157.19999999925494,
+          88.60000000149012
         ]
       },
       "scope": "Recording renderer and native canvas calls; not live-game FPS"
@@ -527,7 +535,7 @@
         "stroke": "rgb(240, 90, 85)"
       }
     },
-    "images": 4944,
+    "images": 4968,
     "failures": [],
     "stats": {
       "dressed": 14766,
@@ -544,7 +552,7 @@
     },
     "lifecycle": {
       "cycles": 1000,
-      "heapGrowthBytes": 288816,
+      "heapGrowthBytes": 288760,
       "repeatedNativeFits": {
         "layouts": 0,
         "mutations": 0
@@ -618,19 +626,19 @@
     "viewportCases": 132,
     "scales": 52,
     "renderTiming": {
-      "medianMs": 5.400000002235174,
-      "p95Ms": 15.299999997019768,
-      "maxMs": 17.300000000745058
+      "medianMs": 7,
+      "p95Ms": 19.099999997764826,
+      "maxMs": 21.199999999254942
     },
     "performance": {
       "dressed": 638,
       "failures": 0,
       "lastError": "",
-      "layouts": 658,
-      "balances": 718,
-      "balanceTrials": 1359,
-      "placements": 840,
-      "observerCallbacks": 351,
+      "layouts": 654,
+      "balances": 714,
+      "balanceTrials": 1335,
+      "placements": 834,
+      "observerCallbacks": 348,
       "ready": true,
       "active": 1,
       "pending": 0
@@ -638,16 +646,23 @@
     "errors": []
   },
   "unitAndPackaging": {
-    "tests": 17,
-    "pass": 17,
+    "tests": 21,
+    "pass": 21,
     "fail": 0,
     "skipped": 0,
-    "goTests": "pass"
+    "goTests": "pass",
+    "packedFontRecovery": "pass"
   },
   "nativeHooks": {
-    "changedAssets": 380,
+    "changedAssets": 392,
     "syntaxErrors": 0,
-    "missing": []
+    "missing": [],
+    "fontWarnings": [],
+    "otherVariantWarnings": [
+      "dungeon.rewards!error expected one data array, found 0 0",
+      "dungeon.scaling!error expected one data array, found 0 0",
+      "loot.types!error unsupported tag signature: var ([\\w$]+)=Object\\.freeze\\(([\\w$]+)\\),([\\w$]+)=new Map;function [\\w$]+\\( 0"
+    ]
   },
   "installerUi": {
     "status": "not-repeated",
@@ -657,9 +672,9 @@
     "Actual released font/renderer code with a recording renderer port; draw call counts and canvas microbenchmarks are not live-game FPS.",
     "Real FNT headers and glyph tables from local ARENA2; raw game data is not included in the mod.",
     "System fallback remains for symbols/scripts missing from the role-specific faces.",
-    "Text baked into image/texture pixels and decorative ship plaque pixel geometry bypasses UI font rendering.",
     "No multiplayer account/session was used.",
-    "Native operating-system menus/dialogs retain OS typography."
+    "Native operating-system menus/dialogs retain OS typography.",
+    "Original update packs and ARENA2 stay immutable; active resource paths and FNT parsing replace their old fonts. Recovery data is kept for uninstall."
   ],
   "trade": {
     "gameVersion": "0.1.14545",
@@ -1030,9 +1045,234 @@
     "errors": []
   },
   "auditFindings": [
-    "One CSS FontFace registration per supplied family; removed duplicate JS FontFace objects.",
-    "Bounded shorthand cache and unchanged-value fast path; native getter detects canvas reset and restore.",
-    "Book faces and pagination built once with preloaded fonts; resize rebuilds once.",
-    "Nested heading text keeps its title role instead of falling back to the body font."
-  ]
+    "Active ASAR contains exactly seven supplied font files; legacy font resources are not exposed.",
+    "FNT parsing replaces cached original glyph bytes with generated community glyphs.",
+    "Canvas font getters and text methods use community defaults; image-only contexts do zero font work.",
+    "FontFace and FontFaceSet follow the same source policy, including cross-realm objects.",
+    "Module workers load seven faces; early transferred messages preserve task and microtask order.",
+    "Sixteen renderers collected while FNT handles remain alive; stale metadata still measures text.",
+    "Native image decoder pixels match original."
+  ],
+  "fontPolicy": {
+    "initial": "10px \"DFO Gabin\", \"DFO Flexi\", \"DFO Ritalin\", \"DFO Greengoth\", \"DFO Hangyaku\", \"DFO Ckazka\", \"DFO Wolga\", sans-serif",
+    "resize": "10px \"DFO Gabin\", \"DFO Flexi\", \"DFO Ritalin\", \"DFO Greengoth\", \"DFO Hangyaku\", \"DFO Ckazka\", \"DFO Wolga\", sans-serif",
+    "reset": "10px \"DFO Gabin\", \"DFO Flexi\", \"DFO Ritalin\", \"DFO Greengoth\", \"DFO Hangyaku\", \"DFO Ckazka\", \"DFO Wolga\", sans-serif",
+    "offscreen": "10px \"DFO Gabin\", \"DFO Flexi\", \"DFO Ritalin\", \"DFO Greengoth\", \"DFO Hangyaku\", \"DFO Ckazka\", \"DFO Wolga\", sans-serif",
+    "offscreenReset": "10px \"DFO Gabin\", \"DFO Flexi\", \"DFO Ritalin\", \"DFO Greengoth\", \"DFO Hangyaku\", \"DFO Ckazka\", \"DFO Wolga\", sans-serif",
+    "redirected": "\"DFO Gabin\"",
+    "families": [
+      "DFO Gabin",
+      "DFO Greengoth",
+      "DFO Flexi",
+      "DFO Hangyaku",
+      "DFO Ckazka",
+      "DFO Ritalin",
+      "DFO Wolga"
+    ],
+    "fnts": [
+      {
+        "name": "FONT0000",
+        "height": 11,
+        "changed": true
+      },
+      {
+        "name": "FONT0001",
+        "height": 14,
+        "changed": true
+      },
+      {
+        "name": "FONT0002",
+        "height": 5,
+        "changed": true
+      },
+      {
+        "name": "FONT0003",
+        "height": 7,
+        "changed": true
+      },
+      {
+        "name": "FONT0004",
+        "height": 6,
+        "changed": true
+      }
+    ],
+    "stats": {
+      "canvasChanges": 5,
+      "classicDraws": 16,
+      "classicBatches": 16,
+      "glyphsDrawn": 240,
+      "faces": 16,
+      "failures": [],
+      "faceRedirects": 1,
+      "blockedFonts": 2,
+      "enabled": true,
+      "shorthandCacheSize": 3
+    },
+    "aliveRenderers": 0,
+    "staleMetadataWidth": 72.76310251719916,
+    "workers": {
+      "plain": {
+        "id": 7,
+        "sequence": 1,
+        "initial": "10px sans-serif",
+        "first": "10px sans-serif",
+        "assigned": "20px \"Times New Roman\"",
+        "reset": "10px sans-serif",
+        "bytes": [
+          3,
+          8,
+          13,
+          21
+        ],
+        "faces": [],
+        "sequences": [
+          1,
+          2
+        ],
+        "ms": 31.200000002980232
+      },
+      "custom": {
+        "id": 7,
+        "sequence": 1,
+        "initial": "10px \"DFO Gabin\", \"DFO Flexi\", \"DFO Ritalin\", \"DFO Greengoth\", \"DFO Hangyaku\", \"DFO Ckazka\", \"DFO Wolga\", sans-serif",
+        "first": "10px \"DFO Gabin\", \"DFO Flexi\", \"DFO Ritalin\", \"DFO Greengoth\", \"DFO Hangyaku\", \"DFO Ckazka\", \"DFO Wolga\", sans-serif",
+        "assigned": "20px \"DFO Gabin\", \"DFO Flexi\", \"DFO Ritalin\", \"DFO Greengoth\", \"DFO Hangyaku\", \"DFO Ckazka\", \"DFO Wolga\", sans-serif",
+        "reset": "10px \"DFO Gabin\", \"DFO Flexi\", \"DFO Ritalin\", \"DFO Greengoth\", \"DFO Hangyaku\", \"DFO Ckazka\", \"DFO Wolga\", sans-serif",
+        "bytes": [
+          3,
+          8,
+          13,
+          21
+        ],
+        "faces": [
+          {
+            "family": "\"DFO Gabin\"",
+            "status": "loaded"
+          },
+          {
+            "family": "\"DFO Greengoth\"",
+            "status": "loaded"
+          },
+          {
+            "family": "\"DFO Flexi\"",
+            "status": "loaded"
+          },
+          {
+            "family": "\"DFO Hangyaku\"",
+            "status": "loaded"
+          },
+          {
+            "family": "\"DFO Ckazka\"",
+            "status": "loaded"
+          },
+          {
+            "family": "\"DFO Ritalin\"",
+            "status": "loaded"
+          },
+          {
+            "family": "\"DFO Wolga\"",
+            "status": "loaded"
+          }
+        ],
+        "sequences": [
+          1,
+          2
+        ],
+        "ms": 78.69999999925494
+      }
+    },
+    "imageDecoder": {
+      "plain": {
+        "id": 42,
+        "width": 2,
+        "height": 2,
+        "data": [
+          255,
+          0,
+          0,
+          255,
+          0,
+          0,
+          255,
+          255,
+          255,
+          0,
+          0,
+          255,
+          0,
+          0,
+          255,
+          255
+        ],
+        "auditCanvasChanges": -1
+      },
+      "custom": {
+        "id": 42,
+        "width": 2,
+        "height": 2,
+        "data": [
+          255,
+          0,
+          0,
+          255,
+          0,
+          0,
+          255,
+          255,
+          255,
+          0,
+          0,
+          255,
+          0,
+          0,
+          255,
+          255
+        ],
+        "auditCanvasChanges": 0
+      }
+    },
+    "pixelLetters": {
+      "height": 7,
+      "shared": true,
+      "rows": {
+        "A": [
+          ".....",
+          "..#..",
+          ".##..",
+          ".###.",
+          ".#.#.",
+          "#..#.",
+          "....."
+        ],
+        "G": [
+          "......",
+          ".####.",
+          "#.....",
+          "#...#.",
+          "#...#.",
+          ".####.",
+          "......"
+        ],
+        "Ф": [
+          "......",
+          ".####.",
+          "###.##",
+          "#.#.##",
+          "###.##",
+          ".####.",
+          "......"
+        ],
+        "Я": [
+          ".....",
+          ".###.",
+          ".###.",
+          ".###.",
+          ".###.",
+          "####.",
+          "....."
+        ]
+      }
+    },
+    "errors": []
+  }
 }

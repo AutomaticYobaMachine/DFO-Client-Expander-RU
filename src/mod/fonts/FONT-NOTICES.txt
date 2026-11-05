@@ -57,3 +57,8 @@ SHA-256: 1e2f236e0ced3853a780ad8bfcb65612f62aba466c5df7df9459b16a8a92c30d
 Family: Hangyaku
 Copyright: Copyright (c) 2018, Dare-demo Iie
 В файле и архиве нет отдельного текста лицензии; дополнительных условий не предполагаем.
+
+Совместимые растровые FNT в page/dfo_font_data.js созданы tools/build-font-defaults.py
+из предоставленных Gabin, Greengoth и Flexi. Исходные глифы игры не используются.
+Для производных растровых данных сохраняются сведения и условия лицензий
+соответствующих шрифтов; данные, полученные из Flexi, — CC BY-SA 4.0 International.

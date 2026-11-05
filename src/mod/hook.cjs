@@ -11,8 +11,9 @@
 'use strict';
 const fs = require('node:fs');          // Electron's: reads inside app.asar, where this payload lives
 const path = require('node:path');
-const { transformAsset, injectPage, EXPECTED } = require('./transforms.cjs');
+const { transformAsset, injectPage, expectedHooks } = require('./transforms.cjs');
 const { createLootStore } = require('./loot-store.cjs');
+const {replacement,stripFaces}=require('./font-assets.cjs');
 
 const VERSION = (() => { try { return JSON.parse(fs.readFileSync(path.join(__dirname, 'version.json'), 'utf8')).version; } catch { return '?'; } })();
 const DEFAULTS = Object.freeze({
@@ -23,6 +24,7 @@ const DEFAULTS = Object.freeze({
 });
 const OWN = Object.freeze({   // served at dagger://game/dfo-mod/<name>
   'dfo_fonts.js': 'page/dfo_fonts.js',
+  'dfo_font_data.js':'page/dfo_font_data.js',
   'dfo_item_cards.js': 'page/dfo_item_cards.js',
   'item-font-title.ttf': 'fonts/item-font-title.ttf', 'item-font-text.ttf': 'fonts/item-font-text.ttf',
   'item-font-numbers.ttf': 'fonts/item-font-numbers.ttf', 'book-font-text.ttf': 'fonts/book-font-text.ttf',
@@ -69,7 +71,7 @@ function wrap(handleDagger, { app = null } = {}) {
     if (ctx) return ctx;
     let fontB64 = null, quests = null, ql = null;
     if (ru) {
-      try { fontB64 = fs.readFileSync(path.join(__dirname, 'ru', 'tiny5_cyrillic.woff2')).toString('base64'); } catch { fontB64 = null; }
+      if(cfg.fonts===false)try { fontB64 = fs.readFileSync(path.join(__dirname, 'ru', 'tiny5_cyrillic.woff2')).toString('base64'); } catch { fontB64 = null; }
       try { quests = JSON.parse(fs.readFileSync(path.join(__dirname, 'ru', 'quests.json'), 'utf8')); } catch { quests = null; }
       try { ql = JSON.parse(fs.readFileSync(path.join(__dirname, 'ru', 'ql.json'), 'utf8')); } catch { ql = null; }
     }
@@ -77,7 +79,7 @@ function wrap(handleDagger, { app = null } = {}) {
     let pack = null;
     if (ru) { try { pack = JSON.parse(fs.readFileSync(path.join(__dirname, 'ru-pack', 'index.json'), 'utf8')); } catch { pack = null; } }
     ctx = { ru, marks: !!cfg.marks, nearbyLoot: cfg.nearbyLoot !== false, dungeons: cfg.dungeons !== false, itemCards: cfg.itemCards !== false, fonts: cfg.fonts !== false, fontB64, quests, ql,
-      pageCfg: { fonts: {enabled:cfg.fonts!==false}, itemCards: { enabled: cfg.itemCards !== false }, dungeons: { ...cfg.dungeonOptions, enabled: cfg.dungeons !== false }, nearbyLoot: { ...cfg.nearbyLootOptions, enabled: cfg.nearbyLoot !== false }, marks: { marks: !!cfg.marks, ...cfg.marksOptions }, ru: { on: ru, pack, gameLanguage: cfg.gameLanguage !== false } } };
+      pageCfg: { fonts: {enabled:cfg.fonts!==false,revision:VERSION}, itemCards: { enabled: cfg.itemCards !== false }, dungeons: { ...cfg.dungeonOptions, enabled: cfg.dungeons !== false }, nearbyLoot: { ...cfg.nearbyLootOptions, enabled: cfg.nearbyLoot !== false }, marks: { marks: !!cfg.marks, ...cfg.marksOptions }, ru: { on: ru, pack, gameLanguage: cfg.gameLanguage !== false } } };
     return ctx;
   };
   const cache = new Map();   // rel -> { key, text }
@@ -86,7 +88,7 @@ function wrap(handleDagger, { app = null } = {}) {
   let summaryTimer = null;
   /** Once the game's files have come (no new one for a few seconds): which expected hooks found no place at all. */
   const summary = () => {
-    const want = [...(ctx?.fonts ? EXPECTED.fonts : []), ...(ctx?.itemCards ? EXPECTED.itemCards : []), ...(ctx?.dungeons ? EXPECTED.dungeons : []), ...(ctx?.nearbyLoot ? EXPECTED.nearbyLoot : []), ...(ctx?.marks ? EXPECTED.marks : []), ...(ctx?.ru ? EXPECTED.ru : [])];
+    const want = expectedHooks(ctx||{});
     const lost = want.filter((id) => !(seenHooks.get(id) > 0));
     log(lost.length ? `NOT FOUND in this game version (these features are off): ${lost.join(', ')}` : `all ${want.length} expected hooks found`);
   };
@@ -144,21 +146,37 @@ function wrap(handleDagger, { app = null } = {}) {
     catch (e) { log(`cache write: ${e?.message ?? e}`); return e.status || 500; }
   }
 
-  const serveOwn = (name) => {
+  const serveOwn = (name,cacheFont=false) => {
     const rel = OWN[name];
     if (!rel) return new Response('not found', { status: 404 });
     let buf = own.get(name);
     if (!buf) { buf = fs.readFileSync(path.join(__dirname, rel)); own.set(name, buf); }
     const mime = name.endsWith('.ttf') ? 'font/ttf' : name.endsWith('.otf') ? 'font/otf' : 'text/javascript; charset=utf-8';
-    return new Response(buf, { headers: { 'Content-Type': mime } });
+    return new Response(buf, { headers: { 'Content-Type': mime, 'Cache-Control':cacheFont&&mime.startsWith('font/')?'public,max-age=31536000,immutable':'no-store' } });
   };
 
   return async function dfoHandleDagger(req) {
-    if (!cfg.enabled) return handleDagger(req);
     let url;
     try { url = new URL(req.url); } catch { return handleDagger(req); }
+    // The launcher's static stylesheet also uses these same local files.
+    // Its host is different from the game's host, not an ASAR directory.
+    if(url.host==='launcher'){
+      let rel;try{rel=decodeURIComponent(url.pathname).replace(/^\/+/, '')}catch{return new Response('bad request',{status:400})}const ownFont=/^dfo-mod\/(?:fonts\/)?([\w.-]+)$/.exec(rel);
+      if(ownFont&&OWN[ownFont[1]])return serveOwn(ownFont[1],url.searchParams.get('dfo')===VERSION);
+      if(cfg.fonts!==false){
+        const asset=replacement(rel);if(asset)return asset.file?serveOwn(asset.file):new Response(asset.body,{headers:{'Content-Type':asset.type,'Cache-Control':'no-store'}});
+        if(/\.html$/i.test(rel)||!rel){
+          const res=await handleDagger(req);if(!res?.ok)return res;
+          const {preparePage}=require('./fonts-transform.cjs');
+          const scripts='<script src="/dfo-mod/dfo_font_data.js?dfo=1.21.0"></script><script src="/dfo-mod/dfo_fonts.js?dfo=1.21.0"></script>';
+          const html=await res.text();return new Response(preparePage(html.replace('</head>',scripts+'</head>')),{headers:res.headers,status:res.status});
+        }
+      }
+      return handleDagger(req);
+    }
+    if (!cfg.enabled) return handleDagger(req);
     if (url.host !== 'game') return handleDagger(req);
-    const rel = decodeURIComponent(url.pathname).replace(/^\/+/, '');
+    let rel;try{rel=decodeURIComponent(url.pathname).replace(/^\/+/, '')}catch{return new Response('bad request',{status:400})}
     if (rel === 'dfo-mod/report' && req.method === 'POST') { writeReport(await req.text()); return new Response(null, { status: 204 }); }
     if (rel === 'dfo-mod/cache') {
       if (req.method === 'POST') return new Response(null, { status: writeCache(await req.text()) });
@@ -183,8 +201,15 @@ function wrap(handleDagger, { app = null } = {}) {
         return new Response(body, { headers: { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-cache' } });
       } catch { return new Response('not found', { status: 404 }); }
     }
-    const own1 = /^(?:play\/)?dfo-mod\/([\w.-]+)$/.exec(rel);
-    if (own1) { try { return serveOwn(own1[1]); } catch (e) { log(`own ${rel}: ${e?.message}`); return new Response('not found', { status: 404 }); } }
+    const own1 = /^(?:play\/)?dfo-mod\/(?:fonts\/)?([\w.-]+)$/.exec(rel);
+    if (own1) { try { return serveOwn(own1[1],url.searchParams.get('dfo')===VERSION); } catch (e) { log(`own ${rel}: ${e?.message}`); return new Response('not found', { status: 404 }); } }
+    if(cfg.fonts!==false){
+      const asset=replacement(rel);if(asset)return asset.file?serveOwn(asset.file):new Response(asset.body,{headers:{'Content-Type':asset.type,'Cache-Control':'no-store'}});
+      if(/\.css$/i.test(rel)){
+        const response=await handleDagger(req);if(!response?.ok)return response;
+        return new Response(stripFaces(await response.text()).text,{status:response.status,headers:response.headers});
+      }
+    }
     const page = /\.html$/i.test(rel) || rel === '';
     const asset = /^assets\/[^/]+\.js$/.test(rel);
     if (!page && !asset) return handleDagger(req);

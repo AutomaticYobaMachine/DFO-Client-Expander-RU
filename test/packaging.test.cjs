@@ -18,7 +18,8 @@ test('distribution installer: install, reinstall and uninstall preserve original
       ['main.cjs',Buffer.from("const protocol={handle(){}};function handleDagger(){};protocol.handle('dagger',handleDagger);")],
       ['package.json',Buffer.from('{"version":"0.1.0"}')],
       ['untouched.bin',Buffer.from([0,10,42,255])],
-      ['launcher/launcher.css',Buffer.from('body{font-family:monospace}')],
+      ['launcher/launcher.css',Buffer.from('@font-face{font-family:OldFace;src:url(fonts/OldFace.woff2)}body{font-family:monospace}')],
+      ['launcher/fonts/OldFace.woff2',Buffer.from('original font bytes')],
     ])});blank.close();
     const original=fs.readFileSync(asar);
     fs.mkdirSync(user);fs.writeFileSync(path.join(user,'dfo-mod.json'),JSON.stringify({nearbyLootOptions:{keyCode:'KeyK',customOption:123},dungeonOptions:{customOption:456},marks:false}));
@@ -31,6 +32,10 @@ test('distribution installer: install, reinstall and uninstall preserve original
         assert.ok(files.has('dfo-mod/'+file));assert.deepEqual(readFile(a,'dfo-mod/'+file),fs.readFileSync(path.join(dist,'mod',file)));
       }
       assert.match(readFile(a,'main.cjs').toString(),/dfo-mod\/hook.cjs/);
+      assert.equal(listFiles(a.header).has('launcher/fonts/OldFace.woff2'),false,'Original faces are removed from active ASAR');
+      assert.deepEqual([...files.keys()].filter(f=>/\.(?:ttf|otf|woff2?)$/i.test(f)).sort(),Object.values(require('../src/mod/page/dfo_fonts.js').files).map(f=>'dfo-mod/fonts/'+f).sort());
+      assert.ok(files.has('dfo-mod/font-assets.cjs'));assert.ok(files.has('dfo-mod/page/dfo_font_data.js'));
+      assert.doesNotMatch(readFile(a,'launcher/launcher.css').toString(),/font-family:OldFace/);
       for(const file of [...Object.values(require('../src/mod/page/dfo_fonts.js').files),'FONT-NOTICES.txt']){
         assert.deepEqual(readFile(a,'dfo-mod/fonts/'+file),fs.readFileSync(path.join(dist,'mod/fonts',file)),'The standalone installer must carry every font and its notices');
       }
@@ -93,6 +98,20 @@ test('distribution installer: install, reinstall and uninstall preserve original
     assert.notEqual(badCache.status,0);assert.match(badCache.stdout+badCache.stderr,/файлы клиента не изменены/);
     assert.deepEqual(fs.readFileSync(asar),beforeBadCacheAsar);assert.equal(fs.readFileSync(path.join(user,'dfo-mod-cache.json'),'utf8'),'{broken');
   }finally{fs.rmSync(temp,{recursive:true,force:true});}
+});
+
+test('font removal restores packed originals even when the external ASAR backup was lost',
+ {skip:!fs.existsSync(installer)},()=>{
+  const temp=fs.mkdtempSync(path.join(os.tmpdir(),'dfo-font-recovery-'));
+  try{
+    const root=path.join(temp,'source'),asar=path.join(temp,'app.asar'),user=path.join(temp,'profile');fs.mkdirSync(path.join(root,'launcher/fonts'),{recursive:true});
+    const main="const protocol={handle(){}};function handleDagger(){};protocol.handle('dagger',handleDagger);",css='@font-face{font-family:Old;src:url(fonts/old.woff2)}body{font-family:Old}',font=Buffer.from('original packed font');
+    fs.writeFileSync(path.join(root,'main.cjs'),main);fs.writeFileSync(path.join(root,'package.json'),'{"version":"0.1.0"}');fs.writeFileSync(path.join(root,'launcher/launcher.css'),css);fs.writeFileSync(path.join(root,'launcher/fonts/old.woff2'),font);
+    require('../src/asar.cjs').packFolder(root,asar);
+    const run=cmd=>cp.execFileSync(process.execPath,[path.join(dist,'patcher/patcher.cjs'),cmd,'--no-ru','--no-proc-check','--asar',asar,'--user-data',user],{encoding:'utf8'});
+    run('install');fs.unlinkSync(asar+'.dfo-mod-original.bak');run('uninstall');
+    const restored=openAsar(asar);try{assert.deepEqual(readFile(restored,'launcher/fonts/old.woff2'),font);assert.equal(readFile(restored,'main.cjs').toString(),main);assert.equal(readFile(restored,'launcher/launcher.css').toString(),css);assert.equal([...listFiles(restored.header).keys()].some(f=>f.startsWith('dfo-mod/')),false)}finally{restored.close()}
+  }finally{fs.rmSync(temp,{recursive:true,force:true})}
 });
 
 test('standalone Windows binary embeds the complete payload, product metadata, icon and DPI manifest',

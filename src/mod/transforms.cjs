@@ -11,6 +11,7 @@ const { transformNearby } = require('./nearby-loot-transform.cjs');
 const { transformTags } = require('./loot-tags-transform.cjs');
 const { transformDungeons } = require('./dungeon-transform.cjs');
 const { transformItemCards } = require('./item-cards-transform.cjs');
+const { transformFonts, preparePage } = require('./fonts-transform.cjs');
 
 /** Translate `v` in place when the RU runtime is loaded - a statement. */
 const TR = (v) => `if(typeof globalThis.__translate=="function"&&typeof ${v}=="string"&&${v})${v}=globalThis.__translate(${v});`;
@@ -441,6 +442,7 @@ function transformAsset(rel, text, ctx) {
   if (ctx.nearbyLoot !== false) t = transformTags(rel, transformNearby(rel, t, log), log);
   if (ctx.dungeons !== false) t = transformDungeons(rel, t, log);
   if (ctx.itemCards === true) t = transformItemCards(rel, t, log);
+  if (ctx.fonts === true) t = transformFonts(rel, t, log);
   return { text: t, log };
 }
 
@@ -449,6 +451,7 @@ function injectPage(html, prefix, ctx) {
   if (html.includes('dfo-mod/dfo_marks.js')) return html;
   const tags = [];
   tags.push(`<script>window.__DFO_MOD_CFG__=${JSON.stringify(ctx.pageCfg ?? {})};</script>`);
+  if (ctx.fonts === true) tags.push(`<script src="${prefix}dfo-mod/dfo_fonts.js"></script>`);
   if (ctx.ru && !html.includes('ru_dict.js')) tags.push(`<script src="${prefix}dfo-mod/ru_dict.js"></script>`, `<script src="${prefix}dfo-mod/ru_i18n.js"></script>`);
   tags.push(`<script src="${prefix}dfo-mod/ru_locale.js"></script>`, `<script src="${prefix}dfo-mod/ru_items.js"></script>`);
   if (ctx.itemCards === true) tags.push(`<script src="${prefix}dfo-mod/dfo_item_cards.js"></script>`);
@@ -456,13 +459,14 @@ function injectPage(html, prefix, ctx) {
   if (ctx.dungeons !== false) tags.push(...['dfo_dungeon_model.js', 'dfo_dungeons.js', 'dfo_dungeon_live_model.js', 'dfo_dungeon_graph.js', 'dfo_dungeon_nav_model.js', 'dfo_dungeon_nav.js', 'dfo_dungeon_live.js'].map(f => `<script src="${prefix}dfo-mod/${f}"></script>`));
   if (ctx.nearbyLoot !== false) tags.push(...['dfo_loot_rules.js', 'dfo_loot_ui.js', 'dfo_loot.js'].map(f => `<script src="${prefix}dfo-mod/${f}"></script>`));
   const at = html.indexOf('<script type="module"');
-  if (at < 0) return html.replace('</head>', `${tags.join('\n  ')}\n</head>`);
-  return `${html.slice(0, at)}${tags.join('\n  ')}\n  ${html.slice(at)}`;
+  const out=at<0?html.replace('</head>', `${tags.join('\n  ')}\n</head>`):`${html.slice(0, at)}${tags.join('\n  ')}\n  ${html.slice(at)}`;
+  return ctx.fonts===true?preparePage(out):out;
 }
 
 /** The hooks a working install finds somewhere in the game's files - one missing from every file means that feature is
  *  off in this version of the game (the log says which). The other ids are older shapes of the same places. */
 const EXPECTED = Object.freeze({
+  fonts: ['fonts.classic','fonts.choices','fonts.network'],
   itemCards: ['itemCards.inventory', 'itemCards.values', 'itemCards.materials', 'itemCards.powers', 'itemCards.prices', 'itemCards.currency', 'itemCards.effectLabels'],
   dungeons: ['dungeon.world', 'dungeon.hud', 'dungeon.travelView', 'dungeon.bestiary', 'dungeon.tables', 'dungeon.scaling', 'dungeon.rewards', 'dungeon.runtime', 'dungeon.lifetime', 'dungeon.aurum', 'dungeon.ore', 'dungeon.renown', 'dungeon.respawn', 'dungeon.layout', 'dungeon.sizes', 'dungeon.elites', 'dungeon.live', 'dungeon.journalDoor', 'dungeon.journalClassic', 'dungeon.journalFocus', 'dungeon.traits', 'dungeon.navContext', 'dungeon.navDraw', 'dungeon.navQuests'],
   nearbyLoot: ['loot.tags', 'loot.types', 'loot.kinds', 'loot.identified', 'loot.bound', 'loot.bootstrap', 'loot.world', 'loot.exterior', 'loot.modes', 'loot.dungeon', 'loot.inventory', 'loot.transfer', 'loot.arrows'],

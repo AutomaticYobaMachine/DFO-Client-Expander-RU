@@ -9,7 +9,7 @@ import (
 
 const (
 	appName      = "DFO-Client-Expander-RU"
-	appVersion   = "1.19.4"
+	appVersion   = "1.20.0"
 	appAuthor    = "AutomaticYobaMachine"
 	appCommunity = "Создано специально для русского сообщества DFO Online."
 )
@@ -37,6 +37,7 @@ const (
 	idLootKey
 	idDungeonKey
 	idItemCards
+	idFonts
 )
 
 type feature struct {
@@ -50,6 +51,7 @@ var features = []feature{
 	{idLoot, "nearbyLoot", "Лут рядом", "КЛАВИША J · 15 МЕТРОВ", "Дроп противников и предметы на полу — в одном окне с фильтрами, пресетами, сортировкой и «Забрать все». Автолут настраивается отдельно. Стены и соседние этажи исключены; вещи подбираются из исходных куч и трупов."},
 	{idDungeons, "dungeons", "Сведения о данжах", "КАРТОЧКИ И СВОДКА ВНУТРИ", "Карточки данжей на Overworld. Справа сверху — живые счётчики врагов, элит и игроков. По K — подробная сводка: квесты, аурум, реген и линия маршрута к выходу, ауруму, элитнику или цели задания. Свою кнопку назначьте ниже."},
 	{idItemCards, "itemCards", "Карточки предметов", "МАТЕРИАЛ · ЦЕННОСТЬ · СРАВНЕНИЕ", "Единая карточка в два столбца: материал отдельно от типа брони, свойства и эффекты списком, родные сигилы, наборы и сравнение с надетым. Ценность учитывает сохранённые улучшения. Без описаний и внутренней прокрутки. Для расширенного интерфейса игры."},
+	{idFonts, "fonts", "Шрифты сообщества", "ЕДИНЫЙ СТИЛЬ ТЕКСТА", "Наши шрифты во всём игровом интерфейсе: меню, чат, журнал, книги, инвентарь, торговля и классические окна. Gabin для обычного текста, Flexi для заголовков; специальные шрифты сигилов, наборов и легендарных свойств сохраняются. Работает отдельно от русификации и карточек предметов."},
 }
 
 type gameStatus struct {
@@ -68,7 +70,7 @@ type gameStatus struct {
 }
 
 func defaults() map[int]bool {
-	return map[int]bool{idRu: true, idMarks: true, idLoot: true, idDungeons: true, idItemCards: true, idVisited: true}
+	return map[int]bool{idRu: true, idMarks: true, idLoot: true, idDungeons: true, idItemCards: true, idFonts: true, idVisited: true}
 }
 
 // Missing options in an older install keep their defaults; explicit false survives.

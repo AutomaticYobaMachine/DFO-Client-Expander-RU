@@ -705,7 +705,7 @@ func wndProc(hwnd uintptr, m uint32, wp, lp uintptr) uintptr {
 			} else {
 				a.startSearch()
 			}
-		case idRu, idMarks, idLoot, idDungeons, idItemCards, idVisited:
+		case idRu, idMarks, idLoot, idDungeons, idItemCards, idFonts, idVisited:
 			on, _, _ := pSendMessageW.Call(a.ctl[id], bmGetCheck, 0, 0)
 			a.mu.Lock()
 			a.toggles[id] = on == 1
@@ -993,7 +993,7 @@ func main() {
 		if mm.message == wmKeyDown && mm.wParam == 13 {
 			focus, _, _ := pGetFocus.Call()
 			id, _, _ := pGetDlgCtrlID.Call(focus)
-			if int(id) != idLog && int(id) != idPath && int(id) != idRu && int(id) != idMarks && int(id) != idLoot && int(id) != idDungeons && int(id) != idItemCards && int(id) != idVisited {
+			if int(id) != idLog && int(id) != idPath && int(id) != idRu && int(id) != idMarks && int(id) != idLoot && int(id) != idDungeons && int(id) != idItemCards && int(id) != idFonts && int(id) != idVisited {
 				pSendMessageW.Call(focus, bmClick, 0, 0)
 				continue
 			}

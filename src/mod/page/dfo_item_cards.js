@@ -201,7 +201,7 @@ body .card.dfo-item-card[data-rarity=gilded] { border-width:4px!important; borde
     };
     const ensureStyle = () => {
       if (doc.getElementById('dfo-item-cards-style')) return;
-      const style = node('style'); style.id = 'dfo-item-cards-style'; style.textContent = fontFaces + CSS; (doc.head || doc.documentElement).append(style);
+      const style = node('style'); style.id = 'dfo-item-cards-style'; style.textContent = (win.__dfoFonts?'':fontFaces) + CSS; (doc.head || doc.documentElement).append(style);
     };
     function price(state, data) {
       if (!data) return;

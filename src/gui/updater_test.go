@@ -349,7 +349,7 @@ func TestAutomaticModUpgradePreservesDisabledStateAndRequiresInstalledOlderVersi
 	if upgradeEligible(st, false) {
 		t.Fatal("downgraded a newer extension")
 	}
-	saved := map[string]bool{"ru": false, "marks": true, "nearbyLoot": false, "dungeons": true, "itemCards": false, "onlyVisited": false}
+	saved := map[string]bool{"ru": false, "marks": true, "nearbyLoot": false, "dungeons": true, "itemCards": false, "fonts": false, "onlyVisited": false}
 	choices := resumeChoices(saved, defaults())
 	for _, feature := range features {
 		if choices[feature.ID] != saved[feature.Key] {
@@ -358,6 +358,10 @@ func TestAutomaticModUpgradePreservesDisabledStateAndRequiresInstalledOlderVersi
 	}
 	if choices[idVisited] {
 		t.Error("lost onlyVisited")
+	}
+	delete(saved, "fonts")
+	if !resumeChoices(saved, defaults())[idFonts] {
+		t.Error("missing fonts choice lost the new default")
 	}
 }
 

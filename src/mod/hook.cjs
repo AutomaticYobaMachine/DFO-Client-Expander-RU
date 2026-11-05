@@ -16,12 +16,13 @@ const { createLootStore } = require('./loot-store.cjs');
 
 const VERSION = (() => { try { return JSON.parse(fs.readFileSync(path.join(__dirname, 'version.json'), 'utf8')).version; } catch { return '?'; } })();
 const DEFAULTS = Object.freeze({
-  enabled: true, ru: true, marks: true, nearbyLoot: true, dungeons: true, itemCards: true,
+  enabled: true, ru: true, marks: true, nearbyLoot: true, dungeons: true, itemCards: true, fonts: true,
   nearbyLootOptions: { keyCode: 'KeyJ' },
   dungeonOptions: { keyCode: 'KeyK' },
   marksOptions: { onlyVisited: true, markRadiusM: 1200, nameRadiusM: 300, maxMarks: 60 },
 });
 const OWN = Object.freeze({   // served at dagger://game/dfo-mod/<name>
+  'dfo_fonts.js': 'page/dfo_fonts.js',
   'dfo_item_cards.js': 'page/dfo_item_cards.js',
   'item-font-title.ttf': 'fonts/item-font-title.ttf', 'item-font-text.ttf': 'fonts/item-font-text.ttf',
   'item-font-sigil.ttf': 'fonts/item-font-sigil.ttf', 'item-font-set.ttf': 'fonts/item-font-set.ttf',
@@ -74,8 +75,8 @@ function wrap(handleDagger, { app = null } = {}) {
     // the pack the game's language system reads, as the page lists it (ru_locale.js): its credits and its files
     let pack = null;
     if (ru) { try { pack = JSON.parse(fs.readFileSync(path.join(__dirname, 'ru-pack', 'index.json'), 'utf8')); } catch { pack = null; } }
-    ctx = { ru, marks: !!cfg.marks, nearbyLoot: cfg.nearbyLoot !== false, dungeons: cfg.dungeons !== false, itemCards: cfg.itemCards !== false, fontB64, quests, ql,
-      pageCfg: { itemCards: { enabled: cfg.itemCards !== false }, dungeons: { ...cfg.dungeonOptions, enabled: cfg.dungeons !== false }, nearbyLoot: { ...cfg.nearbyLootOptions, enabled: cfg.nearbyLoot !== false }, marks: { marks: !!cfg.marks, ...cfg.marksOptions }, ru: { on: ru, pack, gameLanguage: cfg.gameLanguage !== false } } };
+    ctx = { ru, marks: !!cfg.marks, nearbyLoot: cfg.nearbyLoot !== false, dungeons: cfg.dungeons !== false, itemCards: cfg.itemCards !== false, fonts: cfg.fonts !== false, fontB64, quests, ql,
+      pageCfg: { fonts: {enabled:cfg.fonts!==false}, itemCards: { enabled: cfg.itemCards !== false }, dungeons: { ...cfg.dungeonOptions, enabled: cfg.dungeons !== false }, nearbyLoot: { ...cfg.nearbyLootOptions, enabled: cfg.nearbyLoot !== false }, marks: { marks: !!cfg.marks, ...cfg.marksOptions }, ru: { on: ru, pack, gameLanguage: cfg.gameLanguage !== false } } };
     return ctx;
   };
   const cache = new Map();   // rel -> { key, text }
@@ -84,7 +85,7 @@ function wrap(handleDagger, { app = null } = {}) {
   let summaryTimer = null;
   /** Once the game's files have come (no new one for a few seconds): which expected hooks found no place at all. */
   const summary = () => {
-    const want = [...(ctx?.itemCards ? EXPECTED.itemCards : []), ...(ctx?.dungeons ? EXPECTED.dungeons : []), ...(ctx?.nearbyLoot ? EXPECTED.nearbyLoot : []), ...(ctx?.marks ? EXPECTED.marks : []), ...(ctx?.ru ? EXPECTED.ru : [])];
+    const want = [...(ctx?.fonts ? EXPECTED.fonts : []), ...(ctx?.itemCards ? EXPECTED.itemCards : []), ...(ctx?.dungeons ? EXPECTED.dungeons : []), ...(ctx?.nearbyLoot ? EXPECTED.nearbyLoot : []), ...(ctx?.marks ? EXPECTED.marks : []), ...(ctx?.ru ? EXPECTED.ru : [])];
     const lost = want.filter((id) => !(seenHooks.get(id) > 0));
     log(lost.length ? `NOT FOUND in this game version (these features are off): ${lost.join(', ')}` : `all ${want.length} expected hooks found`);
   };
@@ -183,7 +184,7 @@ function wrap(handleDagger, { app = null } = {}) {
     }
     const own1 = /^(?:play\/)?dfo-mod\/([\w.-]+)$/.exec(rel);
     if (own1) { try { return serveOwn(own1[1]); } catch (e) { log(`own ${rel}: ${e?.message}`); return new Response('not found', { status: 404 }); } }
-    const page = rel === 'play/index.html' || rel === 'index.html' || rel === '';
+    const page = /\.html$/i.test(rel) || rel === '';
     const asset = /^assets\/[^/]+\.js$/.test(rel);
     if (!page && !asset) return handleDagger(req);
     const res = await handleDagger(req);
@@ -191,7 +192,7 @@ function wrap(handleDagger, { app = null } = {}) {
     try {
       const text = await res.text();
       let out;
-      if (page) out = injectPage(text, rel === 'play/index.html' ? '../' : './', context());
+      if (page) out = injectPage(text, '../'.repeat(Math.max(0,rel.split('/').length-1))||'./', context());
       else {
         const key = `${text.length}:${text.slice(0, 64)}:${text.slice(-64)}`;
         const hit = cache.get(rel);

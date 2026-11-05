@@ -18,6 +18,7 @@ test('distribution installer: install, reinstall and uninstall preserve original
       ['main.cjs',Buffer.from("const protocol={handle(){}};function handleDagger(){};protocol.handle('dagger',handleDagger);")],
       ['package.json',Buffer.from('{"version":"0.1.0"}')],
       ['untouched.bin',Buffer.from([0,10,42,255])],
+      ['launcher/launcher.css',Buffer.from('body{font-family:monospace}')],
     ])});blank.close();
     const original=fs.readFileSync(asar);
     fs.mkdirSync(user);fs.writeFileSync(path.join(user,'dfo-mod.json'),JSON.stringify({nearbyLootOptions:{keyCode:'KeyK',customOption:123},dungeonOptions:{customOption:456},marks:false}));
@@ -26,24 +27,26 @@ test('distribution installer: install, reinstall and uninstall preserve original
     for(let i=0;i<2;i++){
       run('install');
       const a=openAsar(asar),files=listFiles(a.header);
-      for(const file of ['item-cards-transform.cjs','page/dfo_item_cards.js','nearby-loot-transform.cjs','loot-tags-transform.cjs','dungeon-transform.cjs','dungeon-live-transform.cjs','dungeon-nav-transform.cjs','page/dfo_dungeon_model.js','page/dfo_dungeons.js','page/dfo_dungeon_live_model.js','page/dfo_dungeon_live.js','page/dfo_dungeon_graph.js', 'page/dfo_dungeon_nav_model.js','page/dfo_dungeon_nav.js','loot-store.cjs','page/dfo_loot_rules.js','page/dfo_loot_ui.js','page/dfo_loot.js','transforms.cjs']){
+      for(const file of ['fonts-transform.cjs','page/dfo_fonts.js','item-cards-transform.cjs','page/dfo_item_cards.js','nearby-loot-transform.cjs','loot-tags-transform.cjs','dungeon-transform.cjs','dungeon-live-transform.cjs','dungeon-nav-transform.cjs','page/dfo_dungeon_model.js','page/dfo_dungeons.js','page/dfo_dungeon_live_model.js','page/dfo_dungeon_live.js','page/dfo_dungeon_graph.js', 'page/dfo_dungeon_nav_model.js','page/dfo_dungeon_nav.js','loot-store.cjs','page/dfo_loot_rules.js','page/dfo_loot_ui.js','page/dfo_loot.js','transforms.cjs']){
         assert.ok(files.has('dfo-mod/'+file));assert.deepEqual(readFile(a,'dfo-mod/'+file),fs.readFileSync(path.join(dist,'mod',file)));
       }
       assert.match(readFile(a,'main.cjs').toString(),/dfo-mod\/hook.cjs/);
       for(const file of ['item-font-title.ttf','item-font-text.ttf','item-font-sigil.ttf','item-font-set.ttf','item-font-legendary.otf','FONT-NOTICES.txt']){
         assert.deepEqual(readFile(a,'dfo-mod/fonts/'+file),fs.readFileSync(path.join(dist,'mod/fonts',file)),'The standalone installer must carry every font and its notices');
       }
-      assert.deepEqual(readFile(a,'untouched.bin'),Buffer.from([0,10,42,255]));a.close();
+      assert.deepEqual(readFile(a,'untouched.bin'),Buffer.from([0,10,42,255]));assert.equal((readFile(a,'launcher/launcher.css').toString().match(/\/\* DFO community fonts \*\//g)||[]).length,1);a.close();
       const cfg=JSON.parse(fs.readFileSync(path.join(user,'dfo-mod.json')));
-      assert.equal(cfg.nearbyLoot,true);assert.equal(cfg.dungeons,true);assert.equal(cfg.itemCards,true);assert.equal(cfg.nearbyLootOptions.keyCode,'KeyK');assert.equal(cfg.marks,false);
+      assert.equal(cfg.nearbyLoot,true);assert.equal(cfg.dungeons,true);assert.equal(cfg.itemCards,true);assert.equal(cfg.fonts,true);assert.equal(cfg.nearbyLootOptions.keyCode,'KeyK');assert.equal(cfg.marks,false);
       assert.equal(cfg.dungeonOptions.keyCode,'KeyK');assert.equal(cfg.dungeonOptions.customOption,456);
     }
-    run('install','--no-ru','--loot-key','Mouse4','--dungeon-key','NumpadAdd','--set','ru=0','--set','marks=1','--set','nearbyLoot=0','--set','dungeons=0','--set','itemCards=0','--set','onlyVisited=0','--set','enabled=1');
+    run('install','--no-ru','--loot-key','Mouse4','--dungeon-key','NumpadAdd','--set','ru=0','--set','marks=1','--set','nearbyLoot=0','--set','dungeons=0','--set','itemCards=0','--set','fonts=0','--set','onlyVisited=0','--set','enabled=1');
     let cfg=JSON.parse(fs.readFileSync(path.join(user,'dfo-mod.json')));
     assert.equal(cfg.itemCards,false);
+    assert.equal(cfg.fonts,false);
     assert.equal(cfg.enabled,true);assert.equal(cfg.ru,false);assert.equal(cfg.marks,true);assert.equal(cfg.nearbyLoot,false);assert.equal(cfg.dungeons,false);assert.equal(cfg.marksOptions.onlyVisited,false);assert.equal(cfg.nearbyLootOptions.keyCode,'Mouse4');
     let current=openAsar(asar);assert.equal(listFiles(current.header).has('dfo-mod/page/ru_dict.js'),false);
-    assert.ok(listFiles(current.header).has('dfo-mod/fonts/item-font-text.ttf'),'Card fonts are independent of the Russian translation');current.close();
+    assert.ok(listFiles(current.header).has('dfo-mod/fonts/item-font-text.ttf'),'Card fonts are independent of the Russian translation');
+    assert.doesNotMatch(readFile(current,'launcher/launcher.css').toString(),/DFO community fonts/);current.close();
     run('install','--loot-key','NumpadEnter','--set','ru=1','--set','marks=0','--set','nearbyLoot=1','--set','dungeons=1','--set','onlyVisited=1');
     cfg=JSON.parse(fs.readFileSync(path.join(user,'dfo-mod.json')));assert.equal(cfg.ru,true);assert.equal(cfg.marks,false);assert.equal(cfg.nearbyLoot,true);assert.equal(cfg.dungeons,true);assert.equal(cfg.marksOptions.onlyVisited,true);assert.equal(cfg.nearbyLootOptions.keyCode,'NumpadEnter');
     run('install','--loot-key','Mouse5','--dungeon-key','Mouse4');run('install');

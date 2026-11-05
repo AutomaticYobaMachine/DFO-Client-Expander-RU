@@ -95,7 +95,7 @@ function writeConfig(ud, withRu) {
   fs.mkdirSync(ud, { recursive: true });
   const file = path.join(ud, 'dfo-mod.json');
   const store = createLootStore(ud);
-  let cfg = { enabled: true, ru: withRu, marks: true, nearbyLoot: true, dungeons: true, itemCards: true, nearbyLootOptions: { keyCode: 'KeyJ' }, marksOptions: { onlyVisited: true, markRadiusM: 1200, nameRadiusM: 300, maxMarks: 60 } };
+  let cfg = { enabled: true, ru: withRu, marks: true, nearbyLoot: true, dungeons: true, itemCards: true, fonts: true, nearbyLootOptions: { keyCode: 'KeyJ' }, marksOptions: { onlyVisited: true, markRadiusM: 1200, nameRadiusM: 300, maxMarks: 60 } };
   try { if (fs.existsSync(file)) cfg = { ...cfg, ...JSON.parse(fs.readFileSync(file, 'utf8')) }; } catch { /* a broken file is written again */ }
   cfg.marksOptions = { onlyVisited: true, markRadiusM: 1200, nameRadiusM: 300, maxMarks: 60, ...(cfg.marksOptions ?? {}) };
 
@@ -120,7 +120,7 @@ function writeConfig(ud, withRu) {
     const [k, v] = String(args[i + 1] ?? '').split('=');
     const on = v === '1' || v === 'true';
     if (k === 'ru') cfg.ru = on && withRu;
-    else if (k === 'marks' || k === 'nearbyLoot' || k === 'dungeons' || k === 'itemCards' || k === 'enabled') cfg[k] = on;
+    else if (k === 'marks' || k === 'nearbyLoot' || k === 'dungeons' || k === 'itemCards' || k === 'fonts' || k === 'enabled') cfg[k] = on;
     else if (k === 'onlyVisited') cfg.marksOptions.onlyVisited = on;
   }
   if (!withRu) cfg.ru = false;
@@ -231,6 +231,16 @@ function install() {
 
   for (const file of ['item-font-title.ttf', 'item-font-text.ttf', 'item-font-sigil.ttf', 'item-font-set.ttf', 'item-font-legendary.otf', 'FONT-NOTICES.txt'])
     put.set(`dfo-mod/fonts/${file}`, fs.readFileSync(path.join(MOD, 'fonts', file)));
+  put.set('dfo-mod/fonts-transform.cjs',fs.readFileSync(path.join(MOD,'fonts-transform.cjs')));
+  put.set('dfo-mod/page/dfo_fonts.js',fs.readFileSync(path.join(MOD,'page/dfo_fonts.js')));
+  let fonts=true;
+  try{fonts=JSON.parse(fs.readFileSync(path.join(ud,'dfo-mod.json'),'utf8')).fonts!==false}catch{}
+  for(let i=0;i<args.length;i++)if(args[i]==='--set'&&String(args[i+1]).startsWith('fonts='))fonts=/^fonts=(?:1|true)$/.test(args[i+1]);
+  if(fonts&&listFiles(base.header).has('launcher/launcher.css')){
+    const key='launcher/launcher.css',source=put.get(key)??readFile(base,key);if(!put.has(`dfo-mod/orig/${key}`))orig(key,readFile(base,key));
+    const {launcherCss}=require(path.join(MOD,'fonts-transform.cjs'));
+    put.set(key,Buffer.from(String(source)+'\n'+launcherCss()));
+  }
 
   say('Пересобираю app.asar...');
   const tmp = `${asarPath}.dfo-tmp`;

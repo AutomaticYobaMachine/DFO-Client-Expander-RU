@@ -1,0 +1,877 @@
+{
+  "modVersion": "1.20.0",
+  "gameVersion": "0.1.14536",
+  "original": "https://github.com/Lattymoy/daggerfall-js-source",
+  "date": "2026-11-05",
+  "moduleSource": "Executed font runtime matches the final installer payload; launcher installation fix verified separately by packaged install/uninstall tests",
+  "matchingPayloadFiles": [
+    {
+      "path": "mod/dungeon-live-transform.cjs",
+      "sha256": "0f02ad8b3f739ce51b2bfc013a28d56c9db3694fe982a0a9d4f5139b5e175942"
+    },
+    {
+      "path": "mod/dungeon-nav-transform.cjs",
+      "sha256": "c0eb26bd65f95435156690a96163fbb1027e536984faf6ab2c45dd6ff6cc5de8"
+    },
+    {
+      "path": "mod/dungeon-transform.cjs",
+      "sha256": "d56730730e319f1ea13b3740a83d3ec6d583e95bcd61fbab6511acd3b89e557b"
+    },
+    {
+      "path": "mod/fonts/FONT-NOTICES.txt",
+      "sha256": "8362c47e94c8bd3e3473d19840ee1493f31508bdd9ce714c4dbc89832257de9d"
+    },
+    {
+      "path": "mod/fonts/item-font-legendary.otf",
+      "sha256": "431b3d0fd0e324d427dc8076d0bd9591713797362f0d959c3fbc601cc815e21d"
+    },
+    {
+      "path": "mod/fonts/item-font-set.ttf",
+      "sha256": "16fcbd56ca32e92f4551649434793f8da873337e87d1e81e3a35c4569603c6a6"
+    },
+    {
+      "path": "mod/fonts/item-font-sigil.ttf",
+      "sha256": "1aa16df54414a45b16f15d601340143287e7def62ffc5c8a6425f968703f8067"
+    },
+    {
+      "path": "mod/fonts/item-font-text.ttf",
+      "sha256": "f2a009268cc0f4cf5305f2039470def5cc7ad4bd3b43e8451c97627238f46bc1"
+    },
+    {
+      "path": "mod/fonts/item-font-title.ttf",
+      "sha256": "10e6edc2e999a2b83728ba9eb27fdbbe79a685022f7cdb6a76ebece55c907708"
+    },
+    {
+      "path": "mod/fonts-transform.cjs",
+      "sha256": "b9c7ebf91a4677a8e021c1b85891f19d1e412eeef0e5ccc4c69d4919763a64e4"
+    },
+    {
+      "path": "mod/hook.cjs",
+      "sha256": "44a8daf843696e83e27ba41feda85f427f3953f2953ca3b8452b4df03665235c"
+    },
+    {
+      "path": "mod/item-cards-transform.cjs",
+      "sha256": "f2310a2492102126c41a9aa6c31c81bfef61f4b15fd26bc2e8e7a323be7a96a2"
+    },
+    {
+      "path": "mod/loot-store.cjs",
+      "sha256": "e2ab6cc10e85f02d635b4d234861993ceb1a8f9bec7dd7940163767967d0d90e"
+    },
+    {
+      "path": "mod/loot-tags-transform.cjs",
+      "sha256": "3ea51e36a635c095d100fec52543fd496fd2ade4bc49ec32b8db234e86c3a381"
+    },
+    {
+      "path": "mod/nearby-loot-transform.cjs",
+      "sha256": "e5105a051e757bc587e00c7b8c2e723969d8f382c13e96e37a0ae7bc1c011862"
+    },
+    {
+      "path": "mod/page/dfo_dungeon_graph.js",
+      "sha256": "87457b92034c843fca777fdef53aca35f6036c7754c5e4a9d2cf4e997c3bbf5b"
+    },
+    {
+      "path": "mod/page/dfo_dungeon_live.js",
+      "sha256": "1e7eff562779cf0edef050b5bfdce747649df715e4896e59301e2b1fa7f0cff7"
+    },
+    {
+      "path": "mod/page/dfo_dungeon_live_model.js",
+      "sha256": "c16df9b4d71fbb489c729251861fb60a4c0907245244929feee3e393088fb59e"
+    },
+    {
+      "path": "mod/page/dfo_dungeon_model.js",
+      "sha256": "38b6a75843766b61d9d75bc5363b8e408f2ca61cef1a903808c2bfd42d38d33c"
+    },
+    {
+      "path": "mod/page/dfo_dungeon_nav.js",
+      "sha256": "158d323d9bfccaee9a078c7d588cbdf34d26d80f46745425e65707e890767d1b"
+    },
+    {
+      "path": "mod/page/dfo_dungeon_nav_model.js",
+      "sha256": "d24e5d2335d09a0ea091c8c3966f3ad7fc9734976b6bc287ca88fc76d82bba24"
+    },
+    {
+      "path": "mod/page/dfo_dungeons.js",
+      "sha256": "d87103af96da1e4b2519721cf0520f1062e181a1a09b4a4ffcdd4a58bb9c5eab"
+    },
+    {
+      "path": "mod/page/dfo_fonts.js",
+      "sha256": "766d8da314eac4964c8712f8da929f7387ad87863fd7590b2410996904c0b167"
+    },
+    {
+      "path": "mod/page/dfo_item_cards.js",
+      "sha256": "e28276e72b253908d7f2329cdfb772607cb2940c71f7f953a850e07c5a1eced5"
+    },
+    {
+      "path": "mod/page/dfo_loot.js",
+      "sha256": "5fe93293827bba53dd283a1994d5321ed4a916608ae9c3727ffbc71b71f584c1"
+    },
+    {
+      "path": "mod/page/dfo_loot_rules.js",
+      "sha256": "89ca66d3655eef111feca0c97ec3aab8fd1db1f5a7c1222156a98779f30331ac"
+    },
+    {
+      "path": "mod/page/dfo_loot_ui.js",
+      "sha256": "11d528f20f01c9c78af0d3173ad0fa1e3ca23077886b0e36b8b386c560e486c4"
+    },
+    {
+      "path": "mod/page/dfo_marks.js",
+      "sha256": "2d6d06b8cb677250ef6a10b337c34b52432e70ae4c04a2065027ccdb53d01e40"
+    },
+    {
+      "path": "mod/page/dfo_town.js",
+      "sha256": "12db9c01c359c512dfea71404e7df5702ee060f7f188482112916e9acb27fb93"
+    },
+    {
+      "path": "mod/page/ru_items.js",
+      "sha256": "2725de910acef9825a6156f4519e81db942a9984ca7ebd9033dfecfc83c24557"
+    },
+    {
+      "path": "mod/page/ru_locale.js",
+      "sha256": "a67a687d7e3796c1e660daf74e0e8d982f141d71ef357297e9bab6ffe8c8063b"
+    },
+    {
+      "path": "mod/transforms.cjs",
+      "sha256": "79bbc1bfab8f1669c7427f9da7086ef0966a0498b6ea5a75417ce8acb176c3ad"
+    },
+    {
+      "path": "mod/version.json",
+      "sha256": "c364c7040dc5f798e076742d7e918ebaf9ab5ee4e6a0fb4e05125bc5cf833998"
+    }
+  ],
+  "fonts": {
+    "nodes": [
+      {
+        "text": "ШРИФТЫ СООБЩЕСТВА · DFO Online",
+        "font": "\"DFO Flexi\", \"DFO Gabin\", \"DFO Ritalin\", sans-serif"
+      },
+      {
+        "text": "Игрок Dragonborn №5. Ёжик и йод. ~40 зол. [10–20] → ± × ∞",
+        "font": "\"DFO Gabin\", \"DFO Flexi\", \"DFO Ritalin\", sans-serif"
+      },
+      {
+        "text": "Текст с заданным в игре шрифтом тоже заменён.",
+        "font": "\"DFO Gabin\", \"DFO Flexi\", \"DFO Ritalin\", sans-serif"
+      },
+      {
+        "text": "Проверка латиницы и кириллицы",
+        "font": "\"DFO Gabin\", \"DFO Flexi\", \"DFO Ritalin\", sans-serif"
+      },
+      {
+        "text": "Продолжить",
+        "font": "\"DFO Gabin\", \"DFO Flexi\", \"DFO Ritalin\", sans-serif"
+      },
+      {
+        "text": "Название сигила",
+        "font": "\"DFO Gabin\", \"DFO Flexi\", \"DFO Ritalin\", sans-serif"
+      },
+      {
+        "text": "Название сигила",
+        "font": "\"DFO Ckazka\", \"DFO Gabin\", \"DFO Flexi\", sans-serif"
+      },
+      {
+        "text": "Название набора",
+        "font": "\"DFO Gabin\", \"DFO Flexi\", \"DFO Ritalin\", sans-serif"
+      },
+      {
+        "text": "Название набора",
+        "font": "\"DFO Ritalin\", \"DFO Gabin\", \"DFO Flexi\", sans-serif"
+      },
+      {
+        "text": "Легендарное свойство",
+        "font": "\"DFO Wolga\", \"DFO Gabin\", \"DFO Flexi\", sans-serif"
+      }
+    ],
+    "classic": [
+      {
+        "name": "FONT0000",
+        "height": 11,
+        "scale": 2.008458362210701,
+        "measured": 283.7997594197589,
+        "drawn": 570.0000000000003,
+        "batches": 1,
+        "nativeBitmapUnused": true
+      },
+      {
+        "name": "FONT0001",
+        "height": 14,
+        "scale": 1.6437020711344874,
+        "measured": 346.77817227947185,
+        "drawn": 569.9999999999999,
+        "batches": 1,
+        "nativeBitmapUnused": true
+      },
+      {
+        "name": "FONT0002",
+        "height": 5,
+        "scale": 3,
+        "measured": 124.6851667717322,
+        "drawn": 374.05550031519664,
+        "batches": 1,
+        "nativeBitmapUnused": true
+      },
+      {
+        "name": "FONT0003",
+        "height": 7,
+        "scale": 3,
+        "measured": 174.7197106204816,
+        "drawn": 524.1591318614447,
+        "batches": 1,
+        "nativeBitmapUnused": true
+      },
+      {
+        "name": "FONT0004",
+        "height": 6,
+        "scale": 3,
+        "measured": 154.7998687744142,
+        "drawn": 464.39960632324187,
+        "batches": 1,
+        "nativeBitmapUnused": true
+      }
+    ],
+    "defaultFont": "10px \"DFO Gabin\", \"DFO Flexi\", \"DFO Ritalin\", sans-serif",
+    "resetFont": "10px \"DFO Gabin\", \"DFO Flexi\", \"DFO Ritalin\", sans-serif",
+    "invalidFont": "10px \"DFO Gabin\", \"DFO Flexi\", \"DFO Ritalin\", sans-serif",
+    "mapped": "italic bold 24px \"DFO Gabin\", \"DFO Flexi\", \"DFO Ritalin\", sans-serif",
+    "offscreen": "12px \"DFO Gabin\", \"DFO Flexi\", \"DFO Ritalin\", sans-serif",
+    "uploads": 4,
+    "releases": 0,
+    "warm": {
+      "canvasChanges": 5,
+      "classicDraws": 7,
+      "classicBatches": 7,
+      "glyphsDrawn": 210,
+      "faces": 3,
+      "failures": [],
+      "enabled": true
+    },
+    "hot": {
+      "canvasChanges": 5,
+      "classicDraws": 1007,
+      "classicBatches": 1007,
+      "glyphsDrawn": 14210,
+      "faces": 3,
+      "failures": [],
+      "enabled": true
+    },
+    "uploadsBefore": 4,
+    "uploadsAfter": 4,
+    "platform": [
+      {
+        "selector": "#font-heading",
+        "fonts": [
+          {
+            "familyName": "Flexi IBM VGA False",
+            "postScriptName": "Flexi_IBM_VGA_False",
+            "isCustomFont": true,
+            "glyphCount": 30
+          }
+        ]
+      },
+      {
+        "selector": "#font-body",
+        "fonts": [
+          {
+            "familyName": "Flexi IBM VGA False",
+            "postScriptName": "Flexi_IBM_VGA_False",
+            "isCustomFont": true,
+            "glyphCount": 4
+          },
+          {
+            "familyName": "Gabin",
+            "postScriptName": "Gabin-Regular",
+            "isCustomFont": true,
+            "glyphCount": 53
+          }
+        ]
+      }
+    ],
+    "errors": [],
+    "external": [],
+    "disabled": {
+      "installed": false,
+      "font": "14px Georgia",
+      "style": false
+    }
+  },
+  "cardStates": {
+    "checked": 13760,
+    "axes": {
+      "template states": 9018,
+      "rarity/identity": 112,
+      "condition thresholds": 80,
+      "crafting": 40,
+      "extended tier labels": 64,
+      "heirloom": 8,
+      "long metadata": 8,
+      "equipped": 8,
+      "realm restrictions": 8,
+      "armor materials": 130,
+      "weapon materials": 100,
+      "money edge cases": 32,
+      "enchantment catalog": 852,
+      "affix catalog": 852,
+      "sockets": 246,
+      "techniques": 48,
+      "legendary records": 80,
+      "aetheric records": 180,
+      "gilded records": 10,
+      "sigil/set stages": 1512,
+      "active set tiers": 336,
+      "rarity disabled": 16,
+      "lighting": 20
+    },
+    "metals": {
+      "Steel": {
+        "label": "Сталь",
+        "color": "rgb(198, 203, 209)",
+        "stroke": "rgba(0, 0, 0, 0)"
+      },
+      "Iron": {
+        "label": "Железо",
+        "color": "rgb(116, 121, 128)",
+        "stroke": "rgba(0, 0, 0, 0)"
+      },
+      "Silver": {
+        "label": "Серебро",
+        "color": "rgb(255, 255, 255)",
+        "stroke": "rgba(0, 0, 0, 0)"
+      },
+      "Elven": {
+        "label": "Эльфийский металл",
+        "color": "rgb(149, 207, 255)",
+        "stroke": "rgba(0, 0, 0, 0)"
+      },
+      "Dwarven": {
+        "label": "Двемерский металл",
+        "color": "rgb(223, 184, 79)",
+        "stroke": "rgba(0, 0, 0, 0)"
+      },
+      "Mithril": {
+        "label": "Мифрил",
+        "color": "rgb(64, 191, 255)",
+        "stroke": "rgba(0, 0, 0, 0)"
+      },
+      "Adamantium": {
+        "label": "Адамантит",
+        "color": "rgb(203, 179, 232)",
+        "stroke": "rgba(0, 0, 0, 0)"
+      },
+      "Ebony": {
+        "label": "Эбонит",
+        "color": "rgb(16, 17, 22)",
+        "stroke": "rgb(244, 241, 232)"
+      },
+      "Orcish": {
+        "label": "Орочий металл",
+        "color": "rgb(97, 200, 126)",
+        "stroke": "rgba(0, 0, 0, 0)"
+      },
+      "Daedric": {
+        "label": "Даэдрический металл",
+        "color": "rgb(19, 14, 16)",
+        "stroke": "rgb(240, 90, 85)"
+      }
+    },
+    "images": 5074,
+    "failures": [],
+    "stats": {
+      "dressed": 14766,
+      "failures": 0,
+      "lastError": "",
+      "layouts": 14768,
+      "balances": 14771,
+      "balanceTrials": 4160,
+      "placements": 14802,
+      "observerCallbacks": 207,
+      "ready": true,
+      "active": 1,
+      "pending": 0
+    },
+    "lifecycle": {
+      "cycles": 1000,
+      "heapGrowthBytes": 286252,
+      "repeatedNativeFits": {
+        "layouts": 0,
+        "mutations": 0
+      }
+    }
+  },
+  "bounds": {
+    "catalog": {
+      "templates": 483,
+      "checked": 501,
+      "groups": [
+        "Armor",
+        "Books",
+        "CreatureIngredients1",
+        "CreatureIngredients2",
+        "CreatureIngredients3",
+        "Currency",
+        "Deeds",
+        "Drugs",
+        "Furniture",
+        "Gems",
+        "Jewellery",
+        "Maps",
+        "MensClothing",
+        "MetalIngredients",
+        "MiscItems",
+        "MiscellaneousIngredients1",
+        "MiscellaneousIngredients2",
+        "Paintings",
+        "PlantIngredients1",
+        "PlantIngredients2",
+        "QuestItems",
+        "ReligiousItems",
+        "Transportation",
+        "UselessItems1",
+        "UselessItems2",
+        "Weapons",
+        "WomensClothing"
+      ],
+      "customFixtures": [
+        513,
+        514,
+        515,
+        516,
+        517,
+        518,
+        519,
+        520,
+        521,
+        522,
+        523,
+        524,
+        525,
+        526,
+        563,
+        1330,
+        1342,
+        1800,
+        1830,
+        9001,
+        9002,
+        9003,
+        9004,
+        9005,
+        9006,
+        9007
+      ],
+      "skipped": [],
+      "failures": []
+    },
+    "viewportCases": 132,
+    "scales": 44,
+    "renderTiming": {
+      "medianMs": 4.5,
+      "p95Ms": 11.5,
+      "maxMs": 12.400000000372529
+    },
+    "performance": {
+      "dressed": 636,
+      "failures": 0,
+      "lastError": "",
+      "layouts": 656,
+      "balances": 712,
+      "balanceTrials": 1332,
+      "placements": 838,
+      "observerCallbacks": 343,
+      "ready": true,
+      "active": 1,
+      "pending": 0
+    },
+    "errors": []
+  },
+  "unitAndPackaging": {
+    "tests": 17,
+    "pass": 17,
+    "fail": 0,
+    "skipped": 0,
+    "goTests": "pass"
+  },
+  "nativeHooks": {
+    "changedAssets": 378,
+    "syntaxErrors": 0,
+    "missing": []
+  },
+  "installerUi": {
+    "status": "environment-blocked",
+    "reason": "Wine bootstrap aborts on unimplemented user32.dll.CreateDialogParamW and cannot load kernel32.dll, before installer launch"
+  },
+  "limits": [
+    "Actual released font/renderer code with a recording renderer port; draw call counts are not live-game FPS.",
+    "Real FNT headers and glyph tables from local ARENA2; game data is not included in the mod.",
+    "System fallback is retained for symbols/scripts missing from all supplied faces.",
+    "Text baked into image/texture pixels is artwork and is not redrawn by replacing fonts.",
+    "No multiplayer account/session was used.",
+    "Native operating-system menus/dialogs retain OS typography."
+  ],
+  "trade": {
+    "gameVersion": "0.1.14536",
+    "language": "ru",
+    "rows": [
+      {
+        "id": "steel",
+        "mode": "Sell",
+        "quality": 1,
+        "priceAdjustment": 800,
+        "skills": {
+          "mercantile": 0,
+          "personality": 20
+        },
+        "inventory": "~240",
+        "trade": "~240"
+      },
+      {
+        "id": "rare",
+        "mode": "Sell",
+        "quality": 1,
+        "priceAdjustment": 800,
+        "skills": {
+          "mercantile": 0,
+          "personality": 20
+        },
+        "inventory": "~1 370",
+        "trade": "~1 370"
+      },
+      {
+        "id": "unknown",
+        "mode": "Sell",
+        "quality": 1,
+        "priceAdjustment": 800,
+        "skills": {
+          "mercantile": 0,
+          "personality": 20
+        },
+        "inventory": "~40 000",
+        "trade": "~40 000"
+      },
+      {
+        "id": "unknownRare",
+        "mode": "Sell",
+        "quality": 1,
+        "priceAdjustment": 800,
+        "skills": {
+          "mercantile": 0,
+          "personality": 20
+        },
+        "inventory": "~800",
+        "trade": "~800"
+      },
+      {
+        "id": "stack",
+        "mode": "Sell",
+        "quality": 1,
+        "priceAdjustment": 800,
+        "skills": {
+          "mercantile": 0,
+          "personality": 20
+        },
+        "inventory": "~30",
+        "trade": "~30"
+      },
+      {
+        "id": "ruhn",
+        "mode": "Sell",
+        "quality": 1,
+        "priceAdjustment": 800,
+        "skills": {
+          "mercantile": 0,
+          "personality": 20
+        },
+        "inventory": "~320",
+        "trade": "~320"
+      },
+      {
+        "id": "found",
+        "mode": "Sell",
+        "quality": 1,
+        "priceAdjustment": 800,
+        "skills": {
+          "mercantile": 0,
+          "personality": 20
+        },
+        "inventory": "~80",
+        "trade": "~80"
+      },
+      {
+        "id": "crafted",
+        "mode": "Sell",
+        "quality": 1,
+        "priceAdjustment": 800,
+        "skills": {
+          "mercantile": 0,
+          "personality": 20
+        },
+        "inventory": "~240",
+        "trade": "~240"
+      },
+      {
+        "id": "effects",
+        "mode": "Sell",
+        "quality": 1,
+        "priceAdjustment": 800,
+        "skills": {
+          "mercantile": 0,
+          "personality": 20
+        },
+        "inventory": "~800",
+        "trade": "~800"
+      },
+      {
+        "id": "steel",
+        "mode": "Sell",
+        "quality": 20,
+        "priceAdjustment": 1250,
+        "skills": {
+          "mercantile": 100,
+          "personality": 90
+        },
+        "inventory": "~240",
+        "trade": "~240"
+      },
+      {
+        "id": "rare",
+        "mode": "Sell",
+        "quality": 20,
+        "priceAdjustment": 1250,
+        "skills": {
+          "mercantile": 100,
+          "personality": 90
+        },
+        "inventory": "~1 370",
+        "trade": "~1 370"
+      },
+      {
+        "id": "unknown",
+        "mode": "Sell",
+        "quality": 20,
+        "priceAdjustment": 1250,
+        "skills": {
+          "mercantile": 100,
+          "personality": 90
+        },
+        "inventory": "~40 000",
+        "trade": "~40 000"
+      },
+      {
+        "id": "unknownRare",
+        "mode": "Sell",
+        "quality": 20,
+        "priceAdjustment": 1250,
+        "skills": {
+          "mercantile": 100,
+          "personality": 90
+        },
+        "inventory": "~800",
+        "trade": "~800"
+      },
+      {
+        "id": "stack",
+        "mode": "Sell",
+        "quality": 20,
+        "priceAdjustment": 1250,
+        "skills": {
+          "mercantile": 100,
+          "personality": 90
+        },
+        "inventory": "~30",
+        "trade": "~30"
+      },
+      {
+        "id": "ruhn",
+        "mode": "Sell",
+        "quality": 20,
+        "priceAdjustment": 1250,
+        "skills": {
+          "mercantile": 100,
+          "personality": 90
+        },
+        "inventory": "~320",
+        "trade": "~320"
+      },
+      {
+        "id": "found",
+        "mode": "Sell",
+        "quality": 20,
+        "priceAdjustment": 1250,
+        "skills": {
+          "mercantile": 100,
+          "personality": 90
+        },
+        "inventory": "~80",
+        "trade": "~80"
+      },
+      {
+        "id": "crafted",
+        "mode": "Sell",
+        "quality": 20,
+        "priceAdjustment": 1250,
+        "skills": {
+          "mercantile": 100,
+          "personality": 90
+        },
+        "inventory": "~240",
+        "trade": "~240"
+      },
+      {
+        "id": "effects",
+        "mode": "Sell",
+        "quality": 20,
+        "priceAdjustment": 1250,
+        "skills": {
+          "mercantile": 100,
+          "personality": 90
+        },
+        "inventory": "~800",
+        "trade": "~800"
+      },
+      {
+        "id": "unknown",
+        "mode": "SellMagic",
+        "quality": 10,
+        "priceAdjustment": 1000,
+        "skills": {
+          "mercantile": 60,
+          "personality": 70
+        },
+        "inventory": "~40 000",
+        "trade": "~40 000"
+      },
+      {
+        "id": "unknownRare",
+        "mode": "SellMagic",
+        "quality": 10,
+        "priceAdjustment": 1000,
+        "skills": {
+          "mercantile": 60,
+          "personality": 70
+        },
+        "inventory": "~800",
+        "trade": "~800"
+      },
+      {
+        "id": "effects",
+        "mode": "SellMagic",
+        "quality": 10,
+        "priceAdjustment": 1000,
+        "skills": {
+          "mercantile": 60,
+          "personality": 70
+        },
+        "inventory": "~800",
+        "trade": "~800"
+      },
+      {
+        "id": "steel",
+        "mode": "Buy",
+        "quality": 15,
+        "priceAdjustment": 900,
+        "skills": {
+          "mercantile": 20,
+          "personality": 50
+        },
+        "inventory": "~240",
+        "trade": "~240"
+      },
+      {
+        "id": "rare",
+        "mode": "Buy",
+        "quality": 15,
+        "priceAdjustment": 900,
+        "skills": {
+          "mercantile": 20,
+          "personality": 50
+        },
+        "inventory": "~1 370",
+        "trade": "~1 370"
+      },
+      {
+        "id": "unknown",
+        "mode": "Buy",
+        "quality": 15,
+        "priceAdjustment": 900,
+        "skills": {
+          "mercantile": 20,
+          "personality": 50
+        },
+        "inventory": "~40 000",
+        "trade": "~40 000"
+      },
+      {
+        "id": "unknownRare",
+        "mode": "Buy",
+        "quality": 15,
+        "priceAdjustment": 900,
+        "skills": {
+          "mercantile": 20,
+          "personality": 50
+        },
+        "inventory": "~800",
+        "trade": "~800"
+      },
+      {
+        "id": "stack",
+        "mode": "Buy",
+        "quality": 15,
+        "priceAdjustment": 900,
+        "skills": {
+          "mercantile": 20,
+          "personality": 50
+        },
+        "inventory": "~30",
+        "trade": "~30"
+      },
+      {
+        "id": "ruhn",
+        "mode": "Buy",
+        "quality": 15,
+        "priceAdjustment": 900,
+        "skills": {
+          "mercantile": 20,
+          "personality": 50
+        },
+        "inventory": "~320",
+        "trade": "~320"
+      },
+      {
+        "id": "found",
+        "mode": "Buy",
+        "quality": 15,
+        "priceAdjustment": 900,
+        "skills": {
+          "mercantile": 20,
+          "personality": 50
+        },
+        "inventory": "~80",
+        "trade": "~80"
+      },
+      {
+        "id": "crafted",
+        "mode": "Buy",
+        "quality": 15,
+        "priceAdjustment": 900,
+        "skills": {
+          "mercantile": 20,
+          "personality": 50
+        },
+        "inventory": "~240",
+        "trade": "~240"
+      },
+      {
+        "id": "effects",
+        "mode": "Buy",
+        "quality": 15,
+        "priceAdjustment": 900,
+        "skills": {
+          "mercantile": 20,
+          "personality": 50
+        },
+        "inventory": "~800",
+        "trade": "~800"
+      }
+    ],
+    "unknownPowersRemainHidden": true,
+    "errors": []
+  }
+}

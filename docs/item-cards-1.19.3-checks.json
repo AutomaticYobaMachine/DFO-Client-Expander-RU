@@ -1,0 +1,1377 @@
+{
+  "modVersion": "1.19.3",
+  "date": "2026-11-05",
+  "original": "https://github.com/Lattymoy/daggerfall-js-source",
+  "publicSourceCommit": "a3eb1605ea1dc391b691fe314377458a7e63e483",
+  "comprehensiveStatesGameVersion": "0.1.14533",
+  "latestCompatibilityGameVersion": "0.1.14536",
+  "moduleSource": "Final installer payload; all 31 embedded mod files match src/mod byte for byte",
+  "matchingPayloadFiles": [
+    {
+      "path": "mod/dungeon-live-transform.cjs",
+      "sha256": "0f02ad8b3f739ce51b2bfc013a28d56c9db3694fe982a0a9d4f5139b5e175942"
+    },
+    {
+      "path": "mod/dungeon-nav-transform.cjs",
+      "sha256": "c0eb26bd65f95435156690a96163fbb1027e536984faf6ab2c45dd6ff6cc5de8"
+    },
+    {
+      "path": "mod/dungeon-transform.cjs",
+      "sha256": "d56730730e319f1ea13b3740a83d3ec6d583e95bcd61fbab6511acd3b89e557b"
+    },
+    {
+      "path": "mod/fonts/FONT-NOTICES.txt",
+      "sha256": "0f0175f61faad7503d341bc8b09692a6e36a9a62c07e588472dfe0f292f0b9b6"
+    },
+    {
+      "path": "mod/fonts/item-font-legendary.otf",
+      "sha256": "431b3d0fd0e324d427dc8076d0bd9591713797362f0d959c3fbc601cc815e21d"
+    },
+    {
+      "path": "mod/fonts/item-font-set.ttf",
+      "sha256": "16fcbd56ca32e92f4551649434793f8da873337e87d1e81e3a35c4569603c6a6"
+    },
+    {
+      "path": "mod/fonts/item-font-sigil.ttf",
+      "sha256": "1aa16df54414a45b16f15d601340143287e7def62ffc5c8a6425f968703f8067"
+    },
+    {
+      "path": "mod/fonts/item-font-text.ttf",
+      "sha256": "f2a009268cc0f4cf5305f2039470def5cc7ad4bd3b43e8451c97627238f46bc1"
+    },
+    {
+      "path": "mod/fonts/item-font-title.ttf",
+      "sha256": "10e6edc2e999a2b83728ba9eb27fdbbe79a685022f7cdb6a76ebece55c907708"
+    },
+    {
+      "path": "mod/hook.cjs",
+      "sha256": "c5da2c315345b57c718cf42809cfdd51397122ced54e7db160d20ccfd1401d12"
+    },
+    {
+      "path": "mod/item-cards-transform.cjs",
+      "sha256": "f2310a2492102126c41a9aa6c31c81bfef61f4b15fd26bc2e8e7a323be7a96a2"
+    },
+    {
+      "path": "mod/loot-store.cjs",
+      "sha256": "e2ab6cc10e85f02d635b4d234861993ceb1a8f9bec7dd7940163767967d0d90e"
+    },
+    {
+      "path": "mod/loot-tags-transform.cjs",
+      "sha256": "3ea51e36a635c095d100fec52543fd496fd2ade4bc49ec32b8db234e86c3a381"
+    },
+    {
+      "path": "mod/nearby-loot-transform.cjs",
+      "sha256": "e5105a051e757bc587e00c7b8c2e723969d8f382c13e96e37a0ae7bc1c011862"
+    },
+    {
+      "path": "mod/page/dfo_dungeon_graph.js",
+      "sha256": "87457b92034c843fca777fdef53aca35f6036c7754c5e4a9d2cf4e997c3bbf5b"
+    },
+    {
+      "path": "mod/page/dfo_dungeon_live.js",
+      "sha256": "1e7eff562779cf0edef050b5bfdce747649df715e4896e59301e2b1fa7f0cff7"
+    },
+    {
+      "path": "mod/page/dfo_dungeon_live_model.js",
+      "sha256": "c16df9b4d71fbb489c729251861fb60a4c0907245244929feee3e393088fb59e"
+    },
+    {
+      "path": "mod/page/dfo_dungeon_model.js",
+      "sha256": "38b6a75843766b61d9d75bc5363b8e408f2ca61cef1a903808c2bfd42d38d33c"
+    },
+    {
+      "path": "mod/page/dfo_dungeon_nav.js",
+      "sha256": "158d323d9bfccaee9a078c7d588cbdf34d26d80f46745425e65707e890767d1b"
+    },
+    {
+      "path": "mod/page/dfo_dungeon_nav_model.js",
+      "sha256": "d24e5d2335d09a0ea091c8c3966f3ad7fc9734976b6bc287ca88fc76d82bba24"
+    },
+    {
+      "path": "mod/page/dfo_dungeons.js",
+      "sha256": "d87103af96da1e4b2519721cf0520f1062e181a1a09b4a4ffcdd4a58bb9c5eab"
+    },
+    {
+      "path": "mod/page/dfo_item_cards.js",
+      "sha256": "adbd984ee4cd660a581b8a0166ce168d05d98c643a9d6a74bc9b296a3971b5b6"
+    },
+    {
+      "path": "mod/page/dfo_loot.js",
+      "sha256": "5fe93293827bba53dd283a1994d5321ed4a916608ae9c3727ffbc71b71f584c1"
+    },
+    {
+      "path": "mod/page/dfo_loot_rules.js",
+      "sha256": "89ca66d3655eef111feca0c97ec3aab8fd1db1f5a7c1222156a98779f30331ac"
+    },
+    {
+      "path": "mod/page/dfo_loot_ui.js",
+      "sha256": "11d528f20f01c9c78af0d3173ad0fa1e3ca23077886b0e36b8b386c560e486c4"
+    },
+    {
+      "path": "mod/page/dfo_marks.js",
+      "sha256": "2d6d06b8cb677250ef6a10b337c34b52432e70ae4c04a2065027ccdb53d01e40"
+    },
+    {
+      "path": "mod/page/dfo_town.js",
+      "sha256": "12db9c01c359c512dfea71404e7df5702ee060f7f188482112916e9acb27fb93"
+    },
+    {
+      "path": "mod/page/ru_items.js",
+      "sha256": "2725de910acef9825a6156f4519e81db942a9984ca7ebd9033dfecfc83c24557"
+    },
+    {
+      "path": "mod/page/ru_locale.js",
+      "sha256": "a67a687d7e3796c1e660daf74e0e8d982f141d71ef357297e9bab6ffe8c8063b"
+    },
+    {
+      "path": "mod/transforms.cjs",
+      "sha256": "6eb5acdfdafdabc5318bb70253ff2874d1179d5a1189c5ce7b74233bd313d00b"
+    },
+    {
+      "path": "mod/version.json",
+      "sha256": "fbbcb0d71afe51449dd0a76e1a7f2ee1d241d54e9c50e1a1a59f168f8ee5a783"
+    }
+  ],
+  "stateChecks": {
+    "checked": 13760,
+    "axes": {
+      "template states": 9018,
+      "rarity/identity": 112,
+      "condition thresholds": 80,
+      "crafting": 40,
+      "extended tier labels": 64,
+      "heirloom": 8,
+      "long metadata": 8,
+      "equipped": 8,
+      "realm restrictions": 8,
+      "armor materials": 130,
+      "weapon materials": 100,
+      "money edge cases": 32,
+      "enchantment catalog": 852,
+      "affix catalog": 852,
+      "sockets": 246,
+      "techniques": 48,
+      "legendary records": 80,
+      "aetheric records": 180,
+      "gilded records": 10,
+      "sigil/set stages": 1512,
+      "active set tiers": 336,
+      "rarity disabled": 16,
+      "lighting": 20
+    },
+    "metals": {
+      "Steel": {
+        "label": "Сталь",
+        "color": "rgb(198, 203, 209)",
+        "stroke": "rgba(0, 0, 0, 0)"
+      },
+      "Iron": {
+        "label": "Железо",
+        "color": "rgb(116, 121, 128)",
+        "stroke": "rgba(0, 0, 0, 0)"
+      },
+      "Silver": {
+        "label": "Серебро",
+        "color": "rgb(255, 255, 255)",
+        "stroke": "rgba(0, 0, 0, 0)"
+      },
+      "Elven": {
+        "label": "Эльфийский металл",
+        "color": "rgb(149, 207, 255)",
+        "stroke": "rgba(0, 0, 0, 0)"
+      },
+      "Dwarven": {
+        "label": "Двемерский металл",
+        "color": "rgb(223, 184, 79)",
+        "stroke": "rgba(0, 0, 0, 0)"
+      },
+      "Mithril": {
+        "label": "Мифрил",
+        "color": "rgb(64, 191, 255)",
+        "stroke": "rgba(0, 0, 0, 0)"
+      },
+      "Adamantium": {
+        "label": "Адамантит",
+        "color": "rgb(203, 179, 232)",
+        "stroke": "rgba(0, 0, 0, 0)"
+      },
+      "Ebony": {
+        "label": "Эбонит",
+        "color": "rgb(16, 17, 22)",
+        "stroke": "rgb(244, 241, 232)"
+      },
+      "Orcish": {
+        "label": "Орочий металл",
+        "color": "rgb(97, 200, 126)",
+        "stroke": "rgba(0, 0, 0, 0)"
+      },
+      "Daedric": {
+        "label": "Даэдрический металл",
+        "color": "rgb(19, 14, 16)",
+        "stroke": "rgb(240, 90, 85)"
+      }
+    },
+    "images": 5042,
+    "failures": [],
+    "stats": {
+      "dressed": 14766,
+      "failures": 0,
+      "lastError": "",
+      "layouts": 14768,
+      "placements": 14802,
+      "observerCallbacks": 208,
+      "ready": true,
+      "active": 1,
+      "pending": 0
+    },
+    "lifecycle": {
+      "cycles": 1000,
+      "heapGrowthBytes": 287056,
+      "repeatedNativeFits": {
+        "layouts": 0,
+        "mutations": 0
+      }
+    }
+  },
+  "boundsAndCatalog": {
+    "catalog": {
+      "templates": 483,
+      "checked": 501,
+      "groups": [
+        "Armor",
+        "Books",
+        "CreatureIngredients1",
+        "CreatureIngredients2",
+        "CreatureIngredients3",
+        "Currency",
+        "Deeds",
+        "Drugs",
+        "Furniture",
+        "Gems",
+        "Jewellery",
+        "Maps",
+        "MensClothing",
+        "MetalIngredients",
+        "MiscItems",
+        "MiscellaneousIngredients1",
+        "MiscellaneousIngredients2",
+        "Paintings",
+        "PlantIngredients1",
+        "PlantIngredients2",
+        "QuestItems",
+        "ReligiousItems",
+        "Transportation",
+        "UselessItems1",
+        "UselessItems2",
+        "Weapons",
+        "WomensClothing"
+      ],
+      "customFixtures": [
+        513,
+        514,
+        515,
+        516,
+        517,
+        518,
+        519,
+        520,
+        521,
+        522,
+        523,
+        524,
+        525,
+        526,
+        563,
+        1330,
+        1342,
+        1800,
+        1830,
+        9001,
+        9002,
+        9003,
+        9004,
+        9005,
+        9006,
+        9007
+      ],
+      "skipped": [],
+      "failures": []
+    },
+    "viewportCases": 132,
+    "scales": 56,
+    "renderTiming": {
+      "medianMs": 4,
+      "p95Ms": 5.399999999906868,
+      "maxMs": 6.7999999998137355
+    },
+    "performance": {
+      "dressed": 636,
+      "failures": 0,
+      "lastError": "",
+      "layouts": 656,
+      "placements": 848,
+      "observerCallbacks": 361,
+      "ready": true,
+      "active": 1,
+      "pending": 0
+    },
+    "errors": []
+  },
+  "nativePricing": {
+    "quality": 10,
+    "priceAdjustment": 1000,
+    "skills": {
+      "mercantile": 60,
+      "personality": 70
+    },
+    "basePercent": 29.106,
+    "personalPercent": 33.793,
+    "rows": [
+      {
+        "name": "iron, whole",
+        "nominal": 1000,
+        "counterUnit": 1000,
+        "saleCondition": 100,
+        "nativeCost": 2000,
+        "nativeDefault": 291,
+        "nativePersonal": 338,
+        "nominalOverSale": 2.9585798816568047,
+        "empiricalDivide73Plus40": 192,
+        "resale": null,
+        "estimate40": 400,
+        "displayed": "~400"
+      },
+      {
+        "name": "iron, worn 20%",
+        "nominal": 1000,
+        "counterUnit": 1000,
+        "saleCondition": 20,
+        "nativeCost": 400,
+        "nativeDefault": 58,
+        "nativePersonal": 67,
+        "nominalOverSale": 14.925373134328359,
+        "empiricalDivide73Plus40": 192,
+        "resale": null,
+        "estimate40": 80,
+        "displayed": "~80"
+      },
+      {
+        "name": "iron, repaired by smith",
+        "nominal": 1000,
+        "counterUnit": 1000,
+        "saleCondition": 20,
+        "nativeCost": 400,
+        "nativeDefault": 58,
+        "nativePersonal": 67,
+        "nominalOverSale": 14.925373134328359,
+        "empiricalDivide73Plus40": 192,
+        "resale": null,
+        "estimate40": 80,
+        "displayed": "~80"
+      },
+      {
+        "name": "iron, self mended",
+        "nominal": 1000,
+        "counterUnit": 1000,
+        "saleCondition": 46,
+        "nativeCost": 920,
+        "nativeDefault": 133,
+        "nativePersonal": 154,
+        "nominalOverSale": 6.4935064935064934,
+        "empiricalDivide73Plus40": 192,
+        "resale": null,
+        "estimate40": 184,
+        "displayed": "~180"
+      },
+      {
+        "name": "daedric, whole",
+        "nominal": 1000,
+        "counterUnit": 500,
+        "saleCondition": 100,
+        "nativeCost": 1000,
+        "nativeDefault": 145,
+        "nativePersonal": 168,
+        "nominalOverSale": 5.9523809523809526,
+        "empiricalDivide73Plus40": 192,
+        "resale": null,
+        "estimate40": 200,
+        "displayed": "~200"
+      },
+      {
+        "name": "crafted rare",
+        "nominal": 2000,
+        "counterUnit": 600,
+        "saleCondition": 100,
+        "nativeCost": 1200,
+        "nativeDefault": 174,
+        "nativePersonal": 202,
+        "nominalOverSale": 9.900990099009901,
+        "empiricalDivide73Plus40": 384,
+        "resale": null,
+        "estimate40": 240,
+        "displayed": "~240"
+      },
+      {
+        "name": "three pieces",
+        "nominal": 3000,
+        "counterUnit": 1000,
+        "saleCondition": 100,
+        "nativeCost": 6000,
+        "nativeDefault": 873,
+        "nativePersonal": 1013,
+        "nominalOverSale": 2.9615004935834155,
+        "empiricalDivide73Plus40": 575,
+        "resale": null,
+        "estimate40": 1200,
+        "displayed": "~1 200"
+      },
+      {
+        "name": "counter-bought piece",
+        "nominal": 1000,
+        "counterUnit": 1000,
+        "saleCondition": 100,
+        "nativeCost": 2000,
+        "nativeDefault": 291,
+        "nativePersonal": 338,
+        "nominalOverSale": 2.9585798816568047,
+        "empiricalDivide73Plus40": 192,
+        "resale": {
+          "cost": 2000,
+          "paid": 95
+        },
+        "estimate40": 95,
+        "displayed": "~100"
+      },
+      {
+        "name": "identified enchanted",
+        "nominal": 2500,
+        "counterUnit": 2500,
+        "saleCondition": 100,
+        "nativeCost": 5000,
+        "nativeDefault": 727,
+        "nativePersonal": 844,
+        "nominalOverSale": 2.962085308056872,
+        "empiricalDivide73Plus40": 479,
+        "resale": null,
+        "estimate40": 1000,
+        "displayed": "~1 000"
+      },
+      {
+        "name": "unidentified enchanted",
+        "nominal": 2500,
+        "counterUnit": 2500,
+        "saleCondition": 100,
+        "nativeCost": 5000,
+        "nativeDefault": 727,
+        "nativePersonal": 844,
+        "nominalOverSale": 2.962085308056872,
+        "empiricalDivide73Plus40": 479,
+        "resale": null,
+        "estimate40": 1000,
+        "displayed": "~1 000"
+      }
+    ],
+    "shopSamples": [
+      {
+        "quality": 1,
+        "priceAdjustment": 800,
+        "basePercent": 14.559,
+        "personalPercent": 16.958
+      },
+      {
+        "quality": 1,
+        "priceAdjustment": 1000,
+        "basePercent": 18.199,
+        "personalPercent": 21.198
+      },
+      {
+        "quality": 1,
+        "priceAdjustment": 1250,
+        "basePercent": 22.75,
+        "personalPercent": 26.498
+      },
+      {
+        "quality": 10,
+        "priceAdjustment": 800,
+        "basePercent": 23.284,
+        "personalPercent": 27.034
+      },
+      {
+        "quality": 10,
+        "priceAdjustment": 1000,
+        "basePercent": 29.106,
+        "personalPercent": 33.793
+      },
+      {
+        "quality": 10,
+        "priceAdjustment": 1250,
+        "basePercent": 36.382,
+        "personalPercent": 42.242
+      },
+      {
+        "quality": 20,
+        "priceAdjustment": 800,
+        "basePercent": 34.157,
+        "personalPercent": 39.754
+      },
+      {
+        "quality": 20,
+        "priceAdjustment": 1000,
+        "basePercent": 42.697,
+        "personalPercent": 49.693
+      },
+      {
+        "quality": 20,
+        "priceAdjustment": 1250,
+        "basePercent": 53.371,
+        "personalPercent": 62.116
+      }
+    ],
+    "version": "0.1.14536",
+    "nativeAssets": [
+      {
+        "path": "assets/enhancedInventory-C54YOAiE.js",
+        "sha256": "7f87e58c2ea693b4e28cec67f617a77bfbb9106b1457b6a6206f43cb6d8301c7"
+      },
+      {
+        "path": "assets/enhancedInventory-D2519YAq.js",
+        "sha256": "5aa794ffe702d483f052d69de5b92c1abf1f1b81ec60d2e4dccdcbfe6974d5ba"
+      },
+      {
+        "path": "assets/equip-DkXfFLnE.js",
+        "sha256": "021dc1750f607bc03b4678501358ee2b95da8890d09ca1e05732ad22eb182736"
+      },
+      {
+        "path": "assets/worldTick-Cg4x9Bzt.js",
+        "sha256": "5c9ed9adc3dc496421c5d81cc1ac231becd591fa17720ee4ce1f8c0930137ffe"
+      }
+    ],
+    "limits": [
+      "Controlled item fixtures; player screenshots do not expose their hidden foundCondition/provenance fields.",
+      "Calls actual released JS with online=true; does not perform a live trade.",
+      "nativeDefault/nativePersonal show the haggle before the counter-bought resale cap; estimate40/displayed include that cap."
+    ]
+  },
+  "realTradeWindows": {
+    "english": {
+      "gameVersion": "0.1.14533",
+      "language": "en",
+      "rows": [
+        {
+          "id": "steel",
+          "mode": "Sell",
+          "quality": 1,
+          "priceAdjustment": 800,
+          "skills": {
+            "mercantile": 0,
+            "personality": 20
+          },
+          "inventory": "~240",
+          "trade": "~240"
+        },
+        {
+          "id": "rare",
+          "mode": "Sell",
+          "quality": 1,
+          "priceAdjustment": 800,
+          "skills": {
+            "mercantile": 0,
+            "personality": 20
+          },
+          "inventory": "~1 370",
+          "trade": "~1 370"
+        },
+        {
+          "id": "unknown",
+          "mode": "Sell",
+          "quality": 1,
+          "priceAdjustment": 800,
+          "skills": {
+            "mercantile": 0,
+            "personality": 20
+          },
+          "inventory": "~40 000",
+          "trade": "~40 000"
+        },
+        {
+          "id": "unknownRare",
+          "mode": "Sell",
+          "quality": 1,
+          "priceAdjustment": 800,
+          "skills": {
+            "mercantile": 0,
+            "personality": 20
+          },
+          "inventory": "~800",
+          "trade": "~800"
+        },
+        {
+          "id": "stack",
+          "mode": "Sell",
+          "quality": 1,
+          "priceAdjustment": 800,
+          "skills": {
+            "mercantile": 0,
+            "personality": 20
+          },
+          "inventory": "~30",
+          "trade": "~30"
+        },
+        {
+          "id": "ruhn",
+          "mode": "Sell",
+          "quality": 1,
+          "priceAdjustment": 800,
+          "skills": {
+            "mercantile": 0,
+            "personality": 20
+          },
+          "inventory": "~320",
+          "trade": "~320"
+        },
+        {
+          "id": "found",
+          "mode": "Sell",
+          "quality": 1,
+          "priceAdjustment": 800,
+          "skills": {
+            "mercantile": 0,
+            "personality": 20
+          },
+          "inventory": "~80",
+          "trade": "~80"
+        },
+        {
+          "id": "crafted",
+          "mode": "Sell",
+          "quality": 1,
+          "priceAdjustment": 800,
+          "skills": {
+            "mercantile": 0,
+            "personality": 20
+          },
+          "inventory": "~240",
+          "trade": "~240"
+        },
+        {
+          "id": "effects",
+          "mode": "Sell",
+          "quality": 1,
+          "priceAdjustment": 800,
+          "skills": {
+            "mercantile": 0,
+            "personality": 20
+          },
+          "inventory": "~800",
+          "trade": "~800"
+        },
+        {
+          "id": "steel",
+          "mode": "Sell",
+          "quality": 20,
+          "priceAdjustment": 1250,
+          "skills": {
+            "mercantile": 100,
+            "personality": 90
+          },
+          "inventory": "~240",
+          "trade": "~240"
+        },
+        {
+          "id": "rare",
+          "mode": "Sell",
+          "quality": 20,
+          "priceAdjustment": 1250,
+          "skills": {
+            "mercantile": 100,
+            "personality": 90
+          },
+          "inventory": "~1 370",
+          "trade": "~1 370"
+        },
+        {
+          "id": "unknown",
+          "mode": "Sell",
+          "quality": 20,
+          "priceAdjustment": 1250,
+          "skills": {
+            "mercantile": 100,
+            "personality": 90
+          },
+          "inventory": "~40 000",
+          "trade": "~40 000"
+        },
+        {
+          "id": "unknownRare",
+          "mode": "Sell",
+          "quality": 20,
+          "priceAdjustment": 1250,
+          "skills": {
+            "mercantile": 100,
+            "personality": 90
+          },
+          "inventory": "~800",
+          "trade": "~800"
+        },
+        {
+          "id": "stack",
+          "mode": "Sell",
+          "quality": 20,
+          "priceAdjustment": 1250,
+          "skills": {
+            "mercantile": 100,
+            "personality": 90
+          },
+          "inventory": "~30",
+          "trade": "~30"
+        },
+        {
+          "id": "ruhn",
+          "mode": "Sell",
+          "quality": 20,
+          "priceAdjustment": 1250,
+          "skills": {
+            "mercantile": 100,
+            "personality": 90
+          },
+          "inventory": "~320",
+          "trade": "~320"
+        },
+        {
+          "id": "found",
+          "mode": "Sell",
+          "quality": 20,
+          "priceAdjustment": 1250,
+          "skills": {
+            "mercantile": 100,
+            "personality": 90
+          },
+          "inventory": "~80",
+          "trade": "~80"
+        },
+        {
+          "id": "crafted",
+          "mode": "Sell",
+          "quality": 20,
+          "priceAdjustment": 1250,
+          "skills": {
+            "mercantile": 100,
+            "personality": 90
+          },
+          "inventory": "~240",
+          "trade": "~240"
+        },
+        {
+          "id": "effects",
+          "mode": "Sell",
+          "quality": 20,
+          "priceAdjustment": 1250,
+          "skills": {
+            "mercantile": 100,
+            "personality": 90
+          },
+          "inventory": "~800",
+          "trade": "~800"
+        },
+        {
+          "id": "unknown",
+          "mode": "SellMagic",
+          "quality": 10,
+          "priceAdjustment": 1000,
+          "skills": {
+            "mercantile": 60,
+            "personality": 70
+          },
+          "inventory": "~40 000",
+          "trade": "~40 000"
+        },
+        {
+          "id": "unknownRare",
+          "mode": "SellMagic",
+          "quality": 10,
+          "priceAdjustment": 1000,
+          "skills": {
+            "mercantile": 60,
+            "personality": 70
+          },
+          "inventory": "~800",
+          "trade": "~800"
+        },
+        {
+          "id": "effects",
+          "mode": "SellMagic",
+          "quality": 10,
+          "priceAdjustment": 1000,
+          "skills": {
+            "mercantile": 60,
+            "personality": 70
+          },
+          "inventory": "~800",
+          "trade": "~800"
+        },
+        {
+          "id": "steel",
+          "mode": "Buy",
+          "quality": 15,
+          "priceAdjustment": 900,
+          "skills": {
+            "mercantile": 20,
+            "personality": 50
+          },
+          "inventory": "~240",
+          "trade": "~240"
+        },
+        {
+          "id": "rare",
+          "mode": "Buy",
+          "quality": 15,
+          "priceAdjustment": 900,
+          "skills": {
+            "mercantile": 20,
+            "personality": 50
+          },
+          "inventory": "~1 370",
+          "trade": "~1 370"
+        },
+        {
+          "id": "unknown",
+          "mode": "Buy",
+          "quality": 15,
+          "priceAdjustment": 900,
+          "skills": {
+            "mercantile": 20,
+            "personality": 50
+          },
+          "inventory": "~40 000",
+          "trade": "~40 000"
+        },
+        {
+          "id": "unknownRare",
+          "mode": "Buy",
+          "quality": 15,
+          "priceAdjustment": 900,
+          "skills": {
+            "mercantile": 20,
+            "personality": 50
+          },
+          "inventory": "~800",
+          "trade": "~800"
+        },
+        {
+          "id": "stack",
+          "mode": "Buy",
+          "quality": 15,
+          "priceAdjustment": 900,
+          "skills": {
+            "mercantile": 20,
+            "personality": 50
+          },
+          "inventory": "~30",
+          "trade": "~30"
+        },
+        {
+          "id": "ruhn",
+          "mode": "Buy",
+          "quality": 15,
+          "priceAdjustment": 900,
+          "skills": {
+            "mercantile": 20,
+            "personality": 50
+          },
+          "inventory": "~320",
+          "trade": "~320"
+        },
+        {
+          "id": "found",
+          "mode": "Buy",
+          "quality": 15,
+          "priceAdjustment": 900,
+          "skills": {
+            "mercantile": 20,
+            "personality": 50
+          },
+          "inventory": "~80",
+          "trade": "~80"
+        },
+        {
+          "id": "crafted",
+          "mode": "Buy",
+          "quality": 15,
+          "priceAdjustment": 900,
+          "skills": {
+            "mercantile": 20,
+            "personality": 50
+          },
+          "inventory": "~240",
+          "trade": "~240"
+        },
+        {
+          "id": "effects",
+          "mode": "Buy",
+          "quality": 15,
+          "priceAdjustment": 900,
+          "skills": {
+            "mercantile": 20,
+            "personality": 50
+          },
+          "inventory": "~800",
+          "trade": "~800"
+        }
+      ],
+      "unknownPowersRemainHidden": true,
+      "errors": []
+    },
+    "russian": {
+      "gameVersion": "0.1.14536",
+      "language": "ru",
+      "rows": [
+        {
+          "id": "steel",
+          "mode": "Sell",
+          "quality": 1,
+          "priceAdjustment": 800,
+          "skills": {
+            "mercantile": 0,
+            "personality": 20
+          },
+          "inventory": "~240",
+          "trade": "~240"
+        },
+        {
+          "id": "rare",
+          "mode": "Sell",
+          "quality": 1,
+          "priceAdjustment": 800,
+          "skills": {
+            "mercantile": 0,
+            "personality": 20
+          },
+          "inventory": "~1 370",
+          "trade": "~1 370"
+        },
+        {
+          "id": "unknown",
+          "mode": "Sell",
+          "quality": 1,
+          "priceAdjustment": 800,
+          "skills": {
+            "mercantile": 0,
+            "personality": 20
+          },
+          "inventory": "~40 000",
+          "trade": "~40 000"
+        },
+        {
+          "id": "unknownRare",
+          "mode": "Sell",
+          "quality": 1,
+          "priceAdjustment": 800,
+          "skills": {
+            "mercantile": 0,
+            "personality": 20
+          },
+          "inventory": "~800",
+          "trade": "~800"
+        },
+        {
+          "id": "stack",
+          "mode": "Sell",
+          "quality": 1,
+          "priceAdjustment": 800,
+          "skills": {
+            "mercantile": 0,
+            "personality": 20
+          },
+          "inventory": "~30",
+          "trade": "~30"
+        },
+        {
+          "id": "ruhn",
+          "mode": "Sell",
+          "quality": 1,
+          "priceAdjustment": 800,
+          "skills": {
+            "mercantile": 0,
+            "personality": 20
+          },
+          "inventory": "~320",
+          "trade": "~320"
+        },
+        {
+          "id": "found",
+          "mode": "Sell",
+          "quality": 1,
+          "priceAdjustment": 800,
+          "skills": {
+            "mercantile": 0,
+            "personality": 20
+          },
+          "inventory": "~80",
+          "trade": "~80"
+        },
+        {
+          "id": "crafted",
+          "mode": "Sell",
+          "quality": 1,
+          "priceAdjustment": 800,
+          "skills": {
+            "mercantile": 0,
+            "personality": 20
+          },
+          "inventory": "~240",
+          "trade": "~240"
+        },
+        {
+          "id": "effects",
+          "mode": "Sell",
+          "quality": 1,
+          "priceAdjustment": 800,
+          "skills": {
+            "mercantile": 0,
+            "personality": 20
+          },
+          "inventory": "~800",
+          "trade": "~800"
+        },
+        {
+          "id": "steel",
+          "mode": "Sell",
+          "quality": 20,
+          "priceAdjustment": 1250,
+          "skills": {
+            "mercantile": 100,
+            "personality": 90
+          },
+          "inventory": "~240",
+          "trade": "~240"
+        },
+        {
+          "id": "rare",
+          "mode": "Sell",
+          "quality": 20,
+          "priceAdjustment": 1250,
+          "skills": {
+            "mercantile": 100,
+            "personality": 90
+          },
+          "inventory": "~1 370",
+          "trade": "~1 370"
+        },
+        {
+          "id": "unknown",
+          "mode": "Sell",
+          "quality": 20,
+          "priceAdjustment": 1250,
+          "skills": {
+            "mercantile": 100,
+            "personality": 90
+          },
+          "inventory": "~40 000",
+          "trade": "~40 000"
+        },
+        {
+          "id": "unknownRare",
+          "mode": "Sell",
+          "quality": 20,
+          "priceAdjustment": 1250,
+          "skills": {
+            "mercantile": 100,
+            "personality": 90
+          },
+          "inventory": "~800",
+          "trade": "~800"
+        },
+        {
+          "id": "stack",
+          "mode": "Sell",
+          "quality": 20,
+          "priceAdjustment": 1250,
+          "skills": {
+            "mercantile": 100,
+            "personality": 90
+          },
+          "inventory": "~30",
+          "trade": "~30"
+        },
+        {
+          "id": "ruhn",
+          "mode": "Sell",
+          "quality": 20,
+          "priceAdjustment": 1250,
+          "skills": {
+            "mercantile": 100,
+            "personality": 90
+          },
+          "inventory": "~320",
+          "trade": "~320"
+        },
+        {
+          "id": "found",
+          "mode": "Sell",
+          "quality": 20,
+          "priceAdjustment": 1250,
+          "skills": {
+            "mercantile": 100,
+            "personality": 90
+          },
+          "inventory": "~80",
+          "trade": "~80"
+        },
+        {
+          "id": "crafted",
+          "mode": "Sell",
+          "quality": 20,
+          "priceAdjustment": 1250,
+          "skills": {
+            "mercantile": 100,
+            "personality": 90
+          },
+          "inventory": "~240",
+          "trade": "~240"
+        },
+        {
+          "id": "effects",
+          "mode": "Sell",
+          "quality": 20,
+          "priceAdjustment": 1250,
+          "skills": {
+            "mercantile": 100,
+            "personality": 90
+          },
+          "inventory": "~800",
+          "trade": "~800"
+        },
+        {
+          "id": "unknown",
+          "mode": "SellMagic",
+          "quality": 10,
+          "priceAdjustment": 1000,
+          "skills": {
+            "mercantile": 60,
+            "personality": 70
+          },
+          "inventory": "~40 000",
+          "trade": "~40 000"
+        },
+        {
+          "id": "unknownRare",
+          "mode": "SellMagic",
+          "quality": 10,
+          "priceAdjustment": 1000,
+          "skills": {
+            "mercantile": 60,
+            "personality": 70
+          },
+          "inventory": "~800",
+          "trade": "~800"
+        },
+        {
+          "id": "effects",
+          "mode": "SellMagic",
+          "quality": 10,
+          "priceAdjustment": 1000,
+          "skills": {
+            "mercantile": 60,
+            "personality": 70
+          },
+          "inventory": "~800",
+          "trade": "~800"
+        },
+        {
+          "id": "steel",
+          "mode": "Buy",
+          "quality": 15,
+          "priceAdjustment": 900,
+          "skills": {
+            "mercantile": 20,
+            "personality": 50
+          },
+          "inventory": "~240",
+          "trade": "~240"
+        },
+        {
+          "id": "rare",
+          "mode": "Buy",
+          "quality": 15,
+          "priceAdjustment": 900,
+          "skills": {
+            "mercantile": 20,
+            "personality": 50
+          },
+          "inventory": "~1 370",
+          "trade": "~1 370"
+        },
+        {
+          "id": "unknown",
+          "mode": "Buy",
+          "quality": 15,
+          "priceAdjustment": 900,
+          "skills": {
+            "mercantile": 20,
+            "personality": 50
+          },
+          "inventory": "~40 000",
+          "trade": "~40 000"
+        },
+        {
+          "id": "unknownRare",
+          "mode": "Buy",
+          "quality": 15,
+          "priceAdjustment": 900,
+          "skills": {
+            "mercantile": 20,
+            "personality": 50
+          },
+          "inventory": "~800",
+          "trade": "~800"
+        },
+        {
+          "id": "stack",
+          "mode": "Buy",
+          "quality": 15,
+          "priceAdjustment": 900,
+          "skills": {
+            "mercantile": 20,
+            "personality": 50
+          },
+          "inventory": "~30",
+          "trade": "~30"
+        },
+        {
+          "id": "ruhn",
+          "mode": "Buy",
+          "quality": 15,
+          "priceAdjustment": 900,
+          "skills": {
+            "mercantile": 20,
+            "personality": 50
+          },
+          "inventory": "~320",
+          "trade": "~320"
+        },
+        {
+          "id": "found",
+          "mode": "Buy",
+          "quality": 15,
+          "priceAdjustment": 900,
+          "skills": {
+            "mercantile": 20,
+            "personality": 50
+          },
+          "inventory": "~80",
+          "trade": "~80"
+        },
+        {
+          "id": "crafted",
+          "mode": "Buy",
+          "quality": 15,
+          "priceAdjustment": 900,
+          "skills": {
+            "mercantile": 20,
+            "personality": 50
+          },
+          "inventory": "~240",
+          "trade": "~240"
+        },
+        {
+          "id": "effects",
+          "mode": "Buy",
+          "quality": 15,
+          "priceAdjustment": 900,
+          "skills": {
+            "mercantile": 20,
+            "personality": 50
+          },
+          "inventory": "~800",
+          "trade": "~800"
+        }
+      ],
+      "unknownPowersRemainHidden": true,
+      "errors": []
+    }
+  },
+  "nativeModulesBetweenReleases": {
+    "from": "0.1.14533",
+    "to": "0.1.14536",
+    "rows": [
+      {
+        "file": "enhancedInventory-C54YOAiE.js",
+        "hooks": [
+          "itemCards.inventory"
+        ],
+        "sha256": "7f87e58c2ea693b4e28cec67f617a77bfbb9106b1457b6a6206f43cb6d8301c7",
+        "previous": "enhancedInventory-DNLlVAMu.js",
+        "equalAfterImportHashNormalization": true
+      },
+      {
+        "file": "equip-DkXfFLnE.js",
+        "hooks": [
+          "itemCards.currency"
+        ],
+        "sha256": "021dc1750f607bc03b4678501358ee2b95da8890d09ca1e05732ad22eb182736",
+        "previous": "equip-DkXfFLnE.js",
+        "equalAfterImportHashNormalization": true
+      },
+      {
+        "file": "nativeInventory-BGIz19C6.js",
+        "hooks": [
+          "itemCards.effectLabels"
+        ],
+        "sha256": "f1382871c73f48aa274db20887f82c370acb2a36a2938e5a1c7c2126ba6a9f9f",
+        "previous": "nativeInventory-BGIz19C6.js",
+        "equalAfterImportHashNormalization": true
+      },
+      {
+        "file": "realmTradeLaw-BG6PyYoU.js",
+        "hooks": [
+          "itemCards.powers"
+        ],
+        "sha256": "09d3a488035a74d468bbc816f60295a8dc5861605e5c8bee29ec2c0dd13c25db",
+        "previous": "realmTradeLaw-BG6PyYoU.js",
+        "equalAfterImportHashNormalization": true
+      },
+      {
+        "file": "wagonKinds-DKbPC9Na.js",
+        "hooks": [
+          "itemCards.values"
+        ],
+        "sha256": "80f4f74b4219ad6051c3702117764859377fb84927740e55df77eff807e954f6",
+        "previous": "wagonKinds-DKbPC9Na.js",
+        "equalAfterImportHashNormalization": true
+      },
+      {
+        "file": "worldTick-Cg4x9Bzt.js",
+        "hooks": [
+          "itemCards.materials",
+          "itemCards.prices"
+        ],
+        "sha256": "5c9ed9adc3dc496421c5d81cc1ac231becd591fa17720ee4ce1f8c0930137ffe",
+        "previous": "worldTick-Cg4x9Bzt.js",
+        "equalAfterImportHashNormalization": true
+      }
+    ]
+  },
+  "unitAndPackaging": {
+    "tests": 14,
+    "pass": 14,
+    "fail": 0,
+    "skip": 0,
+    "latestNativeHookTests": 12,
+    "latestNativeHookPass": 12,
+    "nativeCardHooks": 7,
+    "goInstallerTests": "pass"
+  },
+  "localInstaller": {
+    "file": "DFO-Client-Expander-RU-1.19.3.exe",
+    "bytes": 13718016,
+    "sha256": "9f9a1308db330a508a9eaf693ada7feefb50d347a0afc02f0527bba81d36cfe4",
+    "scope": "Local pre-commit build; GitHub Actions EXE has its own checksum because Go embeds commit metadata."
+  },
+  "limits": [
+    "Controlled fixtures rendered by actual released JS; not a live multiplayer session.",
+    "Trade tests only hover native rows; they do not sell, identify or transfer items.",
+    "Public template catalog includes 26 dynamic-template fixtures; these are not proof of game-wide content completeness.",
+    "The 13760-state matrix ran on 0.1.14533; relevant native modules in 0.1.14536 match after import filename hash normalization. Current release separately passed real rendering, pricing, trade and viewport checks.",
+    "No tags or GitHub Release are created."
+  ]
+}

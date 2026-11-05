@@ -167,21 +167,28 @@ async function main() {
       assert.equal(result.columns,2);assert.deepEqual(result.bad,[],id+' no scroll');
       assert.deepEqual(result.textOutside,[],id+' all text stays inside the card');
       assert.equal(await card.locator('.dfo-item-footer').count(),1);assert.equal(await card.locator('.lore,.description').count(),0);
-      if(id==='steel'){assert.match(result.left,/Материал\nSteel/);assert.match(result.left,/Тип брони\nPlate/);assert.equal(result.money,'~240');}
+      if(id==='steel'){assert.match(result.left,/Материал\nСталь/);assert.match(result.left,/Тип брони\nPlate/);assert.equal(result.money,'~240');}
       if(id==='chain')assert.match(result.left,/Металл не указан/);
       if(id==='missing')assert.match(result.left,/Нет данных/);
       if(id==='rare')assert.match(result.money,/^~1\s370$/);
-      if(id==='unknown'){assert.doesNotMatch(result.text,/99\s999/);assert.equal(result.money,'—');}
+      if(id==='unknown'){assert.doesNotMatch(result.text,/99\s999/);assert.match(result.money,/^~40\s000$/);}
       if(id==='stack')assert.equal(result.money,'~30');
       if(id==='pellets'){assert.match(result.left,/Цена \/ кг\n~10 зол\./);assert.equal(result.money,'~30');}
       if(id==='base')assert.match(result.money,/\d/);
       if(id==='invalid')assert.equal(result.money,'—');
       if(id==='credit')assert.match(result.money,/20\s000/);
       if(id==='coins')assert.equal(result.money,'27');
-      if(!['credit','coins','unknown','invalid'].includes(id))assert.match(result.money,/^~[\d\s.,]+$/,'Estimated price is marked and rounded to tens');
+      if(!['credit','coins','invalid'].includes(id))assert.match(result.money,/^~[\d\s.,]+$/,'Estimated price is marked and rounded to tens');
       assert.equal(result.footer,result.money,'footer contains only the requested money number and coin');
       assert.equal(await card.locator('svg.dfo-item-coin').count(),1);assert.equal(await card.locator('.dfo-item-corners>i').count(),4);
-      if(id==='mail'){assert.match(result.left,/Кольчужная/);assert.match(result.left,/Steel/);}
+      const colors=await card.evaluate(n=>[...n.querySelectorAll('.dfo-effect-label,.dfo-effect-value,.dfo-effect-range')].map(s=>({kind:s.className,color:getComputedStyle(s).color,text:s.textContent})));
+      for(const part of colors)assert.equal(part.color,{'dfo-effect-label':'rgb(237, 213, 164)','dfo-effect-value':'rgb(243, 242, 237)','dfo-effect-range':'rgb(105, 107, 114)'}[part.kind],id+' effect token color');
+      if(id==='rare')assert.ok(colors.some(p=>p.kind==='dfo-effect-range'));
+      if(['steel','rare','ruhn'].includes(id)){
+        assert.equal(await card.locator('.dfo-item-head .dfo-item-material').count(),1,'Material belongs to the name block');
+        assert.equal(await card.locator('.dfo-item-stats dt').evaluateAll(rows=>rows.some(x=>x.textContent==='Материал')),false,'Material is not duplicated among general stats');
+      }
+      if(id==='mail'){assert.match(result.left,/Кольчужная/);assert.match(result.left,/Сталь/);}
       if(id==='fur')assert.match(result.left,/Мех/);
       if(['ruhn','wyrd'].includes(id)){assert.ok(result.blocks.some(x=>x[0].includes('sigilbox')),id+' native sigil');assert.ok(result.blocks.some(x=>x[0].includes('setbox')),id+' native set');}
       report.push({id,...result});
@@ -215,7 +222,7 @@ async function main() {
       for(const power of await original.locator('.inv-tip ul.rarity>li').allTextContents())assert.ok(powers.includes(power),id+' preserves native power: '+power);
     }
     assert.deepEqual(errors,[],'No browser exceptions');
-    for(const key of ['itemCards.inventory','itemCards.values','itemCards.materials','itemCards.powers','itemCards.prices','itemCards.currency'])assert.ok(logs.some(x=>x[0]===key&&x[1]===1),key);
+    for(const key of ['itemCards.inventory','itemCards.values','itemCards.materials','itemCards.powers','itemCards.prices','itemCards.currency','itemCards.effectLabels'])assert.ok(logs.some(x=>x[0]===key&&x[1]===1),key);
     await page.evaluate(()=>probe.show('ruhn'));await page.evaluate(()=>new Promise(r=>requestAnimationFrame(r)));
     if(process.env.DFO_SCREENSHOT_DIR){fs.mkdirSync(process.env.DFO_SCREENSHOT_DIR,{recursive:true});await page.screenshot({path:path.join(process.env.DFO_SCREENSHOT_DIR,'item-card-game.png')});}
     const ru=await browser.newPage({viewport:{width:1920,height:1080}});ru.on('pageerror',e=>errors.push(e.stack));

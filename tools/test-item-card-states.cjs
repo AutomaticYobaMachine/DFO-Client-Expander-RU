@@ -60,7 +60,7 @@ async function main(){
    for(const set of data.enums.sigilSets)for(const wornCount of [2,4,6,9])for(const renown of [1,20,40])push('active set tiers',set+' '+wornCount+' '+renown,mk(102,'Armor',{rarity:'rare',sigil:{set,party:1,xp:37500}}),{renown,wornCount,set});
    for(const item of gear)for(const isIdentified of [false,true])push('rarity disabled',item.group+' '+isIdentified,{...item,rarity:'rare',isIdentified,enchantments:[{type:0,param:4}],affixes:[{id:'stat',param:'strength',value:10}]},{rarityOff:true});
    for(const row of rows.filter(r=>/Torch|Lantern|Candle/.test(r.name)))for(const lit of [false,true])push('lighting',row.name+' '+lit,mk(row.index,row.groups?.[0]||'UselessItems2'),{lit});
-   window.stateAudit={scenarios,totals:{},failures:[],checked:0,images:0};
+   window.stateAudit={scenarios,totals:{},metals:{},failures:[],checked:0,images:0};
    window.checkState=(s,body)=>{
     const api=window.__dfoItemCards,item=structuredClone(s.item),before=JSON.stringify(item),savedItems=probe.entity.items,savedSlots=[...probe.entity.equip.slots];
     const host=document.createElement('div');host.className=body?'packtip packdetail open':'inv-tip';
@@ -90,9 +90,20 @@ async function main(){
      const powers=[...actual.querySelectorAll('.dfo-item-lines>li,.dfo-item-meta>li,.dfo-item-tier')].map(x=>x.getAttribute('aria-label')||x.textContent).sort();
      if(JSON.stringify(powers)!==JSON.stringify(expected.powers.sort()))throw new Error('A native power line was lost or duplicated');
      if(actual.dataset.rarity&&!actual.querySelector('.dfo-item-title>.dfo-item-tier'))throw new Error('Extended rarity label is missing from the left heading');
+     const material=actual.querySelector('.dfo-item-material'),metal=material?.querySelector('.dfo-item-metal');
+     if(material){
+      if(!material.closest('.dfo-item-head')||actual.querySelector('.dfo-item-stats .dfo-item-metal'))throw new Error('Material must be in the name header');
+      const nameBox=actual.querySelector('h3').getBoundingClientRect(),materialBox=material.getBoundingClientRect(),primaryBox=actual.querySelector('.dfo-item-primary')?.getBoundingClientRect();
+      if(materialBox.top<nameBox.bottom-.5||(primaryBox&&materialBox.bottom>primaryBox.top+.5))throw new Error('Material must be between the name and main stat');
+      const palette={Iron:'rgb(116, 121, 128)',Steel:'rgb(198, 203, 209)',Silver:'rgb(255, 255, 255)',Elven:'rgb(149, 207, 255)',Dwarven:'rgb(223, 184, 79)',Mithril:'rgb(64, 191, 255)',Adamantium:'rgb(203, 179, 232)',Orcish:'rgb(97, 200, 126)',Ebony:'rgb(16, 17, 22)',Daedric:'rgb(19, 14, 16)'};
+      if(palette[metal.dataset.metal]&&getComputedStyle(metal).color!==palette[metal.dataset.metal])throw new Error('Wrong metal color: '+metal.dataset.metal);
+      if(['Ebony','Daedric'].includes(metal.dataset.metal)&&!(parseFloat(getComputedStyle(metal).webkitTextStrokeWidth)>0))throw new Error('Dark metal name needs its outline');
+      if(palette[metal.dataset.metal])stateAudit.metals[metal.dataset.metal]={label:metal.textContent,color:getComputedStyle(metal).color,stroke:getComputedStyle(metal).webkitTextStrokeColor};
+     }
+     for(const [selector,color]of [['.dfo-effect-label','rgb(237, 213, 164)'],['.dfo-effect-value','rgb(243, 242, 237)'],['.dfo-effect-range','rgb(105, 107, 114)']])for(const span of actual.querySelectorAll(selector))if(getComputedStyle(span).color!==color)throw new Error('Effect text color overwritten by native selection style: '+selector);
      if(auditNative.readers.saysMaterial(item)){
       const word=auditNative.readers.material(item),expectedMaterial={Daedric:'Даэдрический металл',Orcish:'Орочий металл'}[word];
-      if(expectedMaterial){const row=[...actual.querySelectorAll('.dfo-item-stats>.pair')].find(n=>n.querySelector('dt').textContent==='Материал');if(row?.querySelector('dd').textContent!==expectedMaterial)throw new Error('Material was translated as a language skill')}
+      if(expectedMaterial){if(actual.querySelector('.dfo-item-material .dfo-item-metal')?.textContent!==expectedMaterial)throw new Error('Material was translated as a language skill')}
      }
      const statuses=[...actual.querySelectorAll('.dfo-item-statuses>p')].map(x=>[x.className,x.textContent]);
      if(JSON.stringify(statuses)!==JSON.stringify(expected.statuses))throw new Error('A native status was lost');
@@ -157,7 +168,8 @@ async function main(){
   assert.ok(heapAfter-heapBefore<Math.max(2*1024*1024,heapBefore*.2),'Tooltip cycles retained excessive heap');
   await page.evaluate(()=>{__cardTestActivate(20);__cardAuditDuel(false);probe.show('ruhn')});
   assert.deepEqual(errors,[]);
-  const report=await page.evaluate(()=>({checked:stateAudit.checked,axes:stateAudit.totals,images:stateAudit.images,failures:stateAudit.failures,stats:__dfoItemCards.stats()}));
+  const report=await page.evaluate(()=>({checked:stateAudit.checked,axes:stateAudit.totals,metals:stateAudit.metals,images:stateAudit.images,failures:stateAudit.failures,stats:__dfoItemCards.stats()}));
+  if(report.axes['weapon materials'])assert.equal(Object.keys(report.metals).length,10,'All ten native metals must exercise their colors');
   report.lifecycle={cycles:1000,heapGrowthBytes:heapAfter-heapBefore,repeatedNativeFits:repeated};
   assert.equal(report.stats.failures,0);
   if(process.env.DFO_ARENA2_DIR)assert.ok(report.images>0,'Actual palette/texture icons were exercised');

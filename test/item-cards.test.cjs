@@ -1,7 +1,7 @@
 'use strict';
 const {test}=require('node:test'),assert=require('node:assert/strict');
 const fs=require('node:fs'),path=require('node:path'),os=require('node:os');
-const {derive,effectGroup}=require('../src/mod/page/dfo_item_cards.js');
+const {derive,effectGroup,effectParts,materialPalette}=require('../src/mod/page/dfo_item_cards.js');
 const {transformItemCards}=require('../src/mod/item-cards-transform.cjs');
 const {transformAsset,injectIndex,EXPECTED}=require('../src/mod/transforms.cjs');
 const {wrap}=require('../src/mod/hook.cjs');
@@ -19,6 +19,21 @@ test('named enchantment triggers remain distinct from numerical bonuses in eithe
   assert.equal(effectGroup('При ношении: Невесомость').key,'held');
   assert.equal(effectGroup('+22% к урону [10–25]').key,'bonuses');
   assert.equal(effectGroup('Soul Bound: Dragonling').key,'properties');
+});
+test('effect colors preserve every character while distinguishing labels, values and trailing ranges',()=>{
+  const lines=[['+16 Скрытность [10–20]','bonuses'],['Улучшает навык: Критический удар','properties'],['Extra spell pts During Winter','properties'],['Ледяная буря','strike'],['+10 к урону [5–10] [3–7]','bonuses']];
+  for(const [text,key]of lines)assert.equal(effectParts(text,key,['Extra spell pts']).map(p=>p.text).join(''),text);
+  assert.deepEqual(effectParts('Улучшает навык: Критический удар'),[{kind:'label',text:'Улучшает навык: '},{kind:'value',text:'Критический удар'}]);
+  assert.equal(effectParts('+16 Скрытность [10–20]','bonuses').at(-1).kind,'range');
+  assert.equal(effectParts('Extra spell pts During Winter','properties',['Extra spell pts'])[1].text,'During Winter');
+  assert.equal(effectParts('Ледяная буря','strike')[0].kind,'value');
+});
+test('ten metals have distinct colors; Ebony and Daedric retain black with their requested outlines',()=>{
+  assert.equal(Object.keys(materialPalette).length,10);
+  assert.equal(new Set(Object.values(materialPalette).map(p=>p.color)).size,10);
+  assert.ok(materialPalette.Ebony.stroke.includes('#f4f1e8'));assert.ok(materialPalette.Daedric.stroke.includes('#f05a55'));
+  assert.equal(derive(sword,line,native,known).materialKey,'Steel');
+  assert.equal(derive(sword,line,{...native,saysMaterial:()=>false},known).materialKey,null,'Do not reveal a hidden metal through its color');
 });
 
 test('all supplied card fonts are served locally with their original bytes and font MIME types',async()=>{
@@ -57,9 +72,9 @@ test('fallback is explicitly a template estimate; missing data is never the nati
   assert.equal(derive({...item,value:0},line,native,known).total,0);
   assert.equal(derive({...item,value:NaN},line,native,known).total,1440);
 });
-test('unknown identity, malformed stacks, zero weight and unsafe totals do not leak or fabricate money',()=>{
-  const hidden=derive(sword,line,{...native,value:()=>assert.fail('unknown must not price')},{known:()=>false});
-  assert.equal(hidden.unitValue,null);assert.equal(hidden.perKg,null);
+test('unknown identity keeps powers hidden but uses the same sale valuation; malformed inputs never fabricate money',()=>{
+  const hidden=derive(sword,line,{...native,power:()=>assert.fail('Do not reveal an unidentified power')},{known:()=>false});
+  assert.equal(hidden.unitValue,3425);assert.equal(hidden.price,1370);assert.equal(hidden.perKg,1096);assert.equal(hidden.power,null);assert.equal(hidden.known,false);
   for(const count of [0,-1,1.5,'2',NaN,Infinity,Number.MAX_SAFE_INTEGER+1])assert.equal(derive({...sword,stackCount:count},line,native,known).total,null);
   for(const weight of [0,-1,NaN,Infinity])assert.equal(derive(sword,{...line,weight},native,known).perKg,null);
   assert.equal(derive({...sword,stackCount:Number.MAX_SAFE_INTEGER},line,native,known).total,null);
@@ -78,14 +93,14 @@ test('credit nominal is native face value, distinct from paper price and merchan
 });
 test('construction, metal and absent material remain distinct and obey native visibility',()=>{
   const armor={...sword,group:'Armor',templateIndex:102,material:513};
-  assert.equal(derive(armor,line,native,known).material,'Steel');
+  assert.equal(derive(armor,line,native,known).material,'Сталь');
   assert.equal(derive({...armor,material:521},line,{...native,material:()=> 'Daedric',materialLabel:()=> 'Язык даэдра'},known).material,'Даэдрический металл');
   assert.equal(derive({...armor,material:520},line,{...native,material:()=> 'Orcish',materialLabel:()=> 'Орочий язык'},known).material,'Орочий металл');
   assert.equal(derive({...armor,material:undefined},line,native,known).material,'Нет данных');
   assert.equal(derive({...armor,material:256},line,{...native,material:()=> 'Chain'},known).material,'Металл не указан');
   assert.equal(derive({...armor,templateIndex:520},line,{...native,variantWord:()=> 'Fur '},known).material,'Мех');
   const mail=derive({...armor,templateIndex:515},line,{...native,variantWord:()=> 'Mail '},known);
-  assert.equal(mail.material,'Steel');assert.equal(mail.construction,'Кольчужная');
+  assert.equal(mail.material,'Сталь');assert.equal(mail.construction,'Кольчужная');
   assert.equal(derive(armor,{...line,material:null},{...native,saysMaterial:()=>false},known).material,'Не указан');
   assert.equal(derive({...sword,templateIndex:527},line,native,known).material,'Ткань');
   assert.equal(derive({...sword,templateIndex:131},line,native,known).material,null);

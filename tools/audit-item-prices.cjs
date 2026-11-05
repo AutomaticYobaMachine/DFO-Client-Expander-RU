@@ -20,6 +20,7 @@ const {server}=require('./test-item-cards-browser.cjs');
     const api=__dfoPriceAudit,skills={mercantile:60,personality:70},quality=10,priceAdjustment=1000;
     const base={templateIndex:120,group:'Weapons',material:0,name:'Price audit fixture',value:1000,stackCount:1,currentCondition:100,maxCondition:100,isIdentified:true};
     const fixtures=[['iron, whole',{}],['iron, worn 20%',{currentCondition:20}],['iron, repaired by smith',{foundCondition:20,currentCondition:100,selfMended:0}],['iron, self mended',{foundCondition:20,currentCondition:100,selfMended:80}],['daedric, whole',{material:9}],['crafted rare',{value:2000,provenance:'smith audit',rarity:'rare',affixes:[{id:'damage',value:20}]}],['three pieces',{stackCount:3}],['counter-bought piece',{counterBought:true,counterPaid:95,counterValue:1000}]];
+    fixtures.push(['identified enchanted',{rarity:'rare',value:2500,enchantments:[{type:0,param:4}],affixes:[{id:'damage',value:20}]}],['unidentified enchanted',{rarity:'rare',value:2500,isIdentified:false,enchantments:[{type:0,param:4}],affixes:[{id:'damage',value:20}]}]);
     const probe=100000;
     const percent=who=>100*__dfoTradePrice(__dfoCost(probe,quality,priceAdjustment,-1),quality,who,true,{online:true})/probe;
     const rows=fixtures.map(([name,fields])=>{
@@ -37,6 +38,8 @@ const {server}=require('./test-item-cards-browser.cjs');
       if(JSON.stringify(item)!==before)throw Error('Pricing mutated item');
       return {name,nominal,counterUnit:api.counterValue(item),saleCondition:api.saleCondition(item,{online:true}),nativeCost:lot.cost,nativeDefault,nativePersonal,nominalOverSale:nominal/nativePersonal,empiricalDivide73Plus40:Math.round(nominal/7.3*1.4),resale:lot.resale??null,estimate40:estimate,displayed:actual};
     });
+    const identified=rows.find(r=>r.name==='identified enchanted'),unidentified=rows.find(r=>r.name==='unidentified enchanted');
+    if(identified.displayed!==unidentified.displayed||identified.nativeCost!==unidentified.nativeCost)throw Error('Identification changed the stored item estimate');
     const shopSamples=[];
     for(const q of [1,10,20])for(const adjustment of [800,1000,1250]){
       const cost=__dfoCost(probe,q,adjustment,-1);

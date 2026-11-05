@@ -72,6 +72,10 @@ function currency(text) {
   const gold = need(text, /([\w$]+)=([\w$]+)=>\2\?\.group===`Currency`&&\2\?\.templateIndex===[\w$]+/)[1];
   return text + `\n;globalThis.__dfoItemCards?.register({isGold:${gold}});\n`;
 }
+function effectLabels(text) {
+  const labels=need(text,/([\w$]+)=\(\)=>([\w$]+)\(`itemPowers`,/)[1];
+  return text+`\n;globalThis.__dfoItemCards?.register({effectLabels:${labels}});\n`;
+}
 
 function transformItemCards(rel, text, log) {
   // Worker entries cannot display DOM cards; they duplicate large, tree-shaken item tables.
@@ -83,6 +87,7 @@ function transformItemCards(rel, text, log) {
   if (text.includes('Imprint: ') && text.includes('.legendary?') && text.includes('.gilded?')) jobs.push(['itemCards.powers', powers]);
   if (text.includes('modeActionEnabled:') && /function [\w$]+\([\w$]+,[\w$]+=\[\],\{quality:/.test(text)) jobs.push(['itemCards.prices', prices]);
   if (/\/equip-[^/]+\.js$/.test(rel) && text.includes('`Currency`')) jobs.push(['itemCards.currency', currency]);
+  if (text.includes('`itemPowers`')) jobs.push(['itemCards.effectLabels',effectLabels]);
   let out = text;
   for (const [id, run] of jobs) {
     if (out.includes(`/*${id}*/`)) continue;

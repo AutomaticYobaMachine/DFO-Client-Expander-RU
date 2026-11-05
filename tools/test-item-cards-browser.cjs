@@ -160,7 +160,7 @@ async function main() {
           const range=document.createRange();range.selectNodeContents(text);
           for(const box of range.getClientRects())if(box.width&&box.height&&(box.left<r.left-1||box.right>r.right+1||box.top<r.top-1||box.bottom>r.bottom+1))textOutside.push(text.textContent);
         }
-        return {x:r.x,y:r.y,width:r.width,height:r.height,right:r.right,bottom:r.bottom,bad,textOutside,columns:getComputedStyle(n.querySelector('.dfo-item-main')).gridTemplateColumns.split(' ').length,text:n.innerText,powers:[...n.querySelectorAll('.dfo-item-lines>li,.dfo-item-meta>li,.dfo-item-tier')].map(e=>e.getAttribute('aria-label')||e.textContent),money:n.querySelector('.dfo-item-price-value').textContent,footer:n.querySelector('.dfo-item-footer').innerText,blocks:[...n.querySelectorAll('.sigilbox,.setbox,.techbox,.cmp')].map(e=>[e.className,e.outerHTML]),left:n.querySelector('.dfo-item-left').innerText,effects:n.querySelector('.dfo-item-effects').innerText};
+        return {x:r.x,y:r.y,width:r.width,height:r.height,right:r.right,bottom:r.bottom,bad,textOutside,columns:getComputedStyle(n.querySelector('.dfo-item-main')).gridTemplateColumns.split(' ').length,text:n.innerText,powers:[...n.querySelectorAll('.dfo-item-lines>li,.dfo-item-meta>li,.dfo-item-tier')].map(e=>e.getAttribute('aria-label')||e.textContent),money:n.querySelector('.dfo-item-price-value').textContent,footer:n.querySelector('.dfo-item-footer').innerText,blocks:['.dfo-item-effects','.dfo-item-overflow'].flatMap(selector=>[...n.querySelector(selector).children].filter(e=>e.matches('.sigilbox,.setbox,.techbox,.cmp')).map(e=>[e.className,e.outerHTML])),left:n.querySelector('.dfo-item-left').innerText,effects:n.querySelector('.dfo-item-effects').innerText};
       });
       assert.ok(result.width>=600&&result.width<=740,id+' width');assert.ok(result.height<=960,id+' height: '+result.height);
       assert.ok(result.x>=7&&result.y>=7&&result.right<=1913&&result.bottom<=1073,id+' viewport: '+JSON.stringify(result));
@@ -230,7 +230,7 @@ async function main() {
     for(const id of ['steel','rare','ruhn','wyrd','spells','credit']){
       await ru.evaluate(id=>probe.show(id),id);const c=ru.locator('.inv-tip .dfo-item-card');await c.waitFor();
       if(id==='steel'){assert.equal(await c.locator('.dfo-item-primary').count(),1);assert.match(await c.locator('.dfo-item-stats').innerText(),/Тип брони/);}
-      assert.equal(await c.locator('.dfo-item-effects li').evaluateAll(list=>list.every(n=>getComputedStyle(n).display!=='none')),true);
+      assert.equal(await c.locator(':is(.dfo-item-effects,.dfo-item-overflow) li').evaluateAll(list=>list.every(n=>getComputedStyle(n).display!=='none')),true);
     }
     if(process.env.DFO_SCREENSHOT_DIR){
       await ru.evaluate(async()=>{probe.show('ruhn');await Promise.all(['DFO Flexi','DFO Gabin','DFO Ckazka','DFO Ritalin','DFO Wolga'].map(f=>document.fonts.load('16px "'+f+'"')))});

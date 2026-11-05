@@ -85,7 +85,7 @@ async function main(){
      window.__dfoItemCards=api;
      const actual=__cardAuditBuild(item,'local',{body});host.replaceChildren(actual);body?api.fitCard(actual,900):api.fitTip(host);
      if(!actual.classList.contains('dfo-item-card'))throw new Error('Card fell back to vanilla');
-     const blocks=[...actual.querySelectorAll('.dfo-item-effects>.sigilbox,.dfo-item-effects>.setbox,.dfo-item-effects>.techbox,.dfo-item-effects>.cmp')].map(x=>x.outerHTML);
+     const blocks=['.dfo-item-effects','.dfo-item-overflow'].flatMap(selector=>[...actual.querySelector(selector).children].filter(n=>n.matches('.sigilbox,.setbox,.techbox,.cmp')).map(x=>x.outerHTML));
      if(JSON.stringify(blocks)!==JSON.stringify(expected.blocks))throw new Error('Native integration DOM changed');
      const powers=[...actual.querySelectorAll('.dfo-item-lines>li,.dfo-item-meta>li,.dfo-item-tier')].map(x=>x.getAttribute('aria-label')||x.textContent).sort();
      if(JSON.stringify(powers)!==JSON.stringify(expected.powers.sort()))throw new Error('A native power line was lost or duplicated');

@@ -14,7 +14,8 @@ const sword={group:'Weapons',templateIndex:120,material:5,value:3425,affixes:[{i
 
 test('named enchantment triggers remain distinct from numerical bonuses in either locale',()=>{
   for(const text of ['When Strikes: Wildfire','Cast When Strikes: Wildfire','При ударе: Дикий огонь'])assert.equal(effectGroup(text).key,'strike');
-  assert.deepEqual(effectGroup('При попадании: Ледяная буря'),{key:'strike',label:'При попадании',text:'Ледяная буря'});
+  assert.deepEqual(effectGroup('При попадании: Ледяная буря'),{key:'strike',label:'Накладывает при попадании',text:'Ледяная буря'});
+  assert.equal(effectGroup('Soul Bound: Dragonling').label,'Пассивные свойства');
   assert.equal(effectGroup('When Used: Restore Power').key,'use');
   assert.equal(effectGroup('При ношении: Невесомость').key,'held');
   assert.equal(effectGroup('+22% к урону [10–25]').key,'bonuses');

@@ -32,13 +32,13 @@
   }
   function effectGroup(text) {
     const words = [
-      ['strike', 'При попадании', /^(?:(?:Cast )?When Strikes|При ударе|При попадании)\s*:\s*(.+)$/i],
+      ['strike', 'Накладывает при попадании', /^(?:(?:Cast )?When Strikes|При ударе|При попадании)\s*:\s*(.+)$/i],
       ['use', 'При использовании', /^(?:(?:Cast )?When Used|При использовании)\s*:\s*(.+)$/i],
       ['held', 'При ношении', /^(?:(?:Cast )?When Held|При ношении|При экипировке)\s*:\s*(.+)$/i],
     ];
     for (const [key, label, pattern] of words) { const m = pattern.exec(text); if (m) return { key, label, text: m[1] }; }
     return /^[+\-−]\d/.test(text) ? { key: 'bonuses', label: 'Надбавки', text }
-      : { key: 'properties', label: 'Чары и свойства', text };
+      : { key: 'properties', label: 'Пассивные свойства', text };
   }
 
   /** Pure presentation data. Never mint, identify, repair or write to the item. */
@@ -129,7 +129,9 @@ body .pack-shell .packdetail.dfo-item-host { width:max-content!important; height
 .dfo-item-primary>span { font-size:11px; color:var(--dim,#a89f88); }
 .dfo-item-primary>strong { font-family:'DFO Flexi',var(--data,monospace); font-size:23px; line-height:1.1; font-weight:400; min-width:0; overflow-wrap:anywhere; }
 .dfo-item-card .dfo-item-statuses>p { text-align:left!important; font-size:11px!important; line-height:1.35!important; margin:7px 0 0; overflow-wrap:anywhere; }
-.dfo-item-effects { display:flex; flex-direction:column; gap:5px; min-width:0; }
+:is(.dfo-item-effects,.dfo-item-overflow) { display:flex; flex-direction:column; gap:5px; min-width:0; }
+.dfo-item-overflow:empty { display:none; }
+.dfo-item-overflow:not(:empty) { border-top:1px solid #454534; margin-top:10px; padding-top:8px; }
 .dfo-item-card .dfo-item-lines { display:block; padding:0; margin:0; list-style:none; font-size:14px!important; line-height:1.25!important; color:#edd5a4!important; text-align:left; }
 .dfo-item-card .dfo-item-lines>li { display:block; font:inherit!important; color:inherit!important; letter-spacing:normal!important; text-transform:none!important; margin:0 0 3px; white-space:normal; overflow-wrap:anywhere; }
 .dfo-item-card .dfo-item-lines>li:first-child { font-size:12px; letter-spacing:normal; text-transform:none; color:inherit; }
@@ -141,7 +143,7 @@ body .pack-shell .packdetail.dfo-item-host { width:max-content!important; height
 .dfo-item-card .dfo-item-meta>li { margin:0 0 4px; }
 .dfo-item-socket-lines { font-size:11px; line-height:1.35; margin:0; }
 .dfo-item-socket-lines>div { margin-bottom:4px; overflow-wrap:anywhere; }
-.dfo-item-effects>.cmp { margin:0; }
+:is(.dfo-item-effects,.dfo-item-overflow)>.cmp { margin:0; }
 .dfo-item-footer { display:flex; justify-content:flex-end; align-items:flex-end; gap:16px; border-top:1px solid #756346; padding:9px 12px 11px; text-align:right; background:var(--ink,#0e1013); }
 .dfo-item-price { display:flex; align-items:center; gap:8px; color:#f5d451; }
 .dfo-item-price-value { font-family:'DFO Flexi',var(--data,monospace); font-size:21px; font-weight:400; line-height:1.15; color:#f5d451; white-space:nowrap; }
@@ -167,7 +169,7 @@ body .card.dfo-item-card[data-rarity=gilded] { border-width:4px!important; borde
 .dfo-item-power-detail { display:block; color:#d7c9ad; }
 .dfo-item-group[data-group=power] { border:1px solid #715336; padding:7px 8px; background:linear-gradient(115deg,#382a1738,transparent); }
 .dfo-item-card .dfo-item-stats>.pair[data-divider] { border-top:1px solid #393b35; padding-top:8px; margin-top:8px; }
-.dfo-item-effects>.cmp { border-left:2px solid #637b65; background:#18201966; padding:6px 8px; }
+:is(.dfo-item-effects,.dfo-item-overflow)>.cmp { border-left:2px solid #637b65; background:#18201966; padding:6px 8px; }
 .dfo-item-card :is(.sigilbox,.setbox,.techbox,.cmp) { font-family:'DFO Gabin',var(--data,serif); }
 .dfo-item-card :is(.dfo-item-stats,.dfo-item-lines,.cmp-head,.cmp-line,.sigil-effect,.sigil-progress,.set-tier-effect) { font-family:'DFO Gabin',var(--data,serif)!important; }
 .dfo-item-card .sigilbox .sigil-stage { font-family:'DFO Ckazka',var(--display,serif)!important; font-size:17px!important; letter-spacing:.02em; }
@@ -180,7 +182,7 @@ body .card.dfo-item-card[data-rarity=gilded] { border-width:4px!important; borde
     const fontRoot = new URL('.', doc.currentScript?.src || new URL('dfo-mod/dfo_item_cards.js', doc.baseURI || win.location.href)).href;
     const fontFaces = [['DFO Flexi','title','ttf'],['DFO Gabin','text','ttf'],['DFO Ckazka','sigil','ttf'],['DFO Ritalin','set','ttf'],['DFO Wolga','legendary','otf']]
       .map(([family,file,ext])=>`@font-face{font-family:'${family}';src:url(${JSON.stringify(new URL('item-font-'+file+'.'+ext,fontRoot).href)}) format('${ext==='otf'?'opentype':'truetype'}');font-style:normal;font-weight:400;font-display:swap;}`).join('\n');
-    const counters = { dressed: 0, failures: 0, lastError: '', layouts: 0, placements: 0, observerCallbacks: 0 };
+    const counters = { dressed: 0, failures: 0, lastError: '', layouts: 0, balances: 0, balanceTrials: 0, placements: 0, observerCallbacks: 0 };
     let scheduled = false, effectLabelKey='',effectLabelNames=[];
     const node = (tag, cls, text) => {
       const value = doc.createElement(tag);
@@ -241,6 +243,7 @@ body .card.dfo-item-card[data-rarity=gilded] { border-width:4px!important; borde
         const data = derive(line.item, line, native, context);
         if (!data) return;
         const main = node('div', 'dfo-item-main'), left = node('div', 'dfo-item-left'), effects = node('div', 'dfo-item-effects');
+        const overflow = node('div', 'dfo-item-overflow');
         const head = node('div', 'dfo-item-head'), title = node('div', 'dfo-item-title');
         const stats = node('dl', 'stats dfo-item-stats'), statuses = node('div', 'dfo-item-statuses');
         const meta = node('ul', 'dfo-item-meta'), socketLines = node('div', 'dfo-item-socket-lines');
@@ -317,6 +320,7 @@ body .card.dfo-item-card[data-rarity=gilded] { border-width:4px!important; borde
         if (statuses.children.length) left.append(statuses);
         if (meta.children.length) left.append(meta);
         left.append(...leftNative);
+        left.append(overflow);
         effects.append(...rightNative);
         if (socketLines.children.length) effects.append(socketLines);
         main.append(left, effects);
@@ -328,7 +332,7 @@ body .card.dfo-item-card[data-rarity=gilded] { border-width:4px!important; borde
         }
         priceBox.append(priceValue,coin); footer.append(priceBox);
         // A native render is a snapshot: sizing must not repeatedly read game rules or mix a fresh price with old stats.
-        const state = { main, footer, priceBox, priceValue, dirty: true, host: null };
+        const state = { main, left, effects, overflow, blocks: [...effects.children], footer, priceBox, priceValue, dirty: true, host: null };
         price(state, data);
         into.replaceChildren(main, footer);
         const corners=node('div','dfo-item-corners');corners.setAttribute('aria-hidden','true');for(let i=0;i<4;i++)corners.append(node('i'));into.append(corners);
@@ -365,7 +369,7 @@ body .card.dfo-item-card[data-rarity=gilded] { border-width:4px!important; borde
     };
     function release(card, state) {
       for (const observer of state.observers || []) observer.disconnect();
-      active.delete(card); pending.delete(card); state.host = null; state.observers = null;
+      active.delete(card); pending.delete(card); state.host = null; state.observers = null; state.contentObserver = null;
     }
     function track(card, state, host) {
       if (state.host === host) return;
@@ -376,8 +380,10 @@ body .card.dfo-item-card[data-rarity=gilded] { border-width:4px!important; borde
       const content = new win.MutationObserver(() => {
         counters.observerCallbacks++;
         if (!card.isConnected) return release(card, state);
-        if (shape(host) !== state.shape) queue(card, true);
+        // A shorter column may change without changing the host's outer height.
+        queue(card, true);
       });
+      state.contentObserver = content;
       content.observe(host, { childList: true, characterData: true, subtree: true }); state.observers.push(content);
       const position = new win.MutationObserver(records => {
         counters.observerCallbacks++;
@@ -398,6 +404,44 @@ body .card.dfo-item-card[data-rarity=gilded] { border-width:4px!important; borde
         resized.observe(host); state.observers.push(resized);
       }
     }
+    function balance(state) {
+      counters.balances++;
+      const { left, effects, overflow } = state;
+      const live = [...effects.children, ...overflow.children], present = new Set(live);
+      const blocks = state.blocks.filter(block => present.has(block)), known = new Set(blocks);
+      // Remember the original sequence across reflows. Newly appended native blocks
+      // belong after that sequence, even while its old tail is in the left column.
+      for (const parent of [effects, overflow]) {
+        const children = [...parent.children];
+        for (let i = 0; i < children.length; i++) if (!known.has(children[i])) {
+          const next = children.slice(i + 1).find(child => known.has(child));
+          blocks.splice(next ? blocks.indexOf(next) : blocks.length, 0, children[i]); known.add(children[i]);
+        }
+      }
+      state.blocks = blocks;
+      let next = effects.firstElementChild;
+      for (const block of blocks) {
+        if (block === next) next = next.nextElementSibling;
+        else effects.insertBefore(block, next);
+      }
+      if (blocks.length < 2) return;
+      const oldLeft = left.style.alignSelf, oldRight = effects.style.alignSelf;
+      try {
+        // Grid cells stretch to the tallest column; measure their natural heights.
+        left.style.alignSelf = effects.style.alignSelf = 'start';
+        const height = () => Math.max(left.getBoundingClientRect().height, effects.getBoundingClientRect().height);
+        let bestHeight = height(), split = blocks.length;
+        if (effects.getBoundingClientRect().height <= left.getBoundingClientRect().height + 1) return;
+        // Only whole, contiguous suffixes may move. Measure at the actual narrower
+        // left-column width; estimating by the right-column height misses wrapping.
+        for (let at = blocks.length - 1; at > 0; at--) {
+          overflow.prepend(blocks[at]); counters.balanceTrials++;
+          const candidate = height();
+          if (candidate < bestHeight - .5 && overflow.scrollWidth <= overflow.clientWidth + 1) { bestHeight = candidate; split = at; }
+        }
+        for (let at = 0; at < split; at++) if (blocks[at].parentElement !== effects) effects.append(blocks[at]);
+      } finally { left.style.alignSelf = oldLeft; effects.style.alignSelf = oldRight; }
+    }
     function measure(card, state, host, view) {
       counters.layouts++;
       // Reset emergency zoom before measuring; ordinary Full HD cards keep their original text size.
@@ -409,6 +453,7 @@ body .card.dfo-item-card[data-rarity=gilded] { border-width:4px!important; borde
       for (const width of widths) {
         card.style.width = width + 'px';
         state.main.style.gridTemplateColumns = Math.min(260, Math.round(width * 0.44)) + 'px minmax(0,1fr)';
+        balance(state);
         if (extent(host).height <= Math.min(960, view.height)) break;
       }
       const size = extent(host);
@@ -450,7 +495,8 @@ body .card.dfo-item-card[data-rarity=gilded] { border-width:4px!important; borde
         if (!view.width || !view.height) {
           host.style.visibility = 'hidden'; state.styleStamp = host.style.cssText; state.classStamp = host.className; return true;
         }
-        if (state.dirty || dirty || state.view !== key) measure(card, state, host, view);
+        const contentChanged = state.contentObserver.takeRecords().length > 0;
+        if (state.dirty || dirty || contentChanged || state.view !== key) measure(card, state, host, view);
         place(host, view);
         // Account for fractional layout rounding and unusual overflowing native rows after zoom.
         const e = extent(host);
@@ -460,6 +506,8 @@ body .card.dfo-item-card[data-rarity=gilded] { border-width:4px!important; borde
         }
         if (host.style.visibility !== 'visible') host.style.visibility = 'visible';
         state.view = key; state.shape = shape(host); state.styleStamp = host.style.cssText; state.classStamp = host.className;
+        // Moving our own blocks is synchronous layout work, not fresh game content.
+        state.contentObserver?.takeRecords();
       } catch (error) { counters.failures++; counters.lastError = String(error?.message || error); }
       return true;
     }

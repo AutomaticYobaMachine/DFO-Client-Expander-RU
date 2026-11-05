@@ -1,0 +1,437 @@
+{
+  "modVersion": "1.19.4",
+  "gameVersion": "0.1.14536",
+  "date": "2026-11-05",
+  "original": "https://github.com/Lattymoy/daggerfall-js-source",
+  "moduleSource": "Final installer payload; all embedded mod files match src/mod byte for byte",
+  "matchingPayloadFiles": [
+    {
+      "path": "mod/dungeon-live-transform.cjs",
+      "sha256": "0f02ad8b3f739ce51b2bfc013a28d56c9db3694fe982a0a9d4f5139b5e175942"
+    },
+    {
+      "path": "mod/dungeon-nav-transform.cjs",
+      "sha256": "c0eb26bd65f95435156690a96163fbb1027e536984faf6ab2c45dd6ff6cc5de8"
+    },
+    {
+      "path": "mod/dungeon-transform.cjs",
+      "sha256": "d56730730e319f1ea13b3740a83d3ec6d583e95bcd61fbab6511acd3b89e557b"
+    },
+    {
+      "path": "mod/fonts/FONT-NOTICES.txt",
+      "sha256": "0f0175f61faad7503d341bc8b09692a6e36a9a62c07e588472dfe0f292f0b9b6"
+    },
+    {
+      "path": "mod/fonts/item-font-legendary.otf",
+      "sha256": "431b3d0fd0e324d427dc8076d0bd9591713797362f0d959c3fbc601cc815e21d"
+    },
+    {
+      "path": "mod/fonts/item-font-set.ttf",
+      "sha256": "16fcbd56ca32e92f4551649434793f8da873337e87d1e81e3a35c4569603c6a6"
+    },
+    {
+      "path": "mod/fonts/item-font-sigil.ttf",
+      "sha256": "1aa16df54414a45b16f15d601340143287e7def62ffc5c8a6425f968703f8067"
+    },
+    {
+      "path": "mod/fonts/item-font-text.ttf",
+      "sha256": "f2a009268cc0f4cf5305f2039470def5cc7ad4bd3b43e8451c97627238f46bc1"
+    },
+    {
+      "path": "mod/fonts/item-font-title.ttf",
+      "sha256": "10e6edc2e999a2b83728ba9eb27fdbbe79a685022f7cdb6a76ebece55c907708"
+    },
+    {
+      "path": "mod/hook.cjs",
+      "sha256": "c5da2c315345b57c718cf42809cfdd51397122ced54e7db160d20ccfd1401d12"
+    },
+    {
+      "path": "mod/item-cards-transform.cjs",
+      "sha256": "f2310a2492102126c41a9aa6c31c81bfef61f4b15fd26bc2e8e7a323be7a96a2"
+    },
+    {
+      "path": "mod/loot-store.cjs",
+      "sha256": "e2ab6cc10e85f02d635b4d234861993ceb1a8f9bec7dd7940163767967d0d90e"
+    },
+    {
+      "path": "mod/loot-tags-transform.cjs",
+      "sha256": "3ea51e36a635c095d100fec52543fd496fd2ade4bc49ec32b8db234e86c3a381"
+    },
+    {
+      "path": "mod/nearby-loot-transform.cjs",
+      "sha256": "e5105a051e757bc587e00c7b8c2e723969d8f382c13e96e37a0ae7bc1c011862"
+    },
+    {
+      "path": "mod/page/dfo_dungeon_graph.js",
+      "sha256": "87457b92034c843fca777fdef53aca35f6036c7754c5e4a9d2cf4e997c3bbf5b"
+    },
+    {
+      "path": "mod/page/dfo_dungeon_live.js",
+      "sha256": "1e7eff562779cf0edef050b5bfdce747649df715e4896e59301e2b1fa7f0cff7"
+    },
+    {
+      "path": "mod/page/dfo_dungeon_live_model.js",
+      "sha256": "c16df9b4d71fbb489c729251861fb60a4c0907245244929feee3e393088fb59e"
+    },
+    {
+      "path": "mod/page/dfo_dungeon_model.js",
+      "sha256": "38b6a75843766b61d9d75bc5363b8e408f2ca61cef1a903808c2bfd42d38d33c"
+    },
+    {
+      "path": "mod/page/dfo_dungeon_nav.js",
+      "sha256": "158d323d9bfccaee9a078c7d588cbdf34d26d80f46745425e65707e890767d1b"
+    },
+    {
+      "path": "mod/page/dfo_dungeon_nav_model.js",
+      "sha256": "d24e5d2335d09a0ea091c8c3966f3ad7fc9734976b6bc287ca88fc76d82bba24"
+    },
+    {
+      "path": "mod/page/dfo_dungeons.js",
+      "sha256": "d87103af96da1e4b2519721cf0520f1062e181a1a09b4a4ffcdd4a58bb9c5eab"
+    },
+    {
+      "path": "mod/page/dfo_item_cards.js",
+      "sha256": "3009fc1d6fa2fd4dced9d18551ee5c090091d8ef33782da6b0bad66868e42e5f"
+    },
+    {
+      "path": "mod/page/dfo_loot.js",
+      "sha256": "5fe93293827bba53dd283a1994d5321ed4a916608ae9c3727ffbc71b71f584c1"
+    },
+    {
+      "path": "mod/page/dfo_loot_rules.js",
+      "sha256": "89ca66d3655eef111feca0c97ec3aab8fd1db1f5a7c1222156a98779f30331ac"
+    },
+    {
+      "path": "mod/page/dfo_loot_ui.js",
+      "sha256": "11d528f20f01c9c78af0d3173ad0fa1e3ca23077886b0e36b8b386c560e486c4"
+    },
+    {
+      "path": "mod/page/dfo_marks.js",
+      "sha256": "2d6d06b8cb677250ef6a10b337c34b52432e70ae4c04a2065027ccdb53d01e40"
+    },
+    {
+      "path": "mod/page/dfo_town.js",
+      "sha256": "12db9c01c359c512dfea71404e7df5702ee060f7f188482112916e9acb27fb93"
+    },
+    {
+      "path": "mod/page/ru_items.js",
+      "sha256": "2725de910acef9825a6156f4519e81db942a9984ca7ebd9033dfecfc83c24557"
+    },
+    {
+      "path": "mod/page/ru_locale.js",
+      "sha256": "a67a687d7e3796c1e660daf74e0e8d982f141d71ef357297e9bab6ffe8c8063b"
+    },
+    {
+      "path": "mod/transforms.cjs",
+      "sha256": "6eb5acdfdafdabc5318bb70253ff2874d1179d5a1189c5ce7b74233bd313d00b"
+    },
+    {
+      "path": "mod/version.json",
+      "sha256": "91235b175265157e3229dbc1302b762fcae6a2167e9f4ed59d687f85b223be14"
+    }
+  ],
+  "balanceChecks": {
+    "cases": [
+      {
+        "id": "steel",
+        "original": 382,
+        "best": 382,
+        "height": 382,
+        "width": 600,
+        "moved": 0,
+        "blocks": 1,
+        "right": 1
+      },
+      {
+        "id": "ruhn",
+        "original": 555,
+        "best": 477,
+        "height": 477,
+        "width": 600,
+        "moved": 1,
+        "blocks": 4,
+        "right": 3
+      },
+      {
+        "id": "wyrd",
+        "original": 523,
+        "best": 470,
+        "height": 470,
+        "width": 600,
+        "moved": 1,
+        "blocks": 4,
+        "right": 3
+      },
+      {
+        "id": "spells",
+        "original": 526,
+        "best": 506,
+        "height": 506,
+        "width": 600,
+        "moved": 1,
+        "blocks": 4,
+        "right": 3,
+        "passive": "Пассивные свойства",
+        "strike": "Накладывает при попадании"
+      },
+      {
+        "id": "combined",
+        "original": 890,
+        "best": 752,
+        "height": 752,
+        "width": 600,
+        "moved": 2,
+        "blocks": 7,
+        "right": 5,
+        "passive": "Пассивные свойства",
+        "strike": "Накладывает при попадании"
+      },
+      {
+        "id": "passive",
+        "original": 955,
+        "best": 817,
+        "height": 817,
+        "width": 600,
+        "moved": 2,
+        "blocks": 9,
+        "right": 7,
+        "passive": "Пассивные свойства",
+        "strike": "Накладывает при попадании"
+      },
+      {
+        "id": "leftHeavy",
+        "original": 880,
+        "best": 880,
+        "height": 880,
+        "width": 600,
+        "moved": 0,
+        "blocks": 1,
+        "right": 1
+      }
+    ],
+    "deferred": {
+      "sameOrder": true,
+      "immediateOrder": true,
+      "clicks": 1,
+      "sameReads": true
+    },
+    "unchangedFits": 40,
+    "stats": {
+      "dressed": 12,
+      "failures": 0,
+      "lastError": "",
+      "layouts": 30,
+      "balances": 30,
+      "balanceTrials": 113,
+      "placements": 86,
+      "observerCallbacks": 78,
+      "ready": true,
+      "active": 1,
+      "pending": 0
+    },
+    "errors": []
+  },
+  "stateChecks": {
+    "checked": 13760,
+    "axes": {
+      "template states": 9018,
+      "rarity/identity": 112,
+      "condition thresholds": 80,
+      "crafting": 40,
+      "extended tier labels": 64,
+      "heirloom": 8,
+      "long metadata": 8,
+      "equipped": 8,
+      "realm restrictions": 8,
+      "armor materials": 130,
+      "weapon materials": 100,
+      "money edge cases": 32,
+      "enchantment catalog": 852,
+      "affix catalog": 852,
+      "sockets": 246,
+      "techniques": 48,
+      "legendary records": 80,
+      "aetheric records": 180,
+      "gilded records": 10,
+      "sigil/set stages": 1512,
+      "active set tiers": 336,
+      "rarity disabled": 16,
+      "lighting": 20
+    },
+    "metals": {
+      "Steel": {
+        "label": "Сталь",
+        "color": "rgb(198, 203, 209)",
+        "stroke": "rgba(0, 0, 0, 0)"
+      },
+      "Iron": {
+        "label": "Железо",
+        "color": "rgb(116, 121, 128)",
+        "stroke": "rgba(0, 0, 0, 0)"
+      },
+      "Silver": {
+        "label": "Серебро",
+        "color": "rgb(255, 255, 255)",
+        "stroke": "rgba(0, 0, 0, 0)"
+      },
+      "Elven": {
+        "label": "Эльфийский металл",
+        "color": "rgb(149, 207, 255)",
+        "stroke": "rgba(0, 0, 0, 0)"
+      },
+      "Dwarven": {
+        "label": "Двемерский металл",
+        "color": "rgb(223, 184, 79)",
+        "stroke": "rgba(0, 0, 0, 0)"
+      },
+      "Mithril": {
+        "label": "Мифрил",
+        "color": "rgb(64, 191, 255)",
+        "stroke": "rgba(0, 0, 0, 0)"
+      },
+      "Adamantium": {
+        "label": "Адамантит",
+        "color": "rgb(203, 179, 232)",
+        "stroke": "rgba(0, 0, 0, 0)"
+      },
+      "Ebony": {
+        "label": "Эбонит",
+        "color": "rgb(16, 17, 22)",
+        "stroke": "rgb(244, 241, 232)"
+      },
+      "Orcish": {
+        "label": "Орочий металл",
+        "color": "rgb(97, 200, 126)",
+        "stroke": "rgba(0, 0, 0, 0)"
+      },
+      "Daedric": {
+        "label": "Даэдрический металл",
+        "color": "rgb(19, 14, 16)",
+        "stroke": "rgb(240, 90, 85)"
+      }
+    },
+    "images": 5068,
+    "failures": [],
+    "stats": {
+      "dressed": 14766,
+      "failures": 0,
+      "lastError": "",
+      "layouts": 14768,
+      "balances": 14771,
+      "balanceTrials": 4160,
+      "placements": 14802,
+      "observerCallbacks": 206,
+      "ready": true,
+      "active": 1,
+      "pending": 0
+    },
+    "lifecycle": {
+      "cycles": 1000,
+      "heapGrowthBytes": 288812,
+      "repeatedNativeFits": {
+        "layouts": 0,
+        "mutations": 0
+      }
+    }
+  },
+  "boundsAndPerformance": {
+    "catalog": {
+      "templates": 483,
+      "checked": 501,
+      "groups": [
+        "Armor",
+        "Books",
+        "CreatureIngredients1",
+        "CreatureIngredients2",
+        "CreatureIngredients3",
+        "Currency",
+        "Deeds",
+        "Drugs",
+        "Furniture",
+        "Gems",
+        "Jewellery",
+        "Maps",
+        "MensClothing",
+        "MetalIngredients",
+        "MiscItems",
+        "MiscellaneousIngredients1",
+        "MiscellaneousIngredients2",
+        "Paintings",
+        "PlantIngredients1",
+        "PlantIngredients2",
+        "QuestItems",
+        "ReligiousItems",
+        "Transportation",
+        "UselessItems1",
+        "UselessItems2",
+        "Weapons",
+        "WomensClothing"
+      ],
+      "customFixtures": [
+        513,
+        514,
+        515,
+        516,
+        517,
+        518,
+        519,
+        520,
+        521,
+        522,
+        523,
+        524,
+        525,
+        526,
+        563,
+        1330,
+        1342,
+        1800,
+        1830,
+        9001,
+        9002,
+        9003,
+        9004,
+        9005,
+        9006,
+        9007
+      ],
+      "skipped": [],
+      "failures": []
+    },
+    "viewportCases": 132,
+    "scales": 44,
+    "renderTiming": {
+      "medianMs": 5.6000000005587935,
+      "p95Ms": 12.700000000186265,
+      "maxMs": 15.299999999813735
+    },
+    "performance": {
+      "dressed": 636,
+      "failures": 0,
+      "lastError": "",
+      "layouts": 656,
+      "balances": 712,
+      "balanceTrials": 1332,
+      "placements": 837,
+      "observerCallbacks": 344,
+      "ready": true,
+      "active": 1,
+      "pending": 0
+    },
+    "errors": []
+  },
+  "unitAndPackaging": {
+    "tests": 14,
+    "pass": 14,
+    "fail": 0,
+    "skipped": 0,
+    "goInstaller": "pass"
+  },
+  "limits": [
+    "Controlled fixtures with actual released renderer, not a live multiplayer session.",
+    "Original/balanced heights are measured at the same width and font settings.",
+    "Original public template catalog includes dynamic-template fixtures; it does not establish game-wide completeness.",
+    "Price and item rules are unchanged; layout tests verify cached native readers are not called again.",
+    "No GitHub Release or tag is created."
+  ]
+}

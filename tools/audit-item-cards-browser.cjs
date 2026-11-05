@@ -104,7 +104,7 @@ async function main(){
   });
   await within('120 additional effects');
   assert.ok(await page.locator('.inv-tip').evaluate(n=>Number(n.style.zoom)<1));
-  assert.equal(await page.locator('.inv-tip .dfo-item-effects>div').count()>=120,true,'No effect may be removed to fit');
+  assert.equal(await page.locator('.inv-tip :is(.dfo-item-effects,.dfo-item-overflow)>div').count()>=120,true,'No effect may be removed to fit');
   await page.evaluate(()=>probe.show('steel'));await within('normal card after huge card');
   // No idle timers, whole-HUD mutation observer, repeated price reads or unbounded layout feedback.
   await nextFrame(page);

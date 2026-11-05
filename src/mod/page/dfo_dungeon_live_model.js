@@ -56,15 +56,23 @@
     const complete = !uncertain && (Number.isSafeInteger(session.roomCount) || others < 64);
     return { count: total, complete, connected: true, note: complete ? 'Включая вас; участники этой сетевой комнаты.' : 'Известные клиенту участники. Полнота списка не подтверждена.' };
   }
-  function quests(bridge, loc, foes) {
+  function quests(bridge, loc, foes, ctx=null, stands=[]) {
     const machine = bridge?.machine, mapId = loc?.mapTableData?.mapId;
     if (!machine?.quests || !Number.isSafeInteger(mapId)) return [];
     const active = read(() => bridge.questLog?.({ windows: false }), null);
-    const activeIds = active ? new Set([...(active.active || []), ...(active.unlogged || [])].map(q => String(q.id))) : null;
-    const bound = new Set((foes || []).flatMap(f => f?.questBehaviour?.questUID == null ? [] : [String(f.questBehaviour.questUID)]));
-    return values(machine.quests).filter(q => !q.questComplete && (!activeIds || activeIds.has(String(q.uid)))
+    const rows = active ? new Map([...(active.active || []), ...(active.unlogged || [])].map(q=>[String(q.id),q])) : null;
+    const activeIds = rows ? new Set(rows.keys()) : null;
+    const bound = new Set(), bind=b=>{const uid=b?.questUID||b?.targetQuest?.uid||b?.targetResource?.parentQuest?.uid;if(uid!=null)bound.add(String(uid));};
+    for(const f of foes||[]){
+      if(!f||f._gone||f._absentHere||f.removed)continue;
+      bind(read(()=>ctx?.questFoeBehaviour?.(f),f?.questBehaviour));
+      for(const item of f?.entity?.items||[])if(item?.questUID!=null&&item.questSymbol)bound.add(String(item.questUID));
+    }
+    for(const p of ctx?.people||[])bind(p?.questBehaviour);
+    for(const s of stands||[])if(s?.active&&!s.dead)bind(s.behaviour);
+    return values(machine.quests).filter(q => !q.questComplete && !q.questTombstoned && q.shelvedAt==null && (!activeIds || activeIds.has(String(q.uid)))
       && (bound.has(String(q.uid)) || values(q.resources).some(r => r?.siteDetails?.siteType === 2 && r.siteDetails.mapId === mapId)))
-      .map(q => ({ uid: String(q.uid), name: String(q.displayName || q.questName || 'Задание'), objectives: active?.active?.find(r => String(r.id) === String(q.uid))?.ql?.objectives?.filter(o => o.state === 'open').map(o => o.text) || [] }));
+      .map(q => ({ uid: String(q.uid), name: String(q.displayName || q.questName || 'Задание'), objectives: rows?.get(String(q.uid))?.ql?.objectives?.filter(o => o.state === 'open').map(o => o.text) || [] }));
   }
   function regen(native) {
     if (!finite(native?.now) || !finite(native?.interval)) return { minutes: null, intervalMinutes: null, count: 0, state: 'offline' };
@@ -84,7 +92,7 @@
     const online = read(() => tools.online?.(), false), enemy = enemies(live.foes, tools);
     return { title: heading?.title || live.location.name || 'Подземелье', subtitle: heading?.subtitle || '', rating: heading?.rating || '', forecast: heading?.model || null,
       enemies: enemy, players: players(read(() => world.presence?.()), live.location.mapTableData?.mapId, online),
-      quests: quests(live.questBridge, live.location, live.foes), regen: regen(read(() => live.regen())), aurum: aurum(live.aurum, tools, live.location, online),
+      quests: quests(live.questBridge, live.location, live.foes,live.ctx,read(()=>world.modes?.()?.dfoDungeonQuestSources?.stands,[])), regen: regen(read(() => live.regen())), aurum: aurum(live.aurum, tools, live.location, online),
       synced: !enemy.syncing, online };
   }
   // The always-visible HUD reads counts only: no quest scan, forecast, names,

@@ -10,8 +10,8 @@
     let seq=0,calculating=false,route=null,showing=[],plannedAt=-Infinity,lastAttempt=-Infinity,failedView='';
     const now=()=>deps.now?.()??Date.now();
     const notify=next=>{const value={...state,...next};if(JSON.stringify(value)!==JSON.stringify(state)){state=value;deps.changed?.({...state});}};
-    const read=(details=true)=>{try{const v=deps.read(details);return v?{...v,nav:{...v.nav,collider:M.navigationGeometry(v.nav.collider)}}:null;}catch{return null;}};
-    const groups=v=>M.targets(v.live,v.sources,v.tools,v.questIds);
+    const read=(details=true,quests=wanted?.kind==='quest')=>{try{const v=deps.read(details,quests);return v?{...v,nav:{...v.nav,collider:M.navigationGeometry(v.nav.collider)}}:null;}catch{return null;}};
+    const groups=v=>M.targets(v.live,v.sources,v.tools,v.questIds,wanted?.kind);
     const source=v=>v.nav.collider?.source||v.nav.collider;
     const candidates=v=>{
       let list=groups(v)[wanted.kind]||[];
@@ -50,8 +50,10 @@
         const current=read();if(!current)throw Object.assign(new Error('cancelled'),{cancelled:true});v={...current,nav:{...current.nav,feet:M.point(current.nav.feet)}};
         const stamp=revision(v),targets=candidates(v).map(t=>({...t,at:M.point(t.at)}));
         if(stamp!==graphRevision){retry=true;return;}
+        if(!targets.length){route=null;showing=[];notify({phase:'unavailable',distance:null,message:none[wanted.kind]});return;}
         notify({phase:'routing',message:'Прокладываю путь…',distance:null});
-        const result=await client.route(v.nav.feet,targets,v.nav.transitions||[]);check(v,token);
+        const pins=typeof v.nav.transitions==='function'?v.nav.transitions():v.nav.transitions||[];
+        const result=await client.route(v.nav.feet,targets,M.portalTransitions(v.live.ctx.actions,pins,v.nav.portalSurfaces),{riding:M.riding(v.nav.feet,v.nav.collider,v.live.ctx.actions)});check(v,token);
         if(revision(v)!==stamp){retry=true;return;}
         if(!result){route=null;showing=[];failedView=attemptKey(v);notify({phase:'unavailable',distance:null,message:'Путь в загруженной геометрии не найден.'});return;}
         const latest=read(),fresh=candidates(latest).find(t=>t.key===result.target.key);
@@ -68,7 +70,7 @@
       void solve(v,token);
     }
     function start(kind,uid=null){
-      const v=read();if(!G||!labels[kind]||!v||!M.point(v.nav?.feet)||!v.nav.collider?._buckets)return false;
+      const v=read(true,kind==='quest');if(!G||!labels[kind]||!v||!M.point(v.nav?.feet)||!v.nav.collider?._buckets)return false;
       if(owner&&(owner!==v.live.ctx||ownerSource!==source(v)||readKey!==v.nav.key+'|'+v.room))stop(true);
       wanted={kind,uid:uid==null?null:String(uid)};owner=v.live.ctx;ownerSource=source(v);readKey=v.nav.key+'|'+v.room;
       notify({kind,uid:wanted.uid,name:labels[kind]});
@@ -88,7 +90,7 @@
       if(!followed){showing=[];if(now()-plannedAt>350)request(v);return;}
       showing=followed.points;
       const extra=route.transition?Math.max(0,route.distance-M.length(route.points)):0;
-      if(followed.remaining<1.2&&followed.off<1.6){
+      if(followed.remaining < (route.transition?.contact ? .15 : 1.2) && followed.off < (route.transition?.contact ? .5 : 1.6) && (route.transition||M.goalReached(target,v.nav.feet,v.nav.collider))){
         showing=[];notify({phase:route.transition?'transition':'arrived',name:target.name,distance:route.transition?Math.ceil(followed.remaining+extra):0,message:route.transition?'':'Цель рядом.'});return;
       }
       notify({phase:'following',name:target.name,distance:Math.ceil(followed.remaining+extra),message:''});
@@ -96,22 +98,26 @@
     return{
       start,stop,tick,state:()=>({...state}),points:()=>showing,context:()=>owner,
       matches:v=>!!v&&owner===v.live.ctx&&ownerSource===source(v)&&readKey===v.nav.key+'|'+v.room,
-      availability(){const v=read();if(!G||!v?.nav.collider?._buckets)return{ready:false};const all=groups(v);return{ready:true,...Object.fromEntries(Object.entries(all).map(([k,a])=>[k,a.length]))};}
+      availability(){const v=read(true,true);if(!G||!v?.nav.collider?._buckets)return{ready:false};const all=M.targets(v.live,v.sources,v.tools,v.questIds);return{ready:true,...Object.fromEntries(Object.entries(all).map(([k,a])=>[k,a.length]))};}
     };
   }
   if(typeof module==='object'&&module.exports){module.exports={createNavigation};return;}
   if(root.__dfoDungeonNavigation||root.__DFO_MOD_CFG__?.dungeons?.enabled===false)return;
-  const doc=root.document;let drawPass=null,drawGL=null,budgetAt=performance.now(),questAt=-Infinity,questContext=null,questIds=null;
+  const doc=root.document;let drawPass=null,drawGL=null,budgetAt=performance.now(),questAt=-Infinity,questContext=null,questBridge=null,questIds=null,questRows=null;
   const disposeDraw=()=>{try{drawPass?.dispose();}catch{}drawPass=drawGL=null;};
-  const read=(details=true)=>{
-    const info=root.__dfoDungeons?.liveInfo(false);if(!info)return null;
+  const read=(details=true,includeQuests=details)=>{
+    const info=root.__dfoDungeons?.liveInfo(false);
+    const nextContext=info?.live?.ctx??null,nextBridge=info?.live?.questBridge??null;
+    if(questContext!==nextContext||questBridge!==nextBridge){questContext=nextContext;questBridge=nextBridge;questIds=questRows=null;questAt=-Infinity;}
+    if(!info)return null;
     const nav=info.live.ctx.dfoDungeonNavigation;if(!nav?.collider||!nav.feet)return null;
     const modes=info.world.modes?.();
-    if(details&&(questContext!==info.live.ctx||performance.now()-questAt>=250)){
-      questContext=info.live.ctx;questAt=performance.now();questIds=new Set(root.__dfoDungeonLiveModel.quests(info.live.questBridge,info.live.location,info.live.foes).map(q=>q.uid));
+    if(details&&includeQuests&&performance.now()-questAt>=250){
+      questAt=performance.now();let log=null,failed=false;try{log=questBridge?.questLog?.({windows:false});}catch{failed=true;}
+      const rows=failed?[]:log?[...(log.active||[]),...(log.unlogged||[])]:null;
+      questIds=rows?new Set(rows.map(q=>String(q.id))):null;questRows=rows?new Map(rows.map(q=>[String(q.id),q])):null;
     }
-    const view=details?{...nav,transitions:typeof nav.transitions==='function'?nav.transitions():nav.transitions||[]}:nav;
-    return{...info,nav:view,sources:modes?.dfoDungeonQuestSources||{},questIds:details?questIds:null,room:info.world.presence?.()?.room||''};
+    return{...info,nav,sources:{...modes?.dfoDungeonQuestSources,questRows},questIds:details&&includeQuests?questIds:null,room:info.world.presence?.()?.room||''};
   };
   const hud=doc.createElement('div');hud.className='dfo-navigation-hud';hud.hidden=true;hud.setAttribute('aria-live','polite');
   const style=doc.createElement('style');style.textContent='.dfo-navigation-hud{position:fixed;left:50%;bottom:16vh;transform:translateX(-50%);max-width:80vw;z-index:7;pointer-events:none;text-align:center;white-space:pre-line;padding:8px 14px;border:1px solid rgba(83,191,255,.5);background:rgba(11,22,31,.78);color:#b4e8ff;font:13px var(--data,system-ui,sans-serif);line-height:1.5}.dfo-navigation-hud[hidden]{display:none}';

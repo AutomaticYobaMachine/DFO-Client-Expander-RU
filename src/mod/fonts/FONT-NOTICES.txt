@@ -1,0 +1,42 @@
+Шрифты карточек DFO-Client-Expander-RU
+
+Предоставлены пользователем в архиве «Шрифты.zip». Авторство шрифтов не принадлежит автору расширения.
+Файлы шрифтов не изменены. Назначения взяты из подписей файлов пользователя.
+
+Ckazka - Для названия Сигила.ttf
+Файл: item-font-sigil.ttf; назначение: название сигила.
+SHA-256: 1aa16df54414a45b16f15d601340143287e7def62ffc5c8a6425f968703f8067
+Family: ckazka
+
+Flexi_IBM_VGA_False - Для Заголовков(Имен собственных предметов).ttf
+Файл: item-font-title.ttf; назначение: имя предмета.
+SHA-256: 10e6edc2e999a2b83728ba9eb27fdbbe79a685022f7cdb6a76ebece55c907708
+Copyright: (c) 2020 VileR
+Family: Flexi IBM VGA False
+Manufacturer: VileR
+Designer: VileR
+License: Creative Commons Attribution-ShareAlike 4.0 International
+License URL: http://creativecommons.org/licenses/by-sa/4.0/
+
+Gabin - для всех обычных текстов.ttf
+Файл: item-font-text.ttf; назначение: обычный текст.
+SHA-256: f2a009268cc0f4cf5305f2039470def5cc7ad4bd3b43e8451c97627238f46bc1
+Family: Gabin
+Designer: Che E Ren
+
+Ritalin - для названий сета в блоке сета.ttf
+Файл: item-font-set.ttf; назначение: название набора.
+SHA-256: 16fcbd56ca32e92f4551649434793f8da873337e87d1e81e3a35c4569603c6a6
+Copyright: © 2000, Apostrophic Laboratories. All rights reserved. Distribute freely. apostrofe@mail.com
+Family: Ritalin
+Designer: Apostrophe (')
+
+Wolgadeutsche - Для названия эффекта Легендарного свойства.otf
+Файл: item-font-legendary.otf; назначение: имя легендарного свойства.
+SHA-256: 431b3d0fd0e324d427dc8076d0bd9591713797362f0d959c3fbc601cc815e21d
+Family: Wolgadeutsche
+Designer: Serg Shishin
+
+Flexi IBM VGA False — VileR, © 2020; Creative Commons Attribution-ShareAlike 4.0 International.
+Полный текст лицензии: https://creativecommons.org/licenses/by-sa/4.0/legalcode
+У остальных файлов сохранены все доступные встроенные сведения об авторстве и лицензии; новых прав на них не заявляем.

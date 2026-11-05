@@ -49,7 +49,7 @@
   }
   function quest(uid) {
     const state = current, now = info();if (!state || now?.live.ctx !== state.ctx) { close();return; }
-    if (uid != null && !M.quests(now.live.questBridge, now.live.location, now.live.foes).some(q => q.uid === uid)) { state.status.textContent = 'Задание больше не активно в этом данже.';return; }
+    if (uid != null && !M.quests(now.live.questBridge, now.live.location, now.live.foes,now.live.ctx,now.world.modes?.()?.dfoDungeonQuestSources?.stands).some(q => q.uid === uid)) { state.status.textContent = 'Задание больше не активно в этом данже.';return; }
     close();
     if (!now.live.journal(uid)) { open();if (current) current.status.textContent = 'Не удалось открыть журнал. Завершите другое действие и повторите.'; }
   }

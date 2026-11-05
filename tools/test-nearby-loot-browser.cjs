@@ -24,11 +24,11 @@ const entity={name:'Loot check',career:{name:'Spellsword'},stats:{strength:50,en
 const feet=new Float32Array([0,0,0]); // Same storage as the live PlayerMotor in world/town/buildings.
 let mounts=0,view=null,win=null;
 const source=(key,items,pos)=>({key,pos,items:()=>items,visit:fn=>fn(items)});
-const scene={wall:false,upper:false},collider={raycast:(_p,dir)=>scene.wall&&dir[2]>.5?3:Infinity,surfaceHit:p=>({dist:p[1],normal:[0,1,0]})};
+const scene={wall:false,upper:false,table:false},collider={raycast:(_p,dir)=>scene.wall&&dir[2]>.5?3:Infinity,surfaceHit:(p,d,max)=>({dist:d[1]<0&&p[1]/-d[1]<=max?p[1]/-d[1]:Infinity,normal:[0,1,0]})};
 window.fixture={entity,a,b,rare,plain,arrows,scene,feet,ordinary:false,get mounts(){return mounts},get view(){return view}};
 // The real hosts prevent browser back/forward on both mouse edges too.
 for(const type of ['mousedown','mouseup']) addEventListener(type,e=>{if(e.button===3||e.button===4)e.preventDefault()});
-__dfoLoot.register('test',{entity,collider:()=>collider,feet:()=>feet,blocked:()=>!!win&&!win.done,sources:()=>[source('corpse:0',a,[1,0,0]),source('loot:0',b,scene.upper?[0,3,5]:[0,0,15]),source('search:0',[mk('Excluded grave',113)],[0,0,0])],open(loot){
+__dfoLoot.register('test',{entity,collider:()=>collider,feet:()=>feet,blocked:()=>!!win&&!win.done,sources:()=>[source('corpse:0',a,[1,0,0]),source('loot:0',b,scene.upper?[0,3,5]:scene.table?[0,1.35,5]:[0,0,15]),source('search:0',[mk('Excluded grave',113)],[0,0,0])],open(loot){
  mounts++; const host=document.createElement('div');host.id='enhanced-inventory';document.body.append(host);
  win={done:false};
  const close=()=>{if(win.done)return;win.done=true;view.unmount();host.remove();loot.closed()};
@@ -273,6 +273,12 @@ const server = http.createServer(async (req, res) => {
     await page.reload();await page.waitForFunction(()=>window.ready);await page.evaluate(()=>fixture.scene.upper=true);
     await page.keyboard.press('j');await page.waitForSelector('.loot-win');
     assert.equal(await page.locator('.loot-win .itemrow').count(),1);assert.equal(await page.evaluate(()=>fixture.b.length),2);assert.equal(await page.evaluate(()=>fixture.entity.items.length),0,'upper storey is excluded from display and auto-loot');
+    await page.reload();await page.waitForFunction(()=>window.ready);
+    await page.evaluate(async()=>{fixture.scene.table=true;await __dfoLootSettings.load();await __dfoLootSettings.update({filter:{mode:'black',tags:[]},autoLoot:{enabled:false}});});
+    await page.keyboard.press('j');await page.waitForSelector('.loot-win');assert.equal(await page.locator('.loot-win .itemrow').count(),3,'visible table loot is included');
+    await page.locator('.loot-win .itemrow').filter({hasText:'Longsword'}).click();
+    await page.waitForFunction(()=>fixture.entity.items.some(it=>it.templateIndex===120)&&!fixture.b.some(it=>it.templateIndex===120));
+    assert.equal(await page.locator('#enhanced-inventory').count(),1);assert.equal(await page.evaluate(()=>fixture.mounts),1);
     // Collect all uses current rows and real carry plans, and closes only after success.
     await page.evaluate(()=>__dfoLootSettings.update({filter:{mode:'black',tags:[]},autoLoot:{enabled:false}}));
     await page.reload();await page.waitForFunction(()=>window.ready);await page.keyboard.press('j');await page.waitForSelector('.loot-win');

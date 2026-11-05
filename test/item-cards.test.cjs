@@ -1,22 +1,54 @@
 'use strict';
 const {test}=require('node:test'),assert=require('node:assert/strict');
 const fs=require('node:fs'),path=require('node:path'),os=require('node:os');
-const {derive}=require('../src/mod/page/dfo_item_cards.js');
+const {derive,effectGroup}=require('../src/mod/page/dfo_item_cards.js');
 const {transformItemCards}=require('../src/mod/item-cards-transform.cjs');
 const {transformAsset,injectIndex,EXPECTED}=require('../src/mod/transforms.cjs');
 const {wrap}=require('../src/mod/hook.cjs');
 const native={isAmmo:item=>item.templateIndex===131,isHandWraps:item=>item.templateIndex===527,
   saysMaterial:()=>true,variantWord:()=>'',material:()=> 'Steel',materialLabel:word=>word,
-  template:index=>index===120?{basePrice:15}:null,value:()=>1440};
+  template:index=>index===120?{basePrice:15}:null,value:()=>1440,
+  sale:item=>({cost:(Number.isFinite(item.value)?item.value:1440)*2*(item.stackCount??1)}),isGold:item=>item.group==='Currency'&&item.templateIndex===276};
 const line={weight:1.25,material:'Steel'},known={known:()=>true};
 const sword={group:'Weapons',templateIndex:120,material:5,value:3425,affixes:[{id:'damage',value:19}],enchantments:[{type:0,param:0}]};
+
+test('named enchantment triggers remain distinct from numerical bonuses in either locale',()=>{
+  for(const text of ['When Strikes: Wildfire','Cast When Strikes: Wildfire','При ударе: Дикий огонь'])assert.equal(effectGroup(text).key,'strike');
+  assert.deepEqual(effectGroup('При попадании: Ледяная буря'),{key:'strike',label:'При попадании',text:'Ледяная буря'});
+  assert.equal(effectGroup('When Used: Restore Power').key,'use');
+  assert.equal(effectGroup('При ношении: Невесомость').key,'held');
+  assert.equal(effectGroup('+22% к урону [10–25]').key,'bonuses');
+  assert.equal(effectGroup('Soul Bound: Dragonling').key,'properties');
+});
+
+test('all supplied card fonts are served locally with their original bytes and font MIME types',async()=>{
+  const handle=wrap(async()=>new Response('native fallback'));
+  for(const file of ['item-font-title.ttf','item-font-text.ttf','item-font-sigil.ttf','item-font-set.ttf','item-font-legendary.otf']){
+    const response=await handle(new Request('dagger://game/dfo-mod/'+file));
+    assert.equal(response.status,200);assert.equal(response.headers.get('content-type'),file.endsWith('.otf')?'font/otf':'font/ttf');
+    assert.deepEqual(Buffer.from(await response.arrayBuffer()),fs.readFileSync(path.join(__dirname,'../src/mod/fonts',file)));
+  }
+  assert.equal((await handle(new Request('dagger://game/dfo-mod/other-font.ttf'))).status,404,'No arbitrary font/file route');
+});
 
 test('stored worth includes improvements once; tooltip is a read-only projection',()=>{
   const item=Object.freeze({...sword,affixes:Object.freeze(sword.affixes),enchantments:Object.freeze(sword.enchantments)});
   const data=derive(item,line,{...native,value:()=>assert.fail('Do not recalculate an already priced item')},known);
-  assert.equal(data.unitValue,3425);assert.equal(data.total,3425);assert.equal(data.source,'stored');assert.equal(data.perKg,2740);
+  assert.equal(data.unitValue,3425);assert.equal(data.total,3425);assert.equal(data.source,'stored');assert.equal(data.perKg,1096);assert.equal(data.price,1370);
   assert.equal(item.value,3425);assert.equal(derive({...item,stackCount:3},line,native,known).total,10275);
-  assert.equal(derive({...item,stackCount:3},{weight:3.75},native,known).perKg,2740,'Stack weight is already the total, not the unit weight');
+  assert.equal(derive({...item,stackCount:3},{weight:3.75},native,known).perKg,1096,'Stack weight is already the total, not the unit weight');
+});
+test('40% estimate uses the native corrected lot basis, rounds once to tens and respects native resale limits',()=>{
+  const item=Object.freeze({...sword,value:1000});
+  assert.equal(derive(item,line,native,known).price,400);
+  assert.equal(derive(item,line,{...native,sale:()=>({cost:400})},known).price,80,'Found-at-20% basis, even after paid repair');
+  assert.equal(derive(item,line,{...native,sale:()=>({cost:1000})},known).price,200,'Daedric half belongs to native sale math');
+  assert.equal(derive({...item,value:1013},line,native,known).price,410);
+  assert.equal(derive({...item,value:2,stackCount:20},line,native,known).price,20,'Price the whole stack, then round');
+  assert.equal(derive(item,line,{...native,sale:()=>({cost:2000,resale:{cost:2000,paid:95}})},known).price,100);
+  assert.equal(derive(item,line,{...native,sale:()=>({cost:2000,resale:{cost:1000,paid:95}})},known).price,300,'Only bought-back share is capped');
+  for(const sale of [{cost:NaN},{cost:Infinity},{cost:-1},{cost:2000,resale:{cost:NaN,paid:95}}])assert.equal(derive(item,line,{...native,sale:()=>sale},known).price,null);
+  assert.equal(derive(item,line,native,known).approximate,true);
 });
 test('fallback is explicitly a template estimate; missing data is never the native placeholder price 1',()=>{
   const {value,...item}=sword;
@@ -37,8 +69,12 @@ test('unknown identity, malformed stacks, zero weight and unsafe totals do not l
 test('credit nominal is native face value, distinct from paper price and merchant offers',()=>{
   const item={group:'MiscItems',templateIndex:171,value:20000};
   const data=derive(item,{weight:0},native,{...known,credit:()=> '20,000 gold'});
-  assert.equal(data.total,20000);assert.equal(data.source,'credit');assert.equal(data.perKg,null);
+  assert.equal(data.total,20000);assert.equal(data.price,20000);assert.equal(data.approximate,false);assert.equal(data.source,'credit');assert.equal(data.perKg,null);
   assert.equal(derive({...item,value:20000.75},{weight:0},native,{...known,credit:()=> '20,000 gold'}).total,20000,'Credit face value truncates exactly as the native reader');
+  assert.equal(derive({...item,value:undefined},{weight:0},native,{...known,credit:()=> '0 gold'}).price,null,'An absent face value is not the template paper price');
+  assert.equal(derive({...item,value:20003},{weight:0},native,{...known,credit:()=> '20,003 gold'}).price,20003,'Face value is never approximate or rounded to tens');
+  const coins=derive({group:'Currency',templateIndex:276,stackCount:27,value:999},{weight:0},native,known);
+  assert.equal(coins.price,27);assert.equal(coins.approximate,false,'A pile of 27 gold pieces is worth 27, not an NPC item offer');
 });
 test('construction, metal and absent material remain distinct and obey native visibility',()=>{
   const armor={...sword,group:'Armor',templateIndex:102,material:513};
@@ -72,7 +108,7 @@ test('feature configuration and script route work independently of every other f
   }finally{fs.rmSync(dir,{recursive:true,force:true});}
 });
 
-test('all three hooks match current published game assets, parse and apply once; bad signatures fall back atomically',
+test('all card hooks match current published game assets, parse and apply once; bad signatures fall back atomically',
  {skip:!process.env.DFO_BUILD_DIR},()=>{
   const acorn=require(process.env.DFO_ACORN_MODULE||'acorn');
   const assets=path.join(process.env.DFO_BUILD_DIR,'assets'),seen=[];

@@ -1,0 +1,221 @@
+{
+  "engine": "player milestone graph",
+  "scenes": [
+    {
+      "name": "Privateer's Hold",
+      "triangles": 8430,
+      "parts": 309,
+      "nodes": 22885,
+      "prepareMs": 653,
+      "queries": [
+        {
+          "goal": "enemy-marker-0",
+          "cached": false,
+          "ms": 264,
+          "distance": 94.8,
+          "heightSpan": 6.4,
+          "blocks": [
+            0
+          ],
+          "kinds": [
+            "walk"
+          ],
+          "testedEdges": 7056
+        },
+        {
+          "goal": "enemy-marker-0",
+          "cached": true,
+          "ms": 11,
+          "distance": 94.8,
+          "heightSpan": 6.4,
+          "blocks": [
+            0
+          ],
+          "kinds": [
+            "walk"
+          ],
+          "testedEdges": 7056
+        },
+        {
+          "goal": "enemy-marker-1",
+          "cached": false,
+          "ms": 640,
+          "distance": 133.5,
+          "heightSpan": 12.8,
+          "blocks": [
+            0
+          ],
+          "kinds": [
+            "walk",
+            "drop"
+          ],
+          "testedEdges": 17620
+        },
+        {
+          "goal": "enemy-marker-1",
+          "cached": true,
+          "ms": 20,
+          "distance": 133.5,
+          "heightSpan": 12.8,
+          "blocks": [
+            0
+          ],
+          "kinds": [
+            "walk",
+            "drop"
+          ],
+          "testedEdges": 17620
+        }
+      ]
+    },
+    {
+      "name": "S0000140.RDB elevator 74013",
+      "triangles": 3966,
+      "parts": 164,
+      "nodes": 9036,
+      "prepareMs": 424,
+      "queries": [
+        {
+          "goal": "down",
+          "cached": false,
+          "ms": 12,
+          "distance": 13.7,
+          "heightSpan": 12.8,
+          "blocks": [],
+          "kinds": [
+            "walk",
+            "lift"
+          ],
+          "testedEdges": 28
+        },
+        {
+          "goal": "down",
+          "cached": true,
+          "ms": 0,
+          "distance": 13.7,
+          "heightSpan": 12.8,
+          "blocks": [],
+          "kinds": [
+            "walk",
+            "lift"
+          ],
+          "testedEdges": 28
+        },
+        {
+          "goal": "up",
+          "cached": false,
+          "ms": 11,
+          "distance": 13.7,
+          "heightSpan": 12.8,
+          "blocks": [],
+          "kinds": [
+            "walk",
+            "lift"
+          ],
+          "testedEdges": 47
+        },
+        {
+          "goal": "up",
+          "cached": true,
+          "ms": 0,
+          "distance": 13.7,
+          "heightSpan": 12.8,
+          "blocks": [],
+          "kinds": [
+            "walk",
+            "lift"
+          ],
+          "testedEdges": 47
+        }
+      ]
+    },
+    {
+      "name": "The Convocation of Elona",
+      "triangles": 21135,
+      "parts": 841,
+      "nodes": 68563,
+      "prepareMs": 1195,
+      "queries": [
+        {
+          "goal": "enemy-marker-21",
+          "cached": false,
+          "ms": 9403,
+          "distance": 447.1,
+          "heightSpan": 32,
+          "blocks": [
+            8,
+            7,
+            6,
+            5
+          ],
+          "kinds": [
+            "walk"
+          ],
+          "testedEdges": 221149
+        },
+        {
+          "goal": "enemy-marker-21",
+          "cached": true,
+          "ms": 386,
+          "distance": 447.1,
+          "heightSpan": 32,
+          "blocks": [
+            8,
+            7,
+            6,
+            5
+          ],
+          "kinds": [
+            "walk"
+          ],
+          "testedEdges": 221149
+        }
+      ]
+    },
+    {
+      "name": "Ruins of Old Carololda's Farm",
+      "triangles": 19599,
+      "parts": 857,
+      "nodes": 59745,
+      "prepareMs": 1035,
+      "queries": [
+        {
+          "goal": "enemy-marker-97",
+          "cached": false,
+          "ms": 1558,
+          "distance": 309,
+          "heightSpan": 32,
+          "blocks": [
+            6,
+            5,
+            4,
+            9,
+            12
+          ],
+          "kinds": [
+            "walk"
+          ],
+          "testedEdges": 64679
+        },
+        {
+          "goal": "enemy-marker-97",
+          "cached": true,
+          "ms": 56,
+          "distance": 309,
+          "heightSpan": 32,
+          "blocks": [
+            6,
+            5,
+            4,
+            9,
+            12
+          ],
+          "kinds": [
+            "walk"
+          ],
+          "testedEdges": 64679
+        }
+      ]
+    }
+  ]
+}

@@ -5,12 +5,23 @@
   if (root && root.document) api.install(root);
 })(typeof globalThis === 'object' ? globalThis : this, function () {
   'use strict';
-  const DATA_KEYS = ['template', 'value', 'variantWord', 'material', 'materialLabel', 'saysMaterial', 'isAmmo', 'isHandWraps'];
+  const DATA_KEYS = ['template', 'value', 'variantWord', 'material', 'materialLabel', 'saysMaterial', 'isAmmo', 'isHandWraps', 'sale', 'isGold'];
   const finite = value => typeof value === 'number' && Number.isFinite(value) && value >= 0;
   const money = value => finite(value) && value <= Number.MAX_SAFE_INTEGER;
+  const nearestTen = value => money(value) && money(Math.round(value / 10) * 10) ? Math.round(value / 10) * 10 : null;
   const variants = { Fur: 'Мех', Mail: 'Кольчужная', Brigandine: 'Бригандина' };
   // These English material names are also skill names; the generic RU text hook uses the language meaning.
   const materialTerms = { Daedric: 'Даэдрический металл', Orcish: 'Орочий металл' };
+  function effectGroup(text) {
+    const words = [
+      ['strike', 'При попадании', /^(?:(?:Cast )?When Strikes|При ударе|При попадании)\s*:\s*(.+)$/i],
+      ['use', 'При использовании', /^(?:(?:Cast )?When Used|При использовании)\s*:\s*(.+)$/i],
+      ['held', 'При ношении', /^(?:(?:Cast )?When Held|При ношении|При экипировке)\s*:\s*(.+)$/i],
+    ];
+    for (const [key, label, pattern] of words) { const m = pattern.exec(text); if (m) return { key, label, text: m[1] }; }
+    return /^[+\-−]\d/.test(text) ? { key: 'bonuses', label: 'Надбавки', text }
+      : { key: 'properties', label: 'Чары и свойства', text };
+  }
 
   /** Pure presentation data. Never mint, identify, repair or write to the item. */
   function derive(item, line, native, context = {}) {
@@ -38,7 +49,8 @@
     if (known && count != null) {
       const credit = typeof context.credit === 'function' ? context.credit() : null;
       // letterWorthGold is a native display string, not a number: its non-null result identifies credit.
-      if (credit != null && money(item.value)) { unitValue = Math.trunc(item.value); source = 'credit'; }
+      if (credit != null) { unitValue = money(item.value) ? Math.trunc(item.value) : null; source = 'credit'; }
+      else if (native.isGold(item)) { unitValue = 1; source = 'currency'; }
       else if (money(item.value)) { unitValue = item.value; source = 'stored'; }
       else if (native.template(item.templateIndex)) {
         const value = native.value(item);
@@ -47,37 +59,57 @@
     }
     const product = unitValue == null || count == null ? null : unitValue * count;
     const total = finite(product) && product <= Number.MAX_SAFE_INTEGER ? product : null;
+    let estimate = null;
+    if (total != null) {
+      if (source === 'credit' || source === 'currency') estimate = total;
+      else {
+        // At quality 10 and regional index 1000, native calculateCost is exactly
+        // twice the item's sale basis. Keep its item-specific corrections and
+        // counter-purchase caps; replace only shop/player haggling with 40%.
+        const sale = native.sale(item);
+        if (money(sale?.cost)) {
+          estimate = sale.cost * .2;
+          if (sale.resale) {
+            if (!money(sale.resale.cost) || !money(sale.resale.paid)) estimate = null;
+            else estimate = Math.min(estimate, Math.max(0, sale.cost - sale.resale.cost) * .2 + sale.resale.paid);
+          }
+        }
+      }
+    }
+    const approximate = source !== 'credit' && source !== 'currency';
+    const price = approximate ? nearestTen(estimate) : estimate;
     // Wallets/containers have a native contents weight; do not price their contents as the empty object.
     const ordinaryWeight = ['Weapons', 'Armor', 'MensClothing', 'WomensClothing', 'Jewellery'].includes(item.group);
-    const perKg = ordinaryWeight && money(total) && finite(line.weight) && line.weight > 0
-      ? total / line.weight : null;
-    return { known, count, material, construction, unitValue, total, source,
+    const perKg = ordinaryWeight && money(estimate) && finite(line.weight) && line.weight > 0
+      ? estimate / line.weight : null;
+    const power = known && typeof native.power === 'function' ? native.power(item) : null;
+    return { known, count, material, construction, unitValue, total, source, power, price, approximate,
       perKg: finite(perKg) && perKg <= Number.MAX_SAFE_INTEGER ? perKg : null };
   }
 
   const CSS = `
-body .card.dfo-item-card { padding:0!important; margin:0; display:block!important; overflow:visible!important; max-height:none!important; box-sizing:border-box; }
+body .card.dfo-item-card { --dfo-ornament:var(--rar,#827a68); --dfo-corner:polygon(0 0,100% 0,100% 15%,15% 15%,15% 100%,0 100%); padding:0!important; margin:0; position:relative; display:block!important; overflow:visible!important; max-height:none!important; box-sizing:border-box; background:var(--ink,#0e1013)!important; color:var(--bone,#e9e4d9); border:3px solid var(--dfo-ornament)!important; box-shadow:inset 0 0 0 1px #000,0 5px 18px #0008; font:14px/1.28 'DFO Gabin',var(--data,Georgia,serif); font-synthesis:none; }
 body .card.dfo-item-card>.card-body { display:block; flex:none; min-height:0; padding:0; overflow:visible!important; max-height:none!important; }
 body .inv-tip.dfo-item-host { width:max-content!important; max-width:none!important; max-height:none!important; overflow:visible!important; pointer-events:none; }
 body .pack-shell .packdetail.dfo-item-host { width:max-content!important; height:auto!important; max-width:none!important; max-height:none!important; overflow:visible!important; bottom:auto!important; right:auto!important; transition:none!important; }
 .dfo-item-main { display:grid; grid-template-columns:260px minmax(0,1fr); gap:14px; padding:12px; box-sizing:border-box; }
-.dfo-item-left { min-width:0; border-right:1px solid #544b37; padding-right:12px; }
+.dfo-item-left { min-width:0; border-right:1px solid #756346; box-shadow:1px 0 #000; padding-right:12px; }
 .dfo-item-head { display:grid; grid-template-columns:64px minmax(0,1fr); gap:10px; align-items:center; margin-bottom:12px; }
 .dfo-item-card .dfo-item-head>.bigicon { width:64px; height:82px; margin:0!important; display:flex; align-items:center; justify-content:center; }
 .dfo-item-card .dfo-item-head>.bigicon img,.dfo-item-card .dfo-item-head>.bigicon canvas { width:auto!important; height:auto!important; max-width:60px!important; max-height:78px!important; object-fit:contain; }
-.dfo-item-card .dfo-item-title h3 { font-family:inherit; font-weight:400; font-size:18px; line-height:1.2; text-align:left; text-transform:none; letter-spacing:normal; margin:0!important; overflow-wrap:anywhere; }
+.dfo-item-card .dfo-item-title h3 { font-family:'DFO Flexi',var(--display,Georgia,serif)!important; font-weight:400; font-size:18px; line-height:1.15; text-align:left; text-transform:none; letter-spacing:normal; margin:0!important; overflow-wrap:anywhere; color:var(--rar,var(--bone,#e9e4d9)); }
 .dfo-item-tier { font-size:11px; margin:0 0 4px; color:var(--rar,var(--brass,#d5b26e)); }
 .dfo-item-tier::before { content:var(--rar-pips,''); margin-right:4px; font-size:9px; }
 .dfo-item-card .dfo-item-stats { display:block!important; margin:0; padding:0; }
-.dfo-item-card .dfo-item-stats>.pair { display:flex!important; justify-content:space-between; gap:8px; margin:0 0 6px; font-size:12px!important; line-height:1.3!important; }
+.dfo-item-card .dfo-item-stats>.pair { display:flex!important; justify-content:space-between; gap:8px; margin:0 0 6px; font-size:13px!important; line-height:1.25!important; }
 .dfo-item-card .dfo-item-stats>.pair>dt { font:inherit!important; letter-spacing:normal!important; text-transform:none!important; text-align:left!important; color:var(--dim,#a89f88); }
 .dfo-item-card .dfo-item-stats>.pair>dd { font:inherit!important; margin:0; text-align:right; min-width:0; overflow-wrap:anywhere; }
 .dfo-item-primary { display:flex; align-items:baseline; justify-content:space-between; gap:8px; border-bottom:1px solid #454534; padding:0 0 9px; margin:0 0 10px; }
 .dfo-item-primary>span { font-size:11px; color:var(--dim,#a89f88); }
-.dfo-item-primary>strong { font-size:23px; line-height:1.1; font-weight:400; min-width:0; overflow-wrap:anywhere; }
+.dfo-item-primary>strong { font-family:'DFO Flexi',var(--data,monospace); font-size:23px; line-height:1.1; font-weight:400; min-width:0; overflow-wrap:anywhere; }
 .dfo-item-card .dfo-item-statuses>p { text-align:left!important; font-size:11px!important; line-height:1.35!important; margin:7px 0 0; overflow-wrap:anywhere; }
 .dfo-item-effects { display:flex; flex-direction:column; gap:5px; min-width:0; }
-.dfo-item-card .dfo-item-lines { display:block; padding:0; margin:0; list-style:none; font-size:12px!important; line-height:1.3!important; color:#f3cf86!important; text-align:left; }
+.dfo-item-card .dfo-item-lines { display:block; padding:0; margin:0; list-style:none; font-size:14px!important; line-height:1.25!important; color:#edd5a4!important; text-align:left; }
 .dfo-item-card .dfo-item-lines>li { display:block; font:inherit!important; color:inherit!important; letter-spacing:normal!important; text-transform:none!important; margin:0 0 3px; white-space:normal; overflow-wrap:anywhere; }
 .dfo-item-card .dfo-item-lines>li:first-child { font-size:12px; letter-spacing:normal; text-transform:none; color:inherit; }
 .dfo-item-card .dfo-item-lines>li:first-child::before { content:none!important; }
@@ -86,15 +118,44 @@ body .pack-shell .packdetail.dfo-item-host { width:max-content!important; height
 .dfo-item-socket-lines { font-size:11px; line-height:1.35; margin:0; }
 .dfo-item-socket-lines>div { margin-bottom:4px; overflow-wrap:anywhere; }
 .dfo-item-effects>.cmp { margin:0; }
-.dfo-item-footer { display:flex; justify-content:flex-end; border-top:1px solid #5c4e37; padding:8px 12px 10px; text-align:right; }
-.dfo-item-price { display:flex; flex-direction:column; align-items:flex-end; gap:3px; }
-.dfo-item-price-label,.dfo-item-unit-price { font-size:11px; color:var(--dim,#a89f88); }
-.dfo-item-price-value { font-size:19px; line-height:1.1; color:var(--brass,#efd18e); white-space:nowrap; }
+.dfo-item-footer { display:flex; justify-content:flex-end; align-items:flex-end; gap:16px; border-top:1px solid #756346; padding:9px 12px 11px; text-align:right; background:var(--ink,#0e1013); }
+.dfo-item-price { display:flex; align-items:center; gap:8px; color:#f5d451; }
+.dfo-item-price-value { font-family:'DFO Flexi',var(--data,monospace); font-size:21px; font-weight:400; line-height:1.15; color:#f5d451; white-space:nowrap; }
+.dfo-item-coin { width:20px; height:20px; flex:none; color:#f5d451; }
+.dfo-item-card::before { content:''; position:absolute; inset:3px; border:1px solid color-mix(in srgb,var(--dfo-ornament) 32%,transparent); pointer-events:none; }
+.dfo-item-corners { position:absolute; inset:2px; pointer-events:none; }
+.dfo-item-corners>i { width:18px; height:18px; position:absolute; background:var(--dfo-ornament); clip-path:var(--dfo-corner); opacity:.95; }
+.dfo-item-corners>i:nth-child(1) { left:0; top:0; }
+.dfo-item-corners>i:nth-child(2) { right:0; top:0; transform:rotate(90deg); }
+.dfo-item-corners>i:nth-child(3) { right:0; bottom:0; transform:rotate(180deg); }
+.dfo-item-corners>i:nth-child(4) { left:0; bottom:0; transform:rotate(270deg); }
+body .card.dfo-item-card:not([data-rarity]),body .card.dfo-item-card[data-rarity=common] { border-width:2px!important; }
+.dfo-item-card[data-rarity=magic] { --dfo-corner:polygon(0 0,100% 0,65% 20%,35% 20%,35% 35%,20% 35%,20% 65%,0 100%); }
+body .card.dfo-item-card[data-rarity=rare] { border-style:double!important; --dfo-corner:polygon(0 0,100% 0,100% 18%,46% 18%,46% 46%,18% 46%,18% 100%,0 100%); }
+.dfo-item-card[data-rarity=legendary] { --dfo-corner:polygon(0 0,100% 0,78% 16%,45% 16%,60% 33%,33% 60%,16% 45%,16% 78%,0 100%); }
+body .card.dfo-item-card[data-rarity=aetheric] { border-style:groove!important; --dfo-corner:polygon(0 0,100% 0,72% 16%,40% 16%,40% 40%,16% 40%,16% 72%,0 100%,0 60%,10% 50%,0 40%); }
+body .card.dfo-item-card[data-rarity=gilded] { border-width:4px!important; border-style:double!important; --dfo-corner:polygon(0 0,100% 0,82% 18%,48% 18%,60% 30%,30% 60%,18% 48%,18% 82%,0 100%,0 65%,12% 50%,0 35%); }
+.dfo-item-group { min-width:0; margin:0; }
+.dfo-item-group+.dfo-item-group { border-top:1px solid #393b35; padding-top:7px; margin-top:2px; }
+.dfo-item-group>h4,.dfo-item-stat-heading { margin:0 0 6px; font:12px/1.2 'DFO Gabin',var(--data,serif); letter-spacing:.07em; text-transform:uppercase; color:#b7a071; }
+.dfo-item-group[data-group=strike] .dfo-item-lines>li::before,.dfo-item-group[data-group=held] .dfo-item-lines>li::before,.dfo-item-group[data-group=use] .dfo-item-lines>li::before { content:'◆'!important; display:inline; margin-right:6px; color:var(--dfo-ornament); font-size:8px; }
+.dfo-item-power-name { display:block; font:20px/1.12 'DFO Wolga',var(--display,Georgia,serif); color:#e8b278; margin:2px 0 5px; }
+.dfo-item-power-detail { display:block; color:#d7c9ad; }
+.dfo-item-group[data-group=power] { border:1px solid #715336; padding:7px 8px; background:linear-gradient(115deg,#382a1738,transparent); }
+.dfo-item-card .dfo-item-stats>.pair[data-divider] { border-top:1px solid #393b35; padding-top:8px; margin-top:8px; }
+.dfo-item-effects>.cmp { border-left:2px solid #637b65; background:#18201966; padding:6px 8px; }
+.dfo-item-card :is(.sigilbox,.setbox,.techbox,.cmp) { font-family:'DFO Gabin',var(--data,serif); }
+.dfo-item-card :is(.dfo-item-stats,.dfo-item-lines,.cmp-head,.cmp-line,.sigil-effect,.sigil-progress,.set-tier-effect) { font-family:'DFO Gabin',var(--data,serif)!important; }
+.dfo-item-card .sigilbox .sigil-stage { font-family:'DFO Ckazka',var(--display,serif)!important; font-size:17px!important; letter-spacing:.02em; }
+.dfo-item-card .setbox .set-name { font-family:'DFO Ritalin',var(--display,serif)!important; font-size:18px!important; letter-spacing:.02em; }
 `;
 
   function install(win) {
     if (win.__DFO_MOD_CFG__?.itemCards?.enabled === false || win.__dfoItemCards) return;
     const doc = win.document, native = {}, states = new WeakMap(), pending = new Set(), active = new Map();
+    const fontRoot = new URL('.', doc.currentScript?.src || new URL('dfo-mod/dfo_item_cards.js', doc.baseURI || win.location.href)).href;
+    const fontFaces = [['DFO Flexi','title','ttf'],['DFO Gabin','text','ttf'],['DFO Ckazka','sigil','ttf'],['DFO Ritalin','set','ttf'],['DFO Wolga','legendary','otf']]
+      .map(([family,file,ext])=>`@font-face{font-family:'${family}';src:url(${JSON.stringify(new URL('item-font-'+file+'.'+ext,fontRoot).href)}) format('${ext==='otf'?'opentype':'truetype'}');font-style:normal;font-weight:400;font-display:swap;}`).join('\n');
     const counters = { dressed: 0, failures: 0, lastError: '', layouts: 0, placements: 0, observerCallbacks: 0 };
     let scheduled = false;
     const node = (tag, cls, text) => {
@@ -114,19 +175,34 @@ body .pack-shell .packdetail.dfo-item-host { width:max-content!important; height
     };
     const ensureStyle = () => {
       if (doc.getElementById('dfo-item-cards-style')) return;
-      const style = node('style'); style.id = 'dfo-item-cards-style'; style.textContent = CSS; (doc.head || doc.documentElement).append(style);
+      const style = node('style'); style.id = 'dfo-item-cards-style'; style.textContent = fontFaces + CSS; (doc.head || doc.documentElement).append(style);
     };
     function price(state, data) {
       if (!data) return;
-      const label = data.source === 'credit' ? 'Аккредитив · номинал'
-        : data.source === 'base' ? 'Базовая ценность · расчёт'
-          : data.count > 1 ? 'Ценность стопки · номинал' : 'Ценность · номинал';
-      const value = data.total == null ? data.known ? 'Нет данных' : 'Не опознана' : format(data.total) + ' зол.';
-      const unit = data.count > 1 && data.unitValue != null ? format(data.unitValue) + ' зол. / шт.' : '';
-      if (state.priceLabel.textContent !== label) state.priceLabel.textContent = label;
+      const value = data.price == null ? '—' : (data.approximate ? '~' : '') + format(data.price);
       if (state.priceValue.textContent !== value) state.priceValue.textContent = value;
-      if (state.unitPrice.textContent !== unit) state.unitPrice.textContent = unit;
-      state.unitPrice.hidden = !unit;
+      state.priceBox.setAttribute('aria-label', data.price == null ? 'Стоимость неизвестна' : (data.approximate ? 'Примерная стоимость: ' : 'Стоимость: ') + format(data.price) + ' золота');
+    }
+
+    function groupedPowers(list, data) {
+      const groups = new Map(), name = typeof data.power?.name === 'string' ? said(data.power.name) : null;
+      for (const row of [...list.children]) {
+        const original = row.textContent, powerAt = name ? original.indexOf(name) : -1;
+        const kind = powerAt >= 0 ? { key:'power',label:'Легендарное свойство',text:original } : effectGroup(original);
+        let group = groups.get(kind.key);
+        if (!group) {
+          const section = node('section','dfo-item-group');section.dataset.group=kind.key;section.append(node('h4',null,kind.label));
+          const rows = list.cloneNode(false);section.append(rows);group={section,rows};groups.set(kind.key,group);
+        }
+        // The accessible line is the complete native sentence; its repeated
+        // trigger is written once visually as the group's heading.
+        row.setAttribute('aria-label',original);
+        if (kind.key==='power') {
+          row.replaceChildren(node('strong','dfo-item-power-name',name),node('span','dfo-item-power-detail',original.slice(0,powerAt)+original.slice(powerAt+name.length).replace(/^:\s*/,'')));
+        } else row.textContent=kind.text;
+        group.rows.append(row);
+      }
+      return [...groups.values()].map(g=>g.section);
     }
 
     function dress(card, line, context) {
@@ -171,7 +247,7 @@ body .pack-shell .packdetail.dfo-item-host { width:max-content!important; height
               else if (!tier && hasTier) tier = text;
               else list.append(originalLine.cloneNode(true));
             }
-            if (list.children.length) rightNative.push(list);
+            if (list.children.length) rightNative.push(...groupedPowers(list,data));
             continue;
           }
           if (child.matches('.lockline,.boundline')) { statuses.append(child.cloneNode(true)); continue; }
@@ -194,10 +270,15 @@ body .pack-shell .packdetail.dfo-item-host { width:max-content!important; height
           badge.append(node('span', null, primary.querySelector('dt')?.textContent), node('strong', null, primary.querySelector('dd')?.textContent));
           left.append(badge);
         }
-        addPair(stats, 'Материал', data.material);
-        if (data.construction && data.construction !== data.material) addPair(stats, 'Конструкция', data.construction);
+        const materialRows=node('dl');
+        addPair(materialRows, 'Материал', data.material);
+        if (data.construction && data.construction !== data.material) addPair(materialRows, 'Конструкция', data.construction);
+        if(materialRows.children.length)stats.prepend(...materialRows.children);
         if (data.count > 1) addPair(stats, 'Количество', data.count);
-        if (data.perKg != null) addPair(stats, 'Ценность / кг', format(data.perKg) + ' зол.');
+        const pricePerKg = nearestTen(data.perKg);
+        if (pricePerKg != null) addPair(stats, 'Цена / кг', '~' + format(pricePerKg) + ' зол.');
+        for(const pair of stats.children)if([said('Condition'),said('Worn'),'Цена / кг'].includes(pair.querySelector('dt')?.textContent))pair.dataset.divider='';
+        if(stats.children.length)left.append(node('h4','dfo-item-stat-heading','Общие сведения'));
         left.append(stats);
         if (statuses.children.length) left.append(statuses);
         if (meta.children.length) left.append(meta);
@@ -206,12 +287,17 @@ body .pack-shell .packdetail.dfo-item-host { width:max-content!important; height
         if (socketLines.children.length) effects.append(socketLines);
         main.append(left, effects);
         const footer = node('div', 'dfo-item-footer'), priceBox = node('div', 'dfo-item-price');
-        const priceLabel = node('span', 'dfo-item-price-label'), unitPrice = node('span', 'dfo-item-unit-price'), priceValue = node('strong', 'dfo-item-price-value');
-        priceBox.append(priceLabel, unitPrice, priceValue); footer.append(priceBox);
+        const priceValue = node('strong', 'dfo-item-price-value'), coin=doc.createElementNS('http://www.w3.org/2000/svg','svg');
+        coin.setAttribute('viewBox','0 0 20 20');coin.setAttribute('class','dfo-item-coin');coin.setAttribute('aria-hidden','true');
+        for(const [tag,attributes]of [['circle',{cx:10,cy:10,r:8,fill:'#8e6118',stroke:'currentColor','stroke-width':1.5}],['circle',{cx:10,cy:10,r:5.5,fill:'#c99a2d',stroke:'#f8df80','stroke-width':.8}],['path',{d:'M8 6.5h2.2c4 0 4 7 0 7H8zm1-1.5v10',fill:'none',stroke:'#805313','stroke-width':1.4}]]){
+          const part=doc.createElementNS('http://www.w3.org/2000/svg',tag);for(const [key,value]of Object.entries(attributes))part.setAttribute(key,String(value));coin.append(part);
+        }
+        priceBox.append(priceValue,coin); footer.append(priceBox);
         // A native render is a snapshot: sizing must not repeatedly read game rules or mix a fresh price with old stats.
-        const state = { main, footer, priceLabel, priceValue, unitPrice, dirty: true, host: null };
+        const state = { main, footer, priceBox, priceValue, dirty: true, host: null };
         price(state, data);
         into.replaceChildren(main, footer);
+        const corners=node('div','dfo-item-corners');corners.setAttribute('aria-hidden','true');for(let i=0;i<4;i++)corners.append(node('i'));into.append(corners);
         card.classList.add('dfo-item-card');
         states.set(card, state); counters.dressed++;
         ensureStyle();
@@ -370,9 +456,9 @@ body .pack-shell .packdetail.dfo-item-host { width:max-content!important; height
     win.addEventListener('scroll', reposition, { capture: true, passive: true });
     win.visualViewport?.addEventListener('resize', refresh);
     win.visualViewport?.addEventListener('scroll', reposition);
-    doc.fonts?.addEventListener?.('loadingdone', refresh);
+    doc.fonts?.addEventListener?.('loadingdone', () => { for (const [card] of active) if(card.isConnected)fit(card,true); });
     win.__dfoItemCards = Object.freeze({
-      register(parts) { for (const key of DATA_KEYS) if (typeof parts?.[key] === 'function') native[key] = parts[key]; },
+      register(parts) { for (const key of [...DATA_KEYS,'power']) if (typeof parts?.[key] === 'function') native[key] = parts[key]; },
       dress,
       // The native second argument is room in pixels, not our internal dirty/invalidation flag.
       fitCard(card) {
@@ -385,5 +471,5 @@ body .pack-shell .packdetail.dfo-item-host { width:max-content!important; height
       stats: () => ({ ...counters, ready: ready(), active: active.size, pending: pending.size }),
     });
   }
-  return { derive, install, CSS };
+  return { derive, effectGroup, install, CSS };
 });

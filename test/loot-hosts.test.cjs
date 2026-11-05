@@ -68,6 +68,7 @@ test('published world, town and interior bridges expose and take real ground loo
     }
     const host = vm.runInNewContext('(' + nodeText(expression) + ')', context);
     assert.equal(host.feet(), motor.pos, kind + ': real motor buffer');assert.equal(host.collider(), c);assert.equal(host.blocked(), false);
+    assert.deepEqual([...host.eye()], [...motor.eye], kind + ': actual player eye');
     const loot = createSession(host, { tools: () => ({ planTake, applyTransfer }) });
     assert.equal(loot.items().length, 2, kind + ': body and floor loot are visible');
     motor.pinFeet(100, 15, -20);assert.equal(loot.items().length, 0, kind + ': another storey stays excluded');

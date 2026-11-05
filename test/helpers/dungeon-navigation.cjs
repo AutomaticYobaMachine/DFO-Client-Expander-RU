@@ -34,7 +34,7 @@ async function realDungeon(name="Privateer's Hold",region="Daggerfall") {
   maps.load(rd('MAPS.BSA'),rd('CLIMATE.PAK'),rd('POLITIC.PAK'));blocks.load(rd('BLOCKS.BSA'));arch.load(rd('ARCH3D.BSA'));
   const loc=maps.getLocationByName(region,name),models=new Map();
   const model=id=>{if(!models.has(id)){const c=customModelFor(id),i=c?-1:arch.getRecordIndex(id),cpu=c??(i<0?null:dfMeshToModel(patchSeams(id,arch.getMesh(i)),()=>({width:1,height:1})));models.set(id,cpu?{...cpu,modelIdNum:id}:null);}return models.get(id);};
-  const dungeon=layoutDungeon(loc,blocks,id=>model(id)??emptyModel()),col=new Collider(()=>-Infinity),actions=new ActionSystem(col,{}),positions=new Map();
+  const dungeon=layoutDungeon(loc,blocks,id=>model(id)??emptyModel()),col=new Collider(()=>-Infinity),portalSurfaces=new Collider(()=>-Infinity),actions=new ActionSystem(col,{}),positions=new Map();
   for(const [bi,b]of dungeon.blocks.entries()){
     const origin=trs(b.originX,0,b.originZ,0,0,0);
     for(const [key,p]of b.layout.objectPositions)positions.set(`${bi}:${key}`,{pos:[p.x+b.originX,p.y,p.z+b.originZ],yawDeg:p.yawDeg});
@@ -42,7 +42,7 @@ async function realDungeon(name="Privateer's Hold",region="Daggerfall") {
       const cpu=model(p.modelIdNum);if(!cpu)continue;const m=multiply(origin,p.matrix),box=worldAabb(cpu.positions,m),cls=p.action?classifyPlacementAction(p.action.actionFlag,false):null;
       if(cls==='move'){actions.addAction(bi,p.position,cpu,m,p.action).aabb=box;continue;}
       if(cls==='specialDoor'){actions.addSpecialDoor(bi,p.position,cpu,m,p.action).aabb=box;continue;}
-      if(p.action)actions.addRelay(bi,p.position,p.action,box,[m[12],m[13],m[14]],p.modelIdNum);
+      if(p.action){const o=actions.addRelay(bi,p.position,p.action,box,[m[12],m[13],m[14]],p.modelIdNum);if([1,3,8,9].includes(o.triggerFlag))portalSurfaces.addMesh(o.key,cpu.positions,cpu.indices,m);}
       M.notePlacement(col,'dungeon',cpu);col.addMesh('dungeon',cpu.positions,cpu.indices,m);
     }
     for(const d of b.layout.actionDoors){if(d.disabled)continue;const cpu=model(d.modelIdNum);if(cpu)actions.addDoor(cpu,multiply(origin,d.matrix),{ns:bi,positionKey:d.position,action:d.action,startingLockValue:d.startingLockValue});}
@@ -52,7 +52,7 @@ async function realDungeon(name="Privateer's Hold",region="Daggerfall") {
   const enemies=collectDungeonEnemies(dungeon.blocks.map(b=>({markers:b.layout.markers,waterLevel:b.layout.waterLevel,originX:b.originX,originZ:b.originZ})),{locationId:loc.dungeon.recordElement.header.locationId,dungeonType:loc.mapTableData.dungeonType,playerLevel:1});
   const s=dungeon.startMarker,from=floorLanding(col,[s.x,s.y+1.08,s.z]),anchors=enemies.map(e=>floorLanding(col,[e.x,e.y+.2,e.z]));
   const geometry=M.navigationGeometry(col);
-  return{col,geometry,actions,dungeon,from,anchors,transitions};
+  return{col,geometry,actions,dungeon,from,anchors,portalSurfaces,transitions:M.portalTransitions(actions,transitions,portalSurfaces)};
 }
 async function realBlock(name){
   const load=f=>import(pathToFileURL(path.join(process.env.DFO_UPSTREAM_DIR,f)).href);
@@ -62,14 +62,15 @@ async function realBlock(name){
   const rd=f=>new Uint8Array(fs.readFileSync(path.join(process.env.ARENA2_PATH,f))),blocks=new BlocksFile(),arch=new Arch3dFile(),cache=new Map();blocks.load(rd('BLOCKS.BSA'));arch.load(rd('ARCH3D.BSA'));
   const model=id=>{if(!cache.has(id)){const c=customModelFor(id),i=c?-1:arch.getRecordIndex(id),cpu=c??(i<0?null:dfMeshToModel(patchSeams(id,arch.getMesh(i)),()=>({width:1,height:1})));cache.set(id,cpu?{...cpu,modelIdNum:id}:null);}return cache.get(id);};
   const index=blocks.getBlockIndex(name);if(index<0)throw Error('unknown block '+name);
-  const layout=layoutRdbBlock(blocks.getBlock(index),index,true,id=>model(id)??emptyModel()),{Collider}=await playerModules(),col=new Collider(()=>-Infinity),actions=new ActionSystem(col,{}),M=require('../../src/mod/page/dfo_dungeon_nav_model.js');
+  const layout=layoutRdbBlock(blocks.getBlock(index),index,true,id=>model(id)??emptyModel()),{Collider}=await playerModules(),col=new Collider(()=>-Infinity),portalSurfaces=new Collider(()=>-Infinity),actions=new ActionSystem(col,{}),M=require('../../src/mod/page/dfo_dungeon_nav_model.js');
   for(const p of layout.placements){const cpu=model(p.modelIdNum);if(!cpu)continue;const box=worldAabb(cpu.positions,p.matrix),cls=p.action?classifyPlacementAction(p.action.actionFlag,false):null;
     if(cls==='move'){actions.addAction(0,p.position,cpu,p.matrix,p.action).aabb=box;continue;}
     if(cls==='specialDoor'){actions.addSpecialDoor(0,p.position,cpu,p.matrix,p.action).aabb=box;continue;}
-    if(p.action)actions.addRelay(0,p.position,p.action,box,[p.matrix[12],p.matrix[13],p.matrix[14]],p.modelIdNum);
+    if(p.action){const o=actions.addRelay(0,p.position,p.action,box,[p.matrix[12],p.matrix[13],p.matrix[14]],p.modelIdNum);if([1,3,8,9].includes(o.triggerFlag))portalSurfaces.addMesh(o.key,cpu.positions,cpu.indices,p.matrix);}
     M.notePlacement(col,'dungeon',cpu);col.addMesh('dungeon',cpu.positions,cpu.indices,p.matrix);
   }
   for(const d of layout.actionDoors){const cpu=model(d.modelIdNum);if(cpu)actions.addDoor(cpu,d.matrix,{ns:0,positionKey:d.position,action:d.action,startingLockValue:d.startingLockValue});}
-  return{col,actions,layout};
+  actions.resolvePosition=(ns,key)=>{const p=layout.objectPositions.get(key);return p?{pos:[p.x,p.y,p.z],yawDeg:p.yawDeg}:null;};
+  return{col,actions,layout,portalSurfaces,transitions:M.portalTransitions(actions,[],portalSurfaces)};
 }
 module.exports={playerModules,quad,wall,room,realDungeon,realBlock};

@@ -1,0 +1,207 @@
+{
+  "quality": 10,
+  "priceAdjustment": 1000,
+  "skills": {
+    "mercantile": 60,
+    "personality": 70
+  },
+  "basePercent": 29.106,
+  "personalPercent": 33.793,
+  "rows": [
+    {
+      "name": "iron, whole",
+      "nominal": 1000,
+      "counterUnit": 1000,
+      "saleCondition": 100,
+      "nativeCost": 2000,
+      "nativeDefault": 291,
+      "nativePersonal": 338,
+      "nominalOverSale": 2.9585798816568047,
+      "empiricalDivide73Plus40": 192,
+      "resale": null,
+      "estimate40": 400,
+      "displayed": "~400"
+    },
+    {
+      "name": "iron, worn 20%",
+      "nominal": 1000,
+      "counterUnit": 1000,
+      "saleCondition": 20,
+      "nativeCost": 400,
+      "nativeDefault": 58,
+      "nativePersonal": 67,
+      "nominalOverSale": 14.925373134328359,
+      "empiricalDivide73Plus40": 192,
+      "resale": null,
+      "estimate40": 80,
+      "displayed": "~80"
+    },
+    {
+      "name": "iron, repaired by smith",
+      "nominal": 1000,
+      "counterUnit": 1000,
+      "saleCondition": 20,
+      "nativeCost": 400,
+      "nativeDefault": 58,
+      "nativePersonal": 67,
+      "nominalOverSale": 14.925373134328359,
+      "empiricalDivide73Plus40": 192,
+      "resale": null,
+      "estimate40": 80,
+      "displayed": "~80"
+    },
+    {
+      "name": "iron, self mended",
+      "nominal": 1000,
+      "counterUnit": 1000,
+      "saleCondition": 46,
+      "nativeCost": 920,
+      "nativeDefault": 133,
+      "nativePersonal": 154,
+      "nominalOverSale": 6.4935064935064934,
+      "empiricalDivide73Plus40": 192,
+      "resale": null,
+      "estimate40": 184,
+      "displayed": "~180"
+    },
+    {
+      "name": "daedric, whole",
+      "nominal": 1000,
+      "counterUnit": 500,
+      "saleCondition": 100,
+      "nativeCost": 1000,
+      "nativeDefault": 145,
+      "nativePersonal": 168,
+      "nominalOverSale": 5.9523809523809526,
+      "empiricalDivide73Plus40": 192,
+      "resale": null,
+      "estimate40": 200,
+      "displayed": "~200"
+    },
+    {
+      "name": "crafted rare",
+      "nominal": 2000,
+      "counterUnit": 600,
+      "saleCondition": 100,
+      "nativeCost": 1200,
+      "nativeDefault": 174,
+      "nativePersonal": 202,
+      "nominalOverSale": 9.900990099009901,
+      "empiricalDivide73Plus40": 384,
+      "resale": null,
+      "estimate40": 240,
+      "displayed": "~240"
+    },
+    {
+      "name": "three pieces",
+      "nominal": 3000,
+      "counterUnit": 1000,
+      "saleCondition": 100,
+      "nativeCost": 6000,
+      "nativeDefault": 873,
+      "nativePersonal": 1013,
+      "nominalOverSale": 2.9615004935834155,
+      "empiricalDivide73Plus40": 575,
+      "resale": null,
+      "estimate40": 1200,
+      "displayed": "~1 200"
+    },
+    {
+      "name": "counter-bought piece",
+      "nominal": 1000,
+      "counterUnit": 1000,
+      "saleCondition": 100,
+      "nativeCost": 2000,
+      "nativeDefault": 291,
+      "nativePersonal": 338,
+      "nominalOverSale": 2.9585798816568047,
+      "empiricalDivide73Plus40": 192,
+      "resale": {
+        "cost": 2000,
+        "paid": 95
+      },
+      "estimate40": 95,
+      "displayed": "~100"
+    }
+  ],
+  "shopSamples": [
+    {
+      "quality": 1,
+      "priceAdjustment": 800,
+      "basePercent": 14.559,
+      "personalPercent": 16.958
+    },
+    {
+      "quality": 1,
+      "priceAdjustment": 1000,
+      "basePercent": 18.199,
+      "personalPercent": 21.198
+    },
+    {
+      "quality": 1,
+      "priceAdjustment": 1250,
+      "basePercent": 22.75,
+      "personalPercent": 26.498
+    },
+    {
+      "quality": 10,
+      "priceAdjustment": 800,
+      "basePercent": 23.284,
+      "personalPercent": 27.034
+    },
+    {
+      "quality": 10,
+      "priceAdjustment": 1000,
+      "basePercent": 29.106,
+      "personalPercent": 33.793
+    },
+    {
+      "quality": 10,
+      "priceAdjustment": 1250,
+      "basePercent": 36.382,
+      "personalPercent": 42.242
+    },
+    {
+      "quality": 20,
+      "priceAdjustment": 800,
+      "basePercent": 34.157,
+      "personalPercent": 39.754
+    },
+    {
+      "quality": 20,
+      "priceAdjustment": 1000,
+      "basePercent": 42.697,
+      "personalPercent": 49.693
+    },
+    {
+      "quality": 20,
+      "priceAdjustment": 1250,
+      "basePercent": 53.371,
+      "personalPercent": 62.116
+    }
+  ],
+  "version": "0.1.14530",
+  "nativeAssets": [
+    {
+      "path": "assets/enhancedInventory-D7RImcNl.js",
+      "sha256": "dd39d487779381705c759f80f339479ad98896c07b3dfad0dbede3082f8f563e"
+    },
+    {
+      "path": "assets/enhancedInventory-DrJWhZme.js",
+      "sha256": "fa912b008ef9ba2a07a0622cbca77564328080e3cf46f98b0a9221e6e458fda0"
+    },
+    {
+      "path": "assets/equip-DkXfFLnE.js",
+      "sha256": "021dc1750f607bc03b4678501358ee2b95da8890d09ca1e05732ad22eb182736"
+    },
+    {
+      "path": "assets/worldTick-Co6mvuZ9.js",
+      "sha256": "71a8236c6f1ca8686ffa1fd522f67f16913169e84254cc9c8b1d76318f64f26f"
+    }
+  ],
+  "limits": [
+    "Controlled item fixtures; player screenshots do not expose their hidden foundCondition/provenance fields.",
+    "Calls actual released JS with online=true; does not perform a live trade.",
+    "nativeDefault/nativePersonal show the haggle before the counter-bought resale cap; estimate40/displayed include that cap."
+  ]
+}

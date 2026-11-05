@@ -144,7 +144,7 @@
     return {points,links};
   }
   class Geometry {
-    constructor(data,support=null){this.data=data;this.support=support;this.faces=[];this.grid=new Map();this.wide=[];this.stamp=0;}
+    constructor(data,support=null){this.data=data;this.support=support;this.faces=[];this.grid=new Map();this.wide=[];this.stamp=0;this.climbStarts=new Map();}
     async index(checkpoint){
       const data=this.data;
       for(let i=0;i<data.length;i+=9){
@@ -267,19 +267,27 @@
       if(a[1]-b[1]<=STEP||Math.hypot(a[0]-b[0],a[2]-b[2])>1.8)return null;
       // Step out over the lower landing's column, then descend; never cut a floor slab.
       const lip=[b[0],a[1]+.06,b[2]],low=[b[0],b[1]+.06,b[2]];
-      if(!this.clear([a[0],a[1]+.06,a[2]],lip)||!this.clear(lip,low))return null;
       const ray=this.ray([lip[0],lip[1]-.02,lip[2]],[0,-1,0],a[1]-b[1]+.12,true);
       if(!ray||Math.abs(lip[1]-.02-ray.dist-b[1])>.15)return null;
+      if(!this.clear([a[0],a[1]+.06,a[2]],lip)||!this.clear(lip,low))return null;
       return [a,lip,low,b];
     }
     climb(a,b){
-      if(b[1]-a[1]<=STEP||b[1]-a[1]>64||Math.hypot(a[0]-b[0],a[2]-b[2])>1.8)return null;
-      for(let i=0;i<12;i++){
-        const ang=i*Math.PI/6,d=[Math.cos(ang),0,Math.sin(ang)],probeY=Math.min(1,(b[1]-a[1])*.5),h=this.ray([a[0],a[1]+probeY,a[2]],d,.85);
-        if(!h||h.face.ny>.5)continue;
-        const wall=[a[0]+d[0]*Math.max(0,h.dist-.37),a[1],a[2]+d[2]*Math.max(0,h.dist-.37)];
+      if(b[1]-a[1]<=STEP||Math.hypot(a[0]-b[0],a[2]-b[2])>1.8)return null;
+      const probeY=Math.min(1,(b[1]-a[1])*.5),key=JSON.stringify([a,probeY]);let starts=this.climbStarts.get(key);
+      if(!starts){
+        starts=[];
+        for(let i=0;i<12;i++){
+          const ang=i*Math.PI/6,d=[Math.cos(ang),0,Math.sin(ang)],h=this.ray([a[0],a[1]+probeY,a[2]],d,.85);
+          if(!h||h.face.ny>.5)continue;
+          const wall=[a[0]+d[0]*Math.max(0,h.dist-.37),a[1],a[2]+d[2]*Math.max(0,h.dist-.37)];
+          if(this.clear(a,wall))starts.push({d,wall});
+        }
+        this.climbStarts.set(key,starts);if(this.climbStarts.size>50000)this.climbStarts.delete(this.climbStarts.keys().next().value);
+      }
+      for(const {d,wall}of starts){
         const top=[wall[0],b[1]+.06,wall[2]];
-        if(Math.hypot(top[0]-b[0],top[2]-b[2])>1.5||!this.clear(a,wall)||!this.clear(wall,top)||!this.clear(top,[b[0],b[1]+.06,b[2]]))continue;
+        if(Math.hypot(top[0]-b[0],top[2]-b[2])>1.5||!this.clear(wall,top)||!this.clear(top,[b[0],b[1]+.06,b[2]]))continue;
         let continuous=true;
         for(let y=a[1]+.6;y<b[1]-.08;y+=.45){
           const hit=this.ray([wall[0],y,wall[2]],d,.65);if(!hit||hit.face.ny>.5){continuous=false;break;}
@@ -348,7 +356,7 @@
         parts.push({origin,data:local,key:hash(local),support:true});total+=values.length;
         if(end===ends[0]&&ends.length>1&&!rotates){
           const ps=profile(local).points;
-          for(const p of ps.slice(0,256)){const a=p.map((x,i)=>x+origin[i]),b=a.map((x,i)=>x+ends[1].move[i]);channels.push({from:a,to:b});}
+          for(const p of ps.slice(0,256)){const a=p.map((x,i)=>x+origin[i]),b=a.map((x,i)=>x+ends[1].move[i]);channels.push({from:a,to:b,key:o.key});}
         }
       }
       await checkpoint();
@@ -358,16 +366,16 @@
     return {parts,total,channels};
   }
   class Graph {
-    constructor(){this.nodes=[];this.grid=new Map();this.columns=new Map();this.edges=new Map();this.serial=0;this.tested=0;}
+    constructor(){this.nodes=[];this.grid=new Map();this.columns=new Map();this.edges=new Map();this.attachments=new Map();this.channels=[];this.serial=0;this.tested=0;}
     async build(input,checkpoint=async()=>{}){
       const all=new Float32Array(input.total),support=new Uint8Array(input.total/9);let offset=0;
       for(const p of input.parts){for(let i=0;i<p.data.length;i++)all[offset+i]=p.data[i]+p.origin[i%3];if(p.support)support.fill(1,offset/9,(offset+p.data.length)/9);offset+=p.data.length;await checkpoint();}
       this.geo=new Geometry(all,support);await this.geo.index(checkpoint);const seen=new Map();
-      const add=hint=>{
-        const p=this.geo.floor(hint);if(!p||Math.abs(p[1]-hint[1])>.55)return -1;
+      const add=(hint,floating=false)=>{
+        const p=floating?xyz(hint):this.geo.floor(hint);if(!p||!floating&&Math.abs(p[1]-hint[1])>.55)return -1;
         const key=[Math.round(p[0]*2),Math.round(p[1]*16),Math.round(p[2]*2)].join(',');if(seen.has(key))return seen.get(key);
         if(!this.geo.fits(p))return -1;
-        const id=this.nodes.length;seen.set(key,id);this.nodes.push({p,links:new Set()});put(this.grid,spatial(p,3),id);put(this.columns,cell(p[0],p[2],1),id);return id;
+        const id=this.nodes.length;seen.set(key,id);this.nodes.push({p,links:new Set(),floating});put(this.grid,spatial(p,3),id);put(this.columns,cell(p[0],p[2],1),id);return id;
       };
       let n=0;
       for(const part of input.parts){
@@ -378,13 +386,34 @@
       }
       // A genuine moving support connects its end poses even where there is no
       // continuous climbable wall. This is one spatial line, without switch states.
-      for(const c of input.channels||[]){
-        const a=add(c.from),b=add(c.to);if(a<0||b<0||a===b)continue;
-        const p=this.nodes[a].p,q=this.nodes[b].p;
-        if(!this.geo.clear(p,q))continue;
+      const liftLink=(a,b,grounded=false)=>{
+        if(a<0||b<0||a===b||this.edges.has(`${a}:${b}`))return;
+        const p=this.nodes[a].p,q=this.nodes[b].p;if(!this.geo.clear(p,q,0,true,grounded))return;
         this.nodes[a].links.add(b);this.nodes[b].links.add(a);
         this.edges.set(`${a}:${b}`,{kind:'lift',points:[p,q],cost:dist(p,q)});
         this.edges.set(`${b}:${a}`,{kind:'lift',points:[q,p],cost:dist(p,q)});
+      };
+      for(const c of input.channels||[]){
+        const a=add(c.from),b=add(c.to);if(a<0||b<0||a===b)continue;
+        const pins=[a,b],dy=c.to[1]-c.from[1];
+        if(Math.abs(dy)>STEP&&Math.hypot(c.to[0]-c.from[0],c.to[2]-c.from[2])<.01){
+          const levels=new Map();
+          for(let x=Math.floor(c.from[0]-1.05);x<=Math.floor(c.from[0]+1.05);x++)for(let z=Math.floor(c.from[2]-1.05);z<=Math.floor(c.from[2]+1.05);z++)
+            for(const id of this.columns.get(`${x},${z}`)||[]){
+              const n=this.nodes[id],t=(n.p[1]-c.from[1])/dy,d=Math.hypot(n.p[0]-c.from[0],n.p[2]-c.from[2]);
+              if(n.floating||t<=.01||t>=.99||d>1.05)continue;
+              const key=Math.round(n.p[1]*8);let group=levels.get(key);if(!group)levels.set(key,group=[]);group.push({id,d});
+            }
+          // A lift may pass several real side landings, not just its two stops.
+          // Only real supported landings get a bridge to its actual trajectory.
+          for(const group of levels.values())for(const {id}of group.sort((a,b)=>a.d-b.d).slice(0,4)){
+            const p=this.nodes[id].p,pin=add([c.from[0],p[1],c.from[2]],true);if(pin<0)continue;
+            liftLink(id,pin,true);if(this.edges.has(`${id}:${pin}`)||id===pin)pins.push(pin);
+          }
+        }
+        const ordered=[...new Set(pins)].sort((a,b)=>this.nodes[a].p[1]-this.nodes[b].p[1]);
+        for(let i=1;i<ordered.length;i++)liftLink(ordered[i-1],ordered[i]);
+        this.channels.push({...c,pins:ordered});
         await checkpoint();
       }
       this.serial++;return this;
@@ -398,12 +427,28 @@
       }
       found.sort((a,b)=>a.d-b.d);return found.slice(0,cap).map(x=>x.id);
     }
+    verticalNear(p,r=1.8){
+      // Choose by landing height first. A dozen points on the current floor
+      // must not hide every exit of a deep shaft or its neighbouring shafts.
+      const levels=new Map();
+      for(let x=Math.floor(p[0]-r);x<=Math.floor(p[0]+r);x++)for(let z=Math.floor(p[2]-r);z<=Math.floor(p[2]+r);z++)
+        for(const id of this.columns.get(`${x},${z}`)||[]){
+          const q=this.nodes[id].p,d=Math.hypot(q[0]-p[0],q[2]-p[2]),dy=q[1]-p[1];if(d>r||Math.abs(dy)<.7)continue;
+          const level=Math.round(q[1]*2);let group=levels.get(level);if(!group)levels.set(level,group=[]);group.push({id,d,dy});
+        }
+      const selected=[];
+      for(const sign of [-1,1]){
+        const ordered=[...levels.values()].filter(a=>a[0].dy*sign>0).sort((a,b)=>Math.abs(a[0].dy)-Math.abs(b[0].dy));
+        for(const group of ordered.slice(0,2))selected.push(...group.sort((a,b)=>a.d-b.d).slice(0,2).map(v=>v.id));
+      }
+      return selected;
+    }
     neighbours(id){
       const n=this.nodes[id];if(n.neighbours)return n.neighbours;
       const nearby=this.near(n.p,6,200),rays=new Map();
       for(const i of nearby){const p=this.nodes[i].p,dx=p[0]-n.p[0],dz=p[2]-n.p[2],d=Math.hypot(dx,dz);if(Math.abs(p[1]-n.p[1])>.7+d*2.75)continue;
         const sector=Math.round(Math.atan2(dz,dx)*4/Math.PI),old=rays.get(sector);if(!old||old.d<d)rays.set(sector,{i,d});}
-      return n.neighbours=[...new Set([...n.links,...nearby.slice(0,10),...[...rays.values()].map(x=>x.i),...this.near(n.p,1.8,12,true)])].filter(i=>i!==id);
+      return n.neighbours=[...new Set([...n.links,...nearby.slice(0,10),...[...rays.values()].map(x=>x.i),...this.verticalNear(n.p)])].filter(i=>i!==id);
     }
     edge(a,b){
       const key=`${a}:${b}`;if(this.edges.has(key))return this.edges.get(key);
@@ -421,44 +466,102 @@
       if(!points){points=this.geo.drop(a,b);kind='drop';}
       return points?{points,kind,cost:length(points)}:null;
     }
-    attach(p,goal=false){
-      const floor=this.geo.floor(p),at=floor&&Math.abs(floor[1]-p[1])<.7?floor:p,links=[];
-      const ids=[...new Set([...this.near(at,8,36),...this.near(at,1.8,16,true)])];
+    attach(p,goal=false,riding=null){
+      const floor=this.geo.floor(p),at=!riding&&floor&&Math.abs(floor[1]-p[1])<.7?floor:p,links=[];
+      const key=JSON.stringify([at,goal,riding]),old=this.attachments.get(key);if(old)return old;
+      const ids=[...new Set([...this.near(at,8,36),...this.verticalNear(at)])];
       for(const id of ids){const q=this.nodes[id].p,edge=goal?this.connect(q,at):this.connect(at,q);if(edge)links.push({id,...edge});}
-      return {at,links};
+      if(riding&&!goal){
+        const candidates=[];
+        for(const c of this.channels){
+          if(c.key!==riding)continue;
+          const v=c.to.map((x,k)=>x-c.from[k]),len2=dot(v,v),t=len2?dot(at.map((x,k)=>x-c.from[k]),v)/len2:-1;
+          if(t<0||t>1)continue;const on=lerp(c.from,c.to,t),off=dist(on,at);if(off<=1.8)candidates.push({c,on,off});
+        }
+        for(const {c,on}of candidates.sort((a,b)=>a.off-b.off).slice(0,8)){
+          if(!this.geo.clear(at,on))continue;
+          for(const id of c.pins){const q=this.nodes[id].p;if(!this.geo.clear(on,q))continue;const points=[at,on,q];links.push({id,kind:'lift',points,cost:length(points)});}
+        }
+      }
+      const result={at,links};this.attachments.set(key,result);if(this.attachments.size>512)this.attachments.delete(this.attachments.keys().next().value);return result;
     }
-    async route(from,targets,transitions=[],checkpoint=async()=>{}){
+    portalEntries(t){
+      const raw=xyz(t.entrance?.pos);if(!raw)return [];
+      const activation=t.activation,box=activation?.box,min=xyz(box?.min),max=xyz(box?.max);
+      if(!min||!max){const p=this.geo.ground([raw[0],raw[1]+.15,raw[2]],0,2.8);return p&&this.geo.fits(p)?[p]:[];}
+      const centre=min.map((x,k)=>(x+max[k])/2),hints=[],margin=RADIUS+.006;
+      const own=[],mesh=activation.surfaces;
+      for(let i=0;mesh&&i+8<mesh.length;i+=9){const t=faceOf(Array.from(mesh.slice(i,i+3)),Array.from(mesh.slice(i+3,i+6)),Array.from(mesh.slice(i+6,i+9)));if(t)own.push(t);}
+      const xs=[centre[0],min[0]+(max[0]-min[0])*.22,min[0]+(max[0]-min[0])*.78];
+      const zs=[centre[2],min[2]+(max[2]-min[2])*.22,min[2]+(max[2]-min[2])*.78];
+      if(activation.kind==='on')for(const x of xs)for(const z of zs)hints.push([x,max[1],z]);
+      else{
+        hints.push(raw);
+        for(const z of zs)for(const x of [min[0]-margin,max[0]+margin])hints.push([x,raw[1],z]);
+        for(const x of xs)for(const z of [min[2]-margin,max[2]+margin])hints.push([x,raw[1],z]);
+      }
+      for(const face of own){
+        const hub=face.a.map((x,k)=>(x+face.b[k]+face.c[k])/3);
+        if(activation.kind==='on'&&face.ny>=.34){
+          hints.push(hub);
+          for(const p of [face.a,face.b,face.c])hints.push(lerp(p,hub,.2));
+        }else if(activation.kind==='into'&&face.ny<.5){
+          const run=Math.hypot(face.n[0],face.n[2]),off=margin/(run||1);
+          for(const p of [hub,...[face.a,face.b,face.c].map(p=>lerp(p,hub,.3))])for(const s of [-1,1])
+            hints.push([p[0]+face.n[0]*off*s,p[1]-BODY.height/2,p[2]+face.n[2]*off*s]);
+        }
+      }
+      const result=[],seen=new Set();
+      for(const hint of hints){
+        const p=this.geo.ground(hint,.6,3.4);if(!p||!this.geo.fits(p))continue;
+        if(activation.kind==='on'&&(own.length?!own.some(f=>f.ny>=.34&&pointTriangle2(p,f)<.001):Math.abs(p[1]-max[1])>.1))continue;
+        if(activation.kind==='into'&&(p[1]+BODY.height<min[1]||p[1]>max[1]+.1))continue;
+        if(activation.kind==='into'&&own.length&&!own.some(f=>f.ny<.5&&BODY.centres.some(y=>pointTriangle2([p[0],p[1]+y,p[2]],f)<(RADIUS+.015)**2)))continue;
+        const key=p.map(x=>Math.round(x*100)).join(',');if(seen.has(key))continue;seen.add(key);result.push(p);
+        if(result.length>=32)break;
+      }
+      return result;
+    }
+    async route(from,targets,transitions=[],checkpoint=async()=>{},options={}){
       from=xyz(from);targets=targets.map(t=>({...t,at:xyz(t.at)})).filter(t=>t.at);if(!from||!targets.length)return null;
       const anchors=[],extra=new Map(),goals=[],portals=[],base=this.nodes.length;
       const at=id=>id<base?this.nodes[id].p:anchors[id-base].at;
       const link=(a,b,edge)=>put(extra,a,{to:b,edge});
-      const anchor=(p,goal=false)=>{
-        const id=base+anchors.length,attached=this.attach(p,goal);anchors.push({id,at:attached.at});
+      const anchor=(p,goal=false,riding=null)=>{
+        const id=base+anchors.length,attached=this.attach(p,goal,riding);anchors.push({id,at:attached.at});
         for(const e of attached.links)goal?link(e.id,id,e):link(id,e.id,e);
         return id;
       };
-      const start=anchor(from);
+      const start=anchor(from,false,options.riding);
       for(const target of targets){
-        const raw=target.at,approaches=[raw];
-        for(const radius of [.65,1.05])for(let n=0;n<8;n++)approaches.push([raw[0]+Math.cos(n*Math.PI/4)*radius,raw[1],raw[2]+Math.sin(n*Math.PI/4)*radius]);
+        const raw=target.at,reach=target.kind==='quest'&&Number.isFinite(target.reach)?Math.max(0,Math.min(2.25,target.reach)):0,approaches=[raw];
+        for(const radius of reach?[.65,1.05,1.6]:[.65,1.05])for(let n=0;n<8;n++)approaches.push([raw[0]+Math.cos(n*Math.PI/4)*radius,raw[1],raw[2]+Math.sin(n*Math.PI/4)*radius]);
         for(const p of approaches){
-          const landed=this.geo.floor(p);if(!landed||Math.abs(landed[1]-raw[1])>.7||!this.geo.fits(landed)||!this.geo.clear(landed,raw,0,false))continue;
-          const id=anchor(landed,true);goals.push({id,target,at:landed});if(dist(landed,raw)<.05)break;
+          const landed=reach?this.geo.ground(p,BODY.floorUp,reach+BODY.floorUp)??this.geo.floor(p):this.geo.floor(p);
+          if(!landed||Math.abs(landed[1]-raw[1])>(reach||.7)||!this.geo.fits(landed))continue;
+          if(reach){
+            const eye=[landed[0],landed[1]+BODY.height-.2,landed[2]],end=[raw[0],raw[1]+.06,raw[2]],delta=end.map((x,i)=>x-eye[i]),d=Math.hypot(...delta);
+            if(dist(landed,raw)>reach||d>.0001&&this.geo.ray(eye,delta.map(x=>x/d),d))continue;
+          }else if(!this.geo.clear(landed,raw,0,false))continue;
+          const id=anchor(landed,true);goals.push({id,target,at:landed});if(!reach&&dist(landed,raw)<.05)break;
         }
         await checkpoint();
       }
       if(!goals.length)return null;
       for(const t of transitions){
-        const a=xyz(t.entrance?.pos),b=xyz(t.exit?.pos);if(!a||!b)continue;
-        const landing=p=>this.geo.ground([p[0],p[1]+.15,p[2]],0,2.8);
-        const pa=landing(a),pb=landing(b);if(!pa||!pb)continue;
-        const enter=anchor(pa,true),exit=anchor(pb);portals.push({from:pa,to:pb,enter,exit});
-        link(enter,exit,{kind:'portal',points:[pa,pb],cost:.05});
+        const b=xyz(t.exit?.pos);if(!b)continue;
+        const entrances=this.portalEntries(t),pb=this.geo.ground([b[0],b[1]+.15,b[2]],0,128);
+        if(!entrances.length||!pb||!this.geo.fits(pb))continue;
+        const exit=anchor(pb),contact=t.activation?.kind==='on'||t.activation?.kind==='into';
+        portals.push({from:entrances,to:pb,exit});
+        for(const pa of entrances){const enter=anchor(pa,true);link(enter,exit,{kind:'portal',points:[pa,pb],cost:.05,contact});}
+        await checkpoint();
       }
       // An admissible heuristic includes shortcuts through every directed portal.
       const tails=portals.map(p=>Math.min(...goals.map(g=>dist(p.to,g.at))));
-      for(let pass=0;pass<portals.length;pass++)for(let i=0;i<portals.length;i++)for(let j=0;j<portals.length;j++)tails[i]=Math.min(tails[i],dist(portals[i].to,portals[j].from)+.05+tails[j]);
-      const heuristic=p=>Math.min(...goals.map(g=>dist(p,g.at)),...portals.map((t,i)=>dist(p,t.from)+.05+tails[i]));
+      const approach=(p,t)=>Math.min(...t.from.map(a=>dist(p,a)));
+      for(let pass=0;pass<portals.length;pass++)for(let i=0;i<portals.length;i++)for(let j=0;j<portals.length;j++)tails[i]=Math.min(tails[i],approach(portals[i].to,portals[j])+.05+tails[j]);
+      const heuristic=p=>Math.min(...goals.map(g=>dist(p,g.at)),...portals.map((t,i)=>approach(p,t)+.05+tails[i]));
       const finish=new Map(goals.map(g=>[g.id,g])),heap=new Heap(),best=new Map([[start,0]]),parent=new Map([[start,{from:-1,edges:[]}]]);
       heap.push({id:start,cost:0,score:heuristic(at(start))});let answer=null,count=0;
       const relax=(from,to,cost,edges)=>{if(cost>=(best.get(to)??Infinity)-1e-8)return;best.set(to,cost);parent.set(to,{from,edges});heap.push({id:to,cost,score:cost+heuristic(at(to))});};
@@ -483,7 +586,7 @@
       while(id!==-1){const p=parent.get(id);if(!p)return null;path.unshift(...p.edges);id=p.from;}
       const points=[],kinds=[];let transition=null;
       for(const e of path){
-        if(e.kind==='portal'){transition={from:e.points[0],to:e.points[1]};break;}
+        if(e.kind==='portal'){transition={from:e.points[0],to:e.points[1],contact:!!e.contact};break;}
         for(const p of e.points)if(!points.length||dist(points.at(-1),p)>.005){points.push(p);kinds.push(e.kind);}
       }
       return {target:answer.goal.target,points,kinds,transition,distance:answer.cost,stats:{nodes:this.nodes.length,edges:this.edges.size,tested:this.tested}};
@@ -513,14 +616,14 @@
         if(worker)try{return await send('build',{input});}catch(e){if(closed)throw e;fail(e);}
         const own=graph=new Graph();graphReady=own.build(input,async()=>{if(closed)throw Object.assign(new Error('cancelled'),{cancelled:true});await checkpoint();});await graphReady;return {nodes:own.nodes.length};
       },
-      async route(from,targets,transitions){
+      async route(from,targets,transitions,options={}){
         const mine=++latestRoute;
         if(closed)throw Object.assign(new Error('cancelled'),{cancelled:true});
-        if(worker)try{return await send('route',{from,targets,transitions});}catch(e){if(closed||e.cancelled)throw e;fail(e);}
+        if(worker)try{return await send('route',{from,targets,transitions,options});}catch(e){if(closed||e.cancelled)throw e;fail(e);}
         if(!graph){graph=new Graph();graphReady=graph.build(inputCache,checkpoint);}
         if(graphReady)await graphReady;
         if(closed||mine!==latestRoute)throw Object.assign(new Error('cancelled'),{cancelled:true});
-        return graph.route(from,targets,transitions,async()=>{if(closed||mine!==latestRoute)throw Object.assign(new Error('cancelled'),{cancelled:true});await checkpoint();});
+        return graph.route(from,targets,transitions,async()=>{if(closed||mine!==latestRoute)throw Object.assign(new Error('cancelled'),{cancelled:true});await checkpoint();},options);
       },
       dispose(){closed=true;fail(Object.assign(new Error('cancelled'),{cancelled:true}));graph=null;graphReady=null;inputCache=null;}
     };
@@ -545,7 +648,7 @@
     const checkpoint=async()=>{if(performance.now()-(checkpoint.at||0)>8){await new Promise(r=>setTimeout(r,0));checkpoint.at=performance.now();}};
     root.onmessage=e=>{const m=e.data;if(m.op==='route')latest=m.id;queue=queue.then(async()=>{try{
       let result;if(m.op==='build'){graph=new Graph();await graph.build(m.input,checkpoint);result={nodes:graph.nodes.length};}
-      else if(m.op==='route'){if(!graph)throw new Error('Профили данжа ещё не готовы.');const pause=async()=>{if(latest!==m.id)throw Object.assign(new Error('cancelled'),{cancelled:true});await checkpoint();};await pause();result=await graph.route(m.from,m.targets,m.transitions,pause);}
+      else if(m.op==='route'){if(!graph)throw new Error('Профили данжа ещё не готовы.');const pause=async()=>{if(latest!==m.id)throw Object.assign(new Error('cancelled'),{cancelled:true});await checkpoint();};await pause();result=await graph.route(m.from,m.targets,m.transitions,pause,m.options);}
       else throw new Error('Неизвестный запрос навигации.');root.postMessage({id:m.id,result});
     }catch(err){root.postMessage({id:m.id,error:err.message,cancelled:!!err.cancelled});}});};
   }else root.__dfoDungeonGraph=api;

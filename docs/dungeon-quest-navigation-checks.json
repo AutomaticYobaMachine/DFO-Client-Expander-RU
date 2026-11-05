@@ -1,0 +1,78 @@
+{
+  "date": "2026-11-05",
+  "modVersion": "1.19.2",
+  "original": "https://github.com/Lattymoy/daggerfall-js-source",
+  "publicSourceCommit": "a3eb1605ea1dc391b691fe314377458a7e63e483",
+  "gameRelease": "app-v0.1.14530",
+  "regression": {
+    "tests": 83,
+    "passed": 83,
+    "failed": 0,
+    "skipped": 0,
+    "newQuestTests": 14
+  },
+  "browser": {
+    "publishedColliderAndWebGL": true,
+    "ownGraphWorkerAndCooperativeFallback": true,
+    "carrierCorpseGroundInventory": true,
+    "temporaryJournalFailureRecovery": true,
+    "exactQuestUIDSelection": true,
+    "noQuestPollingForExit": true,
+    "noPortalPollingWhileFollowing": true,
+    "multiStoreyMultiBlockDeepShaftAndContactPortal": true
+  },
+  "installer": {
+    "tests": 16,
+    "passed": 16,
+    "skipped": 0,
+    "goTests": "passed",
+    "matchingPayloadFiles": 31,
+    "exeBytes": 13716992,
+    "exeSha256": "a3d50d864f9958beed2b874c6b8dc6cbb55b2e51d1a48ab9f7ee5d6fb760c363"
+  },
+  "cards": {
+    "publishedBrowserCases": 19,
+    "nativeBlocksPreserved": true,
+    "errors": [],
+    "unchangedFilesComparedInsideExecutables": [
+      {
+        "file": "mod/item-cards-transform.cjs",
+        "sha256": "80bdce3986bc7d99531288479bb7afda559b06ffee509aa3469db160b1ea1605"
+      },
+      {
+        "file": "mod/page/dfo_item_cards.js",
+        "sha256": "ed5dc86401f4245eee5fdc53a82d96901ed28a1bf278fcfc010500677035a023"
+      },
+      {
+        "file": "mod/fonts/FONT-NOTICES.txt",
+        "sha256": "0f0175f61faad7503d341bc8b09692a6e36a9a62c07e588472dfe0f292f0b9b6"
+      },
+      {
+        "file": "mod/fonts/item-font-legendary.otf",
+        "sha256": "431b3d0fd0e324d427dc8076d0bd9591713797362f0d959c3fbc601cc815e21d"
+      },
+      {
+        "file": "mod/fonts/item-font-set.ttf",
+        "sha256": "16fcbd56ca32e92f4551649434793f8da873337e87d1e81e3a35c4569603c6a6"
+      },
+      {
+        "file": "mod/fonts/item-font-sigil.ttf",
+        "sha256": "1aa16df54414a45b16f15d601340143287e7def62ffc5c8a6425f968703f8067"
+      },
+      {
+        "file": "mod/fonts/item-font-text.ttf",
+        "sha256": "f2a009268cc0f4cf5305f2039470def5cc7ad4bd3b43e8451c97627238f46bc1"
+      },
+      {
+        "file": "mod/fonts/item-font-title.ttf",
+        "sha256": "10e6edc2e999a2b83728ba9eb27fdbbe79a685022f7cdb6a76ebece55c907708"
+      }
+    ],
+    "priorFullMatrix": "item-card-final-checks.json"
+  },
+  "limits": [
+    "Local execution of released game JS, public-source quest classes and local ARENA2; not a live multiplayer session.",
+    "Exact resource/entity links are required; unknown conditional drops are not guessed from localized text or monster templates.",
+    "Full first-time dungeon path search can still take several seconds; goal resolution does not replace the geometric search."
+  ]
+}

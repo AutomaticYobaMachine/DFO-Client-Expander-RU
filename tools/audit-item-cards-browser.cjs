@@ -14,6 +14,7 @@ async function main(){
   page.on('pageerror',e=>errors.push(e.stack));page.setDefaultTimeout(10000);
   await page.route('**/*',r=>new URL(r.request().url()).hostname==='127.0.0.1'?r.continue():r.abort());
   await page.goto(`http://127.0.0.1:${server.address().port}`,{waitUntil:'domcontentloaded'});await page.waitForFunction(()=>window.ready);
+  await page.evaluate(async()=>{probe.show('steel');await Promise.all(['DFO Flexi','DFO Gabin','DFO Ckazka','DFO Ritalin','DFO Wolga'].map(f=>document.fonts.load('16px "'+f+'"')))});
   const catalog=await page.evaluate(async()=>{
    const rows=await fetch('/audit-catalog.json').then(r=>r.json()),groups=new Set(),skipped=[],failures=[];let checked=0;
    const customFixtures=rows.filter(row=>!auditNative.readers.template(row.index));
@@ -30,8 +31,13 @@ async function main(){
       probe.show(id);const n=document.querySelector('.inv-tip .dfo-item-card');
       if(!n)throw new Error('No new card');
       const v=n.getBoundingClientRect();if(v.left<0||v.top<0||v.right>innerWidth+.1||v.bottom>innerHeight+.1)throw new Error('Card outside screen');
-      const native=auditNative.readers.value(item);
-      if(Number.isFinite(native)&&native>=0&&!n.querySelector('.dfo-item-price-value').textContent.includes(fmt.format(native)))throw new Error('Wrong native template estimate: '+native);
+      const sale=auditNative.readers.sale(item),credit=row.index===275;
+      let expected=sale.cost*.2;
+      if(sale.resale)expected=Math.min(expected,Math.max(0,sale.cost-sale.resale.cost)*.2+sale.resale.paid);
+      expected=auditNative.readers.isGold(item)?1:Math.round(expected/10)*10;
+      const shown=n.querySelector('.dfo-item-price-value').textContent;
+      if(credit){if(shown!=='—')throw new Error('Credit with no face value must remain unknown')}
+      else if(Number.isFinite(expected)&&!shown.includes(fmt.format(expected)))throw new Error('Wrong 40% native-sale estimate: '+expected+'; shown '+shown);
       if(JSON.stringify(item)!==before)throw new Error('Item mutated');
       if(!n.querySelector('h3')?.textContent)throw new Error('Missing name');
       checked++;groups.add(group);

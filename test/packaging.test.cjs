@@ -30,6 +30,9 @@ test('distribution installer: install, reinstall and uninstall preserve original
         assert.ok(files.has('dfo-mod/'+file));assert.deepEqual(readFile(a,'dfo-mod/'+file),fs.readFileSync(path.join(dist,'mod',file)));
       }
       assert.match(readFile(a,'main.cjs').toString(),/dfo-mod\/hook.cjs/);
+      for(const file of ['item-font-title.ttf','item-font-text.ttf','item-font-sigil.ttf','item-font-set.ttf','item-font-legendary.otf','FONT-NOTICES.txt']){
+        assert.deepEqual(readFile(a,'dfo-mod/fonts/'+file),fs.readFileSync(path.join(dist,'mod/fonts',file)),'The standalone installer must carry every font and its notices');
+      }
       assert.deepEqual(readFile(a,'untouched.bin'),Buffer.from([0,10,42,255]));a.close();
       const cfg=JSON.parse(fs.readFileSync(path.join(user,'dfo-mod.json')));
       assert.equal(cfg.nearbyLoot,true);assert.equal(cfg.dungeons,true);assert.equal(cfg.itemCards,true);assert.equal(cfg.nearbyLootOptions.keyCode,'KeyK');assert.equal(cfg.marks,false);
@@ -39,7 +42,8 @@ test('distribution installer: install, reinstall and uninstall preserve original
     let cfg=JSON.parse(fs.readFileSync(path.join(user,'dfo-mod.json')));
     assert.equal(cfg.itemCards,false);
     assert.equal(cfg.enabled,true);assert.equal(cfg.ru,false);assert.equal(cfg.marks,true);assert.equal(cfg.nearbyLoot,false);assert.equal(cfg.dungeons,false);assert.equal(cfg.marksOptions.onlyVisited,false);assert.equal(cfg.nearbyLootOptions.keyCode,'Mouse4');
-    let current=openAsar(asar);assert.equal(listFiles(current.header).has('dfo-mod/page/ru_dict.js'),false);current.close();
+    let current=openAsar(asar);assert.equal(listFiles(current.header).has('dfo-mod/page/ru_dict.js'),false);
+    assert.ok(listFiles(current.header).has('dfo-mod/fonts/item-font-text.ttf'),'Card fonts are independent of the Russian translation');current.close();
     run('install','--loot-key','NumpadEnter','--set','ru=1','--set','marks=0','--set','nearbyLoot=1','--set','dungeons=1','--set','onlyVisited=1');
     cfg=JSON.parse(fs.readFileSync(path.join(user,'dfo-mod.json')));assert.equal(cfg.ru,true);assert.equal(cfg.marks,false);assert.equal(cfg.nearbyLoot,true);assert.equal(cfg.dungeons,true);assert.equal(cfg.marksOptions.onlyVisited,true);assert.equal(cfg.nearbyLootOptions.keyCode,'NumpadEnter');
     run('install','--loot-key','Mouse5','--dungeon-key','Mouse4');run('install');

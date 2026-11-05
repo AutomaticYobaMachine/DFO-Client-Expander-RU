@@ -1,7 +1,8 @@
 {
-  "gameVersion": "0.1.14525",
-  "modVersion": "1.19.0",
-  "moduleSource": "dist/payload/mod (same bytes embedded in Windows EXE)",
+  "gameVersion": "0.1.14530",
+  "modVersion": "1.19.1",
+  "moduleSource": "Historical payload snapshot embedded in Windows EXE 1.19.1; byte comparison recorded at that build",
+  "matchingPayloadFiles": 31,
   "stateChecks": {
     "checked": 13760,
     "axes": {
@@ -29,22 +30,22 @@
       "rarity disabled": 16,
       "lighting": 20
     },
-    "images": 5110,
+    "images": 5164,
     "failures": [],
     "stats": {
-      "dressed": 14765,
+      "dressed": 14766,
       "failures": 0,
       "lastError": "",
-      "layouts": 14766,
-      "placements": 14799,
-      "observerCallbacks": 206,
+      "layouts": 14768,
+      "placements": 14802,
+      "observerCallbacks": 208,
       "ready": true,
       "active": 1,
       "pending": 0
     },
     "lifecycle": {
       "cycles": 1000,
-      "heapGrowthBytes": 303540,
+      "heapGrowthBytes": 281444,
       "repeatedNativeFits": {
         "layouts": 0,
         "mutations": 0
@@ -116,51 +117,150 @@
       "failures": []
     },
     "viewportCases": 132,
-    "scales": 40,
+    "scales": 56,
     "renderTiming": {
-      "medianMs": 3.100000001490116,
-      "p95Ms": 5.299999997019768,
-      "maxMs": 5.5
+      "medianMs": 3.4000000059604645,
+      "p95Ms": 5,
+      "maxMs": 5.199999995529652
     },
     "performance": {
-      "dressed": 635,
+      "dressed": 636,
       "failures": 0,
       "lastError": "",
-      "layouts": 651,
-      "placements": 824,
-      "observerCallbacks": 336,
+      "layouts": 657,
+      "placements": 840,
+      "observerCallbacks": 364,
       "ready": true,
       "active": 1,
       "pending": 0
     },
     "errors": []
   },
-  "startupTransform": {
-    "modules": 1027,
-    "sourceMiB": 93.96121120452881,
-    "beforeMs": 902.717706,
-    "afterMs": 140.98849100000007,
-    "byteIdentical": true,
-    "hookMatches": [
-      [
-        "itemCards.inventory",
-        1
-      ],
-      [
-        "itemCards.values",
-        1
-      ],
-      [
-        "itemCards.materials",
-        1
-      ]
-    ]
+  "packagedBrowser": {
+    "passed": [
+      {
+        "id": "steel",
+        "width": 600,
+        "height": 376.078125
+      },
+      {
+        "id": "chain",
+        "width": 600,
+        "height": 376.078125
+      },
+      {
+        "id": "missing",
+        "width": 600,
+        "height": 376.078125
+      },
+      {
+        "id": "rare",
+        "width": 600,
+        "height": 378.078125
+      },
+      {
+        "id": "unknown",
+        "width": 600,
+        "height": 344.828125
+      },
+      {
+        "id": "stack",
+        "width": 600,
+        "height": 275.28125
+      },
+      {
+        "id": "pellets",
+        "width": 600,
+        "height": 247.21875
+      },
+      {
+        "id": "ruhn",
+        "width": 600,
+        "height": 507.796875
+      },
+      {
+        "id": "wyrd",
+        "width": 600,
+        "height": 507.796875
+      },
+      {
+        "id": "spells",
+        "width": 600,
+        "height": 490.203125
+      },
+      {
+        "id": "base",
+        "width": 600,
+        "height": 376.078125
+      },
+      {
+        "id": "invalid",
+        "width": 600,
+        "height": 191.71875
+      },
+      {
+        "id": "sockets",
+        "width": 600,
+        "height": 432.078125
+      },
+      {
+        "id": "gem",
+        "width": 600,
+        "height": 416.078125
+      },
+      {
+        "id": "credit",
+        "width": 600,
+        "height": 253.03125
+      },
+      {
+        "id": "coins",
+        "width": 600,
+        "height": 275.28125
+      },
+      {
+        "id": "mail",
+        "width": 600,
+        "height": 303.765625
+      },
+      {
+        "id": "fur",
+        "width": 600,
+        "height": 281.515625
+      },
+      {
+        "id": "combined",
+        "width": 600,
+        "height": 807.28125
+      }
+    ],
+    "nativeBlocksPreserved": true,
+    "errors": []
   },
-  "startupOptimizationProof": "All 1027 original JS outputs and full-RU worker/UI chunks are byte-identical; renderer module unchanged.",
-  "exeSha256": "6e3d17207d3fc6350444a2fc4251afb1e16c2808fbd96dad182a93aa19f1e31b",
+  "pricingAudit": "item-prices-audit.json",
+  "nativeHooks": {
+    "changedFiles": 377,
+    "syntaxErrors": 0,
+    "allExpectedFound": true
+  },
+  "nativeRegression": {
+    "tests": 107,
+    "passed": 107,
+    "skipped": 0
+  },
+  "packagingAndInstallerRegression": {
+    "tests": 35,
+    "passed": 35,
+    "skipped": 0,
+    "goTests": "passed"
+  },
+  "exeSha256": "bfb5dcafd094108f10b089ae2675f043d0a2165f93fcb8050f198935168d8aab",
+  "exeBytes": 13713408,
   "limits": [
-    "Real published native renderer in local Chromium, not a live multiplayer session.",
-    "Declared state axes and important combinations; not the infinite Cartesian product of arbitrary item fields.",
-    "Memory/timings are local measurements, not full 3D scene FPS guarantees."
+    "Actual published game JS runs in a local Chromium renderer, not in a live multiplayer session.",
+    "The state matrix covers defined axes and significant combinations, not an infinite Cartesian product.",
+    "Geometry and the native movement/action/transfer tests use the public source snapshot and local ARENA2 data.",
+    "A complex first dungeon route can still take several seconds; see the navigation benchmark.",
+    "The card price is an approximate 40% offer basis with native item corrections, not an exact quote from a selected shop."
   ]
 }

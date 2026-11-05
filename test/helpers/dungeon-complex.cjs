@@ -57,4 +57,16 @@ async function replayWalk(fixture,points){
   }
   throw Error('Original player motor did not reach waypoint '+cursor+'/'+points.length+' at '+JSON.stringify([...motor.pos])+' expected '+JSON.stringify(points[cursor]));
 }
-module.exports={SIDE,multiblock,crossedBlocks,replayWalk};
+async function deepShaftCluster(){
+  const {Collider}=await playerModules(),col=new Collider(()=>-Infinity),actions={objects:new Map()};
+  const levels=[0,18,45,12,96,35,120,58,144,76,176],side=3.2,width=3;
+  for(let i=0;i<levels.length;i++){
+    const x=i*side,y=levels[i];
+    quad(col,`landing:${i}`,[[x,y,0],[x+side,y,0],[x+side,y,width],[x,y,width]]);
+    if(i){const low=Math.min(levels[i-1],y),high=Math.max(levels[i-1],y);wall(col,`shaft:${i}`,x,0,width,low,high-low);}
+    const low=Math.min(y,levels[i-1]??y,levels[i+1]??y)-2,high=Math.max(y,levels[i-1]??y,levels[i+1]??y)+3;
+    for(const z of [0,width])quad(col,`sides:${i}:${z}`,[[x,low,z],[x+side,low,z],[x+side,high,z],[x,high,z]]);
+  }
+  return{col,actions,levels,from:[1,0,1.5],goal:[side*levels.length-1,levels.at(-1),1.5]};
+}
+module.exports={SIDE,multiblock,crossedBlocks,replayWalk,deepShaftCluster};

@@ -87,6 +87,15 @@ test('portal arrival retains remaining distance with no interaction instructions
   h.api.start('exit');await settle(h.api);h.nav.feet.set([2.8,0,6]);h.advance();assert.equal(h.api.state().phase,'transition');assert.ok(h.api.state().distance>=5);assert.equal(h.api.state().message,'');
   h.nav.feet.set([8,3,6]);h.advance();await settle(h.api);assert.equal(h.api.state().phase,'following');assert.ok(h.api.state().distance<9);
 });
+test('a contact portal keeps its last metre of line visible and continues automatically after the warp',native,async()=>{
+  const r=await room({stacked:true}),h=controller(r),key='act:0:100';
+  wall(r.col,key,7,0,12,0,2.5);r.actions.objects.set(key,{key,ns:0,positionKey:100,kind:'relay',triggerFlag:3,actionFlag:14,nextKey:200,aabb:{min:[7,0,0],max:[7,2.5,12]},origin:[7,0,6]});
+  r.actions.resolvePosition=(_ns,k)=>({pos:k===100?[7,0,6]:[8,3,6]});h.nav.portalSurfaces=r.col;h.ctx.exitDoors=[{pos:[2,3,6]}];
+  h.api.start('exit');await settle(h.api);h.nav.feet.set([5.9,0,6]);h.advance();
+  assert.equal(h.api.state().phase,'following');assert.ok(h.api.points().length>1,'do not hide the line before touching the portal');
+  h.nav.feet.set([6.64,0,6]);h.advance();assert.equal(h.api.state().phase,'transition');assert.equal(h.api.state().message,'');
+  h.nav.feet.set([8,3,6]);h.advance();await settle(h.api);assert.equal(h.api.state().phase,'following');assert.ok(h.api.state().distance<8);
+});
 test('a route remains drawn while following a wall climb in midair',native,async()=>{
   const r=await room();quad(r.col,'upper',[[7,4,0],[14,4,0],[14,4,12],[7,4,12]]);wall(r.col,'shaft-wall',7,0,12,0,4);
   const h=controller(r);h.ctx.exitDoors=[{pos:[10,4,6]}];h.api.start('exit');await settle(h.api);const ps=h.api.points();
@@ -105,7 +114,7 @@ test('published navigation getters use live context geometry, feet, quest stands
   const deep=load('deepWaterRuntime-');assert.ok(deep.log.some(([id])=>id==='dungeon.navContext'));
   const start=deep.text.indexOf('get dfoDungeonNavigation(){'),end=deep.text.indexOf('get dfoDungeonLive(){',start),getter=deep.text.slice(start,end).replace(/,$/,'');
   const ast=parse('({'+getter+'})',{ecmaVersion:'latest'}),obj=ast.body[0].expression.properties[0].value.body.body[0].argument,props=new Map(obj.properties.map(p=>[p.key.name,p.value]));
-  const col={raycastHit(){}},feet=new Float32Array([1,0,2]),context={},[portals]=props.get('transitions').body.elements.map(e=>e.argument);context[props.get('collider').name]=col;context[portals.callee.object.callee.name]=()=>new Map([['unvisited',{entrance:{pos:[3,1,2]},exit:{pos:[8,3.2,6]}}]]);context.feet=feet;
+  const col={raycastHit(){}},feet=new Float32Array([1,0,2]),context={},[portals]=props.get('transitions').body.elements.map(e=>e.argument);context[props.get('collider').name]=col;context[props.get('portalSurfaces').name]=col;context[portals.callee.object.callee.name]=()=>new Map([['unvisited',{entrance:{pos:[3,1,2]},exit:{pos:[8,3.2,6]}}]]);context.feet=feet;
   const api=vm.runInNewContext('({dfoDungeonLive:{location:{mapTableData:{mapId:123}}},swimmer(){return{feet}},'+getter+'})',context);assert.equal(api.dfoDungeonNavigation.collider,col);assert.equal(api.dfoDungeonNavigation.feet,feet);assert.equal(api.dfoDungeonNavigation.key,123);assert.equal('mesh' in api.dfoDungeonNavigation,false);
   assert.equal(api.dfoDungeonNavigation.transitions().length,1,'all level portals are available before the automap reveals anything');assert.match(deep.text,/notePlacement\(/);
   const at=deep.text.indexOf('globalThis.__dfoDungeonNavigation?.draw(');assert.ok(at>=0);assert.ok(deep.text.indexOf('.drawWater(',at)>at,'line is drawn before the world pass is resolved by HUD quads');

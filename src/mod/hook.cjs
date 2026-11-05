@@ -23,6 +23,9 @@ const DEFAULTS = Object.freeze({
 });
 const OWN = Object.freeze({   // served at dagger://game/dfo-mod/<name>
   'dfo_item_cards.js': 'page/dfo_item_cards.js',
+  'item-font-title.ttf': 'fonts/item-font-title.ttf', 'item-font-text.ttf': 'fonts/item-font-text.ttf',
+  'item-font-sigil.ttf': 'fonts/item-font-sigil.ttf', 'item-font-set.ttf': 'fonts/item-font-set.ttf',
+  'item-font-legendary.otf': 'fonts/item-font-legendary.otf',
   'dfo_dungeon_model.js': 'page/dfo_dungeon_model.js', 'dfo_dungeons.js': 'page/dfo_dungeons.js',
   'dfo_dungeon_live_model.js': 'page/dfo_dungeon_live_model.js',
   'dfo_dungeon_graph.js': 'page/dfo_dungeon_graph.js',
@@ -144,7 +147,8 @@ function wrap(handleDagger, { app = null } = {}) {
     if (!rel) return new Response('not found', { status: 404 });
     let buf = own.get(name);
     if (!buf) { buf = fs.readFileSync(path.join(__dirname, rel)); own.set(name, buf); }
-    return new Response(buf, { headers: { 'Content-Type': 'text/javascript; charset=utf-8' } });
+    const mime = name.endsWith('.ttf') ? 'font/ttf' : name.endsWith('.otf') ? 'font/otf' : 'text/javascript; charset=utf-8';
+    return new Response(buf, { headers: { 'Content-Type': mime } });
   };
 
   return async function dfoHandleDagger(req) {

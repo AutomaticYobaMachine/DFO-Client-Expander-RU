@@ -14,6 +14,7 @@ async function main(){
   await page.route('**/*',r=>new URL(r.request().url()).hostname==='127.0.0.1'?r.continue():r.abort());
   await page.goto(`http://127.0.0.1:${server.address().port}/?ru`,{waitUntil:'domcontentloaded'});
   await page.waitForFunction(()=>window.ready);
+  await page.evaluate(async()=>{probe.show('steel');await Promise.all(['DFO Flexi','DFO Gabin','DFO Ckazka','DFO Ritalin','DFO Wolga'].map(f=>document.fonts.load('16px "'+f+'"')))});
   if(process.env.DFO_ARENA2_DIR){
    await page.evaluate(()=>{probe.show('steel');probe.show('rare')});
    await page.waitForFunction(()=>document.querySelector('.inv-tip .bigicon img')?.naturalWidth>0,null,{timeout:30000});
@@ -86,7 +87,7 @@ async function main(){
      if(!actual.classList.contains('dfo-item-card'))throw new Error('Card fell back to vanilla');
      const blocks=[...actual.querySelectorAll('.dfo-item-effects>.sigilbox,.dfo-item-effects>.setbox,.dfo-item-effects>.techbox,.dfo-item-effects>.cmp')].map(x=>x.outerHTML);
      if(JSON.stringify(blocks)!==JSON.stringify(expected.blocks))throw new Error('Native integration DOM changed');
-     const powers=[...actual.querySelectorAll('.dfo-item-lines>li,.dfo-item-meta>li,.dfo-item-tier')].map(x=>x.textContent).sort();
+     const powers=[...actual.querySelectorAll('.dfo-item-lines>li,.dfo-item-meta>li,.dfo-item-tier')].map(x=>x.getAttribute('aria-label')||x.textContent).sort();
      if(JSON.stringify(powers)!==JSON.stringify(expected.powers.sort()))throw new Error('A native power line was lost or duplicated');
      if(actual.dataset.rarity&&!actual.querySelector('.dfo-item-title>.dfo-item-tier'))throw new Error('Extended rarity label is missing from the left heading');
      if(auditNative.readers.saysMaterial(item)){
@@ -105,8 +106,8 @@ async function main(){
      if(left.getBoundingClientRect().right>right.getBoundingClientRect().left)throw new Error('Columns overlap');
      if(footer.getBoundingClientRect().top<main.getBoundingClientRect().bottom-.5)throw new Error('Price overlaps columns');
      if(actual.querySelector('h3').closest('.dfo-item-left')!==left)throw new Error('Name is not in left column');
-     if(getComputedStyle(actual.querySelector('.dfo-item-price-value')).fontSize!=='19px')throw new Error('Unexpected price typography');
-     for(const [selector,size]of [['.dfo-item-lines','12px'],['.dfo-item-stats dt','12px'],['.dfo-item-statuses p','11px'],['.dfo-item-meta','11px']]){
+     if(getComputedStyle(actual.querySelector('.dfo-item-price-value')).fontSize!=='21px')throw new Error('Unexpected price typography');
+     for(const [selector,size]of [['.dfo-item-lines','14px'],['.dfo-item-stats dt','13px'],['.dfo-item-statuses p','11px'],['.dfo-item-meta','11px']]){
       const n=actual.querySelector(selector);if(n&&getComputedStyle(n).fontSize!==size)throw new Error('Hover/selection typography mismatch: '+selector);
      }
      for(const n of actual.querySelectorAll('.dfo-item-stats dt'))if(getComputedStyle(n).textAlign!=='left')throw new Error('Stat label aligned like a native value');

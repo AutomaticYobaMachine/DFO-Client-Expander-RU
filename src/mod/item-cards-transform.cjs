@@ -56,6 +56,23 @@ function materials(text) {
   return text + `\n;globalThis.__dfoItemCards?.register({material:${material},materialLabel:${label},saysMaterial:${says[1]},isAmmo:${physical[1]},isHandWraps:${physical[3]}});\n`;
 }
 
+function powers(text) {
+  const power = need(text, /([\w$]+)\.legendary\?([\w$]+)\(\1\.legendary\):\1\.gilded\?\2\(\1\.gilded\):null/)[2];
+  return text + `\n;globalThis.__dfoItemCards?.register({power:_item=>${power}(_item?.legendary??_item?.imprint??_item?.gilded)});\n`;
+}
+
+function prices(text) {
+  const cost = need(text, /function ([\w$]+)\([\w$]+,[\w$]+=\[\],\{quality:[\w$]+=0,priceAdjustment:[\w$]+=(?:1e3|1000),/)[1];
+  // Bind the actual Sell arm, including found-condition/craft/Daedric/resale rules.
+  need(text, /case`Sell`:\{[^}]{0,150}?[\w$]+\([\w$]+\(([\w$]+)\),[\w$]+,[\w$]+,[\w$]+\(\1,\{online:[\w$]+\}\)\)/);
+  return text + `\n;globalThis.__dfoItemCards?.register({sale:_item=>${cost}('Sell',[_item],{quality:10,priceAdjustment:1000,online:true})});\n`;
+}
+
+function currency(text) {
+  const gold = need(text, /([\w$]+)=([\w$]+)=>\2\?\.group===`Currency`&&\2\?\.templateIndex===[\w$]+/)[1];
+  return text + `\n;globalThis.__dfoItemCards?.register({isGold:${gold}});\n`;
+}
+
 function transformItemCards(rel, text, log) {
   // Worker entries cannot display DOM cards; they duplicate large, tree-shaken item tables.
   if (/Worker-[^/]+\.js$/.test(rel)) return text;
@@ -63,6 +80,9 @@ function transformItemCards(rel, text, log) {
   if (/\/enhancedInventory-[^/]+\.js$/.test(rel) && text.includes('return{c:') && text.includes('tip-tight')) jobs.push(['itemCards.inventory', inventory]);
   if (text.includes('.variantWord?') && /Number\.isFinite\([\w$]+\?\.value\)/.test(text)) jobs.push(['itemCards.values', templates]);
   if (text.includes('HelmAndShieldMaterialDisplay') && text.includes('[`rare`,`legendary`,`aetheric`,`gilded`]')) jobs.push(['itemCards.materials', materials]);
+  if (text.includes('Imprint: ') && text.includes('.legendary?') && text.includes('.gilded?')) jobs.push(['itemCards.powers', powers]);
+  if (text.includes('modeActionEnabled:') && /function [\w$]+\([\w$]+,[\w$]+=\[\],\{quality:/.test(text)) jobs.push(['itemCards.prices', prices]);
+  if (/\/equip-[^/]+\.js$/.test(rel) && text.includes('`Currency`')) jobs.push(['itemCards.currency', currency]);
   let out = text;
   for (const [id, run] of jobs) {
     if (out.includes(`/*${id}*/`)) continue;

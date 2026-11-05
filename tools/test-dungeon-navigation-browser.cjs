@@ -1,7 +1,7 @@
 'use strict';
 const fs=require('node:fs'),path=require('node:path'),http=require('node:http'),assert=require('node:assert/strict');
 const upstream=path.resolve(process.argv[2]||'/tmp/dfo-upstream'),dist=path.resolve(process.argv[3]||'/tmp/dfo-release-0.1.14520');
-const {chromium}=require(path.join(upstream,'node_modules/playwright')),{parse}=require(path.join(upstream,'node_modules/acorn'));
+const {chromium}=require(process.env.DFO_PLAYWRIGHT_MODULE||path.join(upstream,'node_modules/playwright')),{parse}=require(path.join(upstream,'node_modules/acorn'));
 const {transformAsset}=require('../src/mod/transforms.cjs'),assets=path.join(dist,'assets');
 const world=fs.readdirSync(assets).find(f=>/^world-[^.]+\.js$/.test(f)),deep=fs.readdirSync(assets).find(f=>/^deepWaterRuntime-/.test(f));
 let colliderName,colliderFile;
@@ -30,9 +30,9 @@ function fixture(Collider,mat4){
  const behaviour=uid=>({questUID:uid,targetQuest:quests.get(uid),targetResource:{displayName:'Цель '+uid,isItem:true}});
  const stands=[{x:3,y:0,z:2,active:true,behaviour:behaviour(1)},{x:11,y:0,z:10,active:true,behaviour:behaviour(2)}];
  const foes=[{mobileType:1,src:{},entity:{eliteFoe:true,properName:'За стеной',health:20,maxHealth:20},ai:{feet:[8,0,6],isHostile:true}},{mobileType:1,src:{},entity:{eliteFoe:true,properName:'Ближний',health:20,maxHealth:20},ai:{feet:[3,0,10],isHostile:true}}];
- let overlay=null,passes=0,draws=0,questReads=0;
+ let overlay=null,passes=0,draws=0,questReads=0,portalReads=0;
  const ctx={foes,actions,people:[],enemies:foes.map(f=>({x:f.ai.feet[0],y:0,z:f.ai.feet[2]})),exitDoors:[{centre:{x:0,y:1,z:0},normal:{x:-1,y:0,z:0},size:{y:2},matrix:mat4.trs(13,0,6,0,0,0)}]};
- const nav={collider:col,key:'navigation-fixture',feet,transitions:[]};Object.defineProperty(ctx,'dfoDungeonNavigation',{get:()=>nav});
+ const nav={collider:col,key:'navigation-fixture',feet,transitions:()=>{portalReads++;return[]}};Object.defineProperty(ctx,'dfoDungeonNavigation',{get:()=>nav});
  const questLog=()=>{questReads++;return{active:[...quests.values()].filter(q=>!q.questComplete).map(q=>({id:q.uid,name:q.displayName}))};};
  const live={ctx,location:loc,foes,aurum:{id:'d12345',foot:[11,0,2],open:false},questBridge:{machine:{quests},questLog},regen:()=>null,blocked:()=>!!overlay&&!overlay.done,owns:w=>overlay===w,mount:w=>{if(overlay&&!overlay.done)return false;overlay=w;return true},unmount:w=>{if(overlay===w)overlay=null},journal:()=>false};
  Object.defineProperty(ctx,'dfoDungeonLive',{get:()=>live});
@@ -55,14 +55,31 @@ function fixture(Collider,mat4){
    nav.transitions=[];ctx.exitDoors=[{pos:[10,4,6]}];feet.set([2,0,6]);renderer._camPos=[4,2,8];renderer._view=mat4.lookAt([4,2,8],[7,2.5,6],[0,1,0]);
  }
  function lookAlong(p,q){renderer._camPos=[p[0],p[1]+1.7,p[2]];renderer._view=mat4.lookAt(renderer._camPos,[q[0],q[1]+.1,q[2]],[0,1,0]);}
+ function contactPortal(){
+   for(const key of [...col._buckets.keys()])col.removeBucket(key);geometry.length=colors.length=0;actions.objects.clear();
+   quad('floor',[[0,0,0],[14,0,0],[14,0,12],[0,0,12]]);quad('upper',[[0,3,0],[10,3,0],[10,3,12],[0,3,12]]);
+   quad('act:0:100',[[7,0,0],[7,2.5,0],[7,2.5,12],[7,0,12]]);
+   actions.objects.set('act:0:100',{key:'act:0:100',ns:0,positionKey:100,kind:'relay',triggerFlag:3,actionFlag:14,nextKey:200,aabb:{min:[7,0,0],max:[7,2.5,12]},origin:[7,0,6]});
+   actions.resolvePosition=(_ns,key)=>({pos:key===100?[7,0,6]:[8,3,6]});nav.portalSurfaces=col;
+   for(const [i,data]of [geometry,colors].entries()){gl.bindBuffer(gl.ARRAY_BUFFER,buffers[i]);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(data),gl.STATIC_DRAW);}
+   nav.key='contact-portal';nav.transitions=[];ctx.exitDoors=[{pos:[2,3,6]}];feet.set([2,0,6]);lookAlong([2,0,6],[7,0,6]);
+ }
  function loadComplex(data){
    for(const key of [...col._buckets.keys()])col.removeBucket(key);geometry.length=colors.length=0;actions.objects.clear();
    for(const part of data.parts){const indices=new Uint32Array(part.positions.length/3);for(let i=0;i<indices.length;i++)indices[i]=i;col.addMesh(part.key,new Float32Array(part.positions),indices,I);geometry.push(...part.positions);for(let i=0;i<indices.length;i++)colors.push(.22,.24,.27);}
    for(const o of data.actions)actions.objects.set(o.key,o);
    for(const [i,values]of [geometry,colors].entries()){gl.bindBuffer(gl.ARRAY_BUFFER,buffers[i]);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(values),gl.STATIC_DRAW);}
-   nav.key=data.key;nav.transitions=[];ctx.exitDoors=[{pos:data.goal}];feet.set(data.from);lookAlong(data.from,[14,0,6]);
+   nav.key=data.key;nav.transitions=[];nav.portalSurfaces=null;delete actions.resolvePosition;ctx.exitDoors=[{pos:data.goal}];feet.set(data.from);lookAlong(data.from,[14,0,6]);
  }
- window.fixture={ctx,live,nav,modes,foes,quests,sources,stands,session,feet,shift,draw,renderer,gl,gpuCheck,shaft,loadComplex,lookAlong,get draws(){return draws},get passes(){return passes},get questReads(){return questReads}};
+ function questDrop(){
+   const q=quests.get(2),item={isItem:true,symbol:{name:'relic'},displayName:'Relic',parentQuest:q};
+   item.daggerfallUnityItem={questUID:2,questSymbol:{name:'relic'},questItem:true,name:'Relic'};
+   const carrier={isFoe:true,symbol:{name:'carrier'},displayName:'Carrier',itemQueue:[item.daggerfallUnityItem],parentQuest:q};
+   q.resources.set('relic',item);q.resources.set('carrier',carrier);q.tasks=new Map([['startup',{triggered:true,actions:[{typeName:'HaveItem',targetItem:item.symbol}]}]]);
+   q.hooks={carriesQuestItem:()=>false};stands[1].active=false;
+   const actor=foes[1];actor.dead=false;actor.questBehaviour={questUID:2,targetSymbol:carrier.symbol};actor.entity.items=[];return actor;
+ }
+ window.fixture={ctx,live,nav,modes,foes,quests,sources,stands,session,feet,shift,draw,renderer,gl,gpuCheck,shaft,contactPortal,loadComplex,lookAlong,questDrop,get draws(){return draws},get passes(){return passes},get questReads(){return questReads},get portalReads(){return portalReads}};
  function frame(){draw();requestAnimationFrame(frame);}requestAnimationFrame(frame);window.ready=true;
 }
 const scripts=['dfo_dungeon_model.js','dfo_dungeons.js','dfo_dungeon_live_model.js','dfo_dungeon_graph.js','dfo_dungeon_nav_model.js','dfo_dungeon_nav.js','dfo_dungeon_live.js'];
@@ -81,14 +98,17 @@ const server=http.createServer((req,res)=>{try{
  res.end(body);
 }catch(e){res.statusCode=404;res.end(e.message);}});
 (async()=>{let browser,page;try{
- process.env.DFO_UPSTREAM_DIR=upstream;const {multiblock}=require('../test/helpers/dungeon-complex.cjs');
+ process.env.DFO_UPSTREAM_DIR=upstream;const {multiblock,deepShaftCluster}=require('../test/helpers/dungeon-complex.cjs');
  for(const sealed of [false,true]){const r=await multiblock({sealed}),parts=[];for(const [key,b]of r.col._buckets){const groups=new Map();for(let i=0;i<b.tris.length;i++){const part=b.part[i];if(!groups.has(part))groups.set(part,[]);groups.get(part).push(...b.tris[i].slice(0,3).flat());}for(const positions of groups.values())parts.push({key,positions});}labs.set('/fixture-complex'+(sealed?'-sealed':'')+'.json',JSON.stringify({key:'complex:'+sealed,parts,actions:[...r.actions.objects.values()],from:r.from,goal:r.goal,blocks:r.blocks}));}
+ {const r=await deepShaftCluster(),parts=[...r.col._buckets].map(([key,b])=>({key,positions:b.tris.flatMap(t=>t.slice(0,3).flat())}));labs.set('/fixture-shafts.json',JSON.stringify({key:'deep-shafts',parts,actions:[],from:r.from,goal:r.goal}));}
  await new Promise(r=>server.listen(0,'127.0.0.1',r));const address='http://127.0.0.1:'+server.address().port;
  browser=await chromium.launch({executablePath:process.env.DFO_CHROMIUM||'/usr/bin/chromium',headless:true,args:['--no-sandbox','--enable-unsafe-swiftshader']});page=await browser.newPage({viewport:{width:1200,height:800}});
  const errors=[];page.on('pageerror',e=>{errors.push(String(e));console.error('PAGE',e)});await page.goto(address);await page.waitForFunction(()=>window.ready);await page.waitForTimeout(700);assert.equal(await page.evaluate(()=>fixture.questReads),0,'idle navigation must not scan the quest journal');await page.keyboard.press('k');const dialog=page.locator('.dfo-dungeon-live');await dialog.waitFor();
  for(const name of ['К выходу','К сундуку с аурумом','К ближайшему элитнику','К цели задания'])assert.equal(await dialog.getByRole('button',{name,exact:true}).isEnabled(),true);
  assert.equal(await dialog.getByRole('button',{name:'Обновить',exact:true}).count(),0);await dialog.getByRole('button',{name:'К выходу',exact:true}).click();await dialog.waitFor({state:'hidden'});
  await page.waitForFunction(()=>__dfoDungeonNavigation.state().phase==='following',null,{timeout:30000});await page.waitForFunction(()=>fixture.passes>0);
+ const exitReads=await page.evaluate(()=>({quests:fixture.questReads,portals:fixture.portalReads}));await page.waitForTimeout(800);
+ assert.deepEqual(await page.evaluate(()=>({quests:fixture.questReads,portals:fixture.portalReads})),exitReads,'Following an exit route does not read quests or rebuild portal metadata');
  assert.ok(graphWorkers>0,'the mod runs its own graph worker');assert.equal(workerRequests,0,'NPC navigation workers are never requested');const gpu=await page.evaluate(()=>fixture.gpuCheck());assert.ok(gpu.blue>20,JSON.stringify(gpu));assert.ok(gpu.wall>20);assert.equal(gpu.wallBlue,0,'depth test hides the route behind opaque walls');assert.equal(gpu.error,0);assert.equal(gpu.depth,true);assert.equal(gpu.writes,true);assert.equal(gpu.blend,false);
  const profileKey=await page.evaluate(async()=>{const db=await new Promise((resolve,reject)=>{const q=indexedDB.open('dfo-player-route-profiles',1);q.onsuccess=()=>resolve(q.result);q.onerror=()=>reject(q.error);});const rows=await new Promise((resolve,reject)=>{const q=db.transaction('profiles').objectStore('profiles').getAll();q.onsuccess=()=>resolve(q.result);q.onerror=()=>reject(q.error);});db.close();if(!rows.length)throw Error('profiles were not saved');for(const r of rows)if(!r.profile.points.length||!r.profile.links)throw Error('invalid saved profile');return rows[0].key;});
  if(process.env.DFO_SCREENSHOT_DIR){fs.mkdirSync(process.env.DFO_SCREENSHOT_DIR,{recursive:true});await page.screenshot({path:path.join(process.env.DFO_SCREENSHOT_DIR,'navigation-line.png')});}
@@ -96,6 +116,19 @@ const server=http.createServer((req,res)=>{try{
  await page.keyboard.press('k');await dialog.waitFor();await dialog.getByRole('button',{name:'К ближайшему элитнику',exact:true}).click();await page.waitForFunction(()=>__dfoDungeonNavigation.state().phase==='following'&&__dfoDungeonNavigation.state().name==='Ближний');
  await page.evaluate(()=>fixture.foes[1].dead=true);await page.waitForFunction(()=>__dfoDungeonNavigation.state().name==='За стеной');
  await page.keyboard.press('k');await dialog.waitFor();const select=dialog.getByRole('combobox',{name:'Задание для навигации'});await select.focus();await select.evaluate(n=>window.savedNavSelect=n);await page.evaluate(()=>fixture.foes[0].entity.health=17);await page.waitForTimeout(750);assert.equal(await select.evaluate(n=>n===window.savedNavSelect&&document.activeElement===n),true,'automatic updates must preserve the live quest selector and focus');await select.selectOption('2');await dialog.getByRole('button',{name:'К цели задания',exact:true}).click();await page.waitForFunction(()=>__dfoDungeonNavigation.state().phase==='following'&&__dfoDungeonNavigation.state().uid==='2');assert.equal(await page.evaluate(()=>__dfoDungeonNavigation.state().name),'Цель 2');
+ await page.evaluate(()=>{fixture.questDrop();__dfoDungeonNavigation.start('quest','2')});
+ await page.waitForFunction(()=>__dfoDungeonNavigation.state().phase==='following'&&__dfoDungeonNavigation.state().name.includes('Relic'));
+ assert.equal(await page.evaluate(()=>fixture.foes[1].entity.items.length),0,'Viewing a carrier does not drain its native item queue');
+ await page.evaluate(()=>{window.savedQuestLog=fixture.live.questBridge.questLog;fixture.live.questBridge.questLog=()=>{throw Error('quest snapshot unavailable')};});
+ await page.waitForFunction(()=>__dfoDungeonNavigation.state().phase==='unavailable');
+ await page.evaluate(()=>fixture.live.questBridge.questLog=window.savedQuestLog);
+ await page.waitForFunction(()=>__dfoDungeonNavigation.state().phase==='following'&&__dfoDungeonNavigation.state().name.includes('Relic'));
+ await page.evaluate(()=>{const f=fixture.foes[1];f.dead=true;f.corpse={};f.corpsePos=[3,0,9];f.entity.items.push({...fixture.quests.get(2).resources.get('relic').daggerfallUnityItem});});
+ await page.waitForFunction(()=>__dfoDungeonNavigation.state().phase==='following'&&__dfoDungeonNavigation.state().name==='Relic');
+ await page.evaluate(()=>{fixture.foes[1].entity.items.length=0;fixture.quests.get(2).resources.get('relic').displayName='Dropped relic';fixture.ctx.lootTargets=()=>[{key:'droppedLoot:pi1',pos:[3,1.2,8]}];fixture.ctx.lootContents=()=>[fixture.quests.get(2).resources.get('relic').daggerfallUnityItem];});
+ await page.waitForFunction(()=>__dfoDungeonNavigation.state().phase==='following'&&__dfoDungeonNavigation.state().name==='Dropped relic');
+ await page.evaluate(()=>{fixture.ctx.lootTargets=()=>[];fixture.quests.get(2).hooks.carriesQuestItem=()=>true});
+ await page.waitForFunction(()=>__dfoDungeonNavigation.state().phase==='unavailable');
  await page.evaluate(()=>fixture.quests.get(2).questComplete=true);await page.waitForFunction(()=>__dfoDungeonNavigation.state().phase==='unavailable');await page.keyboard.press('k');await dialog.waitFor();await dialog.getByRole('button',{name:'Убрать маршрут',exact:true}).click();assert.equal(await page.evaluate(()=>__dfoDungeonNavigation.state().phase),'idle');
  await page.setViewportSize({width:720,height:600});const foot=await dialog.locator('.acts').boundingBox();assert.ok(foot.y+foot.height<=600);await dialog.getByRole('button',{name:'К сундуку с аурумом',exact:true}).click();await page.waitForFunction(()=>__dfoDungeonNavigation.state().phase==='following');await page.evaluate(()=>fixture.live.aurum.open=true);await page.waitForFunction(()=>__dfoDungeonNavigation.state().phase==='unavailable');
  await page.evaluate(()=>fixture.modes.mode='exterior');await page.waitForFunction(()=>__dfoDungeonNavigation.state().phase==='idle');
@@ -126,6 +159,14 @@ const server=http.createServer((req,res)=>{try{
    }
    const cleared=await page.evaluate(async()=>{fixture.loadComplex(await(await fetch('/fixture-complex-sealed.json')).json());const before=fixture.passes;fixture.draw();const draws=fixture.passes-before;__dfoDungeonNavigation.start('exit');return draws;});assert.equal(cleared,0,'replacing the layout removes the old route before the next tick');
    await page.waitForFunction(()=>__dfoDungeonNavigation.state().phase==='unavailable',null,{timeout:30000});assert.equal((await page.evaluate(()=>fixture.gpuCheck())).blue,0,'disconnected floors never get a fabricated line');
+   await page.evaluate(async()=>{fixture.loadComplex(await(await fetch('/fixture-shafts.json')).json());__dfoDungeonNavigation.start('exit');});
+   await page.waitForFunction(()=>__dfoDungeonNavigation.state().phase==='following'&&Math.max(...fullRoute.points.map(p=>p[1]))>175,null,{timeout:30000});
+   await page.waitForFunction(()=>fixture.gpuCheck().blue>20,null,{timeout:10000});
+   await page.evaluate(()=>{fixture.contactPortal();__dfoDungeonNavigation.start('exit');});await page.waitForFunction(()=>__dfoDungeonNavigation.state().phase==='following'&&fullRoute.transition?.contact);
+   await page.evaluate(()=>fixture.feet.set([5.9,0,6]));await page.waitForTimeout(350);assert.equal(await page.evaluate(()=>__dfoDungeonNavigation.state().phase),'following');
+   assert.ok((await page.evaluate(()=>fixture.gpuCheck())).blue>20,'the approach line stays visible to the contact portal');
+   await page.evaluate(()=>fixture.feet.set([6.64,0,6]));await page.waitForFunction(()=>__dfoDungeonNavigation.state().phase==='transition');
+   await page.evaluate(()=>fixture.feet.set([8,3,6]));await page.waitForFunction(()=>__dfoDungeonNavigation.state().phase==='following'&&!fullRoute.transition&&fullRoute.target.at[1]>2);
  }
  assert.equal(workerRequests,0);assert.deepEqual(errors,[]);console.log('PASS: published Collider and own graph worker/fallback; exact quest and live UI; cache repair; real WebGL depth and vertical ribbon; three floors across three blocks with stairs, ramp, rotated geometry and disconnected-floor control');
 }catch(e){if(page)console.error('STATE',await page.evaluate(()=>({ready:window.ready,state:window.__dfoDungeonNavigation?.state(),text:document.body.innerText.slice(-2200),render:Object.keys(window.__dfoDungeonRender||{})})).catch(()=>null));throw e;}finally{await browser?.close();server.close();}})().catch(e=>{console.error(e);process.exitCode=1;});

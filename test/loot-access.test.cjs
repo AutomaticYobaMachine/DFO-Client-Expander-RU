@@ -15,7 +15,7 @@ const wall = (c, key, x, low = -1, high = 3, z0 = -3, z1 = 3, move = null) => qu
 test('native typed coordinates work for terrain and source positions without changing either vector', () => {
   for (const Vector of [Array, Float32Array, Float64Array]) for (const Target of [Array, Float32Array, Float64Array]) {
     const feet = Vector.from([100, 12, -20]), target = Target.from([109, 12, -8]);
-    const collider = { ...flatCollider, surfaceHit: p => ({ dist: p[1] - 12, normal: [0, 1, 0] }) };
+    const collider = { ...flatCollider, heightAt: () => 12 };
     assert.equal(distance(feet, target), 15);
     assert.equal(canReach(feet, target, collider), true, `${Vector.name} feet / ${Target.name} target`);
     assert.deepEqual([...feet], [100, 12, -20]);assert.deepEqual([...target], [109, 12, -8]);
@@ -53,7 +53,7 @@ test('real player motor: the street loot list and native transfers work at terra
 
 test('access fails closed for missing/invalid geometry and excludes vertical floors within the 15 m sphere', () => {
   assert.equal(canReach([0, 0, 0], [0, 0, 15], flatCollider), true);
-  for (const target of [[15.001, 0, 0], [0, 3, 0], [1, -3, 1], [0, 1.26, 0], [0, NaN, 0], [0, 0]]) assert.equal(canReach([0, 0, 0], target, flatCollider), false);
+  for (const target of [[15.001, 0, 0], [0, 3, 0], [1, -3, 1], [0, 2.26, 0], [0, NaN, 0], [0, 0]]) assert.equal(canReach([0, 0, 0], target, flatCollider), false);
   for (const c of [null, {}, { raycast: () => NaN }, { raycast() { throw new Error('unloaded'); } }]) assert.equal(canReach([0, 0, 0], [3, 0, 0], c), false);
 });
 
@@ -68,33 +68,53 @@ test('real game collider: walls and closed moving doors block loot; the same doo
   assert.equal(canReach([0, 0, 0], [5, 0, 0], c), false);
 });
 
-test('real game collider: an eye ray through a window or a narrow slit does not grant walking access', native, async () => {
+test('real game collider: the ray must reach the item, while an opening need not fit a walking capsule', native, async () => {
   const window = await world(); wall(window, 'sill', 2, -1, 1.1);
   assert.equal(window.raycast([0, 1.6, 0], [1, 0, 0], 5), Infinity);
   assert.equal(canReach([0, 0, 0], [5, 0, 0], window), false);
   const slit = await world(); wall(slit, 'left', 2, -1, 3, -3, -0.2); wall(slit, 'right', 2, -1, 3, 0.2, 3);
   assert.equal(slit.raycast([0, 1, 0], [1, 0, 0], 5), Infinity);
-  assert.equal(canReach([0, 0, 0], [5, 0, 0], slit), false);
+  assert.equal(canReach([0, 0, 0], [5, 0, 0], slit), true);
   const door = await world(); wall(door, 'left', 2, -1, 3, -3, -0.65); wall(door, 'right', 2, -1, 3, 0.65, 3);
   assert.equal(canReach([0, 0, 0], [5, 0, 0], door), true);
 });
 
-test('real game collider: pits, low ceilings and separate storeys are blocked; supported slopes and small steps work', native, async () => {
+test('real game collider: visible slopes and low ledges do not need a walking path; storeys and terrain occlude', native, async () => {
   const pit = await world(x => x > 2 && x < 4 ? -10 : 0);
-  assert.equal(canReach([0, 0, 0], [6, 0, 0], pit), false);
+  assert.equal(canReach([0, 0, 0], [6, 0, 0], pit), true);
   const slope = await world(x => x * 0.1);
   assert.equal(canReach([0, 0, 0], [6, 0.6, 0], slope), true);
   const step = await world(x => x >= 2 ? 0.4 : 0);
   assert.equal(canReach([0, 0, 0], [5, 0.4, 0], step), true);
   const cliff = await world(x => x >= 2 ? 0.8 : 0);
-  assert.equal(canReach([0, 0, 0], [5, 0.8, 0], cliff), false);
+  assert.equal(canReach([0, 0, 0], [5, 0.8, 0], cliff), true);
+  const ridge = await world(x => x > 2 && x < 4 ? 2 : 0);
+  assert.equal(canReach([0, 0, 0], [6, 0, 0], ridge), false, 'an outdoor ridge blocks a ray even without a terrain mesh');
   const room = await world(() => -Infinity);
   quad(room, 'floor', [[-2, 0, -2], [7, 0, -2], [7, 0, 2], [-2, 0, 2]]);
   assert.equal(canReach([0, 0, 0], [5, 0, 0], room), true, 'native indoor mesh floor');
   quad(room, 'upper-storey', [[-2, 3, -2], [7, 3, -2], [7, 3, 2], [-2, 3, 2]]);
   assert.equal(canReach([0, 0, 0], [5, 3, 0], room), false);
   quad(room, 'low-ceiling', [[1, 1.5, -2], [4, 1.5, -2], [4, 1.5, 2], [1, 1.5, 2]]);
-  assert.equal(canReach([0, 0, 0], [5, 0, 0], room), false);
+  assert.equal(canReach([0, 0, 0], [5, 0, 0], room), true, 'visible loot beneath a low ceiling does not need a standing corridor');
+});
+
+test('real game collider: camera rays find table/plinth loot, include the full 3D radius, and stop at walls and floor slabs', native, async () => {
+  const c = await world(), feet = new Float32Array([0, 0, 0]), eye = new Float32Array([0, 1.6, 0]);
+  const eyeBefore = [...eye];
+  quad(c, 'table-top', [[2, 1.35, -1], [4, 1.35, -1], [4, 1.35, 1], [2, 1.35, 1]]);
+  assert.equal(canReach(feet, [3, 1.35, 0], c, eye), true);
+  assert.equal(canReach(feet, [14.99, 0, 0], c, eye), false, 'distance is measured from the actual eye');
+  assert.equal(canReach(feet, [0, 1.6, -15], c, eye), true);
+  assert.equal(canReach(feet, [0, 1.6, -15.001], c, eye), false);
+  assert.equal(canReach(feet, [0, 1, 0], c, [NaN, 1, 0]), false);
+  wall(c, 'partition', 1);
+  assert.equal(canReach(feet, [3, 1.35, 0], c, eye), false);
+  c.removeBucket('partition');
+  quad(c, 'floor-slab', [[-1, 2, -1], [4, 2, -1], [4, 2, 1], [-1, 2, 1]]);
+  assert.equal(canReach(feet, [3, 2, 0], c, eye), false, 'even a low separate storey occludes the target');
+  assert.equal(canReach(feet, [0, -3, 0], c, eye), false, 'open shafts still do not join storeys');
+  assert.deepEqual([...feet], [0, 0, 0]); assert.deepEqual([...eye], eyeBefore);
 });
 
 test('live access is rechecked before AND inside native transfers; stale rows, bulk and auto-loot cannot bypass a closing door', () => {

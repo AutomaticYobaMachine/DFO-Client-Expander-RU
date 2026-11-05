@@ -13,10 +13,11 @@ function context(text) {
   const api = need(text, rx(`(${ID})=${ID}\\((${ID}),${ID},${ID},\\{meshes:${ID}\\}\\)`))[2];
   const placement = need(text, rx(`(${ID})\\.addMesh\\(\`dungeon\`,(${ID})\\.positions,\\2\\.indices,(${ID})\\)`));
   const collider = placement[1], model = placement[2];
+  const surfaces = need(text, rx(`(${ID})\\.addMesh\\(${ID}\\.key,${model}\\.positions,${model}\\.indices,${placement[3]}\\)`))[1];
   const renderer = need(text, rx(`(${ID})\\.drawWater\\(`))[1];
   const late = need(text, rx(`(${ID})\\.lateWorldDraw\\?\\.\\(\\)`));
   const portals = need(text, rx(`portals:(${ID}),fires:`))[1];
-  const getter = `get dfoDungeonNavigation(){return{collider:${collider},key:this.dfoDungeonLive?.location?.mapTableData?.mapId??'',feet:this.swimmer?.()?.feet,transitions:()=>[...${portals}().values()]}},`;
+  const getter = `get dfoDungeonNavigation(){return{collider:${collider},portalSurfaces:${surfaces},key:this.dfoDungeonLive?.location?.mapTableData?.mapId??'',feet:this.swimmer?.()?.feet,transitions:()=>[...${portals}().values()]}},`;
   let out = text.replace('get dfoDungeonLive(){', getter + 'get dfoDungeonLive(){');
   out = out.replace(placement[0], `(globalThis.__dfoDungeonNavModel?.notePlacement(${collider},\`dungeon\`,${model}),${placement[0]})`);
   out = out.replace(late[0], `${late[0]},(()=>{try{globalThis.__dfoDungeonNavigation?.draw(${api},${renderer})}catch(_dfoNav){}})()`);

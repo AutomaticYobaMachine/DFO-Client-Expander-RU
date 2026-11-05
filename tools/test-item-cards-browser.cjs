@@ -45,6 +45,7 @@ const cases={
  sockets:mk('Socket sword','Weapons',120,1,{rarity:'rare',value:100,sockets:['empty','empty']}),
  gem:mk('Set gem','Weapons',120,1,{rarity:'rare',value:100,sockets:['ruby']}),
  credit:mk('Letter of credit','MiscItems',275,undefined,{value:20000}),
+ coins:mk('Gold pieces','Currency',276,undefined,{value:1,stackCount:27}),
  mail:mk('Mail hauberk','Armor',515,513,{value:480}),
  fur:mk('Fur jerkin','Armor',520,0,{message:1,value:120}),
 };
@@ -83,6 +84,9 @@ const server = http.createServer((req,res) => {
     if(url.pathname==='/dfo-mod/ru_i18n.js'){res.setHeader('Content-Type','text/javascript');return res.end(buildI18n(path.join(root,'data/ru')));}
     if(url.pathname==='/dfo-mod/ru_items.js'){res.setHeader('Content-Type','text/javascript');return res.end(fs.readFileSync(path.join(modDir,'page/ru_items.js')));}
     if (url.pathname === '/dfo-mod/dfo_item_cards.js') {res.setHeader('Content-Type','text/javascript');return res.end(fs.readFileSync(path.join(modDir,'page/dfo_item_cards.js')));}
+    if (/^\/dfo-mod\/item-font-(?:text|title|sigil|set|legendary)\.(?:ttf|otf)$/.test(url.pathname)) {
+      res.setHeader('Content-Type',url.pathname.endsWith('.otf')?'font/otf':'font/ttf');return res.end(fs.readFileSync(path.join(modDir,'fonts',path.basename(url.pathname))));
+    }
     const file = path.resolve(build, '.' + decodeURIComponent(url.pathname));
     if (!file.startsWith(build + path.sep)) {res.writeHead(403);return res.end();}
     let body = fs.readFileSync(file);
@@ -91,10 +95,15 @@ const server = http.createServer((req,res) => {
       const on = !req.headers.referer?.includes('?off');
       const key = file + on;
       if (!cache.has(key)) {
-        const result = transformAsset(url.pathname.slice(1), body.toString(), {ru:fullRu,...ruContext,marks:false,nearbyLoot:false,dungeons:false,itemCards:on});
+        const result = transformAsset(url.pathname.slice(1), body.toString(), {ru:fullRu,...ruContext,marks:process.env.DFO_CARD_PRICE_AUDIT==='1',nearbyLoot:false,dungeons:false,itemCards:on});
         // Test-only access to the published game's own online/renown setters (no replacement laws).
         const renown=/function ([\w$]+)\(([\w$]+)\)\{([\w$]+)=([\w$]+)&&Number.isSafeInteger\(\2\)&&\2>=1\?\2:null\}/.exec(body.toString());
         let extra='';
+        if(process.env.DFO_CARD_PRICE_AUDIT==='1'&&body.toString().includes('modeActionEnabled:')){
+          const raw=body.toString(),head=/function ([\w$]+)\([\w$]+,[\w$]+=\[\],\{quality:[\w$]+=0,priceAdjustment:[\w$]+=(?:1e3|1000),/.exec(raw);
+          const sale=/case`Sell`:\{[^}]{0,150}?([\w$]+)\(([\w$]+)\(([\w$]+)\),[\w$]+,[\w$]+,([\w$]+)\(\3,\{online:[\w$]+\}\)\)/.exec(raw);
+          if(head&&sale)extra+='\n;globalThis.__dfoPriceAudit={tradeCost:'+head[1]+',counterValue:'+sale[2]+',saleCondition:'+sale[4]+'};';
+        }
         if(renown){
           const online=/function ([\w$]+)\(([\w$]+)\)\{([\w$]+)=!!\2,\3\|\|\(([\w$]+)=null\)\}/.exec(body.toString());
           assert.ok(online);extra='\n;globalThis.__cardTestActivate=level=>{'+online[1]+'(level!=null);'+renown[1]+'(level)};';
@@ -136,6 +145,7 @@ async function main() {
       await page.evaluate(id=>probe.show(id),id);
       if(!await card.count())throw new Error(id+': '+JSON.stringify(await page.evaluate(()=>({stats:__dfoItemCards.stats(),tip:document.querySelector('.inv-tip')?.outerHTML}))));
       await card.waitFor();
+      await page.evaluate(async()=>{await Promise.all(['DFO Flexi','DFO Gabin','DFO Ckazka','DFO Ritalin','DFO Wolga'].map(f=>document.fonts.load('16px "'+f+'"')));});
       await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
       const result=await card.evaluate(n=>{
         const r=n.getBoundingClientRect(),s=getComputedStyle(n),bad=[];
@@ -150,23 +160,27 @@ async function main() {
           const range=document.createRange();range.selectNodeContents(text);
           for(const box of range.getClientRects())if(box.width&&box.height&&(box.left<r.left-1||box.right>r.right+1||box.top<r.top-1||box.bottom>r.bottom+1))textOutside.push(text.textContent);
         }
-        return {x:r.x,y:r.y,width:r.width,height:r.height,right:r.right,bottom:r.bottom,bad,textOutside,columns:getComputedStyle(n.querySelector('.dfo-item-main')).gridTemplateColumns.split(' ').length,text:n.innerText,blocks:[...n.querySelectorAll('.sigilbox,.setbox,.techbox,.cmp')].map(e=>[e.className,e.outerHTML]),left:n.querySelector('.dfo-item-left').innerText,effects:n.querySelector('.dfo-item-effects').innerText};
+        return {x:r.x,y:r.y,width:r.width,height:r.height,right:r.right,bottom:r.bottom,bad,textOutside,columns:getComputedStyle(n.querySelector('.dfo-item-main')).gridTemplateColumns.split(' ').length,text:n.innerText,powers:[...n.querySelectorAll('.dfo-item-lines>li,.dfo-item-meta>li,.dfo-item-tier')].map(e=>e.getAttribute('aria-label')||e.textContent),money:n.querySelector('.dfo-item-price-value').textContent,footer:n.querySelector('.dfo-item-footer').innerText,blocks:[...n.querySelectorAll('.sigilbox,.setbox,.techbox,.cmp')].map(e=>[e.className,e.outerHTML]),left:n.querySelector('.dfo-item-left').innerText,effects:n.querySelector('.dfo-item-effects').innerText};
       });
       assert.ok(result.width>=600&&result.width<=740,id+' width');assert.ok(result.height<=960,id+' height: '+result.height);
       assert.ok(result.x>=7&&result.y>=7&&result.right<=1913&&result.bottom<=1073,id+' viewport: '+JSON.stringify(result));
       assert.equal(result.columns,2);assert.deepEqual(result.bad,[],id+' no scroll');
       assert.deepEqual(result.textOutside,[],id+' all text stays inside the card');
       assert.equal(await card.locator('.dfo-item-footer').count(),1);assert.equal(await card.locator('.lore,.description').count(),0);
-      if(id==='steel'){assert.match(result.left,/Материал\nSteel/);assert.match(result.left,/Тип брони\nPlate/);assert.match(result.text,/600 зол\./);}
+      if(id==='steel'){assert.match(result.left,/Материал\nSteel/);assert.match(result.left,/Тип брони\nPlate/);assert.equal(result.money,'~240');}
       if(id==='chain')assert.match(result.left,/Металл не указан/);
       if(id==='missing')assert.match(result.left,/Нет данных/);
-      if(id==='rare')assert.match(result.text,/3\s425 зол\./);
-      if(id==='unknown'){assert.doesNotMatch(result.text,/99\s999/);assert.match(result.text,/Не опознана/);}
-      if(id==='stack'){assert.match(result.text,/80 зол\./);assert.match(result.text,/2 зол\. \/ шт\./);}
-      if(id==='pellets'){assert.match(result.left,/Ценность \/ кг\n20 зол\./);assert.match(result.text,/80 зол\./);}
-      if(id==='base')assert.match(result.text,/Базовая ценность · расчёт/);
-      if(id==='invalid')assert.match(result.text,/Нет данных/);
-      if(id==='credit'){assert.match(result.text,/Аккредитив · номинал/);assert.match(result.text,/20\s000 зол\./);}
+      if(id==='rare')assert.match(result.money,/^~1\s370$/);
+      if(id==='unknown'){assert.doesNotMatch(result.text,/99\s999/);assert.equal(result.money,'—');}
+      if(id==='stack')assert.equal(result.money,'~30');
+      if(id==='pellets'){assert.match(result.left,/Цена \/ кг\n~10 зол\./);assert.equal(result.money,'~30');}
+      if(id==='base')assert.match(result.money,/\d/);
+      if(id==='invalid')assert.equal(result.money,'—');
+      if(id==='credit')assert.match(result.money,/20\s000/);
+      if(id==='coins')assert.equal(result.money,'27');
+      if(!['credit','coins','unknown','invalid'].includes(id))assert.match(result.money,/^~[\d\s.,]+$/,'Estimated price is marked and rounded to tens');
+      assert.equal(result.footer,result.money,'footer contains only the requested money number and coin');
+      assert.equal(await card.locator('svg.dfo-item-coin').count(),1);assert.equal(await card.locator('.dfo-item-corners>i').count(),4);
       if(id==='mail'){assert.match(result.left,/Кольчужная/);assert.match(result.left,/Steel/);}
       if(id==='fur')assert.match(result.left,/Мех/);
       if(['ruhn','wyrd'].includes(id)){assert.ok(result.blocks.some(x=>x[0].includes('sigilbox')),id+' native sigil');assert.ok(result.blocks.some(x=>x[0].includes('setbox')),id+' native set');}
@@ -175,7 +189,7 @@ async function main() {
     assert.deepEqual(await page.evaluate(()=>__dfoItemCards.stats().failures),0);
     // The same shared card is used for local, shop, remote/trade and chat links.
     for(const side of ['local','shop','remote']){
-      await page.evaluate(side=>probe.show('rare',side),side);await card.waitFor();assert.match(await card.innerText(),/3\s425 зол\./);
+      await page.evaluate(side=>probe.show('rare',side),side);await card.waitFor();assert.match(await card.locator('.dfo-item-price-value').innerText(),/^~1\s370$/);
     }
     await page.evaluate(()=>probe.hide());await page.locator('#hover-target').hover();await card.waitFor();
     await page.mouse.move(2,2);assert.equal(await page.locator('.inv-tip').count(),0,'Leaving item dismisses tooltip');
@@ -194,14 +208,14 @@ async function main() {
     // Independent on/off switch: native data and integrations stay byte-for-byte DOM-equivalent.
     const original=await browser.newPage({viewport:{width:1920,height:1080}});original.on('pageerror',e=>errors.push(e.stack));
     await original.goto(`http://127.0.0.1:${server.address().port}/?off`);await original.waitForFunction(()=>window.ready);
-    for(const {id,blocks,text} of report){
+    for(const {id,blocks,powers} of report){
       await original.evaluate(id=>probe.show(id),id);assert.equal(await original.locator('.dfo-item-card').count(),0);
       const native=await original.locator('.inv-tip .card').evaluate(n=>[...n.querySelectorAll('.sigilbox,.setbox,.techbox,.cmp')].map(e=>[e.className,e.outerHTML]));
       assert.deepEqual(blocks,native,id+' preserve exact native integration DOM');
-      for(const power of await original.locator('.inv-tip ul.rarity>li').allTextContents())assert.ok(text.includes(power),id+' preserves native power: '+power);
+      for(const power of await original.locator('.inv-tip ul.rarity>li').allTextContents())assert.ok(powers.includes(power),id+' preserves native power: '+power);
     }
     assert.deepEqual(errors,[],'No browser exceptions');
-    for(const key of ['itemCards.inventory','itemCards.values','itemCards.materials'])assert.ok(logs.some(x=>x[0]===key&&x[1]===1),key);
+    for(const key of ['itemCards.inventory','itemCards.values','itemCards.materials','itemCards.powers','itemCards.prices','itemCards.currency'])assert.ok(logs.some(x=>x[0]===key&&x[1]===1),key);
     await page.evaluate(()=>probe.show('ruhn'));await page.evaluate(()=>new Promise(r=>requestAnimationFrame(r)));
     if(process.env.DFO_SCREENSHOT_DIR){fs.mkdirSync(process.env.DFO_SCREENSHOT_DIR,{recursive:true});await page.screenshot({path:path.join(process.env.DFO_SCREENSHOT_DIR,'item-card-game.png')});}
     const ru=await browser.newPage({viewport:{width:1920,height:1080}});ru.on('pageerror',e=>errors.push(e.stack));
@@ -210,6 +224,12 @@ async function main() {
       await ru.evaluate(id=>probe.show(id),id);const c=ru.locator('.inv-tip .dfo-item-card');await c.waitFor();
       if(id==='steel'){assert.equal(await c.locator('.dfo-item-primary').count(),1);assert.match(await c.locator('.dfo-item-stats').innerText(),/Тип брони/);}
       assert.equal(await c.locator('.dfo-item-effects li').evaluateAll(list=>list.every(n=>getComputedStyle(n).display!=='none')),true);
+    }
+    if(process.env.DFO_SCREENSHOT_DIR){
+      await ru.evaluate(async()=>{probe.show('ruhn');await Promise.all(['DFO Flexi','DFO Gabin','DFO Ckazka','DFO Ritalin','DFO Wolga'].map(f=>document.fonts.load('16px "'+f+'"')))});
+      if(process.env.DFO_ARENA2_DIR)await ru.waitForFunction(()=>document.querySelector('.inv-tip .bigicon img')?.naturalWidth>0);
+      await ru.evaluate(()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r))));
+      await ru.screenshot({path:path.join(process.env.DFO_SCREENSHOT_DIR,'item-card-game-ru.png')});
     }
     assert.deepEqual(errors,[],'RU runtime has no interaction exceptions');
     console.log(JSON.stringify({passed:report.map(({id,width,height})=>({id,width,height})),nativeBlocksPreserved:true,errors},null,2));

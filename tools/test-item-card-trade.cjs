@@ -31,7 +31,7 @@ async function main(){
    window.cardCases=['steel','rare','unknown','unknownRare','stack','ruhn','found','crafted','effects'];
    window.itemCopies=Object.fromEntries(cardCases.map(id=>[id,JSON.stringify(probe.cases[id])]));
   },{trade,inventoryFile,enchantedExport});
-  await page.evaluate(async()=>{probe.show('steel');await Promise.all(['DFO Flexi','DFO Gabin','DFO Ckazka','DFO Ritalin','DFO Wolga'].map(f=>document.fonts.load('16px "'+f+'"')));probe.hide()});
+  await page.evaluate(async()=>{probe.show('steel');await Promise.all(['DFO Greengoth','DFO Flexi','DFO Gabin','DFO Ckazka','DFO Ritalin','DFO Wolga'].map(f=>document.fonts.load('16px "'+f+'"')));probe.hide()});
   const card=page.locator('.inv-tip .dfo-item-card');
   async function findRow(host){
    for(let i=0;i<=await host.locator('.packtab').count();i++){

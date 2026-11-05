@@ -118,7 +118,7 @@ body .pack-shell .packdetail.dfo-item-host { width:max-content!important; height
 .dfo-item-material .dfo-item-metal { font:inherit; font-weight:400; color:var(--dfo-metal-color,#e9e4d9)!important; -webkit-text-stroke:var(--dfo-metal-stroke,0 transparent); text-shadow:var(--dfo-metal-shadow,none); }
 .dfo-item-card .dfo-item-head>.bigicon { width:64px; height:82px; margin:0!important; display:flex; align-items:center; justify-content:center; }
 .dfo-item-card .dfo-item-head>.bigicon img,.dfo-item-card .dfo-item-head>.bigicon canvas { width:auto!important; height:auto!important; max-width:60px!important; max-height:78px!important; object-fit:contain; }
-.dfo-item-card .dfo-item-title h3 { font-family:'DFO Flexi',var(--display,Georgia,serif)!important; font-weight:400; font-size:18px; line-height:1.15; text-align:left; text-transform:none; letter-spacing:normal; margin:0!important; overflow-wrap:anywhere; color:var(--rar,var(--bone,#e9e4d9)); }
+.dfo-item-card .dfo-item-title h3 { font-family:'DFO Greengoth',var(--display,Georgia,serif)!important; font-weight:400; font-size:18px; line-height:1.15; text-align:left; text-transform:none; letter-spacing:normal; margin:0!important; overflow-wrap:anywhere; color:var(--rar,var(--bone,#e9e4d9)); }
 .dfo-item-tier { font-size:11px; margin:0 0 4px; color:var(--rar,var(--brass,#d5b26e)); }
 .dfo-item-tier::before { content:var(--rar-pips,''); margin-right:4px; font-size:9px; }
 .dfo-item-card .dfo-item-stats { display:block!important; margin:0; padding:0; }
@@ -180,7 +180,7 @@ body .card.dfo-item-card[data-rarity=gilded] { border-width:4px!important; borde
     if (win.__DFO_MOD_CFG__?.itemCards?.enabled === false || win.__dfoItemCards) return;
     const doc = win.document, native = {}, states = new WeakMap(), pending = new Set(), active = new Map();
     const fontRoot = new URL('.', doc.currentScript?.src || new URL('dfo-mod/dfo_item_cards.js', doc.baseURI || win.location.href)).href;
-    const fontFaces = [['DFO Flexi','title','ttf'],['DFO Gabin','text','ttf'],['DFO Ckazka','sigil','ttf'],['DFO Ritalin','set','ttf'],['DFO Wolga','legendary','otf']]
+    const fontFaces = [['DFO Greengoth','title','ttf'],['DFO Flexi','numbers','ttf'],['DFO Gabin','text','ttf'],['DFO Ckazka','sigil','ttf'],['DFO Ritalin','set','ttf'],['DFO Wolga','legendary','otf']]
       .map(([family,file,ext])=>`@font-face{font-family:'${family}';src:url(${JSON.stringify(new URL('item-font-'+file+'.'+ext,fontRoot).href)}) format('${ext==='otf'?'opentype':'truetype'}');font-style:normal;font-weight:400;font-display:swap;}`).join('\n');
     const counters = { dressed: 0, failures: 0, lastError: '', layouts: 0, balances: 0, balanceTrials: 0, placements: 0, observerCallbacks: 0 };
     let scheduled = false, effectLabelKey='',effectLabelNames=[];

@@ -1,6 +1,6 @@
 Шрифты интерфейса DFO-Client-Expander-RU
 
-Предоставлены пользователем в архиве «Шрифты.zip». Авторство шрифтов не принадлежит автору расширения.
+Предоставлены пользователем в архивах «Шрифты.zip» и «Новые шрифты.zip». Авторство шрифтов не принадлежит автору расширения.
 Файлы шрифтов не изменены. Назначения взяты из подписей файлов пользователя.
 
 Ckazka - Для названия Сигила.ttf
@@ -9,7 +9,7 @@ SHA-256: 1aa16df54414a45b16f15d601340143287e7def62ffc5c8a6425f968703f8067
 Family: ckazka
 
 Flexi_IBM_VGA_False - Для Заголовков(Имен собственных предметов).ttf
-Файл: item-font-title.ttf; назначение: имя предмета.
+Файл: item-font-numbers.ttf; назначение: числовые показатели и ценники, резервные символы.
 SHA-256: 10e6edc2e999a2b83728ba9eb27fdbbe79a685022f7cdb6a76ebece55c907708
 Copyright: (c) 2020 VileR
 Family: Flexi IBM VGA False
@@ -40,3 +40,20 @@ Designer: Serg Shishin
 Flexi IBM VGA False — VileR, © 2020; Creative Commons Attribution-ShareAlike 4.0 International.
 Полный текст лицензии: https://creativecommons.org/licenses/by-sa/4.0/legalcode
 У остальных файлов сохранены все доступные встроенные сведения об авторстве и лицензии; новых прав на них не заявляем.
+
+Greengoth Expanded - новые заголовки окон и названия предметов.ttf
+Файл: item-font-title.ttf; назначение: заголовки окон и имена предметов.
+SHA-256: 65a1ba1096fbc200c015867064f15e54f39a6dc4e666202564fdbf57ee822966
+Family: Greengoth Expanded
+Copyright: Greengoth Typeface © (Blue Curve Designstudio). 2026. All Rights Reserved
+Manufacturer: Blue Curve Designstudio
+Designer: Dimitri Antonov
+License: CC BY 4.0 International
+License URL: https://creativecommons.org/licenses/by/4.0/
+
+Hangyaku-qZ8ad - текст книг.ttf
+Файл: book-font-text.ttf; назначение: текст классических книг и книг с перелистыванием.
+SHA-256: 1e2f236e0ced3853a780ad8bfcb65612f62aba466c5df7df9459b16a8a92c30d
+Family: Hangyaku
+Copyright: Copyright (c) 2018, Dare-demo Iie
+В файле и архиве нет отдельного текста лицензии; дополнительных условий не предполагаем.

@@ -14,7 +14,7 @@ async function main(){
   page.on('pageerror',e=>errors.push(e.stack));page.setDefaultTimeout(10000);
   await page.route('**/*',r=>new URL(r.request().url()).hostname==='127.0.0.1'?r.continue():r.abort());
   await page.goto(`http://127.0.0.1:${server.address().port}`,{waitUntil:'domcontentloaded'});await page.waitForFunction(()=>window.ready);
-  await page.evaluate(async()=>{probe.show('steel');await Promise.all(['DFO Flexi','DFO Gabin','DFO Ckazka','DFO Ritalin','DFO Wolga'].map(f=>document.fonts.load('16px "'+f+'"')))});
+  await page.evaluate(async()=>{probe.show('steel');await Promise.all(['DFO Greengoth','DFO Flexi','DFO Gabin','DFO Ckazka','DFO Ritalin','DFO Wolga'].map(f=>document.fonts.load('16px "'+f+'"')))});
   const catalog=await page.evaluate(async()=>{
    const rows=await fetch('/audit-catalog.json').then(r=>r.json()),groups=new Set(),skipped=[],failures=[];let checked=0;
    const customFixtures=rows.filter(row=>!auditNative.readers.template(row.index));

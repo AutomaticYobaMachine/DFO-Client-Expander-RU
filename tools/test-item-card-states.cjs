@@ -14,7 +14,7 @@ async function main(){
   await page.route('**/*',r=>new URL(r.request().url()).hostname==='127.0.0.1'?r.continue():r.abort());
   await page.goto(`http://127.0.0.1:${server.address().port}/?ru`,{waitUntil:'domcontentloaded'});
   await page.waitForFunction(()=>window.ready);
-  await page.evaluate(async()=>{probe.show('steel');await Promise.all(['DFO Flexi','DFO Gabin','DFO Ckazka','DFO Ritalin','DFO Wolga'].map(f=>document.fonts.load('16px "'+f+'"')))});
+  await page.evaluate(async()=>{probe.show('steel');await Promise.all(['DFO Greengoth','DFO Flexi','DFO Gabin','DFO Ckazka','DFO Ritalin','DFO Wolga'].map(f=>document.fonts.load('16px "'+f+'"')))});
   if(process.env.DFO_ARENA2_DIR){
    await page.evaluate(()=>{probe.show('steel');probe.show('rare')});
    await page.waitForFunction(()=>document.querySelector('.inv-tip .bigicon img')?.naturalWidth>0,null,{timeout:30000});

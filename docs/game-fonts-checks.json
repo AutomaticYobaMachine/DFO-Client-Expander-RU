@@ -1,9 +1,10 @@
 {
-  "modVersion": "1.20.0",
-  "gameVersion": "0.1.14536",
+  "modVersion": "1.20.1",
+  "gameVersion": "0.1.14545",
   "original": "https://github.com/Lattymoy/daggerfall-js-source",
-  "date": "2026-11-05",
-  "moduleSource": "Executed font runtime matches the final installer payload; launcher installation fix verified separately by packaged install/uninstall tests",
+  "date": "2026-11-06",
+  "checkedAtUTC": "2026-11-05T19:05:42.748947+00:00",
+  "moduleSource": "Tests execute the final installer payload with full Russian transforms and current verified released assets",
   "matchingPayloadFiles": [
     {
       "path": "mod/dungeon-live-transform.cjs",
@@ -19,11 +20,19 @@
     },
     {
       "path": "mod/fonts/FONT-NOTICES.txt",
-      "sha256": "8362c47e94c8bd3e3473d19840ee1493f31508bdd9ce714c4dbc89832257de9d"
+      "sha256": "1f2043c64ab847bd39ab426c2670b23079d39b567677ff741d712d458d5f7e9a"
+    },
+    {
+      "path": "mod/fonts/book-font-text.ttf",
+      "sha256": "1e2f236e0ced3853a780ad8bfcb65612f62aba466c5df7df9459b16a8a92c30d"
     },
     {
       "path": "mod/fonts/item-font-legendary.otf",
       "sha256": "431b3d0fd0e324d427dc8076d0bd9591713797362f0d959c3fbc601cc815e21d"
+    },
+    {
+      "path": "mod/fonts/item-font-numbers.ttf",
+      "sha256": "10e6edc2e999a2b83728ba9eb27fdbbe79a685022f7cdb6a76ebece55c907708"
     },
     {
       "path": "mod/fonts/item-font-set.ttf",
@@ -39,15 +48,15 @@
     },
     {
       "path": "mod/fonts/item-font-title.ttf",
-      "sha256": "10e6edc2e999a2b83728ba9eb27fdbbe79a685022f7cdb6a76ebece55c907708"
+      "sha256": "65a1ba1096fbc200c015867064f15e54f39a6dc4e666202564fdbf57ee822966"
     },
     {
       "path": "mod/fonts-transform.cjs",
-      "sha256": "b9c7ebf91a4677a8e021c1b85891f19d1e412eeef0e5ccc4c69d4919763a64e4"
+      "sha256": "7f90135f3eca83cded011e05174dc7a5ac4e2026e81c95cf74d4a47dd442a556"
     },
     {
       "path": "mod/hook.cjs",
-      "sha256": "44a8daf843696e83e27ba41feda85f427f3953f2953ca3b8452b4df03665235c"
+      "sha256": "b56637b90c3e2edb568109053a39f653416aa58480d3013886e360e81f7f16f1"
     },
     {
       "path": "mod/item-cards-transform.cjs",
@@ -95,11 +104,11 @@
     },
     {
       "path": "mod/page/dfo_fonts.js",
-      "sha256": "766d8da314eac4964c8712f8da929f7387ad87863fd7590b2410996904c0b167"
+      "sha256": "8edf0769eab68615916bcdaf2a8920eea5348a3ece498c27d6b4fd431055d807"
     },
     {
       "path": "mod/page/dfo_item_cards.js",
-      "sha256": "e28276e72b253908d7f2329cdfb772607cb2940c71f7f953a850e07c5a1eced5"
+      "sha256": "dad5698c89f6d6995e9f0d41162b91db8efae4e32d5c44dbe019351053e60098"
     },
     {
       "path": "mod/page/dfo_loot.js",
@@ -131,18 +140,18 @@
     },
     {
       "path": "mod/transforms.cjs",
-      "sha256": "79bbc1bfab8f1669c7427f9da7086ef0966a0498b6ea5a75417ce8acb176c3ad"
+      "sha256": "4f9aeca3cbfd1c8c26cdd5baf7854b361434ae60b0227161739055f244f6548a"
     },
     {
       "path": "mod/version.json",
-      "sha256": "c364c7040dc5f798e076742d7e918ebaf9ab5ee4e6a0fb4e05125bc5cf833998"
+      "sha256": "c2851b95f8d2079fca5f47996d5aee5129e072149bbbd1b3896ae4ca397dea6c"
     }
   ],
   "fonts": {
     "nodes": [
       {
-        "text": "ШРИФТЫ СООБЩЕСТВА · DFO Online",
-        "font": "\"DFO Flexi\", \"DFO Gabin\", \"DFO Ritalin\", sans-serif"
+        "text": "ШРИФТЫ СООБЩЕСТВА · DFO Online · вложенный заголовок",
+        "font": "\"DFO Greengoth\", \"DFO Gabin\", \"DFO Flexi\", sans-serif"
       },
       {
         "text": "Игрок Dragonborn №5. Ёжик и йод. ~40 зол. [10–20] → ± × ∞",
@@ -185,9 +194,9 @@
       {
         "name": "FONT0000",
         "height": 11,
-        "scale": 2.008458362210701,
-        "measured": 283.7997594197589,
-        "drawn": 570.0000000000003,
+        "scale": 3,
+        "measured": 169.08256172839506,
+        "drawn": 507.24768518518533,
         "batches": 1,
         "nativeBitmapUnused": true
       },
@@ -222,8 +231,8 @@
         "name": "FONT0004",
         "height": 6,
         "scale": 3,
-        "measured": 154.7998687744142,
-        "drawn": 464.39960632324187,
+        "measured": 92.41203703703701,
+        "drawn": 277.2361111111111,
         "batches": 1,
         "nativeBitmapUnused": true
       }
@@ -233,7 +242,7 @@
     "invalidFont": "10px \"DFO Gabin\", \"DFO Flexi\", \"DFO Ritalin\", sans-serif",
     "mapped": "italic bold 24px \"DFO Gabin\", \"DFO Flexi\", \"DFO Ritalin\", sans-serif",
     "offscreen": "12px \"DFO Gabin\", \"DFO Flexi\", \"DFO Ritalin\", sans-serif",
-    "uploads": 4,
+    "uploads": 5,
     "releases": 0,
     "warm": {
       "canvasChanges": 5,
@@ -242,7 +251,8 @@
       "glyphsDrawn": 210,
       "faces": 3,
       "failures": [],
-      "enabled": true
+      "enabled": true,
+      "shorthandCacheSize": 8
     },
     "hot": {
       "canvasChanges": 5,
@@ -251,19 +261,129 @@
       "glyphsDrawn": 14210,
       "faces": 3,
       "failures": [],
-      "enabled": true
+      "enabled": true,
+      "shorthandCacheSize": 8
     },
     "uploadsBefore": 4,
     "uploadsAfter": 4,
+    "books": {
+      "classic": {
+        "role": "book",
+        "stable": true,
+        "sharedFontUnchanged": true,
+        "fonts": [
+          "book",
+          "book",
+          "book",
+          "book",
+          "book",
+          "book"
+        ],
+        "rows": [
+          {
+            "text": "Книга о герое Dragonborn. Ёжик и йод. Длинный текст проверяет переносы строк. Длинный текст проверяет переносы строк.",
+            "width": 283.01609848484867
+          },
+          {
+            "text": "Длинный текст проверяет переносы строк. Длинный текст проверяет переносы строк. Длинный текст проверяет переносы строк.",
+            "width": 286.1051136363638
+          },
+          {
+            "text": "Длинный текст проверяет переносы строк. Длинный текст проверяет переносы строк. Длинный текст проверяет переносы строк. ",
+            "width": 288.411931818182
+          },
+          {
+            "text": "Другой размер: 0",
+            "width": 37.916666666666664
+          },
+          {
+            "text": "Другой размер: 1",
+            "width": 36.95549242424242
+          },
+          {
+            "text": "Другой размер: 2",
+            "width": 37.697916666666664
+          },
+          {
+            "text": "Другой размер: 3",
+            "width": 37.92329545454545
+          },
+          {
+            "text": "Другой размер: 4",
+            "width": 37.92992424242424
+          }
+        ],
+        "height": 56
+      },
+      "canvas": {
+        "family": "'DFO Hangyaku','DFO Gabin','DFO Flexi',sans-serif",
+        "font": "24px \"DFO Hangyaku\", \"DFO Gabin\", \"DFO Flexi\", sans-serif",
+        "measured": 203.109375,
+        "nativeWidth": 203.109375
+      },
+      "window": {
+        "spreads": 3,
+        "fonts": [
+          "600 36px \"DFO Hangyaku\", \"DFO Gabin\", \"DFO Flexi\", sans-serif",
+          "26px \"DFO Hangyaku\", \"DFO Gabin\", \"DFO Flexi\", sans-serif",
+          "23px \"DFO Hangyaku\", \"DFO Gabin\", \"DFO Flexi\", sans-serif"
+        ],
+        "paints": 55,
+        "facesBuilt": 6,
+        "facesAfterResize": 12
+      }
+    },
+    "registrations": {
+      "DFO Gabin": 1,
+      "DFO Greengoth": 1,
+      "DFO Flexi": 1,
+      "DFO Hangyaku": 1,
+      "DFO Ckazka": 1,
+      "DFO Ritalin": 1,
+      "DFO Wolga": 1
+    },
+    "repeatedFontAssignments": 0,
+    "restored": "16px \"DFO Gabin\", \"DFO Flexi\", \"DFO Ritalin\", sans-serif",
+    "performance": {
+      "hot1000NamesMs": 8.800000000745058,
+      "canvas10000": {
+        "nativeMs": [
+          10.899999998509884,
+          16.600000001490116,
+          15.400000002235174,
+          14.5,
+          28.5
+        ],
+        "wrappedMs": [
+          29.5,
+          29.599999997764826,
+          35.5,
+          36.399999998509884,
+          41.600000001490116
+        ]
+      },
+      "scope": "Recording renderer and native canvas calls; not live-game FPS"
+    },
     "platform": [
       {
         "selector": "#font-heading",
         "fonts": [
           {
-            "familyName": "Flexi IBM VGA False",
-            "postScriptName": "Flexi_IBM_VGA_False",
+            "familyName": "Greengoth",
+            "postScriptName": "Greengoth-Expanded",
             "isCustomFont": true,
-            "glyphCount": 30
+            "glyphCount": 52
+          }
+        ]
+      },
+      {
+        "selector": "#font-nested-heading",
+        "fonts": [
+          {
+            "familyName": "Greengoth",
+            "postScriptName": "Greengoth-Expanded",
+            "isCustomFont": true,
+            "glyphCount": 22
           }
         ]
       },
@@ -283,6 +403,34 @@
             "glyphCount": 53
           }
         ]
+      },
+      {
+        "selector": ".pack-who",
+        "fonts": [
+          {
+            "familyName": "Flexi IBM VGA False",
+            "postScriptName": "Flexi_IBM_VGA_False",
+            "isCustomFont": true,
+            "glyphCount": 1
+          },
+          {
+            "familyName": "Greengoth",
+            "postScriptName": "Greengoth-Expanded",
+            "isCustomFont": true,
+            "glyphCount": 10
+          }
+        ]
+      },
+      {
+        "selector": ".dfo-item-title h3",
+        "fonts": [
+          {
+            "familyName": "Greengoth",
+            "postScriptName": "Greengoth-Expanded",
+            "isCustomFont": true,
+            "glyphCount": 33
+          }
+        ]
       }
     ],
     "errors": [],
@@ -291,6 +439,13 @@
       "installed": false,
       "font": "14px Georgia",
       "style": false
+    },
+    "missingBookFont": {
+      "ready": true,
+      "enabled": true,
+      "failures": [
+        "Hangyaku"
+      ]
     }
   },
   "cardStates": {
@@ -372,24 +527,24 @@
         "stroke": "rgb(240, 90, 85)"
       }
     },
-    "images": 5074,
+    "images": 4944,
     "failures": [],
     "stats": {
       "dressed": 14766,
       "failures": 0,
       "lastError": "",
-      "layouts": 14768,
-      "balances": 14771,
+      "layouts": 14767,
+      "balances": 14770,
       "balanceTrials": 4160,
-      "placements": 14802,
-      "observerCallbacks": 207,
+      "placements": 14801,
+      "observerCallbacks": 206,
       "ready": true,
       "active": 1,
       "pending": 0
     },
     "lifecycle": {
       "cycles": 1000,
-      "heapGrowthBytes": 286252,
+      "heapGrowthBytes": 288816,
       "repeatedNativeFits": {
         "layouts": 0,
         "mutations": 0
@@ -461,21 +616,21 @@
       "failures": []
     },
     "viewportCases": 132,
-    "scales": 44,
+    "scales": 52,
     "renderTiming": {
-      "medianMs": 4.5,
-      "p95Ms": 11.5,
-      "maxMs": 12.400000000372529
+      "medianMs": 5.400000002235174,
+      "p95Ms": 15.299999997019768,
+      "maxMs": 17.300000000745058
     },
     "performance": {
-      "dressed": 636,
+      "dressed": 638,
       "failures": 0,
       "lastError": "",
-      "layouts": 656,
-      "balances": 712,
-      "balanceTrials": 1332,
-      "placements": 838,
-      "observerCallbacks": 343,
+      "layouts": 658,
+      "balances": 718,
+      "balanceTrials": 1359,
+      "placements": 840,
+      "observerCallbacks": 351,
       "ready": true,
       "active": 1,
       "pending": 0
@@ -490,24 +645,24 @@
     "goTests": "pass"
   },
   "nativeHooks": {
-    "changedAssets": 378,
+    "changedAssets": 380,
     "syntaxErrors": 0,
     "missing": []
   },
   "installerUi": {
-    "status": "environment-blocked",
-    "reason": "Wine bootstrap aborts on unimplemented user32.dll.CreateDialogParamW and cannot load kernel32.dll, before installer launch"
+    "status": "not-repeated",
+    "reason": "Previous optional Wine UI run (1.20.0) was blocked before launch by user32/kernel32; Windows compilation, Go options tests and packaged patcher install/uninstall pass for 1.20.1"
   },
   "limits": [
-    "Actual released font/renderer code with a recording renderer port; draw call counts are not live-game FPS.",
-    "Real FNT headers and glyph tables from local ARENA2; game data is not included in the mod.",
-    "System fallback is retained for symbols/scripts missing from all supplied faces.",
-    "Text baked into image/texture pixels is artwork and is not redrawn by replacing fonts.",
+    "Actual released font/renderer code with a recording renderer port; draw call counts and canvas microbenchmarks are not live-game FPS.",
+    "Real FNT headers and glyph tables from local ARENA2; raw game data is not included in the mod.",
+    "System fallback remains for symbols/scripts missing from the role-specific faces.",
+    "Text baked into image/texture pixels and decorative ship plaque pixel geometry bypasses UI font rendering.",
     "No multiplayer account/session was used.",
     "Native operating-system menus/dialogs retain OS typography."
   ],
   "trade": {
-    "gameVersion": "0.1.14536",
+    "gameVersion": "0.1.14545",
     "language": "ru",
     "rows": [
       {
@@ -873,5 +1028,11 @@
     ],
     "unknownPowersRemainHidden": true,
     "errors": []
-  }
+  },
+  "auditFindings": [
+    "One CSS FontFace registration per supplied family; removed duplicate JS FontFace objects.",
+    "Bounded shorthand cache and unchanged-value fast path; native getter detects canvas reset and restore.",
+    "Book faces and pagination built once with preloaded fonts; resize rebuilds once.",
+    "Nested heading text keeps its title role instead of falling back to the body font."
+  ]
 }

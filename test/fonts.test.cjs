@@ -9,6 +9,9 @@ test('font mapping preserves canvas size and emphasis while replacing legacy fam
  }
  assert.match(mapFont('italic 700 24px Georgia'),/^italic 700 24px /);
  assert.match(mapFont("20px 'DFO Wolga',Georgia"),/DFO Wolga/);
+ assert.match(mapFont("20px 'DFO Greengoth',Georgia"),/DFO Greengoth/);
+ assert.match(mapFont("italic 600 24px 'DFO Hangyaku',serif"),/^italic 600 24px 'DFO Hangyaku'/);
+ assert.doesNotMatch(mapFont("20px 'DFO Flexi',Georgia"),/Greengoth|Hangyaku/);
  assert.equal(mapFont('not a font'),'not a font');
  assert.match(css('../dfo-mod/fonts/'),/@layer dfo-community-fonts/);
 });
@@ -34,6 +37,14 @@ test('all font hooks match actual assets with and without Russian, parse and app
    if(log.some(([id])=>id==='fonts.classic')){
     const head=/function [\w$]+\([\w$]+,[\w$]+,[\w$]+,[\w$]+,[\w$]+,[\w$]+=1,[\w$]+=\[1,1,1,1\]\)\{/.exec(src)[0];
     const bad=src.replace(head,head.replace('=1,','=2,')),notes=[];assert.notEqual(bad,src);assert.equal(transformFonts('assets/'+file,bad,notes),bad);assert.ok(notes.some(([id])=>id.includes('!error')));
+   }
+   if(log.some(([id])=>id==='fonts.bookClassic')){
+    const bad=src.replaceAll('_drawFallback(', '_removedBookFallback('),notes=[];
+    assert.equal(transformFonts('assets/'+file,bad,notes),bad);assert.ok(notes.some(([id])=>id.includes('!error')));
+   }
+   if(log.some(([id])=>id==='fonts.bookCanvas')){
+    const bad=src.replace('globalThis.document?.fonts','globalThis.document?.oldFonts'),notes=[];
+    assert.equal(transformFonts('assets/'+file,bad,notes),bad);assert.ok(notes.some(([id])=>id.includes('!error')));
    }
   }
   assert.deepEqual(found.sort(),[...EXPECTED.fonts].sort());

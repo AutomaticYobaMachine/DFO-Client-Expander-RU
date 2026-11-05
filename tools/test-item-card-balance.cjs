@@ -13,7 +13,7 @@ async function main(){
   await page.route('**/*',r=>new URL(r.request().url()).hostname==='127.0.0.1'?r.continue():r.abort());
   await page.goto('http://127.0.0.1:'+server.address().port+'/?ru&online');await page.waitForFunction(()=>window.ready);
   await page.evaluate(async()=>{
-   probe.show('combined');await Promise.all(['DFO Flexi','DFO Gabin','DFO Ckazka','DFO Ritalin','DFO Wolga'].map(f=>document.fonts.load('16px "'+f+'"')));
+   probe.show('combined');await Promise.all(['DFO Greengoth','DFO Flexi','DFO Gabin','DFO Ckazka','DFO Ritalin','DFO Wolga'].map(f=>document.fonts.load('16px "'+f+'"')));
    probe.cases.leftHeavy={...probe.cases.steel,name:'Кираса с очень длинным именем '.repeat(14)};
    probe.cases.passive={...probe.cases.combined,name:'Passive and active powers',enchantments:[{type:10,param:5},{type:3,param:0},{type:3,param:1},{type:0,param:4},{type:1,param:37},{type:2,param:50}]};
    window.balanceOrder=n=>[...n.querySelector('.dfo-item-effects').children,...n.querySelector('.dfo-item-overflow').children];

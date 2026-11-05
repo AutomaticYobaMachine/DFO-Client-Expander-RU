@@ -31,7 +31,7 @@ test('distribution installer: install, reinstall and uninstall preserve original
         assert.ok(files.has('dfo-mod/'+file));assert.deepEqual(readFile(a,'dfo-mod/'+file),fs.readFileSync(path.join(dist,'mod',file)));
       }
       assert.match(readFile(a,'main.cjs').toString(),/dfo-mod\/hook.cjs/);
-      for(const file of ['item-font-title.ttf','item-font-text.ttf','item-font-sigil.ttf','item-font-set.ttf','item-font-legendary.otf','FONT-NOTICES.txt']){
+      for(const file of [...Object.values(require('../src/mod/page/dfo_fonts.js').files),'FONT-NOTICES.txt']){
         assert.deepEqual(readFile(a,'dfo-mod/fonts/'+file),fs.readFileSync(path.join(dist,'mod/fonts',file)),'The standalone installer must carry every font and its notices');
       }
       assert.deepEqual(readFile(a,'untouched.bin'),Buffer.from([0,10,42,255]));assert.equal((readFile(a,'launcher/launcher.css').toString().match(/\/\* DFO community fonts \*\//g)||[]).length,1);a.close();

@@ -87,7 +87,7 @@ const server = http.createServer((req,res) => {
     if(url.pathname==='/dfo-mod/ru_items.js'){res.setHeader('Content-Type','text/javascript');return res.end(fs.readFileSync(path.join(modDir,'page/ru_items.js')));}
     if(url.pathname==='/dfo-mod/dfo_fonts.js'){res.setHeader('Content-Type','text/javascript');return res.end(fs.readFileSync(path.join(modDir,'page/dfo_fonts.js')));}
     if (url.pathname === '/dfo-mod/dfo_item_cards.js') {res.setHeader('Content-Type','text/javascript');return res.end(fs.readFileSync(path.join(modDir,'page/dfo_item_cards.js')));}
-    if (/^\/dfo-mod\/item-font-(?:text|title|sigil|set|legendary)\.(?:ttf|otf)$/.test(url.pathname)) {
+    if (/^\/dfo-mod\/(?:item-font-(?:text|title|numbers|sigil|set|legendary)|book-font-text)\.(?:ttf|otf)$/.test(url.pathname)) {
       res.setHeader('Content-Type',url.pathname.endsWith('.otf')?'font/otf':'font/ttf');return res.end(fs.readFileSync(path.join(modDir,'fonts',path.basename(url.pathname))));
     }
     const file = path.resolve(build, '.' + decodeURIComponent(url.pathname));
@@ -105,6 +105,14 @@ const server = http.createServer((req,res) => {
         if(globalFonts&&body.toString().includes('#sdf')&&!/Worker-/.test(file)){
           const raw=body.toString(),factory=/function ([\w$]+)\(([\w$]+),([\w$]+),([\w$]+)\)\{\3\.fontName\?\?=\4;/.exec(raw),measure=/function ([\w$]+)\([\w$]+,[\w$]+\)\{let [\w$]+=0;if\(/.exec(raw),draw=/function ([\w$]+)\([\w$]+,[\w$]+,[\w$]+,[\w$]+,[\w$]+,[\w$]+=1,[\w$]+=\[1,1,1,1\]\)\{/.exec(raw);
           const fnt=/var ([\w$]+)=class\{load\([\w$]+\)\{let [\w$]+=new DataView[^;]+;this\.fixedWidth=/.exec(raw);assert.ok(factory&&measure&&draw&&fnt);extra+='\n;window.nativeFontTest={makeFont:'+factory[1]+',measure:'+measure[1]+',draw:'+draw[1]+',FntFile:'+fnt[1]+'};';
+        }
+        if(globalFonts&&/\/bookReader-[^/]+\.js$/.test(url.pathname)){
+          const raw=body.toString(),place=/function ([\w$]+)\(([\w$]+),([\w$]+),([\w$]+)=[\w$]+\)\{let [\w$]+=\[\],[\w$]+=0;for\(let [\w$]+ of \2\)/.exec(raw),reader=/var ([\w$]+)=class\{constructor\([\w$]+\)\{this\.book=/.exec(raw);
+          assert.ok(place&&reader);extra+='\n;window.nativeBookReader={place:'+place[1]+',Reader:'+reader[1]+'};';
+        }
+        if(globalFonts&&/\/enhancedBook-[^/]+\.js$/.test(url.pathname)){
+          const face=/function ([\w$]+)\([\w$]+,[\w$]+=400,[\w$]+=[\w$]+\)/.exec(body.toString());assert.ok(face);
+          extra+='\n;{const f='+face[1]+';'+face[1]+'=function(...a){globalThis.__bookFaceCalls=(globalThis.__bookFaceCalls||0)+1;return f(...a)}}';
         }
         if(process.env.DFO_CARD_PRICE_AUDIT==='1'&&body.toString().includes('modeActionEnabled:')){
           const raw=body.toString(),head=/function ([\w$]+)\([\w$]+,[\w$]+=\[\],\{quality:[\w$]+=0,priceAdjustment:[\w$]+=(?:1e3|1000),/.exec(raw);
@@ -152,7 +160,7 @@ async function main() {
       await page.evaluate(id=>probe.show(id),id);
       if(!await card.count())throw new Error(id+': '+JSON.stringify(await page.evaluate(()=>({stats:__dfoItemCards.stats(),tip:document.querySelector('.inv-tip')?.outerHTML}))));
       await card.waitFor();
-      await page.evaluate(async()=>{await Promise.all(['DFO Flexi','DFO Gabin','DFO Ckazka','DFO Ritalin','DFO Wolga'].map(f=>document.fonts.load('16px "'+f+'"')));});
+      await page.evaluate(async()=>{await Promise.all(['DFO Greengoth','DFO Flexi','DFO Gabin','DFO Ckazka','DFO Ritalin','DFO Wolga'].map(f=>document.fonts.load('16px "'+f+'"')));});
       await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
       const result=await card.evaluate(n=>{
         const r=n.getBoundingClientRect(),s=getComputedStyle(n),bad=[];
@@ -240,7 +248,7 @@ async function main() {
       assert.equal(await c.locator(':is(.dfo-item-effects,.dfo-item-overflow) li').evaluateAll(list=>list.every(n=>getComputedStyle(n).display!=='none')),true);
     }
     if(process.env.DFO_SCREENSHOT_DIR){
-      await ru.evaluate(async()=>{probe.show('ruhn');await Promise.all(['DFO Flexi','DFO Gabin','DFO Ckazka','DFO Ritalin','DFO Wolga'].map(f=>document.fonts.load('16px "'+f+'"')))});
+      await ru.evaluate(async()=>{probe.show('ruhn');await Promise.all(['DFO Greengoth','DFO Flexi','DFO Gabin','DFO Ckazka','DFO Ritalin','DFO Wolga'].map(f=>document.fonts.load('16px "'+f+'"')))});
       if(process.env.DFO_ARENA2_DIR)await ru.waitForFunction(()=>document.querySelector('.inv-tip .bigicon img')?.naturalWidth>0);
       await ru.evaluate(()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r))));
       await ru.screenshot({path:path.join(process.env.DFO_SCREENSHOT_DIR,'item-card-game-ru.png')});

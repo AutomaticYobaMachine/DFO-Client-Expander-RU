@@ -25,6 +25,7 @@ const OWN = Object.freeze({   // served at dagger://game/dfo-mod/<name>
   'dfo_fonts.js': 'page/dfo_fonts.js',
   'dfo_item_cards.js': 'page/dfo_item_cards.js',
   'item-font-title.ttf': 'fonts/item-font-title.ttf', 'item-font-text.ttf': 'fonts/item-font-text.ttf',
+  'item-font-numbers.ttf': 'fonts/item-font-numbers.ttf', 'book-font-text.ttf': 'fonts/book-font-text.ttf',
   'item-font-sigil.ttf': 'fonts/item-font-sigil.ttf', 'item-font-set.ttf': 'fonts/item-font-set.ttf',
   'item-font-legendary.otf': 'fonts/item-font-legendary.otf',
   'dfo_dungeon_model.js': 'page/dfo_dungeon_model.js', 'dfo_dungeons.js': 'page/dfo_dungeons.js',

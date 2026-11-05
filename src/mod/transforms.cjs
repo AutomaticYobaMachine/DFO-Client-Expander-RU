@@ -452,7 +452,7 @@ function injectPage(html, prefix, ctx) {
   if (html.includes('dfo-mod/dfo_marks.js')) return html;
   const tags = [];
   tags.push(`<script>window.__DFO_MOD_CFG__=${JSON.stringify(ctx.pageCfg ?? {})};</script>`);
-  if (ctx.fonts === true) tags.push(`<script src="${prefix}dfo-mod/dfo_font_data.js?dfo=1.21.0"></script>`,`<script src="${prefix}dfo-mod/dfo_fonts.js?dfo=1.21.0"></script>`);
+  if (ctx.fonts === true) tags.push(`<script src="${prefix}dfo-mod/dfo_font_data.js?dfo=1.21.1"></script>`,`<script src="${prefix}dfo-mod/dfo_fonts.js?dfo=1.21.1"></script>`);
   if (ctx.ru && !html.includes('ru_dict.js')) tags.push(`<script src="${prefix}dfo-mod/ru_dict.js"></script>`, `<script src="${prefix}dfo-mod/ru_i18n.js"></script>`);
   tags.push(`<script src="${prefix}dfo-mod/ru_locale.js"></script>`, `<script src="${prefix}dfo-mod/ru_items.js"></script>`);
   if (ctx.itemCards === true) tags.push(`<script src="${prefix}dfo-mod/dfo_item_cards.js"></script>`);
@@ -467,7 +467,7 @@ function injectPage(html, prefix, ctx) {
 /** The hooks a working install finds somewhere in the game's files - one missing from every file means that feature is
  *  off in this version of the game (the log says which). The other ids are older shapes of the same places. */
 const EXPECTED = Object.freeze({
-  fonts: ['fonts.classic','fonts.choices','fonts.network','fonts.bookClassic','fonts.bookCanvas','fonts.fnt','fonts.pixels','fonts.resources','fonts.worker'],
+  fonts: ['fonts.classic','fonts.choices','fonts.network','fonts.bookClassic','fonts.bookCanvas','fonts.fnt','fonts.pixels','fonts.resources','fonts.worker','fonts.uiSizes','fonts.titleSizes','fonts.dial','fonts.statusLayout','fonts.mapHost','fonts.mapProject','fonts.mapHud'],
   itemCards: ['itemCards.inventory', 'itemCards.values', 'itemCards.materials', 'itemCards.powers', 'itemCards.prices', 'itemCards.currency', 'itemCards.effectLabels'],
   dungeons: ['dungeon.world', 'dungeon.hud', 'dungeon.travelView', 'dungeon.bestiary', 'dungeon.tables', 'dungeon.scaling', 'dungeon.rewards', 'dungeon.runtime', 'dungeon.lifetime', 'dungeon.aurum', 'dungeon.ore', 'dungeon.renown', 'dungeon.respawn', 'dungeon.layout', 'dungeon.sizes', 'dungeon.elites', 'dungeon.live', 'dungeon.journalDoor', 'dungeon.journalClassic', 'dungeon.journalFocus', 'dungeon.traits', 'dungeon.navContext', 'dungeon.navDraw', 'dungeon.navQuests'],
   nearbyLoot: ['loot.tags', 'loot.types', 'loot.kinds', 'loot.identified', 'loot.bound', 'loot.bootstrap', 'loot.world', 'loot.exterior', 'loot.modes', 'loot.dungeon', 'loot.inventory', 'loot.transfer', 'loot.arrows'],

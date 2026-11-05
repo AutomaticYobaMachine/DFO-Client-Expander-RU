@@ -36,7 +36,8 @@ async function main(){
     const fnt=new nativeFontTest.FntFile().load(bytes),font=nativeFontTest.makeFont(renderer,fnt,'FONT000'+i);
     const text='FONT000'+i+': Герой Dragonborn №5 — Ёжик, 12345',before=draws.length;
     const measured=nativeFontTest.measure(fnt,text),scale=Math.min(3,570/measured),drawn=nativeFontTest.draw(renderer,font,text,4,8+i*48,scale,[1,1,1,1]);
-    classic.push({name:fnt.fontName,height:fnt.fixedHeight,scale,measured,drawn,batches:draws.length-before,nativeBitmapUnused:font.tex===null});
+    const height=fnt.fixedHeight;nativeFontTest.makeFont(renderer,fnt,'FONT000'+i);if(fnt.fixedHeight!==height)throw Error('Title increase applied twice');
+    classic.push({name:fnt.fontName,height:fnt.fixedHeight,bookHeight:__dfoFonts.bookFont(font).fnt.fixedHeight,scale,measured,drawn,batches:draws.length-before,nativeBitmapUnused:font.tex===null});
    }
    const checkCanvas=document.createElement('canvas'),ctx=checkCanvas.getContext('2d');ctx.fillText('По умолчанию',1,10);const defaultFont=ctx.font;
    checkCanvas.width=200;ctx.fillText('После сброса',1,10);const resetFont=ctx.font;
@@ -71,6 +72,8 @@ async function main(){
   });
   for(const n of report.nodes){assert.match(n.font,/DFO /,n.text);assert.doesNotMatch(n.font,/Pixelify|Cormorant|Barlow|Jacquard|Alagard/)}
   for(const row of report.classic){assert.ok(row.measured>0);assert.ok(Math.abs(row.drawn-row.measured*row.scale)<.0001,JSON.stringify(row));assert.ok(row.batches<=2);assert.equal(row.nativeBitmapUnused,true)}
+  assert.deepEqual(report.classic.map(r=>r.height),[13,14,5,7,8]);
+  assert.deepEqual(report.classic.map(r=>r.bookHeight),[11,14,5,7,6],'Hangyaku keeps its book sizes');
   for(const key of ['defaultFont','resetFont','invalidFont','mapped','offscreen'])assert.match(report[key],/DFO Gabin/);
   assert.match(report.mapped,/24px/);assert.match(report.mapped,/italic/);
   assert.equal(report.uploadsBefore,report.uploadsAfter,'Hot strings cannot re-upload glyph atlases');

@@ -35,6 +35,7 @@ test('distribution installer: install, reinstall and uninstall preserve original
       assert.equal(listFiles(a.header).has('launcher/fonts/OldFace.woff2'),false,'Original faces are removed from active ASAR');
       assert.deepEqual([...files.keys()].filter(f=>/\.(?:ttf|otf|woff2?)$/i.test(f)).sort(),Object.values(require('../src/mod/page/dfo_fonts.js').files).map(f=>'dfo-mod/fonts/'+f).sort());
       assert.ok(files.has('dfo-mod/font-assets.cjs'));assert.ok(files.has('dfo-mod/page/dfo_font_data.js'));
+      assert.deepEqual(readFile(a,'dfo-mod/ui-calibration-transform.cjs'),fs.readFileSync(path.join(dist,'mod/ui-calibration-transform.cjs')));
       assert.doesNotMatch(readFile(a,'launcher/launcher.css').toString(),/font-family:OldFace/);
       for(const file of [...Object.values(require('../src/mod/page/dfo_fonts.js').files),'FONT-NOTICES.txt']){
         assert.deepEqual(readFile(a,'dfo-mod/fonts/'+file),fs.readFileSync(path.join(dist,'mod/fonts',file)),'The standalone installer must carry every font and its notices');

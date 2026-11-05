@@ -65,9 +65,9 @@
       { text: '|', color: '#686f78' },
       { text: ` ★ - ${m.scores.renown == null ? '?' : m.scores.renown.toFixed(1).replace('.', ',')}`, color: '#ffffff' },
     ];
-    g.font = '600 12px system-ui, sans-serif'; const title = ellipsis(m.title, max - 18), titleW = g.measureText(title).width;
-    g.font = '11px system-ui, sans-serif'; const sub = ellipsis(metadata, max - 18), subW = g.measureText(sub).width;
-    const scoreFont = '13px "Segoe UI Symbol", "DejaVu Sans", sans-serif';
+    g.font = '600 11px system-ui, sans-serif'; const title = ellipsis(m.title, max - 18), titleW = g.measureText(title).width;
+    g.font = '10px system-ui, sans-serif'; const sub = ellipsis(metadata, max - 18), subW = g.measureText(sub).width;
+    const scoreFont = '12px "Segoe UI Symbol", "DejaVu Sans", sans-serif';
     g.font = scoreFont; const scoreW = segments.reduce((n, s) => n + g.measureText(s.text).width, 0);
     const w = Math.min(max, Math.ceil(Math.max(titleW, subW, scoreW) + 18)), h = 58;
     c.width = Math.ceil(w * dpr); c.height = Math.ceil(h * dpr); g.scale(dpr, dpr);
@@ -91,7 +91,7 @@
     g.stroke();
 
     g.textBaseline = 'top';
-    g.font = '600 12px system-ui, sans-serif';
+    g.font = '600 11px system-ui, sans-serif';
     g.fillStyle = m.color;
     const split = title.indexOf(']') + 1;
     g.fillText(split ? title.slice(0, split) : title, 9, 5);
@@ -99,7 +99,7 @@
       g.fillStyle = '#f2e4c0';
       g.fillText(title.slice(split), 9 + g.measureText(title.slice(0, split)).width, 5);
     }
-    g.font = '11px system-ui, sans-serif';
+    g.font = '10px system-ui, sans-serif';
     g.fillStyle = '#b8a876';
     g.fillText(sub, 9, 22);
     g.font = scoreFont;

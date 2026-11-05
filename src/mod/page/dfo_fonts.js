@@ -11,23 +11,137 @@
   const roles={Gabin:'body',Greengoth:'title',Flexi:'number',Hangyaku:'book',Ckazka:'sigil',Ritalin:'set',Wolga:'power'};
   const fontMappings=new Map();
   const seed=[...Array.from({length:95},(_,i)=>32+i),...Array.from({length:64},(_,i)=>1040+i),1025,1105,8211,8212,8230,8470,8594,177,215,8734,...Array.from({length:96},(_,i)=>160+i)];
-  function css(base,revision='1.21.0'){
+  function css(base,revision='1.21.1'){
     const faces=Object.entries(files).map(([name,file])=>`@font-face{font-family:'DFO ${name}';src:url(${JSON.stringify(base+file+'?dfo='+encodeURIComponent(revision))}) format('${file.endsWith('.otf')?'opentype':'truetype'}');font-style:normal;font-weight:400;font-display:swap;}`).join('\n');
     return faces+`\n/* DFO community fonts */
 @layer dfo-community-fonts {
  :root {--display:${stacks.title}!important;--data:${stacks.body}!important;--body:${stacks.body}!important;--dfo-text-font:${stacks.body}!important;}
- :root body,:root body *,:root body *::before,:root body *::after {font-family:${stacks.body}!important;}
+ :root body,:root body *,:root body *::before,:root body *::after {font-family:${stacks.body}!important;--dfo-title-step:0px!important;}
  :root body :is(h1,h2,h3,h4,h5,h6,[role=heading],.px-wordmark,.brand h1,.look-emblem,.window-title,.dialog-title,.panel-title),
- :root body :is(h1,h2,h3,h4,h5,h6,[role=heading],.px-wordmark,.brand h1,.look-emblem,.window-title,.dialog-title,.panel-title) * {font-family:${stacks.title}!important;}
- :root body :is(.dfo-item-group>h4,.dfo-item-stat-heading),:root body :is(.dfo-item-group>h4,.dfo-item-stat-heading) * {font-family:${stacks.body}!important;}
- :root body :is(.sigil-stage,.sigilbox .sigil-stage),:root body :is(.sigil-stage,.sigilbox .sigil-stage) * {font-family:${stacks.sigil}!important;}
- :root body :is(.set-name,.setbox .set-name),:root body :is(.set-name,.setbox .set-name) * {font-family:${stacks.set}!important;}
- :root body .dfo-item-power-name,:root body .dfo-item-power-name * {font-family:${stacks.power}!important;}
- :root body .dfo-item-title h3,:root body .dfo-item-title h3 * {font-family:${stacks.title}!important;}
- :root body :is(.itemname>span,.wornname,.inv-menu-head),:root body :is(.itemname>span,.wornname,.inv-menu-head) * {font-family:${stacks.title}!important;}
- :root body :is(.dfo-item-primary strong,.dfo-item-price-value),:root body :is(.dfo-item-primary strong,.dfo-item-price-value) * {font-family:${stacks.number}!important;}
+ :root body :is(h1,h2,h3,h4,h5,h6,[role=heading],.px-wordmark,.brand h1,.look-emblem,.window-title,.dialog-title,.panel-title) * {font-family:${stacks.title}!important;--dfo-title-step:2px!important;}
+ :root body :is(.dfo-item-group>h4,.dfo-item-stat-heading),:root body :is(.dfo-item-group>h4,.dfo-item-stat-heading) * {font-family:${stacks.body}!important;--dfo-title-step:0px!important;}
+ :root body :is(.sigil-stage,.sigilbox .sigil-stage),:root body :is(.sigil-stage,.sigilbox .sigil-stage) * {font-family:${stacks.sigil}!important;--dfo-title-step:0px!important;}
+ :root body :is(.set-name,.setbox .set-name),:root body :is(.set-name,.setbox .set-name) * {font-family:${stacks.set}!important;--dfo-title-step:0px!important;}
+ :root body .dfo-item-power-name,:root body .dfo-item-power-name * {font-family:${stacks.power}!important;--dfo-title-step:0px!important;}
+ :root body .dfo-item-title h3,:root body .dfo-item-title h3 * {font-family:${stacks.title}!important;--dfo-title-step:2px!important;}
+ :root body :is(.itemname>span,.wornname,.inv-menu-head),:root body :is(.itemname>span,.wornname,.inv-menu-head) * {font-family:${stacks.title}!important;--dfo-title-step:2px!important;}
+ :root body .pack-shell .wornname,:root body .pack-shell .wornname * {--dfo-title-step:0px!important;}
+ :root body :is(.dfo-item-primary strong,.dfo-item-price-value),:root body :is(.dfo-item-primary strong,.dfo-item-price-value) * {font-family:${stacks.number}!important;--dfo-title-step:0px!important;}
+ /* Lower-priority defaults cover headings/names without an authored size.
+    Their descendants inherit the result; no repeated +2 on nested spans. */
+ :where(h1){font-size:calc(2em + var(--dfo-title-step,0px));}
+ :where(h2){font-size:calc(1.5em + var(--dfo-title-step,0px));}
+ :where(h3){font-size:calc(1.17em + var(--dfo-title-step,0px));}
+ :where(h4){font-size:calc(1em + var(--dfo-title-step,0px));}
+ :where(h5){font-size:calc(.83em + var(--dfo-title-step,0px));}
+ :where(h6){font-size:calc(.67em + var(--dfo-title-step,0px));}
+ :where([role=heading],.px-wordmark,.look-emblem,.window-title,.dialog-title,.panel-title,.itemname>span,.inv-menu-head){font-size:calc(1em + var(--dfo-title-step,0px));}
 }
-/* /DFO community fonts */`;
+/* /DFO community fonts */
+@layer dfo-community-fonts {
+ :root body .hst-name {font-size:11px!important;line-height:1.2!important;white-space:normal!important;word-break:normal!important;overflow-wrap:normal!important;hyphens:none!important;max-width:240px!important;overflow:visible!important;text-overflow:clip!important;align-self:center!important;}
+ :root body .hst-cell {align-items:center!important;}
+ :root body .pack-shell .shelflabel {max-width:none!important;overflow:visible!important;text-overflow:clip!important;white-space:normal!important;word-break:normal!important;overflow-wrap:normal!important;text-align:center!important;}
+ :root body .pack-shell .shelfgrp {min-width:min-content!important;}
+ :root body .pack-shell .wornshelf {flex-wrap:wrap!important;}
+ :root body .pack-shell .packtab .count {flex-shrink:0!important;min-width:4ch!important;text-align:right!important;}
+ @media(min-width:1200px){
+  :root body .pack-shell:not(.paired)>.pack-win {width:min(1160px,95vw)!important;}
+  :root body .pack-shell:not(.paired) .pack {grid-template-columns:minmax(0,1fr) minmax(420px,500px)!important;}
+ }
+ /* Arms and hit rectangles occupy fixed directions; text cannot move a ray.
+    All ornaments are shapes, independent of the font's diamond glyph. */
+ :root body .px-rose .px-arm {box-sizing:border-box!important;width:32%!important;height:70px!important;min-width:0!important;min-height:0!important;padding:4px!important;gap:5px!important;justify-content:center!important;text-align:center!important;white-space:normal!important;overflow-wrap:normal!important;letter-spacing:.06em!important;text-indent:0!important;transform:translate(-50%,-50%)!important;flex-direction:column!important;line-height:1.2!important;}
+ :root body .px-rose .px-n {left:50%!important;top:12%!important;right:auto!important;bottom:auto!important;}
+ :root body .px-rose .px-s {left:50%!important;top:88%!important;right:auto!important;bottom:auto!important;}
+ :root body .px-rose .px-e {left:84%!important;top:50%!important;right:auto!important;bottom:auto!important;}
+ :root body .px-rose .px-w {left:16%!important;top:50%!important;right:auto!important;bottom:auto!important;}
+ :root body .px-arm::before,:root body .px-arm::after {display:none!important;}
+ :root body .dfo-dial-ray {position:absolute!important;pointer-events:none!important;background:rgba(125,116,96,.55)!important;}
+ :root body .dfo-ray-n,:root body .dfo-ray-s {left:calc(50% - 1px)!important;width:2px!important;height:26%!important;}
+ :root body .dfo-ray-n {top:24%!important;}
+ :root body .dfo-ray-s {top:50%!important;}
+ :root body .dfo-ray-e,:root body .dfo-ray-w {top:calc(50% - 1px)!important;height:2px!important;width:18%!important;}
+ :root body .dfo-ray-e {left:50%!important;}
+ :root body .dfo-ray-w {left:32%!important;}
+ :root body .px-arm .px-term,:root body .px-arm .px-c {font-size:0!important;text-shadow:none!important;width:7px!important;height:7px!important;border:1px solid currentColor!important;transform:rotate(45deg)!important;flex:none!important;order:0!important;}
+ :root body .px-arm .px-c {position:absolute!important;bottom:0!important;background:currentColor!important;width:3px!important;height:3px!important;}
+ :root body .px-knot {font-size:0!important;text-shadow:none!important;box-sizing:border-box!important;transform:translate(-50%,-50%) rotate(45deg)!important;}
+ :root body .px-knot-outer {width:32px!important;height:32px!important;border:2px solid rgba(125,116,96,.4)!important;}
+ :root body .px-knot-mid {width:18px!important;height:18px!important;border:2px solid var(--brass,#b08d57)!important;}
+ :root body .px-knot-core {width:6px!important;height:6px!important;background:#f3ef2c!important;}
+}`;
+  }
+  // No observers or frame callbacks: layout follows native CSS, marks the
+  // native map draw, and book work only runs when a book is typeset.
+  function uiCalibration(win){
+    let host=null,ctx=null;
+    const scaled=new WeakMap();
+    const metric=(face,text)=>{ctx??=(typeof win.OffscreenCanvas==='function'?new win.OffscreenCanvas(1,1):win.document.createElement('canvas')).getContext('2d');ctx.font=face.fnt.font;ctx.textBaseline='alphabetic';return ctx.measureText(text)};
+    const sizeFace=(face,scale)=>{
+      if(!face?.fnt?.canvas||scale===1)return face;
+      let cache=scaled.get(face);if(!cache){cache=new Map();scaled.set(face,cache)}
+      if(cache.has(scale))return cache.get(scale);
+      const f=face.fnt,px=Math.max(.1,f.px*scale),font=`${f.weight??400} ${px}px ${f.family||stacks.book}`;
+      const out={...face,fnt:{...f,px,font,fixedHeight:Math.ceil(px*1.3)}};
+      if(cache.size>=128)cache.delete(cache.keys().next().value);cache.set(scale,out);return out;
+    };
+    const width=(face,text)=>{
+      if(face.fnt.canvas){const m=metric(face,text);return Math.max(m.width,(m.actualBoundingBoxLeft||0)+(m.actualBoundingBoxRight||0));}
+      return win.__dfoFonts.measure(face.fnt,text)??0;
+    };
+    function wrap(face,text,max){
+      const rows=[];let row='';
+      for(const para of String(text).split(/\r?\n/)){
+        row='';for(const word of para.split(/\s+/).filter(Boolean)){
+          const next=row?row+' '+word:word;
+          if(width(face,next)<=max){row=next;continue}
+          if(row){rows.push(row);row=''}
+          if(width(face,word)<=max){row=word;continue}
+          // Books may contain an URL or one unbroken token. Preserve all its
+          // characters across rows rather than clipping it at the paper edge.
+          const chars=Array.from(word);let start=0;
+          while(start<chars.length){let lo=1,hi=Math.min(32,chars.length-start);while(hi<chars.length-start&&width(face,chars.slice(start,start+hi).join(''))<=max){lo=hi;hi=Math.min(chars.length-start,hi*2)}while(lo<hi){const mid=Math.ceil((lo+hi)/2);if(width(face,chars.slice(start,start+mid).join(''))<=max)lo=mid;else hi=mid-1}const part=chars.slice(start,start+lo).join('');start+=lo;if(start<chars.length)rows.push(part);else row=part;}
+        }
+        rows.push(row);
+      }
+      return rows;
+    }
+    function place(lines,fontFor,maxWidth=300){
+      const placed=[];let y=0;
+      for(const line of lines){
+        let face=fontFor(line.font),scale=Number(line.scale??1);if(!(scale>0&&Number.isFinite(scale)))scale=1;
+        if(face?.fnt?.canvas){face=sizeFace(face,scale);scale=1;}
+        const m=face?.fnt?.canvas?metric(face,'MgЙЁру'):null;
+        const rowH=m?Math.ceil(Math.max(face.fnt.fixedHeight,(m.fontBoundingBoxAscent??m.actualBoundingBoxAscent)+(m.fontBoundingBoxDescent??m.actualBoundingBoxDescent))):(face?.fnt?.fixedHeight??0)*scale;
+        const rows=face&&line.text?wrap(face,line.text,Math.max(1,maxWidth/scale-.5)):[line.text??''];
+        const h=rows.length*rowH;placed.push({...line,face,scale,rows,rowH,y,h});y+=h;
+      }
+      return {placed,maxHeight:y};
+    }
+    return {
+      host(value){host=value},
+      mark(m){
+        const kind=String(m.kind||''),key=String(m.key||'');
+        // Never include settlements, player names or friendly living-road
+        // travellers. Only dungeon / hostile / gathering marks are quieter.
+        const small=!!m.dfoDungeon||/(?:^| )(?:dungeon|lair|gather|band|camp|raider|chase)(?: |$)/.test(kind)||/^giant:|^hideout:/.test(key);
+        if(!small)return {};
+        const pos=host?.player?.pos;
+        const distance=pos&&m.at?Math.hypot(m.at[0]-pos[0],m.at[2]-pos[2]):NaN;
+        return {dfoSmall:true,dfoQuiet:Number.isFinite(distance)&&distance>1000};
+      },
+      markerBox:q=>({x0:q.x-12,x1:q.x+12,y0:q.y-12,y1:q.y+12}),
+      place,
+      paint(ctx,face,text,x,y,{color,align='left',w=0}={}){
+        if(!face?.fnt?.canvas)return false;
+        if(!text)return true;
+        const m=metric(face,text),left=Math.max(0,m.actualBoundingBoxLeft||0),advance=Math.max(m.width,left+(m.actualBoundingBoxRight||0));
+        ctx.font=face.fnt.font;ctx.fillStyle=color;ctx.textBaseline='alphabetic';ctx.textAlign='left';
+        const ascent=Math.ceil(m.fontBoundingBoxAscent??metric(face,'MgЙЁру').actualBoundingBoxAscent);
+        ctx.fillText(text,x+left+(align==='center'?Math.max(0,(w-advance)/2):0),y+ascent);return true;
+      },
+    };
   }
   function mapFont(font){
     if(typeof font!=='string')return font;
@@ -66,7 +180,7 @@
     const fontSet=win.document?.fonts||win.fonts,Native=win.FontFace;
     const load=fontSet.load.bind(fontSet),check=fontSet.check.bind(fontSet),add=fontSet.add.bind(fontSet);
     const canonical=family=>Object.keys(files).find(name=>String(family).replace(/["']/g,'').toLowerCase()==='dfo '+name.toLowerCase());
-    const ownUrl=name=>`url(${JSON.stringify(base+files[name]+'?dfo=1.21.0')})`;
+    const ownUrl=name=>`url(${JSON.stringify(base+files[name]+'?dfo=1.21.1')})`;
     win.FontFace=new Proxy(Native,{construct(Type,args,New){
       const name=canonical(args[0])||'Gabin';
       stats.faceRedirects=(stats.faceRedirects||0)+1;
@@ -98,7 +212,7 @@
     return {bytes:get,letters(height=7){
       if(letters.has(height))return letters.get(height);
       const canvas=typeof win.OffscreenCanvas==='function'?new win.OffscreenCanvas(32,32):win.document.createElement('canvas');canvas.width=32;canvas.height=32;
-      const ctx=canvas.getContext('2d',{willReadFrequently:true}),family=height===11||height===6?stacks.title:stacks.body,glyphs=new Map();
+      const ctx=canvas.getContext('2d',{willReadFrequently:true}),family=[6,8,11,13].includes(height)?stacks.title:stacks.body,glyphs=new Map();
       ctx.font='64px '+family;const sample=ctx.measureText('AgЙЁjQ'),total=(sample.actualBoundingBoxAscent||50)+(sample.actualBoundingBoxDescent||14),ratio=height/total;
       const font=(64*ratio)+'px '+family,baseline=(sample.actualBoundingBoxAscent||50)*ratio;
       const glyph=code=>{
@@ -130,9 +244,9 @@
   function install(win){
     if(win.__dfoFonts||win.__DFO_MOD_CFG__?.fonts?.enabled===false)return;
     const doc=win.document,base=new URL('.',doc.currentScript?.src||new URL('dfo-mod/dfo_fonts.js',doc.baseURI)).href;
-    const style=doc.createElement('style');style.id='dfo-community-fonts';style.textContent=css(base,win.__DFO_MOD_CFG__?.fonts?.revision||'1.21.0');doc.head.append(style);
+    const style=doc.createElement('style');style.id='dfo-community-fonts';style.textContent=css(base,win.__DFO_MOD_CFG__?.fonts?.revision||'1.21.1');doc.head.append(style);
     const stats={canvasChanges:0,classicDraws:0,classicBatches:0,glyphsDrawn:0,faces:0,failures:[]};
-    const native={},renderers=new WeakMap(),fnts=new WeakMap(),firstFaces=new Map(),bookFonts=new WeakMap(),fontOwners=new WeakMap();let enabled=false,serial=0;
+    const native={},renderers=new WeakMap(),fnts=new WeakMap(),firstFaces=new Map(),bookFonts=new WeakMap(),fontOwners=new WeakMap(),titleHeights=new WeakMap();let enabled=false,serial=0;
     const translate=text=>typeof win.__translate==='function'?win.__translate(text):text;
     installCanvas(win,stats);
     const {fontSet,load}=installFontSet(win,base,stats);
@@ -166,20 +280,23 @@
       const result=[];for(const char of text){const code=char.codePointAt(0);if(!face.glyphs.has(code))face.add(code);result.push(face.glyphs.get(code)||face.glyphs.get(63));}return result;
     }
     win.__dfoFonts=Object.freeze({
-      ready,get enabled(){return enabled},stacks,fntBytes:bitmaps.bytes,pixelLetters:bitmaps.letters,register(parts){if(typeof parts?.glyphFace==='function')native.glyphFace=parts.glyphFace;},
+      ready,get enabled(){return enabled},stacks,calibration:uiCalibration(win),fntBytes:bitmaps.bytes,pixelLetters:bitmaps.letters,register(parts){if(typeof parts?.glyphFace==='function')native.glyphFace=parts.glyphFace;},
       bookFont(font){
         if(!enabled||!classic(font?.fnt))return font;
         if(font.fnt.dfoFontRole==='book')return font;
         let book=bookFonts.get(font);if(book)return book;
         // A book's default font is also used by the rest of the UI. Give
         // the reader a stable view rather than changing that shared FNT.
-        const fnt=Object.assign(Object.create(Object.getPrototypeOf(font.fnt)),font.fnt,{dfoFontRole:'book'});
+        const fnt=Object.assign(Object.create(Object.getPrototypeOf(font.fnt)),font.fnt,{dfoFontRole:'book',fixedHeight:titleHeights.get(font.fnt)??font.fnt.fixedHeight});
         const owner=fontOwners.get(font)?.deref(),face=faceFor('book',owner);if(face)fnts.set(fnt,new WeakRef(face));
         book={...font,fnt};bookFonts.set(font,book);return book;
       },
       makeFont(renderer,fnt,name){
         if(!enabled||typeof native.glyphFace!=='function')return null;
         fnt.fontName??=name;if(!classic(fnt))return null;
+        // Native layouts also read fixedHeight: change the logical metrics
+        // with the draw, once per FNT, so the larger title cannot overlap rows.
+        if(roleOf(fnt)==='title'&&!titleHeights.has(fnt)){titleHeights.set(fnt,fnt.fixedHeight);fnt.fixedHeight+=2;}
         const face=faceFor(roleOf(fnt),renderer);if(!face)return null;fnts.set(fnt,new WeakRef(face));const font={fnt,tex:null};fontOwners.set(font,new WeakRef(renderer));return font;
       },
       measure(fnt,text){
@@ -212,5 +329,5 @@
       stats:()=>({...stats,failures:[...stats.failures],enabled,shorthandCacheSize:fontMappings.size}),
     });
   }
-  return {install,installWorker,css,mapFont,stacks,files};
+  return {install,installWorker,css,mapFont,stacks,files,uiCalibration};
 });

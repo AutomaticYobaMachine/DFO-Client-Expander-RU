@@ -118,7 +118,7 @@ body .pack-shell .packdetail.dfo-item-host { width:max-content!important; height
 .dfo-item-material .dfo-item-metal { font:inherit; font-weight:400; color:var(--dfo-metal-color,#e9e4d9)!important; -webkit-text-stroke:var(--dfo-metal-stroke,0 transparent); text-shadow:var(--dfo-metal-shadow,none); }
 .dfo-item-card .dfo-item-head>.bigicon { width:64px; height:82px; margin:0!important; display:flex; align-items:center; justify-content:center; }
 .dfo-item-card .dfo-item-head>.bigicon img,.dfo-item-card .dfo-item-head>.bigicon canvas { width:auto!important; height:auto!important; max-width:60px!important; max-height:78px!important; object-fit:contain; }
-.dfo-item-card .dfo-item-title h3 { font-family:'DFO Greengoth',var(--display,Georgia,serif)!important; font-weight:400; font-size:18px; line-height:1.15; text-align:left; text-transform:none; letter-spacing:normal; margin:0!important; overflow-wrap:anywhere; color:var(--rar,var(--bone,#e9e4d9)); }
+.dfo-item-card .dfo-item-title h3 { font-family:'DFO Greengoth',var(--display,Georgia,serif)!important; font-weight:400; font-size:20px; line-height:1.15; text-align:left; text-transform:none; letter-spacing:normal; margin:0!important; overflow-wrap:anywhere; color:var(--rar,var(--bone,#e9e4d9)); }
 .dfo-item-tier { font-size:11px; margin:0 0 4px; color:var(--rar,var(--brass,#d5b26e)); }
 .dfo-item-tier::before { content:var(--rar-pips,''); margin-right:4px; font-size:9px; }
 .dfo-item-card .dfo-item-stats { display:block!important; margin:0; padding:0; }

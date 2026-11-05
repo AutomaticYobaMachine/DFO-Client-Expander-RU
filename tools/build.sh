@@ -17,6 +17,7 @@ cp src/mod/hook.cjs src/mod/transforms.cjs src/mod/nearby-loot-transform.cjs src
 cp src/mod/page/dfo_dungeon_model.js src/mod/page/dfo_dungeons.js src/mod/page/dfo_dungeon_live_model.js src/mod/page/dfo_dungeon_live.js src/mod/page/dfo_dungeon_graph.js src/mod/page/dfo_dungeon_nav_model.js src/mod/page/dfo_dungeon_nav.js src/mod/page/dfo_loot_rules.js src/mod/page/dfo_loot_ui.js src/mod/page/dfo_loot.js src/mod/page/dfo_marks.js src/mod/page/dfo_town.js src/mod/page/ru_locale.js src/mod/page/ru_items.js "$PAYLOAD/mod/page/"
 cp src/mod/item-cards-transform.cjs "$PAYLOAD/mod/"
 cp src/mod/fonts-transform.cjs "$PAYLOAD/mod/"
+cp src/mod/ui-calibration-transform.cjs "$PAYLOAD/mod/"
 cp src/mod/font-assets.cjs "$PAYLOAD/mod/"
 cp src/mod/page/dfo_fonts.js src/mod/page/dfo_font_data.js "$PAYLOAD/mod/page/"
 cp src/mod/page/dfo_item_cards.js "$PAYLOAD/mod/page/"

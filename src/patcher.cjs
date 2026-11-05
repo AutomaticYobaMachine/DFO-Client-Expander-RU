@@ -232,6 +232,7 @@ function install() {
   for (const file of [...Object.values(require(path.join(MOD,'page/dfo_fonts.js')).files), 'FONT-NOTICES.txt'])
     put.set(`dfo-mod/fonts/${file}`, fs.readFileSync(path.join(MOD, 'fonts', file)));
   put.set('dfo-mod/fonts-transform.cjs',fs.readFileSync(path.join(MOD,'fonts-transform.cjs')));
+  put.set('dfo-mod/ui-calibration-transform.cjs',fs.readFileSync(path.join(MOD,'ui-calibration-transform.cjs')));
   put.set('dfo-mod/page/dfo_fonts.js',fs.readFileSync(path.join(MOD,'page/dfo_fonts.js')));
   put.set('dfo-mod/page/dfo_font_data.js',fs.readFileSync(path.join(MOD,'page/dfo_font_data.js')));
   put.set('dfo-mod/font-assets.cjs',fs.readFileSync(path.join(MOD,'font-assets.cjs')));

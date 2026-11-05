@@ -1,6 +1,7 @@
 'use strict';
 const {css}=require('./page/dfo_fonts.js');
 const {stripFaces}=require('./font-assets.cjs');
+const {transformCalibration}=require('./ui-calibration-transform.cjs');
 function need(text,pattern){const m=pattern.exec(text);if(!m)throw Error('Unsupported font signature: '+pattern.source.slice(0,100));return m;}
 function classic(text){
  const factory=need(text,/function ([\w$]+)\(([\w$]+),([\w$]+),([\w$]+)\)\{\3\.fontName\?\?=\4;/)[1];
@@ -13,7 +14,7 @@ function classicBook(text){
  const place=need(text,/function ([\w$]+)\(([\w$]+),([\w$]+),([\w$]+)=[\w$]+\)\{let [\w$]+=\[\],[\w$]+=0;for\(let [\w$]+ of \2\)\{let [\w$]+=\3\([\w$]+\.font\)/)[1];
  const reader=need(text,/var ([\w$]+)=class\{constructor\([\w$]+\)\{this\.book=/)[1];
  need(text,/_drawFallback\([\w$]+,[\w$]+,[\w$]+,[\w$]+\)\{/);
- return text+`\n;{const p=${place},d=${reader}.prototype._drawFallback;${place}=function(lines,fontFor,...args){return p(lines,x=>{const f=fontFor(x);return globalThis.__dfoFonts?.bookFont(f)??f},...args)};${reader}.prototype._drawFallback=function(renderer,canvas,font,...args){return d.call(this,renderer,canvas,globalThis.__dfoFonts?.bookFont(font)??font,...args)}}\n`;
+ return text+`\n;{const p=${place},d=${reader}.prototype._drawFallback;${place}=function(lines,fontFor,...args){const own=x=>{const f=fontFor(x);return globalThis.__dfoFonts?.bookFont(f)??f};return globalThis.__dfoFonts?.enabled?globalThis.__dfoFonts.calibration.place(lines,own,...args):p(lines,own,...args)};${reader}.prototype._drawFallback=function(renderer,canvas,font,...args){return d.call(this,renderer,canvas,globalThis.__dfoFonts?.bookFont(font)??font,...args)}}\n`;
 }
 function canvasBook(text){
  const family="`Cormorant, 'Cormorant Garamond', Georgia, 'Times New Roman', serif`";
@@ -21,15 +22,18 @@ function canvasBook(text){
  if(!text.includes(family))throw Error('Unsupported book family');
  // Entry modules already waited for these local faces. The native async
  // web-font seam would otherwise paginate the whole book a second time.
+ const paint=need(text,/([\w$]+) as paintRow/)[1];
+ const ink=need(text,/([\w$]+) as rowInk/)[1];
  return text.replace(family,'(globalThis.__dfoFonts?.stacks.book??'+family+')')
-  .replace(/(let [\w$]+=)globalThis\.document\?\.fonts;/,'$1globalThis.__dfoFonts?.enabled?null:globalThis.document?.fonts;');
+  .replace(/(let [\w$]+=)globalThis\.document\?\.fonts;/,'$1globalThis.__dfoFonts?.enabled?null:globalThis.document?.fonts;')
+  +`\n;{const p=${paint};${paint}=function(ctx,face,text,x,y,opts={}){if(!globalThis.__dfoFonts?.enabled)return p(ctx,face,text,x,y,opts);return globalThis.__dfoFonts.calibration.paint(ctx,face,text,x,y,{...opts,color:opts.color??${ink}(null)})||p(ctx,face,text,x,y,opts)}}\n`;
 }
 function transformFonts(rel,text,log){
  const stripped=stripFaces(text);if(stripped.count){text=stripped.text;log.push(['fonts.resources',stripped.count]);}
  if(/Worker-[^/]+\.js$/.test(rel)){
   if(text.includes('/*fonts.worker*/'))return text;
   log.push(['fonts.worker',1]);
-  return `import '../dfo-mod/dfo_font_data.js?dfo=1.21.0';import '../dfo-mod/dfo_fonts.js?dfo=1.21.0';\nconst __dfoFontMessages=[];let __dfoFontReplay=false;const __dfoFontGate=e=>{if(!__dfoFontReplay){e.stopImmediatePropagation();__dfoFontMessages.push(e)}};globalThis.addEventListener('message',__dfoFontGate,true);await globalThis.__dfoFontTools.installWorker(globalThis,new URL('../dfo-mod/',import.meta.url).href).ready;\n`+text+`\n{const ch=new MessageChannel();ch.port1.onmessage=()=>{const e=__dfoFontMessages.shift();if(!e){globalThis.removeEventListener('message',__dfoFontGate,true);ch.port1.close();ch.port2.close();return}__dfoFontReplay=true;try{globalThis.dispatchEvent(new MessageEvent('message',{data:e.data,ports:e.ports,origin:e.origin,lastEventId:e.lastEventId}))}finally{__dfoFontReplay=false;ch.port2.postMessage(0)}};ch.port2.postMessage(0)}/*fonts.worker*/\n`;
+  return `import '../dfo-mod/dfo_font_data.js?dfo=1.21.1';import '../dfo-mod/dfo_fonts.js?dfo=1.21.1';\nconst __dfoFontMessages=[];let __dfoFontReplay=false;const __dfoFontGate=e=>{if(!__dfoFontReplay){e.stopImmediatePropagation();__dfoFontMessages.push(e)}};globalThis.addEventListener('message',__dfoFontGate,true);await globalThis.__dfoFontTools.installWorker(globalThis,new URL('../dfo-mod/',import.meta.url).href).ready;\n`+text+`\n{const ch=new MessageChannel();ch.port1.onmessage=()=>{const e=__dfoFontMessages.shift();if(!e){globalThis.removeEventListener('message',__dfoFontGate,true);ch.port1.close();ch.port2.close();return}__dfoFontReplay=true;try{globalThis.dispatchEvent(new MessageEvent('message',{data:e.data,ports:e.ports,origin:e.origin,lastEventId:e.lastEventId}))}finally{__dfoFontReplay=false;ch.port2.postMessage(0)}};ch.port2.postMessage(0)}/*fonts.worker*/\n`;
  }
  const jobs=[];
  if(/^assets\/notify-[^/]+\.js$/.test(rel)&&text.includes('this.fixedWidth='))jobs.push(['fonts.fnt',text=>text.replace(/load\(([\w$]+)\)\{(?=let [\w$]+=new DataView\(\1\.buffer,\1\.byteOffset,\1\.byteLength\);this\.fixedWidth=)/,'load($1){$1=globalThis.__dfoFonts?.fntBytes($1)??$1;')]);
@@ -50,7 +54,7 @@ function transformFonts(rel,text,log){
  if(text.includes('dyslexic:`Dyslexic`'))jobs.push(['fonts.choices',text=>text.replace('Object.freeze({game:`Game`,sans:`Sans`,mono:`Monospace`,dyslexic:`Dyslexic`,system:`My font`})','Object.freeze({game:`Шрифты сообщества`})')]);
  if(text.includes('dagger-enhanced-fonts'))jobs.push(['fonts.network',text=>text.replace(/(function [\w$]+\([\w$]+=document,[\w$]+=globalThis\.location\?\.search\?\?``\)\{)/,'$1if(globalThis.__dfoFonts)return;')]);
  for(const [id,apply]of jobs){if(text.includes('/*'+id+'*/'))continue;try{const next=apply(text);if(next===text)throw Error('No matching declaration');text=next+'\n/*'+id+'*/\n';log.push([id,1])}catch(e){log.push([id+'!error '+e.message,0])}}
- return text;
+ return transformCalibration(rel,text,log);
 }
 function preparePage(html){
  html=stripFaces(html).text;

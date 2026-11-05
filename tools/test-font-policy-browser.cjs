@@ -35,6 +35,9 @@ async function main(){
     const font=nativeFontTest.makeFont(renderer,new nativeFontTest.FntFile().load(bytes),'FONT0003');
     nativeFontTest.draw(renderer,font,'Герой Dragonborn',0,0);keptFontHandles.push(font);rendererRefs.push(new WeakRef(renderer));
    }
+   const worldHost={player:{pos:[0,0,0]},renderer:{textures:new Map()}};
+   window.worldHostRefs=[new WeakRef(worldHost),new WeakRef(worldHost.player),new WeakRef(worldHost.renderer)];
+   __dfoFonts.calibration.host(worldHost);
    return {initial,resize,reset,offscreen,offscreenReset,redirected,families,fnts,stats:__dfoFonts.stats()};
   });
   for(const key of ['initial','resize','reset','offscreen','offscreenReset'])assert.match(report[key],/DFO Gabin/,key);
@@ -42,6 +45,7 @@ async function main(){
   for(const f of report.fnts)assert.equal(f.changed,true,f.name+' must ignore cached old glyph bytes');
   const cdp=await page.context().newCDPSession(page);await cdp.send('HeapProfiler.collectGarbage');await page.waitForTimeout(50);await cdp.send('HeapProfiler.collectGarbage');
   report.aliveRenderers=await page.evaluate(()=>rendererRefs.filter(r=>r.deref()).length);assert.equal(report.aliveRenderers,0,'Kept font metadata must not retain renderers');
+  report.aliveWorldObjects=await page.evaluate(()=>worldHostRefs.filter(r=>r.deref()).length);assert.equal(report.aliveWorldObjects,0,'Map calibration must not retain an old world, player or renderer');
   report.staleMetadataWidth=await page.evaluate(()=>nativeFontTest.measure(keptFontHandles[0].fnt,'Герой Dragonborn'));assert.ok(report.staleMetadataWidth>0);
   report.workers=await page.evaluate(async()=>{
    const probe=policy=>new Promise((resolve,reject)=>{const t=performance.now(),w=new Worker('/assets/fontPolicyWorker-probe.js'+(policy?'':'?font-policy-off'),{type:'module'}),bytes=new Uint8Array([3,8,13,21]);const timeout=setTimeout(()=>{w.terminate();reject(Error('Lost early worker message'))},15000);w.onerror=e=>{clearTimeout(timeout);w.terminate();reject(Error(e.message))};const replies=[];w.onmessage=e=>{replies.push(e.data);if(replies.length<2)return;clearTimeout(timeout);w.terminate();resolve({...replies[0],sequences:replies.map(x=>x.sequence),ms:performance.now()-t})};w.postMessage({id:7,bytes:bytes.buffer},[bytes.buffer]);const next=new Uint8Array([34,55]);w.postMessage({id:8,bytes:next.buffer},[next.buffer]);});

@@ -75,7 +75,7 @@
   // No observers or frame callbacks: layout follows native CSS, marks the
   // native map draw, and book work only runs when a book is typeset.
   function uiCalibration(win){
-    let host=null,ctx=null;
+    let player=null,ctx=null;
     const scaled=new WeakMap();
     const metric=(face,text)=>{ctx??=(typeof win.OffscreenCanvas==='function'?new win.OffscreenCanvas(1,1):win.document.createElement('canvas')).getContext('2d');ctx.font=face.fnt.font;ctx.textBaseline='alphabetic';return ctx.measureText(text)};
     const sizeFace=(face,scale)=>{
@@ -120,14 +120,14 @@
       return {placed,maxHeight:y};
     }
     return {
-      host(value){host=value},
+      host(value){const p=value?.player;player=p&&typeof p==='object'?new WeakRef(p):null},
       mark(m){
         const kind=String(m.kind||''),key=String(m.key||'');
         // Never include settlements, player names or friendly living-road
         // travellers. Only dungeon / hostile / gathering marks are quieter.
         const small=!!m.dfoDungeon||/(?:^| )(?:dungeon|lair|gather|band|camp|raider|chase)(?: |$)/.test(kind)||/^giant:|^hideout:/.test(key);
         if(!small)return {};
-        const pos=host?.player?.pos;
+        const pos=player?.deref()?.pos;
         const distance=pos&&m.at?Math.hypot(m.at[0]-pos[0],m.at[2]-pos[2]):NaN;
         return {dfoSmall:true,dfoQuiet:Number.isFinite(distance)&&distance>1000};
       },

@@ -12,7 +12,7 @@
   "sha256": {
     "fonts-transform.cjs": "63a11a0430e512eac85bd18e61a776c55150a14d065f9d89ff0da3153319a359",
     "ui-calibration-transform.cjs": "8830ac9fdcdd527e2bb2cebdc69cc5faa08e16050862df165775bd812d70d202",
-    "page/dfo_fonts.js": "a4f99a31cc5f0d27a581779232b1a7f0c0c72dfac6f28817b113eeba63a9591c",
+    "page/dfo_fonts.js": "7df54c7a1f39598cd1cf9df67758598ed7823902bd2f1cd7c0410820cdcee905",
     "page/dfo_item_cards.js": "002250d1b7c6c56176df84f3f51dae00f10568439bdd5daa5b5ffa76050699d6",
     "page/dfo_dungeons.js": "29d2256027c9c49be1b6cf8138bc9e6d60ba595f95dbcb4fe704a54cf123bc7d",
     "transforms.cjs": "abacc85f4cb0287f1fbb54c4eefffbbd7f3c8922e60b99c8d79c3485d002b45a",
@@ -143,8 +143,8 @@
       "canvasBookCases": 36,
       "classicBookCases": 20,
       "performance": {
-        "map100000Ms": 10.600000001490116,
-        "book10000CharsMs": 18.600000001490116,
+        "map100000Ms": 12.800000004470348,
+        "book10000CharsMs": 17.899999998509884,
         "bookRows": 455,
         "preserved": true,
         "scope": "Local CPU measurement, not live-game FPS"
@@ -257,8 +257,15 @@
       "errors": [],
       "externalFontRequests": [],
       "policyErrors": [],
-      "renderersAfterGC": 0
-    }
+      "renderersAfterGC": 0,
+      "worldObjectsAfterGC": 0
+    },
+    "additionalPackagingTests": {
+      "pass": 3,
+      "fail": 0,
+      "skip": 0
+    },
+    "lastChange": "Weak player reference: GC, UI calibration and rebuilt-package tests rerun; item rendering/price logic unchanged."
   },
   "limits": [
     "Native published UI modules with fixture entities; no live multiplayer or FPS claim.",

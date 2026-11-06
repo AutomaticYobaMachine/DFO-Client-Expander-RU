@@ -7,9 +7,14 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Existing release tag, for example v1.13.1'
+        description: 'Release tag, for example v1.13.1'
         required: true
         type: string
+      create_tag:
+        description: 'Create the tag at the dispatched commit when it does not exist yet'
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: write
@@ -28,8 +33,28 @@ jobs:
       - name: Check out the release tag
         uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
         with:
-          ref: ${{ inputs.tag || github.ref }}
+          # A dispatch that creates its tag builds the dispatched commit; otherwise the existing tag.
+          ref: ${{ inputs.create_tag && github.sha || inputs.tag || github.ref }}
           fetch-depth: 0
+
+      - name: Create the release tag at the dispatched commit
+        if: ${{ inputs.create_tag }}
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json, os, pathlib, re
+          version = json.loads(pathlib.Path('src/mod/version.json').read_text())['version']
+          tag = os.environ['RELEASE_TAG']
+          if not re.fullmatch(r'v[0-9]+\.[0-9]+\.[0-9]+', tag) or tag != 'v' + version:
+              raise SystemExit(f'Tag {tag!r} does not match version {version!r}')
+          PY
+          if git ls-remote --exit-code --tags origin "refs/tags/$RELEASE_TAG" >/dev/null; then
+            test "$(git rev-parse "$RELEASE_TAG^{commit}")" = "$(git rev-parse HEAD)" \
+              || { echo "$RELEASE_TAG already points elsewhere"; exit 1; }
+          else
+            git tag "$RELEASE_TAG" HEAD
+            git push origin "refs/tags/$RELEASE_TAG"
+          fi
 
       - name: Validate tag, version and release notes
         shell: bash
@@ -61,7 +86,7 @@ jobs:
         shell: bash
         run: |
           (cd src/gui && go test ./...)
-          node --test test/item-cards.test.cjs test/packaging.test.cjs test/service-windows.test.cjs test/loot-input.test.cjs test/loot-access.test.cjs test/loot-hosts.test.cjs test/loot-physical.test.cjs test/local-import.test.cjs test/dungeon-intel.test.cjs test/dungeon-live.test.cjs test/dungeon-navigation.test.cjs test/dungeon-quest-navigation.test.cjs test/dungeon-graph.test.cjs test/dungeon-complex.test.cjs test/dungeon-shafts.test.cjs
+          node --test test/item-cards.test.cjs test/item-text.test.cjs test/packaging.test.cjs test/service-windows.test.cjs test/loot-input.test.cjs test/loot-access.test.cjs test/loot-hosts.test.cjs test/loot-physical.test.cjs test/local-import.test.cjs test/dungeon-intel.test.cjs test/dungeon-live.test.cjs test/dungeon-navigation.test.cjs test/dungeon-quest-navigation.test.cjs test/dungeon-graph.test.cjs test/dungeon-complex.test.cjs test/dungeon-shafts.test.cjs
           (cd dist && sha256sum --check "DFO-Client-Expander-RU-$RELEASE_VERSION.exe.sha256" \
             "DFO-Client-Expander-RU-$RELEASE_VERSION.zip.sha256")
 

@@ -16,7 +16,7 @@ const entry = fs.readdirSync(assets).find(file => /^enhancedInventory-.*\.js$/.t
 assert.ok(entry, 'Need the actual published game assets');
 const html = `<!doctype html><html><head><meta charset="utf-8"><style>
 html,body{margin:0;background:#172029;height:100%;overflow:hidden}#hover-target{position:fixed;right:20px;bottom:20px;width:90px;height:45px;z-index:2147483647}
-</style><script>window.__DFO_MOD_CFG__={fonts:{enabled:${globalFonts}},itemCards:{enabled:!location.search.includes('off')},ru:{on:new URLSearchParams(location.search).has('ru')}};</script>${globalFonts?'<script src="/dfo-mod/dfo_font_data.js"></script><script src="/dfo-mod/dfo_fonts.js"></script>':''}<script src="/dfo-mod/dfo_item_cards.js"></script>
+</style><script>window.__DFO_MOD_CFG__={fonts:{enabled:${globalFonts}},itemCards:{enabled:!location.search.includes('off')},ru:{on:new URLSearchParams(location.search).has('ru')}};</script>${globalFonts?'<script src="/dfo-mod/dfo_font_data.js"></script><script src="/dfo-mod/dfo_fonts.js"></script>':''}<script src="/dfo-mod/dfo_item_text_data.js"></script><script src="/dfo-mod/dfo_item_text.js"></script><script src="/dfo-mod/dfo_item_cards.js"></script>
 <script>
 if(window.__dfoItemCards){
  const api=window.__dfoItemCards;window.auditNative={readers:{},calls:{}};
@@ -50,6 +50,8 @@ const cases={
  coins:mk('Gold pieces','Currency',276,undefined,{value:1,stackCount:27}),
  mail:mk('Mail hauberk','Armor',515,513,{value:480}),
  fur:mk('Fur jerkin','Armor',520,0,{message:1,value:120}),
+ stolen:mk('Stolen dagger','Weapons',113,1,{value:60,stolen:true}),
+ shirt:mk('Long Shirt','WomensClothing',205,0,{value:12,dye:0}),
 };
 cases.combined={...cases.spells,name:'Set weapon with spells and sockets',sockets:['ruby'],sigil:{set:'ruhn',power:8,party:2,xp:37500}};
 const entity={isPlayer:true,name:'Card check',career:{name:'Spellsword'},level:12,stats:{strength:50,endurance:50,willpower:50,intelligence:50,agility:50,speed:50,personality:50,luck:50},skills:new Array(35).fill(40),items:Object.values(cases),goldPieces:0,spells:[],activeEffects:[],health:100,maxHealth:100,magicka:20,maxMagicka:20,fatigue:200,maxFatigue:200};
@@ -87,8 +89,13 @@ const server = http.createServer((req,res) => {
     if(url.pathname==='/dfo-mod/ru_items.js'){res.setHeader('Content-Type','text/javascript');return res.end(fs.readFileSync(path.join(modDir,'page/ru_items.js')));}
     if(url.pathname==='/dfo-mod/dfo_font_data.js'){res.setHeader('Content-Type','text/javascript');return res.end(fs.readFileSync(path.join(modDir,'page/dfo_font_data.js')));}
     if(url.pathname==='/dfo-mod/dfo_fonts.js'){res.setHeader('Content-Type','text/javascript');return res.end(fs.readFileSync(path.join(modDir,'page/dfo_fonts.js')));}
+    if(url.pathname==='/dfo-mod/dfo_item_text.js'){res.setHeader('Content-Type','text/javascript');return res.end(fs.readFileSync(path.join(modDir,'page/dfo_item_text.js')));}
+    if(url.pathname==='/dfo-mod/dfo_item_text_data.js'){
+      const itemText=require(path.join(modDir,'item-text.cjs'));res.setHeader('Content-Type','text/javascript');
+      return res.end(itemText.bundle(String(req.headers.referer||'').includes('?ru')?'ru':'en',path.join(modDir,'item-text')));
+    }
     if (url.pathname === '/dfo-mod/dfo_item_cards.js') {res.setHeader('Content-Type','text/javascript');return res.end(fs.readFileSync(path.join(modDir,'page/dfo_item_cards.js')));}
-    if (/^\/dfo-mod\/(?:item-font-(?:text|title|numbers|sigil|set|legendary)|book-font-text)\.(?:ttf|otf)$/.test(url.pathname)) {
+    if (/^\/dfo-mod\/(?:item-font-(?:text|title|numbers|sigil|set|legendary|description)|book-font-text)\.(?:ttf|otf)$/.test(url.pathname)) {
       res.setHeader('Content-Type',url.pathname.endsWith('.otf')?'font/otf':'font/ttf');if(url.searchParams.has('dfo'))res.setHeader('Cache-Control','public,max-age=31536000,immutable');return res.end(fs.readFileSync(path.join(modDir,'fonts',path.basename(url.pathname))));
     }
     if(url.pathname==='/assets/fontPolicyWorker-probe.js'){
@@ -167,7 +174,7 @@ async function main() {
       await page.evaluate(id=>probe.show(id),id);
       if(!await card.count())throw new Error(id+': '+JSON.stringify(await page.evaluate(()=>({stats:__dfoItemCards.stats(),tip:document.querySelector('.inv-tip')?.outerHTML}))));
       await card.waitFor();
-      await page.evaluate(async()=>{await Promise.all(['DFO Greengoth','DFO Flexi','DFO Gabin','DFO Ckazka','DFO Ritalin','DFO Wolga'].map(f=>document.fonts.load('16px "'+f+'"')));});
+      await page.evaluate(async()=>{await Promise.all(['DFO Greengoth','DFO Flexi','DFO Gabin','DFO Ckazka','DFO Ritalin','DFO Wolga','DFO Flow'].map(f=>document.fonts.load('16px "'+f+'"')));});
       await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
       const result=await card.evaluate(n=>{
         const r=n.getBoundingClientRect(),s=getComputedStyle(n),bad=[];
@@ -201,7 +208,29 @@ async function main() {
       if(id==='credit')assert.match(result.money,/20\s000/);
       if(id==='coins')assert.equal(result.money,'27');
       if(!['credit','coins','invalid'].includes(id))assert.match(result.money,/^~[\d\s.,]+$/,'Estimated price is marked and rounded to tens');
-      assert.equal(result.footer,result.money,'footer contains only the requested money number and coin');
+      // The footer: the item's description on the left, the money number and coin on the right.
+      const said=await card.evaluate(n=>{
+        const box=n.querySelector('.dfo-item-text'),price=n.querySelector('.dfo-item-price').getBoundingClientRect();
+        if(!box)return null;const b=box.getBoundingClientRect(),st=getComputedStyle(box);
+        return {paragraphs:[...box.children].map(p=>({kind:p.className,text:p.textContent,color:getComputedStyle(p).color,size:getComputedStyle(p).fontSize,family:getComputedStyle(p).fontFamily})),
+          family:st.fontFamily,size:st.fontSize,leftOfPrice:b.right<=price.left+1,inFooter:box.parentElement.classList.contains('dfo-item-footer'),
+          flow:document.fonts.check('12px "DFO Flow"')};
+      });
+      assert.equal(result.footer.endsWith(result.money),true,'the money number closes the footer');
+      if(id==='invalid')assert.equal(said,null,'an unknown template has no description');
+      else{
+        assert.ok(said,id+' has a description');assert.ok(said.inFooter&&said.leftOfPrice,id+' description beside the price: '+JSON.stringify(said));
+        assert.match(said.family,/^"?DFO Flow"?/,id+' description font');assert.equal(said.size,'12px',id+' description size');assert.ok(said.flow,'Flow is loaded');
+        const body=said.paragraphs.find(p=>p.kind==='dfo-item-text-body'),hint=said.paragraphs.at(-1);
+        assert.ok(body&&body.color==='rgb(196, 198, 202)',id+' description colour');
+        assert.equal(hint.kind,'dfo-item-text-hint',id+' the hint is the last paragraph');assert.equal(hint.color,'rgb(255, 255, 255)',id+' hint colour');
+        const stolen=said.paragraphs.find(p=>p.kind==='dfo-item-text-stolen');
+        if(id==='stolen'){assert.ok(stolen,'the stolen mark has its own line');assert.equal(stolen.color,'rgb(226, 87, 76)');}
+        else assert.equal(stolen,undefined,id+' is not stolen');
+        if(id==='shirt')assert.match(body.text,/^A blue long-sleeved shirt/,'a garment says its colour first');
+        if(id==='steel')assert.match(body.text,/^A plate cuirass of tempered steel|steel/i,'the metal the card shows');
+        if(id==='unknown')assert.doesNotMatch(body.text+hint.text,/Fire|flame|Frost/i,'no hidden magic told');
+      }
       assert.equal(await card.locator('svg.dfo-item-coin').count(),1);assert.equal(await card.locator('.dfo-item-corners>i').count(),4);
       const colors=await card.evaluate(n=>[...n.querySelectorAll('.dfo-effect-label,.dfo-effect-value,.dfo-effect-range')].map(s=>({kind:s.className,color:getComputedStyle(s).color,text:s.textContent})));
       for(const part of colors)assert.equal(part.color,{'dfo-effect-label':'rgb(237, 213, 164)','dfo-effect-value':'rgb(243, 242, 237)','dfo-effect-range':'rgb(105, 107, 114)'}[part.kind],id+' effect token color');
@@ -255,6 +284,13 @@ async function main() {
       await ru.evaluate(id=>probe.show(id),id);const c=ru.locator('.inv-tip .dfo-item-card');await c.waitFor();
       if(id==='steel'){assert.equal(await c.locator('.dfo-item-primary').count(),1);assert.match(await c.locator('.dfo-item-stats').innerText(),/Тип брони/);}
       assert.equal(await c.locator(':is(.dfo-item-effects,.dfo-item-overflow) li').evaluateAll(list=>list.every(n=>getComputedStyle(n).display!=='none')),true);
+    }
+    // The translated page speaks Russian: the garment's colour agrees with it, the stolen mark stays red.
+    for(const [id,pattern] of [['shirt',/^Синяя рубаха с длинными рукавами/],['stolen',/кинжал/i],['steel',/кираса/i]]){
+      await ru.evaluate(id=>probe.show(id),id);const c=ru.locator('.inv-tip .dfo-item-card');await c.waitFor();
+      const body=await c.locator('.dfo-item-text-body').innerText();assert.match(body,pattern,id+' RU description: '+body);
+      assert.ok(await c.locator('.dfo-item-text-hint').count()===1,id+' RU hint');
+      if(id==='stolen')assert.match(await c.locator('.dfo-item-text-stolen').innerText(),/краденое/i);
     }
     if(process.env.DFO_SCREENSHOT_DIR){
       await ru.evaluate(async()=>{probe.show('ruhn');await Promise.all(['DFO Greengoth','DFO Flexi','DFO Gabin','DFO Ckazka','DFO Ritalin','DFO Wolga'].map(f=>document.fonts.load('16px "'+f+'"')))});

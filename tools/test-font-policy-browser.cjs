@@ -41,7 +41,7 @@ async function main(){
    return {initial,resize,reset,offscreen,offscreenReset,redirected,families,fnts,stats:__dfoFonts.stats()};
   });
   for(const key of ['initial','resize','reset','offscreen','offscreenReset'])assert.match(report[key],/DFO Gabin/,key);
-  assert.equal(report.redirected.replace(/["']/g,''),'DFO Gabin');assert.equal(report.families.length,7);for(const f of report.families)assert.match(f,/^DFO /);
+  assert.equal(report.redirected.replace(/["']/g,''),'DFO Gabin');assert.equal(report.families.length,8);for(const f of report.families)assert.match(f,/^DFO /);
   for(const f of report.fnts)assert.equal(f.changed,true,f.name+' must ignore cached old glyph bytes');
   const cdp=await page.context().newCDPSession(page);await cdp.send('HeapProfiler.collectGarbage');await page.waitForTimeout(50);await cdp.send('HeapProfiler.collectGarbage');
   report.aliveRenderers=await page.evaluate(()=>rendererRefs.filter(r=>r.deref()).length);assert.equal(report.aliveRenderers,0,'Kept font metadata must not retain renderers');
@@ -53,7 +53,7 @@ async function main(){
   });
   assert.deepEqual(report.workers.custom.bytes,[3,8,13,21]);assert.equal(report.workers.custom.id,7);assert.deepEqual(report.workers.custom.sequences,[1,2]);assert.deepEqual(report.workers.custom.sequences,report.workers.plain.sequences);
   for(const key of ['initial','first','assigned','reset'])assert.match(report.workers.custom[key],/DFO Gabin/,key);
-  assert.equal(report.workers.custom.faces.length,7);for(const f of report.workers.custom.faces){assert.match(f.family,/^["']?DFO /);assert.equal(f.status,'loaded')}
+  assert.equal(report.workers.custom.faces.length,8);for(const f of report.workers.custom.faces){assert.match(f.family,/^["']?DFO /);assert.equal(f.status,'loaded')}
   const decoder=fs.readdirSync(path.join(build,'assets')).find(f=>/^vanillaEnhancedDecodeWorker-.*\.js$/.test(f));assert.ok(decoder);
   report.imageDecoder=await page.evaluate(async file=>{
    const canvas=document.createElement('canvas');canvas.width=2;canvas.height=2;const ctx=canvas.getContext('2d');ctx.fillStyle='red';ctx.fillRect(0,0,1,2);ctx.fillStyle='blue';ctx.fillRect(1,0,1,2);const url=canvas.toDataURL();

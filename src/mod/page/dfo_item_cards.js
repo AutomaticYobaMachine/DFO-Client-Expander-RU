@@ -50,19 +50,26 @@
     const gear = item.group === 'Armor' || item.group === 'Weapons';
     const ammo = gear && native.isAmmo(item);
     let material = null, materialKey = null, construction = null;
+    // What the description may say (dfo_item_text.js facts): the same visibility the card's own rows obey.
+    const facts = { known };
     if (gear && !ammo) {
-      if (native.isHandWraps(item)) material = 'Ткань';
+      if (native.isHandWraps(item)) { material = 'Ткань'; facts.material = 'cloth'; }
       else if (!Number.isInteger(item.material) || item.material < 0) material = 'Нет данных';
       else if (native.saysMaterial(item)) {
         const variant = String(native.variantWord(item) || '').trim();
         if (variant) construction = variants[variant] || variant;
-        if (variant === 'Fur') material = 'Мех';
+        if (variant === 'Mail' || variant === 'Brigandine') facts.construction = variant.toLowerCase();
+        if (variant === 'Fur') { material = 'Мех'; facts.material = 'fur'; }
         else {
           const name = native.material(item);
+          if (typeof name === 'string' && /^(?:Iron|Steel|Silver|Elven|Dwarven|Mithril|Adamantium|Ebony|Orcish|Daedric|Leather|Chain)$/.test(name)) facts.material = name.toLowerCase();
           material = name === 'Chain' ? 'Металл не указан' : name ? materialTerms[name] || native.materialLabel(name) : 'Нет данных';
           if(Object.hasOwn(materialPalette,name))materialKey=name;
         }
       } else material = line.material || 'Не указан';
+      // The native Type row (itemInfo.js itemArmorTypeLine): Leather, Chain or Plate, shown whatever the metal.
+      const type = typeof line.armorType === 'string' ? line.armorType.trim().toLowerCase() : '';
+      if (item.group === 'Armor' && (type === 'leather' || type === 'chain' || type === 'plate')) facts.armorType = type;
     }
     let unitValue = null, source = null;
     if (count != null) {
@@ -102,7 +109,7 @@
     const perKg = ordinaryWeight && money(estimate) && finite(line.weight) && line.weight > 0
       ? estimate / line.weight : null;
     const power = known && typeof native.power === 'function' ? native.power(item) : null;
-    return { known, count, material, materialKey, construction, unitValue, total, source, power, price, approximate,
+    return { known, facts, count, material, materialKey, construction, unitValue, total, source, power, price, approximate,
       perKg: finite(perKg) && perKg <= Number.MAX_SAFE_INTEGER ? perKg : null };
   }
 
@@ -145,6 +152,11 @@ body .card.dfo-item-card .dfo-item-title h3 { font-family:'DFO Greengoth',var(--
 .dfo-item-socket-lines>div { margin-bottom:4px; overflow-wrap:anywhere; }
 :is(.dfo-item-effects,.dfo-item-overflow)>.cmp { margin:0; }
 .dfo-item-footer { display:flex; justify-content:flex-end; align-items:flex-end; gap:16px; border-top:1px solid #756346; padding:9px 12px 11px; text-align:right; background:var(--ink,#0e1013); }
+.dfo-item-card .dfo-item-text { flex:1 1 auto; min-width:0; margin:0; text-align:left; font:12px/1.38 'DFO Flow','DFO Gabin',var(--data,Georgia,serif)!important; color:#c4c6ca!important; letter-spacing:normal!important; text-transform:none!important; }
+.dfo-item-card .dfo-item-text>p { margin:0; padding:0; font:inherit!important; color:inherit!important; white-space:normal; overflow-wrap:break-word; text-align:left!important; }
+.dfo-item-card .dfo-item-text>.dfo-item-text-stolen { color:#e2574c!important; }
+.dfo-item-card .dfo-item-text>.dfo-item-text-hint { color:#ffffff!important; margin-top:1.38em; }
+.dfo-item-card .dfo-item-footer:has(.dfo-item-text) { justify-content:space-between; }
 .dfo-item-price { display:flex; align-items:center; gap:8px; color:#f5d451; }
 .dfo-item-price-value { font-family:'DFO Flexi',var(--data,monospace); font-size:21px; font-weight:400; line-height:1.15; color:#f5d451; white-space:nowrap; }
 .dfo-item-coin { width:20px; height:20px; flex:none; color:#f5d451; }
@@ -180,7 +192,7 @@ body .card.dfo-item-card[data-rarity=gilded] { border-width:4px!important; borde
     if (win.__DFO_MOD_CFG__?.itemCards?.enabled === false || win.__dfoItemCards) return;
     const doc = win.document, native = {}, states = new WeakMap(), pending = new Set(), active = new Map();
     const fontRoot = new URL('.', doc.currentScript?.src || new URL('dfo-mod/dfo_item_cards.js', doc.baseURI || win.location.href)).href;
-    const fontFaces = [['DFO Greengoth','title','ttf'],['DFO Flexi','numbers','ttf'],['DFO Gabin','text','ttf'],['DFO Ckazka','sigil','ttf'],['DFO Ritalin','set','ttf'],['DFO Wolga','legendary','otf']]
+    const fontFaces = [['DFO Greengoth','title','ttf'],['DFO Flexi','numbers','ttf'],['DFO Gabin','text','ttf'],['DFO Ckazka','sigil','ttf'],['DFO Ritalin','set','ttf'],['DFO Wolga','legendary','otf'],['DFO Flow','description','otf']]
       .map(([family,file,ext])=>`@font-face{font-family:'${family}';src:url(${JSON.stringify(new URL('item-font-'+file+'.'+ext,fontRoot).href)}) format('${ext==='otf'?'opentype':'truetype'}');font-style:normal;font-weight:400;font-display:swap;}`).join('\n');
     const counters = { dressed: 0, failures: 0, lastError: '', layouts: 0, balances: 0, balanceTrials: 0, placements: 0, observerCallbacks: 0 };
     let scheduled = false, effectLabelKey='',effectLabelNames=[];
@@ -208,6 +220,28 @@ body .card.dfo-item-card[data-rarity=gilded] { border-width:4px!important; borde
       const value = data.price == null ? '—' : (data.approximate ? '~' : '') + format(data.price);
       if (state.priceValue.textContent !== value) state.priceValue.textContent = value;
       state.priceBox.setAttribute('aria-label', data.price == null ? 'Стоимость неизвестна' : (data.approximate ? 'Примерная стоимость: ' : 'Стоимость: ') + format(data.price) + ' золота');
+    }
+
+    // The tier line's own words name a Perfect rare ("Perfect Rare", lootRarity.js tierLabel), in any locale.
+    const isPerfect = tier => /\bPerfect Rare\b/.test(tier) || tier.includes(said('Perfect Rare'));
+    /** The item's description (dfo_item_text.js) under the card, beside the price: its sentences, the stolen mark on
+     *  a line of its own in red, then the player hint in white after a blank line. Null without the text runtime. */
+    function description(item, data, perfect) {
+      const api = win.__dfoItemText;
+      if (!api || typeof api.describe !== 'function') return null;
+      const facts = perfect && data.known ? { ...data.facts, perfect: true } : data.facts;
+      const fragments = api.describe(item, facts);
+      if (!Array.isArray(fragments) || !fragments.length) return null;
+      const said = list => list.map(f => f.text).filter(t => typeof t === 'string' && t).join(' ');
+      const parts = [['body', said(fragments.filter(f => f.category !== 'hint' && f.category !== 'standing'))],
+        ['stolen', said(fragments.filter(f => f.category === 'standing'))], ['hint', said(fragments.filter(f => f.category === 'hint'))]];
+      const box = node('div', 'dfo-item-text');
+      for (const [kind, words] of parts) {
+        if (!words) continue;
+        // Already in the player's language: a text node, so the RU runtime does not translate it a second time.
+        const paragraph = node('p', 'dfo-item-text-' + kind); paragraph.append(doc.createTextNode(words)); box.append(paragraph);
+      }
+      return box.children.length ? box : null;
     }
 
     function groupedPowers(list, data) {
@@ -330,7 +364,10 @@ body .card.dfo-item-card[data-rarity=gilded] { border-width:4px!important; borde
         for(const [tag,attributes]of [['circle',{cx:10,cy:10,r:8,fill:'#8e6118',stroke:'currentColor','stroke-width':1.5}],['circle',{cx:10,cy:10,r:5.5,fill:'#c99a2d',stroke:'#f8df80','stroke-width':.8}],['path',{d:'M8 6.5h2.2c4 0 4 7 0 7H8zm1-1.5v10',fill:'none',stroke:'#805313','stroke-width':1.4}]]){
           const part=doc.createElementNS('http://www.w3.org/2000/svg',tag);for(const [key,value]of Object.entries(attributes))part.setAttribute(key,String(value));coin.append(part);
         }
-        priceBox.append(priceValue,coin); footer.append(priceBox);
+        priceBox.append(priceValue,coin);
+        const text = description(line.item, data, card.dataset.rarity === 'rare' && !!tier && isPerfect(tier));
+        if (text) footer.append(text);
+        footer.append(priceBox);
         // A native render is a snapshot: sizing must not repeatedly read game rules or mix a fresh price with old stats.
         const state = { main, left, effects, overflow, blocks: [...effects.children], footer, priceBox, priceValue, dirty: true, host: null };
         price(state, data);

@@ -33,7 +33,7 @@ const OWN = Object.freeze({   // served at dagger://game/dfo-mod/<name>
   'item-font-title.ttf': 'fonts/item-font-title.ttf', 'item-font-text.ttf': 'fonts/item-font-text.ttf',
   'item-font-numbers.ttf': 'fonts/item-font-numbers.ttf', 'book-font-text.ttf': 'fonts/book-font-text.ttf',
   'item-font-sigil.ttf': 'fonts/item-font-sigil.ttf', 'item-font-set.ttf': 'fonts/item-font-set.ttf',
-  'item-font-legendary.otf': 'fonts/item-font-legendary.otf',
+  'item-font-legendary.otf': 'fonts/item-font-legendary.otf', 'item-font-description.otf': 'fonts/item-font-description.otf',
   'dfo_dungeon_model.js': 'page/dfo_dungeon_model.js', 'dfo_dungeons.js': 'page/dfo_dungeons.js',
   'dfo_dungeon_live_model.js': 'page/dfo_dungeon_live_model.js',
   'dfo_dungeon_graph.js': 'page/dfo_dungeon_graph.js',
@@ -174,7 +174,7 @@ function wrap(handleDagger, { app = null } = {}) {
         if(/\.html$/i.test(rel)||!rel){
           const res=await handleDagger(req);if(!res?.ok)return res;
           const {preparePage}=require('./fonts-transform.cjs');
-          const scripts='<script src="/dfo-mod/dfo_font_data.js?dfo=1.23.0"></script><script src="/dfo-mod/dfo_fonts.js?dfo=1.23.0"></script>';
+          const scripts='<script src="/dfo-mod/dfo_font_data.js?dfo=1.24.0"></script><script src="/dfo-mod/dfo_fonts.js?dfo=1.24.0"></script>';
           const html=await res.text();return new Response(preparePage(html.replace('</head>',scripts+'</head>')),{headers:res.headers,status:res.status});
         }
       }

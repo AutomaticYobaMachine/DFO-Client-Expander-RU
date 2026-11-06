@@ -9,13 +9,13 @@ DFO Online.
 
 ## Скачать готовую программу
 
-Готовый релиз **1.23.0**. Версия 1.22.0 предложит обновление диалогом «Да/Нет».
+Готовый релиз **1.24.0**. Версии 1.22.0 и 1.23.0 предложат обновление диалогом «Да/Нет».
 При переходе с более ранних версий скачайте и запустите новый EXE вручную.
 
-**[Скачать установщик EXE для Windows 10/11 x64](https://github.com/AutomaticYobaMachine/DFO-Client-Expander-RU/releases/download/v1.23.0/DFO-Client-Expander-RU-1.23.0.exe)**
+**[Скачать установщик EXE для Windows 10/11 x64](https://github.com/AutomaticYobaMachine/DFO-Client-Expander-RU/releases/download/v1.24.0/DFO-Client-Expander-RU-1.24.0.exe)**
 
-[ZIP с программой, инструкцией и лицензиями](https://github.com/AutomaticYobaMachine/DFO-Client-Expander-RU/releases/download/v1.23.0/DFO-Client-Expander-RU-1.23.0.zip)
-· [Страница релиза](https://github.com/AutomaticYobaMachine/DFO-Client-Expander-RU/releases/tag/v1.23.0)
+[ZIP с программой, инструкцией и лицензиями](https://github.com/AutomaticYobaMachine/DFO-Client-Expander-RU/releases/download/v1.24.0/DFO-Client-Expander-RU-1.24.0.zip)
+· [Страница релиза](https://github.com/AutomaticYobaMachine/DFO-Client-Expander-RU/releases/tag/v1.24.0)
 
 EXE уже содержит все компоненты. В ZIP находятся только EXE, инструкция и лицензии.
 
@@ -44,6 +44,12 @@ EXE уже содержит все компоненты. В ZIP находятс
 с последним релизом игры.
 
 ## Установщик и рабочая ветка
+
+В **1.24.0** в карточке предмета появилось описание: внизу слева от цены —
+художественные фразы о вещи (основа, металл, цвет одежды, редкость, набор, силы,
+ремесло, износ), краденое красной строкой и подсказка игроку белым. Только то,
+что видно в игре; язык — по русификации.
+[Описания](docs/item-text.md) · [Карточка](docs/item-cards.md).
 
 В **1.23.0** исправлены читаемость и перевод семейств торговых окон,
 банка, заказов, книги/создания заклинаний и зачарования. Вложенный выбор эффекта

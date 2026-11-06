@@ -7,6 +7,8 @@
 // properties/*.csv      key,<form>,<form>,...             - one sentence per modular property, a column per form
 // combos/gear.csv       key,variant,text                  - a weapon or armour piece with its type and {material}
 // combos/metals.csv     key,text                          - the metal slot's phrase; "unknown" when it is not shown
+// combos/clothing.csv   key,text                          - a garment with its {color} (slot 1, when the game dyed it)
+// combos/colors.csv     key,<form>...                     - a dye's colour word in each form ("dye.0": синий/синяя/...)
 // combos/properties.csv key,requires,<form>...            - one sentence for two properties ("a+b", "x.*")
 // combos/legendaries.csv key,templates,<form>...          - a Legendary's own sentence of {base} and power
 // combos/tiers.csv      key,<form>...                     - slot 2: tier + sigil + set ({set})
@@ -162,6 +164,21 @@ function loadLocale(dir) {
     metals[row.key] = row.text;
   });
   if (Object.keys(gear).length && !metals.unknown) throw new Error(`${dir}: frames need the neutral metal phrase "unknown"`);
+  // A garment and its colour: one frame per clothing template, the colour said in the base's form.
+  const clothing = {}, colors = {};
+  tables(index.clothing, ['key', 'text'], (row, where) => {
+    if (!Object.hasOwn(bases, row.key) || Object.hasOwn(clothing, row.key)) throw new Error(`${where}: frame for an unknown or repeated base ${row.key}`);
+    checkText(where, row.text, new Set(['color']));
+    if ((row.text.match(PLACEHOLDER) || []).length !== 1 || !row.text.includes('{color}')) throw new Error(`${where}: a garment's frame says its {color} once`);
+    clothing[row.key] = row.text;
+  });
+  tables(index.colors, ['key', ...required], (row, where) => {
+    if (!/^dye\.\d{1,2}$/.test(row.key) || Object.hasOwn(colors, row.key)) throw new Error(`${where}: bad or repeated colour ${row.key}`);
+    const text = formsOf(where, row, new Set());
+    if (Object.values(text).some(t => /[.!?]$/.test(t))) throw new Error(`${where}: a colour is a word, not a sentence`);
+    colors[row.key] = text;
+  });
+  if (Object.keys(clothing).length && !Object.keys(colors).length) throw new Error(`${dir}: garment frames need the colours`);
   tables(index.combos, ['key', 'requires', ...forms], (row, where) => {
     if (!COMBO.test(row.key) || combos.some(c => c.key === row.key)) throw new Error(`${where}: bad or repeated combination ${row.key}`);
     const requires = row.requires.split('+');
@@ -190,6 +207,11 @@ function loadLocale(dir) {
     if (typeof to !== 'string' || !from.trim() || !to.trim() || /[{}]/.test(from + to)) throw new Error(`${dir}: bad opening ${from}`);
     openings[from] = to;
   }
+  const inlineNames = {};
+  for (const [key, word] of Object.entries(index.inlineNames ?? {})) {
+    if (!Object.hasOwn(bases, key) || typeof word !== 'string' || !word.trim() || /[{}]/.test(word)) throw new Error(`${dir}: bad inline name ${key}`);
+    inlineNames[key] = word;
+  }
   const rules = loadRules(path.join(dir, '..', 'rules.json'));
   const hints = loadHints(path.join(dir, '..', 'hints.json'));
   // Every hint the map names, and the silver sentences, must be said in this locale: a hint is never left unsaid.
@@ -197,7 +219,7 @@ function loadLocale(dir) {
   for (const key of named) if (!Object.hasOwn(properties, key)) throw new Error(`${dir}: no text for ${key}`);
   for (const key of Object.keys(hints.templates)) if (!Object.hasOwn(bases, key)) throw new Error(`${dir}: hints.json names template ${key}, which has no base row`);
   return { locale, name: index.name ?? locale, forms, defaultForm, inlineName: index.inlineName ?? null, bases, properties,
-    gear, metals, combos, legendaries, tiers, sets, rules, hints, openings };
+    gear, metals, clothing, colors, combos, legendaries, tiers, sets, rules, hints, openings, inlineNames };
 }
 
 /** The universal order every locale shares: categories that sort fragment keys, and the queue of slots. */
@@ -264,7 +286,7 @@ function bundle(locale, root = ROOT) {
 /** Every file a locale needs, relative to the item-text folder: what the patcher puts into the game's archive. */
 function localeFiles(locale, root = ROOT) {
   const index = JSON.parse(fs.readFileSync(path.join(root, locale, 'index.json'), 'utf8'));
-  return ['index.json', ...['bases', 'properties', 'gear', 'metals', 'combos', 'legendaries', 'tiers', 'sets'].flatMap(k => index[k] ?? [])]
+  return ['index.json', ...['bases', 'properties', 'gear', 'metals', 'clothing', 'colors', 'combos', 'legendaries', 'tiers', 'sets'].flatMap(k => index[k] ?? [])]
     .map(rel => `${locale}/${rel}`);
 }
 /** What an install carries: the shared rules and hints and the files of each locale it speaks. */

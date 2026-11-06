@@ -1,6 +1,6 @@
 key,s,p,note
-curse.cursed,"A curse lies on it; a temple priest could lift it, for a price.","A curse lies on them; a temple priest could lift it, for a price.","cursed, said once identified"
-curse.damned,It is damned: no temple will lift this curse.,They are damned: no temple will lift this curse.,"damned: Health Leech, whenever used; no temple lifts it"
+curse.cursed,"A curse lies on it, and you feel its unkind weight.","A curse lies on them, and you feel its unkind weight.","cursed, said once identified"
+curse.damned,It is damned for good: the curse has eaten deep into it.,They are damned for good: the curse has eaten deep into them.,"damned: Health Leech, whenever used; no temple lifts it"
 content.potion,Through the stopper you smell herbs and something sharp.,,a bottle holding a potion (potionRecipeKey)
 content.potent,The brew is unusually potent.,,a potent potion (item.potent)
 content.soul,A captured soul swirls inside it.,A captured soul swirls inside them.,a soul trap holding a soul (trappedSoulType)

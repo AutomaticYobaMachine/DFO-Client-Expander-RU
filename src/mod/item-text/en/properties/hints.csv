@@ -14,62 +14,62 @@ hint.crafted,"A crafted piece may be worn, sold, or disenchanted into Arcane Ess
 hint.rare,Rare magic is worth wearing; the Mages Guild can reforge a weak line.,,a Rare piece
 hint.magic,"If the magic does not suit, reforge a line or break it into Welkynd Shards.","If the magic does not suit, reforge a line or break them into Welkynd Shards.",a Magic piece
 hint.enchanted,"Enchanted goods serve with their magic, and fetch far more than plain ones.",,DFU's own enchanted piece (no tier)
-hint.food.spoiled,"Food this far gone barely feeds you, and on Hard it may bring disease.",,food Rotten or Putrid
+hint.food.spoiled,"Food this far gone barely feeds you, and on Hard survival it may bring disease.",,food Rotten or Putrid
 hint.soul.filled,The captured soul waits its hour: an enchanter will weave its strength into new magic.,,a soul trap holding a soul
 hint.weapon.common,"Better than nothing in a pinch: fit for a fight, an enchanter or a trader.",,"templates: Dagger, Tanto, Staff, Shortsword, Wakizashi, Broadsword (+17)"
 hint.armor.common,"Better than nothing in a pinch: wear it now, enchant or sell it later.","Better than nothing in a pinch: wear them now, enchant or sell them later.","templates: Cuirass, Gauntlets, Greaves, Left Pauldron, Right Pauldron, Helm (+17)"
 hint.ammo.arrow,Arrows fly off one after another: keep the quiver full before a long road.,,templates: Arrow
 hint.ammo.bullet,Dwemer firearms swallow bullets greedily: a spare supply is never wasted.,,templates: Dwemer Pellet
-hint.jewellery,"Plain metal without magic is the best ground for an enchanter, and traders pay well.",,"templates: Amulet, Bracer, Ring, Bracelet, Mark, Torc (+2)"
+hint.jewellery,"A piece without magic is the best ground for an enchanter, and traders pay well.",,"templates: Amulet, Bracer, Ring, Bracelet, Mark, Torc (+2)"
 hint.clothing.common,"In plain clothes commoners take you for one of their own, while nobles wince.",,"templates: Straps, Armbands, Sandals, Casual Pants, Breeches, Casual Cloak (+24)"
 hint.clothing.fine,"In fine clothes nobles and merchants receive you warmly, while common folk keep away.",,"templates: Kimono, Fancy Armbands, Formal Cloak, Dwynnen Surcoat, Formal Tunic, Toga (+6)"
 hint.clothing.religious,Priestly robes open the temples' hearts and win a little favour with scholars.,,"templates: Priest Robes, Priestess Robes"
 hint.clothing.plain,"Clothing keeps the warmth in on a cold day, and any trader buys a spare.",,"templates: Sash, Eodoric, Shoes, Tall Boots, Boots, Short Skirt (+26)"
-hint.gem,"The stone will sit in a weapon's or armour's socket, or in a jeweller's piece.",,"templates: Ruby, Emerald, Sapphire, Diamond, Jade, Turquoise (+3)"
-hint.gem.graded,"A cut gem fills a socket or a jeweller's bench, and traders pay dearly.",,"templates: Chipped Ruby, Chipped Emerald, Chipped Sapphire, Chipped Diamond, Chipped Jade, Chipped Turquoise (+26)"
+hint.gem,"The stone will sit in a weapon's or armour's socket, or in a jeweller's piece.",,"templates: Ruby, Emerald, Sapphire, Diamond, Jade, Turquoise (+2)"
+hint.gem.graded,"A gem like this graces a weapon's socket or a ring, and traders pay dearly.",,"templates: Chipped Ruby, Chipped Emerald, Chipped Sapphire, Chipped Diamond, Chipped Jade, Chipped Turquoise (+26)"
 hint.pearl,"A pearl graces a jeweller's work, and an alchemist finds it a place in potions.",,templates: Pearl
-hint.herb.alchemy,At an alchemy station this goes into more than one useful potion.,,"templates: Red Flowers, Yellow Flowers, Pine Branch, Red Berries, Yellow Rose, Black Rose (+10)"
+hint.herb.alchemy,This could go into more than one useful potion; alchemists prize it.,,"templates: Red Flowers, Yellow Flowers, Pine Branch, Red Berries, Yellow Rose, Black Rose (+10)"
 hint.herb.cooking,Over a fire this makes a hearty dish for the road.,,"templates: Root Bulb, Yellow Berries"
-hint.herb.both,Welcome both at the alchemist's table and at the cook's campfire.,,templates: Green Leaves
+hint.herb.both,Good both for a potion and for a hearty camp meal.,,templates: Green Leaves
 hint.herb.arrows,"An alchemist will find a use for it, and a carpenter will whittle arrow shafts.",,templates: Twigs
-hint.herb.linen,At a loom these thin roots are spun into strong linen cloth.,,templates: Root Tendrils
+hint.herb.linen,These thin roots are spun into strong linen cloth.,,templates: Root Tendrils
 hint.herb.plain,No known recipe asks for it: such things are best carried straight to market.,,"templates: Green Berries, Clover, Red Rose, Red Poppy"
 hint.reagent,A rare reagent: in skilled hands it becomes a strong potion.,,"templates: Werewolf's Blood, Fairy Dragon's Scales, Unicorn Horn, Ectoplasm, Spider's Venom, Troll's Blood (+8)"
 hint.reagent.base,Hardly any potion of the alchemist's does without such a base.,,"templates: Pure Water, Rain Water, Elixir Vitae, Nectar, Ichor"
 hint.reagent.mineral,An alchemist prizes such a mineral as a rare and strong ingredient.,,templates: Lodestone
-hint.reagent.unused,"No known recipe asks for it, but an alchemist gladly buys a curiosity.","No known recipe asks for them, but an alchemist gladly buys a curiosity.","templates: Wereboar's Tusk, Nymph Hair, Wraith Essence, Ghoul's Tongue, Gorgon Snake, Lich Dust (+7)"
-hint.daedra-heart,Only with such a heart does ebony become a Daedric ingot in the forge.,,templates: Daedra's Heart
-hint.drug,"The drug grants a brief oblivion, but it pays better to sell than to try.",,"templates: Indulcet, Sursum, Quaesto Vil, Aegrotat"
-hint.metal.iron,In the forge's heat two of these melt into an iron ingot for the smith.,,templates: Iron
-hint.metal.tin,"Tin goes into weapons, and in the forge it meets copper to become brass.",,templates: Tin
-hint.metal.copper,"Copper trims a weapon's fittings, and in the forge it meets tin to become brass.",,templates: Copper
-hint.metal.brass,No recipe asks for brass itself: it is a ready good for the market.,,templates: Brass
-hint.metal.silver,"Silver melts into ingots, and a jeweller turns it into rings and amulets.",,templates: Silver
-hint.metal.precious,A precious metal that begs for a jeweller's bench: rings and amulets.,,"templates: Gold, Platinum"
-hint.metal.mercury,Mercury serves the alchemist and can turn common metals into noble ones.,,templates: Mercury
-hint.metal.sulphur,"Sulphur serves the alchemist, and with stone a mason mixes mortar from it.",,templates: Sulphur
-hint.metal.lead,With lead and stone a mason mixes good building mortar.,,templates: Lead
-hint.ore,In the forge's heat two measures of this melt into one ingot.,,"templates: Moonstone Ore, Dwarven Scrap, Mithril Ore, Adamantium Ore, Ebony Ore, Orichalcum Ore"
-hint.ingot,"Under the hammer an ingot becomes a weapon, armour or a repair kit.",,"templates: Steel Ingot, Silver Ingot, Moonstone Ingot, Dwarven Ingot, Mithril Ingot, Adamantium Ingot (+3)"
-hint.ingot.iron,With charcoal this ingot becomes steel; alone it makes weapons and arrowheads.,,templates: Iron Ingot
-hint.ingot.ebony,"Ebony makes the finest arms, and with a daedra's heart it becomes Daedric.",,templates: Ebony Ingot
-hint.log,"At a workbench a log becomes planks, and in the forge, charcoal.",,"templates: Pine Log, Oak Log, Cherry Log, Teak Log, Mahogany Log, Ironwood Log (+1)"
-hint.plank,"At a workbench planks become staves, bows and sturdy furniture.",,"templates: Pine Plank, Oak Plank, Cherry Plank, Teak Plank, Mahogany Plank, Ironwood Plank (+1)"
-hint.charcoal,The heat of charcoal turns iron into steel in the forge.,,templates: Charcoal
-hint.resin,No good bow holds together without resin: a carpenter will be glad of it.,,templates: Resin
+hint.reagent.unused,"No known recipe asks for it, but an alchemist gladly buys a curiosity.","No known recipe asks for them, but an alchemist gladly buys a curiosity.","templates: Wereboar's Tusk, Nymph Hair, Wraith Essence, Ghoul's Tongue, Gorgon Snake, Lich Dust (+6)"
+hint.daedra-heart,They say only such a heart turns ebony into Daedric metal.,,templates: Daedra's Heart
+hint.drug,A drug's effect is brief and treacherous: better sold than tried.,,"templates: Indulcet, Sursum, Quaesto Vil, Aegrotat"
+hint.metal.iron,A couple of lumps like this could make good iron.,,templates: Iron
+hint.metal.tin,"Tin is handy to a smith, and with copper it turns to brass.",,templates: Tin
+hint.metal.copper,"Copper is handy to a smith, and with tin it turns to brass.",,templates: Copper
+hint.metal.brass,Brass itself is of little use to a craft: easier to sell it.,,templates: Brass
+hint.metal.silver,"This silver could become an ingot, or a fine piece of jewellery.",,templates: Silver
+hint.metal.precious,Metal like this begs for a jeweller's hands: rings and amulets.,,"templates: Gold, Platinum"
+hint.metal.mercury,Alchemists prize mercury: with it a common metal can turn noble.,,templates: Mercury
+hint.metal.sulphur,"Sulphur serves the alchemist, and a mason mixes mortar with it.",,templates: Sulphur
+hint.metal.lead,Lead serves a mason: it makes a strong mortar.,,templates: Lead
+hint.ore,This is fit to be smelted down into an ingot.,,"templates: Moonstone Ore, Dwarven Scrap, Mithril Ore, Adamantium Ore, Ebony Ore, Orichalcum Ore"
+hint.ingot,You think a weapon or a piece of armour could well be forged from this.,,"templates: Steel Ingot, Silver Ingot, Moonstone Ingot, Dwarven Ingot, Mithril Ingot, Adamantium Ingot (+3)"
+hint.ingot.iron,"An iron ingot makes weapons, and with charcoal, good steel.",,templates: Iron Ingot
+hint.ingot.ebony,"Ebony makes the finest arms, and with a daedra's heart, Daedric ones.",,templates: Ebony Ingot
+hint.log,"A log makes good planks, or charcoal if it is burned.",,"templates: Pine Log, Oak Log, Cherry Log, Teak Log, Mahogany Log, Ironwood Log (+1)"
+hint.plank,"A carpenter could make a staff, a bow or furniture of planks like these.",,"templates: Pine Plank, Oak Plank, Cherry Plank, Teak Plank, Mahogany Plank, Ironwood Plank (+1)"
+hint.charcoal,"Without charcoal, iron will never become steel.",,templates: Charcoal
+hint.resin,A carpenter needs resin to glue a good bow together.,,templates: Resin
 hint.heartwood,Carpenters keep heartwood for the very best of their work.,,templates: Heartwood
-hint.pelt,At a loom a pelt becomes soft leather or a skein of wool.,,"templates: Rat Pelt, Bear Hide, Tiger Pelt, Wolf Pelt, Boar Hide"
-hint.hide,At a loom this is cured into soft leather for armour and clothing.,,"templates: Bat Leather, Mudcrab Chitin"
-hint.chitin,"Cured at a loom, this becomes hardened leather for sturdy armour.",,"templates: Scorpion Chitin, Slaughterfish Scales, Dreugh Shell, Dragonling Scale"
-hint.silk,At a loom spider silk turns into fine silk cloth.,,templates: Spider Silk
-hint.feathers,Harpy feathers give arrows the truest fletching.,,templates: Harpy Feathers
+hint.pelt,A pelt like this could become soft leather or a skein of wool.,,"templates: Rat Pelt, Bear Hide, Tiger Pelt, Wolf Pelt, Boar Hide"
+hint.hide,"Cured, this becomes soft leather for armour and clothing.",,"templates: Bat Leather, Mudcrab Chitin"
+hint.chitin,"Cured, this makes tough leather for armour.",,"templates: Scorpion Chitin, Slaughterfish Scales, Dreugh Shell, Dragonling Scale"
+hint.silk,This raw silk can be woven into fine silk cloth.,,templates: Spider Silk
+hint.feathers,Feathers like these will fletch good arrows.,,templates: Harpy Feathers
 hint.leather,"Leather becomes light armour, clothing and comfortable weapon grips.",,templates: Cured Leather
 hint.leather.hard,Hardened leather is the heart of sturdy leather armour.,,templates: Hardened Leather
-hint.cloth,At a loom cloth is sewn into clothing of every kind.,,"templates: Linen Bolt, Wool Bolt, Silk Bolt, Standard-bearer's Silk"
-hint.stone,At a mason's bench stone is cut into blocks or mixed into mortar.,,templates: Rough Stone
-hint.masonry,"A mason makes a column, a bench or a statue's plinth of this.",,"templates: Cut Stone, Mortar"
+hint.cloth,A tailor could sew clothing of any kind from this cloth.,,"templates: Linen Bolt, Wool Bolt, Silk Bolt, Standard-bearer's Silk"
+hint.stone,This stone will do to cut a block or mix some mortar.,,templates: Rough Stone
+hint.masonry,"A mason could raise a column, a bench or a statue's plinth with this.",,"templates: Cut Stone, Mortar"
 hint.essence,Arcane Essence is the price of reforging a line on Magic and Rare pieces.,,templates: Arcane Essence
-hint.trade,"Bought where it is made, this good grows dear in a port that wants it.",,"templates: Carpenter's Stores, Wine, Grain, Wool, Iron, Spices (+6)"
+hint.trade,"Cheap where it is made, this good is dear in a port that wants it.",,"templates: Carpenter's Stores, Wine, Grain, Wool, Iron, Spices (+6)"
 hint.food,"When hunger gnaws on the road, this will keep you going.",,"templates: Rations, Apple, Orange, Bread, Cooked Fish, Meat (+2)"
 hint.food.cook,"Fine to eat as it is, but by a fire it makes a heartier dish.",,"templates: Mushroom, Egg"
 hint.food.raw,Better not eaten raw: over a fire it is both safer and more filling.,,"templates: Raw Fish, Raw Meat, Fish, Longnose Butterflyfish, Largemouth Bass, Canary Rockfish (+4)"
@@ -143,9 +143,11 @@ hint.horse,A horse carries you fast along the roads; just do not forget the oats
 hint.ship,A ship sails the open sea and carries goods from port to port.,,"templates: Rowboat, Large Boat, Small Ship, Large Galley"
 hint.dragon,"Your brass dragon carries you through the sky, if you do not spare its oil.",,templates: Dwarven Dragon
 hint.sell,A trinket for selling: traders will give a few coins for it.,A trinket for selling: traders will give a few coins for them.,a template the map does not name (fallback)
-hint.silver.writ,"Gathered by your own hand, it will fetch silver on a Court writ.",,"second sentence: a market material, the character in no guild"
+hint.silver.writ,"What you gather or make by your own hand, the Court buys for silver.",,"second sentence: a market material, the character in no guild"
 hint.silver.writ.guild,"Perhaps my guild would be interested in this, and would pay in silver.",,"second sentence: a market material, the character in a guild (facts.guild)"
 hint.silver.potion,A potion of your own brewing fetches silver from guilds and temples.,,second sentence: a potion (crafting writ)
 hint.silver.dish.fighters,The Fighters Guild pays silver for dishes of your own cooking.,,"second sentence: Hunter's Stew, Fisherman's Supper"
 hint.silver.dish.mara,The Temple of Mara pays silver for treats of your own cooking.,,"second sentence: Orchard Tart, Feast of the Hearth"
 hint.silver.kit,The Fighters Guild pays silver for repair kits of your own make.,,second sentence: a Repair Kit
+hint.siege-gem,It can be set in a socket like any other gem.,,templates: Siege-cracked Gem
+hint.relic,A relic like this is best sold: it fetches a good price.,,templates: Holy Relic

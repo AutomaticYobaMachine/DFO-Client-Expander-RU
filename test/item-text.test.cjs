@@ -141,13 +141,16 @@ test('sentences agree with the base item: Russian gender and plural, English num
   assert.match(say(ru, { group: 'Jewellery', templateIndex: 135, rarity: 'magic' }, steel)[1], /^На нём/);        // кольцо
   assert.match(say(ru, { group: 'Jewellery', templateIndex: 138, rarity: 'magic' }, steel)[1], /^На ней/);        // гривна
   assert.match(say(ru, { group: 'Jewellery', templateIndex: 133, rarity: 'magic' }, steel)[1], /^На нём/);        // амулет
-  assert.match(say(ru, { group: 'MensClothing', templateIndex: 143, dye: 2 }, steel)[1], /^Оно окрашено/);         // кимоно
-  assert.match(say(ru, { group: 'MensClothing', templateIndex: 141, dye: 2 }, steel)[1], /^Они окрашены/);         // ремни
-  assert.match(say(en, { group: 'MensClothing', templateIndex: 141, dye: 2 }, steel)[1], /^They have been dyed/);
-  assert.match(say(en, { group: 'MensClothing', templateIndex: 143, dye: 2 }, steel)[1], /^It has been dyed/);
+  // A garment's colour agrees with it in its first sentence (slot 1), the base and the dye said together.
+  assert.match(say(ru, { group: 'MensClothing', templateIndex: 143, dye: 2 }, steel)[0], /^Красное акавирское кимоно/);  // кимоно
+  assert.match(say(ru, { group: 'MensClothing', templateIndex: 141, dye: 2 }, steel)[0], /^Красные кожаные ремни/);      // ремни
+  assert.match(say(ru, { group: 'WomensClothing', templateIndex: 184, dye: 6 }, steel)[0], /^Свободная белая деревенская блуза/);
+  assert.match(say(ru, { group: 'MensClothing', templateIndex: 145, dye: 8 }, steel)[0], /^Широкий жёлтый пояс/);
+  assert.match(say(en, { group: 'MensClothing', templateIndex: 141, dye: 2 }, steel)[0], /^Red leather straps/);
+  assert.match(say(en, { group: 'MensClothing', templateIndex: 143, dye: 2 }, steel)[0], /^A red Akaviri robe/);
   // A Legendary's own sentence takes the base's name and form.
   const legend = (pack, item) => describe(pack, item, { known: true }, ALL).find(f => f.category === 'power').text;
-  assert.match(legend(ru, { group: 'Armor', templateIndex: 103, rarity: 'legendary', legendary: 'gauntlets-of-the-rose' }), /^Эти латные перчатки Розы бьют/);
+  assert.match(legend(ru, { group: 'Armor', templateIndex: 103, rarity: 'legendary', legendary: 'gauntlets-of-the-rose' }), /^Эти боевые перчатки Розы бьют/);
   assert.match(legend(ru, { group: 'Weapons', templateIndex: 128, legendary: 'graveward' }), /^Эта секира упокаивает/);
   assert.match(legend(en, { group: 'Weapons', templateIndex: 120, legendary: 'wyrmbane' }), /^This longsword, made/);
   // A group-specific row wins over the template's own (keys like "Deeds:0" are allowed by the loader).
@@ -216,6 +219,9 @@ test('every fragment is one sentence of 5 to 15 words, in every form and with ev
     for (const [key, row] of Object.entries(pack.properties)) for (const [form, t] of Object.entries(row)) check(`${pack.locale} ${key} ${form}`, t);
     for (const combo of pack.combos) for (const [form, t] of Object.entries(combo.text)) check(`${pack.locale} ${combo.key} ${form}`, t);
     for (const [id, frame] of Object.entries(pack.gear)) for (const metal of Object.values(pack.metals)) check(`${pack.locale} frame ${id}`, frame.replace('{material}', metal));
+    for (const [id, frame] of Object.entries(pack.clothing)) for (const color of Object.values(pack.colors)) {
+      check(`${pack.locale} garment ${id}`, frame.replace('{color}', color[pack.bases[id].form] ?? color[pack.defaultForm]));
+    }
     for (const [key, row] of Object.entries(pack.tiers)) for (const [form, t] of Object.entries(row)) for (const set of Object.values(pack.sets)) check(`${pack.locale} ${key} ${form}`, t.replace('{set}', set));
     const rows = text.readTable(path.join(text.ROOT, pack.locale, 'combos', 'legendaries.csv')).rows;
     for (const row of rows) for (const t of row.templates.split(/\s+/)) {
@@ -225,6 +231,30 @@ test('every fragment is one sentence of 5 to 15 words, in every form and with ev
       check(`${pack.locale} ${row.key} on ${t}`, pack.legendaries[row.key][base.form].replace('{base}', name));
     }
   }
+});
+
+test('slot 1 of a garment: the base with its colour, in the gender of the base; no colour, the plain base', () => {
+  // The user's review of 6 November: a garment's dye is its colour, said in the first sentence with the base.
+  const first = (pack, item) => describe(pack, item, { known: true }, ALL)[0];
+  const clothingTemplates = catalog.knownPublicTemplates.filter(t => (t.groups || []).some(g => /Clothing$/.test(g))).map(t => String(t.index));
+  for (const pack of [en, ru]) {
+    assert.deepEqual(Object.keys(pack.clothing).sort(), [...new Set(clothingTemplates)].sort(), `${pack.locale}: a colour frame for every garment`);
+    assert.deepEqual(Object.keys(pack.colors).sort(), Array.from({ length: 10 }, (_, d) => `dye.${d}`).sort(), `${pack.locale}: the ten clothing dyes`);
+  }
+  const shirt = first(ru, { group: 'WomensClothing', templateIndex: 205, dye: 0 });
+  assert.equal(shirt.key, 'clothing.205');
+  assert.equal(shirt.text, 'Синяя рубаха с длинными рукавами из простой ткани.');
+  assert.equal(first(ru, { group: 'MensClothing', templateIndex: 148, dye: 3 }).text, 'Высокие, до колена, тёмно-коричневые сапоги для верховой езды из мягкой кожи.');
+  assert.match(first(ru, { group: 'MensClothing', templateIndex: 143, dye: 6 }).text, /^Белое акавирское кимоно/);
+  assert.match(first(ru, { group: 'MensClothing', templateIndex: 154, dye: 9 }).text, /^Простой зелёный плащ/);
+  assert.equal(first(en, { group: 'WomensClothing', templateIndex: 205, dye: 2 }).text, 'A red long-sleeved shirt of plain cloth.');
+  assert.match(first(en, { group: 'MensClothing', templateIndex: 141, dye: 1 }).text, /^Grey leather straps/);
+  // No dye, or the game's Unchanged (18): the plain base. The colour's own sentence stays out of the queue.
+  assert.equal(first(ru, { group: 'MensClothing', templateIndex: 165 }).key, 'base');
+  assert.equal(first(ru, { group: 'MensClothing', templateIndex: 165, dye: 18 }).key, 'base');
+  assert.ok(!describe(ru, { group: 'MensClothing', templateIndex: 165, dye: 2 }, { known: true }).some(f => f.key.startsWith('dye.')));
+  // Armour is never dyed into a colour sentence: its metal is its colour.
+  assert.notEqual(first(ru, { group: 'Armor', templateIndex: 102, dye: 2 }).key.startsWith('clothing.'), true);
 });
 
 test('slot 1: base + armour type + metal, else base + metal, else the plain base', () => {
@@ -387,6 +417,25 @@ test('every item ends with the player hint: its own paragraph, the state first, 
   assert.equal(describe(ru, { ...iron, questItem: true }, { guild: true }).filter(f => f.category === 'hint').length, 1, 'a quest item is no writ good');
   assert.deepEqual(describe(en, { group: 'UselessItems2', templateIndex: 685 }).filter(f => f.category === 'hint').map(f => f.key), ['hint.dish', 'hint.silver.dish.fighters']);
   assert.equal(describe(en, { group: 'Furniture', templateIndex: 217 }, { guild: true }).filter(f => f.category === 'hint').length, 1, 'furniture is no writ good');
+  // A crafting hint says plainly what the thing is good for: no station names and no counts of what a recipe takes
+  // (the user's review of 6 November: "Из пары таких кусков может выйти добротное железо.").
+  const crafting = /^hint\.(ore|metal|ingot|daedra-heart|charcoal|log|plank|resin|pelt|hide|chitin|silk|cloth|stone|masonry|gem|siege-gem|herb|feathers|leather|pearl|reagent)/;
+  const station = { en: /\b(anvil|loom|furnace|smelter|kiln|crucible|workbench|forge)\b/i,
+    ru: /(горн|наковальн|станок|станк|верстак|плавильн|тигел|тигл)/i };
+  const count = { en: /\b(two|three|four|five|six|ten|dozen)\b/i, ru: /(^|[\s«(])(дв[ае]|три|четыре|пять|шесть|десять|дюжин\S*)(?=[\s,.;:—]|$)/i };
+  let checked = 0;
+  for (const pack of [en, ru]) {
+    for (const [key, sentence] of Object.entries(pack.properties)) {
+      if (!crafting.test(key)) continue;
+      for (const form of Object.values(sentence)) {
+        assert.doesNotMatch(form, /\d/, `${pack.locale} ${key}: no figures`);
+        assert.doesNotMatch(form, station[pack.locale], `${pack.locale} ${key}: no station`);
+        assert.doesNotMatch(form, count[pack.locale], `${pack.locale} ${key}: no counts`);
+        checked++;
+      }
+    }
+  }
+  assert.ok(checked > 40, `crafting hints checked: ${checked}`);
 });
 
 test('the stolen mark stands on its own line; ammunition is never worn down; two sentences never open alike', () => {
@@ -492,7 +541,7 @@ test('the page gets Russian only with the translation installed, and the scripts
     assert.equal(win.__dfoItemTextPack.locale, locale);
     assert.equal(Object.keys(win.__dfoItemTextPack.bases).length, 483);
     const index = JSON.parse(fs.readFileSync(path.join(text.ROOT, locale, 'index.json')));
-    const listed = ['bases', 'properties', 'gear', 'metals', 'combos', 'legendaries', 'tiers', 'sets'].flatMap(k => index[k] ?? []);
+    const listed = ['bases', 'properties', 'gear', 'metals', 'clothing', 'colors', 'combos', 'legendaries', 'tiers', 'sets'].flatMap(k => index[k] ?? []);
     assert.deepEqual(text.localeFiles(locale).filter(f => f.endsWith('.csv')), listed.map(f => `${locale}/${f}`));
     for (const file of text.localeFiles(locale)) assert.ok(fs.existsSync(path.join(text.ROOT, file)), file);
     assert.deepEqual(win.__dfoItemTextPack.rules.queue.map(q => q.slot), [1, 2, 3, 4, 5, 6, 7, 8]);
@@ -544,6 +593,7 @@ test('the stand and the registry in docs are built from the current tables', () 
   assert.ok(!fs.existsSync(path.join(__dirname, '..', 'docs', 'item-text-registry.html')), 'the HTML registry gave way to the document');
   // It lists every fragment of the tables once, each key in its own first cell.
   const count = Object.keys(ru.bases).length + Object.keys(ru.properties).length + Object.keys(ru.gear).length + Object.keys(ru.metals).length
+    + Object.keys(ru.clothing).length + Object.keys(ru.colors).length
     + ru.combos.length + Object.keys(ru.legendaries).length + Object.keys(ru.tiers).length + Object.keys(ru.sets).length;
   assert.equal(registry.total, count);
   const xml = committed.get('word/document.xml').toString('utf8');

@@ -5,7 +5,7 @@ key,group,name,number,text
 144,MensClothing,Fancy Armbands,p,Embroidered armbands that catch the eye at court and in the tavern.
 145,MensClothing,Sash,s,A broad band of cloth wound about the waist.
 146,MensClothing,Eodoric,s,A sleeveless Breton overgarment cut in the old style.
-147,MensClothing,Shoes,p,Light shoes for town streets and dry floors.
+147,MensClothing,Shoes,p,Light shoes for town streets and for home.
 148,MensClothing,Tall Boots,p,Knee-high riding boots of soft leather.
 149,MensClothing,Boots,p,Everyday leather boots that have walked a long way.
 150,MensClothing,Sandals,p,"Open sandals laced with thongs, cool in the southern heat."
@@ -44,7 +44,7 @@ key,group,name,number,text
 183,WomensClothing,Formal Brassiere,s,An embroidered breastband for festive occasions.
 184,WomensClothing,Peasant Blouse,s,A loose blouse of the countryside.
 185,WomensClothing,Eodoric,s,A sleeveless Breton overgarment cut in the old style.
-186,WomensClothing,Shoes,p,Light shoes for town streets and dry floors.
+186,WomensClothing,Shoes,p,Light shoes for town streets and for home.
 187,WomensClothing,Tall Boots,p,Knee-high riding boots of soft leather.
 188,WomensClothing,Boots,p,Everyday leather boots that have walked a long way.
 189,WomensClothing,Sandals,p,"Open sandals laced with thongs, cool in the southern heat."
@@ -53,7 +53,7 @@ key,group,name,number,text
 192,WomensClothing,Formal Cloak,s,"A fine cloak with a broad collar, worn to be seen."
 193,WomensClothing,Khajiit Suit,s,Loose garments cut in the fashion of Elsweyr.
 194,WomensClothing,Formal Eodoric,s,An eodoric of fine cloth for court and ceremony.
-195,WomensClothing,Evening Gown,s,A long gown made for candlelit halls.
+195,WomensClothing,Evening Gown,s,A long gown for balls and receptions.
 196,WomensClothing,Day Gown,s,"A gown for daytime calls, cut with taste."
 197,WomensClothing,Casual Dress,s,A simple dress for everyday work.
 198,WomensClothing,Strapless Dress,s,A daring dress that bares the shoulders.

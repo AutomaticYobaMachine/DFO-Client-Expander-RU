@@ -237,14 +237,27 @@
     return METALS.has(material) ? 'plate' : null;
   }
   /** The base's name as it stands inside a sentence ("longsword", «длинный меч»). */
-  function inlineName(pack, base) {
+  function inlineName(pack, base, item) {
+    // A name that says one kind of armour («Латные перчатки») is said plainly inside a sentence about a piece that may be
+    // leather or chain: the locale's inlineNames give such a template its neutral word («боевые перчатки»).
+    const plainName = item && pack.inlineNames && own(pack.inlineNames, String(item.templateIndex)) ? pack.inlineNames[String(item.templateIndex)] : null;
+    if (plainName) return plainName;
     const name = String(base.name || '');
     if (pack.inlineName === 'lower') return name.toLowerCase();
     if (pack.inlineName === 'lowerFirst') return name.charAt(0).toLowerCase() + name.slice(1);
     return name;
   }
-  /** Slot 1, checked in this order: base item + armour type + metal, base item + metal (a weapon), base item. */
+  /** Slot 1, checked in this order: base item + armour type + metal, base item + metal (a weapon), a garment + its
+   *  colour, base item. The game dyes every garment (item.dye, CLOTHING_DYES); the colour takes the base's form. */
   function identity(pack, item, facts, base, form) {
+    const garment = CLOTHING.has(item.group) && isInt(item.dye) && pack.clothing && own(pack.clothing, String(item.templateIndex))
+      ? pack.clothing[String(item.templateIndex)] : null;
+    const color = garment && pack.colors && own(pack.colors, `dye.${item.dye}`) ? pack.colors[`dye.${item.dye}`] : null;
+    const word = color ? color[form] ?? color[pack.defaultForm] : null;
+    const dressed = word ? fill(garment, form, pack, { color: word }) : null;
+    if (dressed) {
+      return { key: `clothing.${item.templateIndex}`, text: dressed.charAt(0).toUpperCase() + dressed.slice(1), says: key => key.startsWith('dye.') };
+    }
     const variant = variantOf(item, facts);
     const frame = variant == null || !pack.gear ? null : pack.gear[`${item.templateIndex}:${variant}`];
     if (typeof frame === 'string') {
@@ -339,7 +352,7 @@
     if (known) {
       for (const id of [item.legendary, item.gilded]) {
         if (!isId(id) || !own(pack.legendaries, id)) continue;
-        const text = fill(pack.legendaries[id], form, pack, { base: inlineName(pack, base) });
+        const text = fill(pack.legendaries[id], form, pack, { base: inlineName(pack, base, item) });
         if (!text) continue;
         const at = candidates.findIndex(c => c.key === `power.${id}`);
         const fragment = { kind: 'power', key: `legendary.${id}`, text, order: at >= 0 ? candidates[at].order : 0.5 };

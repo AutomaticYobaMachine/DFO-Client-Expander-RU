@@ -56,6 +56,12 @@
  "metals": [
   "combos/metals.csv"
  ],
+ "clothing": [
+  "combos/clothing.csv"
+ ],
+ "colors": [
+  "combos/colors.csv"
+ ],
  "combos": [
   "combos/properties.csv"
  ],
@@ -69,6 +75,9 @@
   "combos/sets.csv"
  ],
  "inlineName": "lowerFirst",
+ "inlineNames": {
+  "103": "боевые перчатки"
+ },
  "openings": {
   "Вы чувствуете": "Вы ощущаете",
   "Вы ощущаете": "Вы чувствуете",

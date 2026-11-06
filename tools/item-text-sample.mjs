@@ -4,7 +4,8 @@
 // stones, graded gems, online sigils and sets), crafted pieces are minted by the game's smithing law, profession
 // materials by the Stores' mint, every other template from its row. Facts as the card derives them. Seeded: the same
 // sample on every run of the same tables and the same game snapshot.
-//   DFO_UPSTREAM_DIR=... node tools/item-text-sample.mjs [out-dir]     -> cards.json, cards-rare.json
+//   DFO_UPSTREAM_DIR=... node tools/item-text-sample.mjs [out-dir] [--seed N]   -> cards.json, cards-rare.json
+// Another seed gives another sample by the same rules.
 // Then: python3 tools/item-text-review.py [out-dir] (spelling, agreement, targeting, repetition, shape).
 import fs from 'node:fs';
 import path from 'node:path';
@@ -17,7 +18,7 @@ const origLog = console.log; console.log = (...a) => { if (!String(a[0]).startsW
 if (!process.env.DFO_UPSTREAM_DIR) { console.error('DFO_UPSTREAM_DIR is not set: the sample needs the game source'); process.exit(2); }
 const UP = process.env.DFO_UPSTREAM_DIR + '/src/';
 const REPO = new URL('..', import.meta.url).pathname;
-const OUT = path.resolve(process.argv[2] || '.');
+const OUT = path.resolve(process.argv[2] && !process.argv[2].startsWith('--') ? process.argv[2] : '.');
 fs.mkdirSync(OUT, { recursive: true });
 const L = await import(UP + 'systems/loot/loot.js');
 const R = await import(UP + 'systems/loot/lootRarity.js');
@@ -39,7 +40,8 @@ const packs = { ru: text.loadLocale(path.join(text.ROOT, 'ru')), en: text.loadLo
 const catalog = JSON.parse(fs.readFileSync(REPO + 'docs/item-field-catalog.json', 'utf8'));
 
 // a seeded generator, so the 500 are the same 500 on every run
-let seed = 20261106;
+const seedArg = process.argv.indexOf('--seed');
+let seed = seedArg > 0 ? Number(process.argv[seedArg + 1]) >>> 0 : 20261106;
 const rnd = () => { seed = (seed + 0x6D2B79F5) >>> 0; let t = seed; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
 const pick = list => list[Math.floor(rnd() * list.length)];
 Math.random = rnd;   // the game's rollers default to Math.random
@@ -110,7 +112,7 @@ for (let n = 0; n < 60; n++) {
 }
 
 // ── 3. profession materials, as the Stores hand them out ──
-for (let n = 0; n < 60; n++) add('gathered', PROF.mintMaterialItem(pick(MARKET).key));
+for (let n = 0, tries = 0; n < 60 && tries < 600; tries++) { const it = PROF.mintMaterialItem(pick(MARKET).key); if (it) { add('gathered', it); n++; } }
 
 // ── 4. every other template, minted from its row ──
 const templates = catalog.knownPublicTemplates;
@@ -139,7 +141,7 @@ for (const c of cards) {
 const out = cards.slice(0, 500).map((c, i) => {
   const facts = factsOf(c.item, rnd() < 0.3);
   const ru = gen.describe(packs.ru, c.item, facts), en = gen.describe(packs.en, c.item, facts);
-  const keep = ['templateIndex', 'group', 'name', 'material', 'rarity', 'legendary', 'gilded', 'aetheric', 'exalted', 'artifact', 'affixes', 'enchantments', 'cursed', 'sockets', 'socket', 'sigil', 'quality', 'maker', 'provenance', 'foodStage', 'noRot', 'slowRot', 'chef', 'potent', 'trappedSoulType', 'poisonType', 'currentCondition', 'maxCondition', 'questItem', 'stolen', 'imbued', 'honed', 'reforges', 'imprint', 'isIdentified', 'magic', 'stackCount', 'variant', 'rriVariant'];
+  const keep = ['templateIndex', 'group', 'name', 'material', 'dye', 'rarity', 'legendary', 'gilded', 'aetheric', 'exalted', 'artifact', 'affixes', 'enchantments', 'cursed', 'sockets', 'socket', 'sigil', 'quality', 'maker', 'provenance', 'foodStage', 'noRot', 'slowRot', 'chef', 'potent', 'trappedSoulType', 'poisonType', 'currentCondition', 'maxCondition', 'questItem', 'stolen', 'imbued', 'honed', 'reforges', 'imprint', 'isIdentified', 'magic', 'stackCount', 'variant', 'rriVariant'];
   const item = Object.fromEntries(keep.filter(k => c.item[k] !== undefined).map(k => [k, c.item[k]]));
   return { n: i + 1, source: c.source, ruName: packs.ru.bases[c.item.templateIndex]?.name ?? null, gender: packs.ru.bases[c.item.templateIndex]?.form ?? null,
     longName: (() => { try { return INFO.itemLongName(c.item); } catch { return null; } })(), item, facts,

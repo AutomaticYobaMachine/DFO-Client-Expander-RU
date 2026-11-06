@@ -13,7 +13,7 @@ key,group,name,number,text
 124,Weapons,Mace,s,"A flanged head on a short haft, made to dent plate."
 125,Weapons,Flail,s,A spiked ball on a chain that swings around shields and over parries.
 126,Weapons,Warhammer,s,"A heavy hammer with a spike behind its face, built to crush armour."
-127,Weapons,Battle Axe,s,"A broad-bladed axe for two hands, as old as war itself."
+127,Weapons,Battle Axe,s,"A broad-bladed axe for two hands, heavy and merciless."
 128,Weapons,War Axe,s,"A one-handed axe with a bearded blade, cruel in the cut."
 129,Weapons,Short Bow,s,"A compact bow of horn and wood, quick to draw in close country."
 130,Weapons,Long Bow,s,A tall bow of yew that sends arrows far and hard.
@@ -22,5 +22,5 @@ key,group,name,number,text
 514,Weapons,Light Flail,s,A lighter flail that recovers quickly after a swing.
 560,Weapons,Dwarven Thunderlock,s,A Dwemer long gun that hurls brass pellets with a roar of steam and thunder.
 561,Weapons,Dwemer Pellet,s,A small brass ball cast for Dwemer firearms.
-562,Weapons,Dwarven Pistolet,s,"A one-handed Dwemer firearm, short of barrel and loud of voice."
+562,Weapons,Dwarven Pistolet,s,A one-handed Dwemer pistolet with a short barrel and a deafening shot.
 563,Weapons,Hand Wraps,p,Strips of cloth wound around the knuckles to spare them in a brawl.

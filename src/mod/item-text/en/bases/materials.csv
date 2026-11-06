@@ -33,14 +33,14 @@ key,group,name,number,text
 652,UselessItems2,Charcoal,s,"Lumps of charcoal for a hot, clean fire."
 653,UselessItems2,Resin,s,"Sticky tree resin, good for glue and varnish."
 654,UselessItems2,Heartwood,s,The dense inner heartwood of an old tree.
-655,UselessItems2,Rat Pelt,s,"A small, greasy rat pelt."
+655,UselessItems2,Rat Pelt,s,"A small greasy rat pelt, thin and flimsy."
 656,UselessItems2,Bat Leather,s,"Thin, supple leather from a giant bat's wing."
 657,UselessItems2,Bear Hide,s,"A thick bear hide, warm and heavy."
 658,UselessItems2,Tiger Pelt,s,"A striped tiger pelt, prized by hunters."
-659,UselessItems2,Spider Silk,s,"Strong, fine silk taken from a giant spider."
+659,UselessItems2,Spider Silk,s,"Tough raw silk from a giant spider, wound into a skein."
 660,UselessItems2,Scorpion Chitin,s,Plates of hard scorpion chitin.
 661,UselessItems2,Slaughterfish Scales,p,Sharp-edged scales from a slaughterfish.
-662,UselessItems2,Harpy Feathers,p,"Greasy, foul-smelling harpy feathers, still useful to a fletcher."
+662,UselessItems2,Harpy Feathers,p,"Greasy, foul-smelling feathers pulled from a harpy's wing."
 663,UselessItems2,Dreugh Shell,s,"A piece of dreugh shell, light and hard as horn."
 664,UselessItems2,Dragonling Scale,s,"A small, hard scale from a dragonling."
 665,UselessItems2,Cured Leather,s,Leather cured and softened for working.
@@ -52,7 +52,7 @@ key,group,name,number,text
 673,UselessItems2,Rough Stone,s,A rough block of quarried stone.
 674,UselessItems2,Cut Stone,s,"A squared block of cut stone, ready for building."
 675,UselessItems2,Mortar,s,A bucket of builder's mortar.
-678,UselessItems2,Siege-cracked Gem,s,"A gem cracked in the fury of a siege, still worth something to a jeweller."
+678,UselessItems2,Siege-cracked Gem,s,"A gem cracked in the fury of a siege, sharp along its break."
 680,UselessItems2,Arcane Essence,s,A faintly glowing essence distilled from pure magicka.
 681,UselessItems2,Wolf Pelt,s,"A grey wolf pelt, rough and warm."
 682,UselessItems2,Boar Hide,s,"A bristly boar hide, tough enough for boots."

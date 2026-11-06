@@ -49,6 +49,12 @@
  "metals": [
   "combos/metals.csv"
  ],
+ "clothing": [
+  "combos/clothing.csv"
+ ],
+ "colors": [
+  "combos/colors.csv"
+ ],
  "combos": [
   "combos/properties.csv"
  ],

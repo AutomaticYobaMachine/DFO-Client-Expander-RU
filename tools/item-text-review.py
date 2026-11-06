@@ -18,8 +18,11 @@ G = {'masc': 'm', 'femn': 'f', 'neut': 'n'}
 
 def head_gender(text):
     for w in re.findall(r'[А-Яа-яЁё-]+', re.split(r'[,—:;]', text)[0]):
-        p = [x for x in MORPH.parse(w) if 'NOUN' in x.tag and 'nomn' in x.tag]
-        if p: return 'p' if 'plur' in p[0].tag else G.get(p[0].tag.gender, '?')
+        if not MORPH.word_is_known(w.lower()): return None   # a world's word (вакидзаси, сюрко): no judgement
+        parses = MORPH.parse(w)
+        p = [x for x in parses if 'NOUN' in x.tag and 'nomn' in x.tag]
+        adjective = any(('ADJF' in x.tag or 'PRTF' in x.tag) and 'nomn' in x.tag for x in parses)
+        if p and ('NOUN' in parses[0].tag or not adjective): return 'p' if 'plur' in p[0].tag else G.get(p[0].tag.gender, '?')
     return None
 
 def spell(words, dic):
@@ -46,7 +49,8 @@ for c in cards + rare:
         hg = head_gender(texts[0])
         if follows and hg and hg != c['gender'] and not texts[0].startswith(('Высокие', 'Всё', 'То,')): problems['род/число первой фразы не совпадает с названием'].append(n)
     for k in keys:
-        if STRIKE.match(k) and g != 'Weapons': problems['фрагмент о бое у вещи, которая не бьёт'].append(n)
+        fists = k.startswith('technique.') and c['item']['templateIndex'] in (103, 524)   # the game gives gauntlets hand-to-hand techniques
+        if STRIKE.match(k) and g != 'Weapons' and not fists: problems['фрагмент о бое у вещи, которая не бьёт'].append(n)
         if WARD.match(k) and g != 'Armor': problems['фрагмент о защите у вещи, которая не защищает'].append(n)
         if k.startswith('condition.') and g not in ('Weapons', 'Armor', 'Jewellery', 'MensClothing', 'WomensClothing'): problems['износ у того, что не надевают'].append(n)
         if k.startswith('content.') and k != 'content.poison' and c['item']['templateIndex'] not in (83, 274): problems['содержимое у чужой вещи'].append(n)

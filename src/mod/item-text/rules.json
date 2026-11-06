@@ -1,7 +1,7 @@
 {
  "about": "The universal order of an item description, shared by every locale. `categories` sorts every fragment key: the first category with a matching prefix wins (a prefix ending in '.' matches that family, any other prefix the key itself or its sub-keys), so the more specific categories come first. `queue` is the description, slot by slot, in reading order: identity, tier, a random pick, a random pick, a random pick, wear, stolen - then the player hint, its own paragraph after one blank line. A random slot draws one fragment from the categories it lists that still have fragments and room under their `max` (the cap counts every slot of the description, so a fragment or category is never repeated past it); the draw is seeded by the item, so one item always reads the same. The hint slot says what to do with the piece (hints.json and the locale's hints.csv): the piece's state first (quest, unidentified, cursed, broken, tier, sigil, made), else its base item's hint; and, for what a writ pays silver for, a second sentence - the guild's when the character is in one (facts.guild).",
  "categories": [
-  { "id": "identity", "title": "Вещь + тип брони + материал / вещь + материал / вещь", "keys": ["base", "gear."] },
+  { "id": "identity", "title": "Вещь + тип брони + материал / вещь + материал / одежда + цвет / вещь", "keys": ["base", "gear.", "clothing."] },
   { "id": "craft", "title": "Ремесло: качество, клеймо, наследие, перековка, заточка", "keys": ["combo.craft.", "craft.", "heirloom", "affix.honed", "affix.reforged", "rarity.imbued"] },
   { "id": "secret", "title": "Скрытые чары или проклятие", "keys": ["state.unidentified", "curse."] },
   { "id": "standing", "title": "Краденое", "keys": ["state.stolen"] },
@@ -15,7 +15,7 @@
   { "id": "sockets", "title": "Камни в гнёздах", "keys": ["socket."] },
   { "id": "wear", "title": "Износ (только то, что надевается)", "keys": ["condition."] },
   { "id": "hint", "title": "Подсказка игроку: что делать с вещью (последний абзац, белым)", "keys": ["hint."] },
-  { "id": "unused", "title": "Вне очереди: квестовое (оно — в подсказке), окраска, привязка, призыв, памятная вещь, останки", "keys": ["dye.", "state."] }
+  { "id": "unused", "title": "Вне очереди: квестовое (оно — в подсказке), отдельная фраза окраски (цвет одежды — в первой фразе), привязка, призыв, памятная вещь, останки", "keys": ["dye.", "state."] }
  ],
  "queue": [
   {"slot": 1, "take": "identity"},

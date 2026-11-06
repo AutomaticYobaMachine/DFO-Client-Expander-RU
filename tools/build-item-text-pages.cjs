@@ -140,7 +140,7 @@ ${fs.readFileSync(path.join(__dirname, 'item-text-pages/stand.css'), 'utf8')}
    </fieldset>
    <fieldset><legend>Содержимое, еда, окраска</legend>
     <div class="row">${check('potion', 'Ключ рецепта (зелье — только в бутылке)')}${check('potent', 'Усиленное')}${check('soul', 'Душа (только в ловушке душ)')}</div>
-    <div class="row">${select('poison', 'Яд на клинке')}${select('food', 'Свежесть')}${select('dye', 'Окраска (вне очереди)')}</div>
+    <div class="row">${select('poison', 'Яд на клинке')}${select('food', 'Свежесть')}${select('dye', 'Цвет одежды')}</div>
     <div class="row">${check('noRot', 'Не портится')}${check('chef', 'Блюдо шефа')}</div>
    </fieldset>
    <fieldset><legend>Износ, состояние, персонаж</legend>
@@ -207,6 +207,8 @@ const HINT_STATES = [
   ['hint.soul.filled', `ловушка душ (${code('MiscItems 274')}); ${code('item.trappedSoulType ≥ 0')}`],
 ];
 const HINT_STATE_KEYS = new Set(HINT_STATES.map(([k]) => k));
+/** The game's clothing dyes (characters/dyes.js CLOTHING_DYES), by item.dye. */
+const DYE_NAMES = ['Blue', 'Grey', 'Red', 'Dark Brown', 'Purple', 'Light Brown', 'White', 'Aquamarine', 'Yellow', 'Green'];
 function depsOf(key) {
   let m;
   if (HINT_STATE_KEYS.has(key)) return HINT_STATES.find(([k]) => k === key)[1];
@@ -281,7 +283,12 @@ function depsOf(key) {
   if ((m = /^condition\.(\w+)$/.exec(key))) return `надеваемое (оружие, броня, украшения, одежда); прочность ${esc({ new: '100%', used: '75–99%', worn: '40–74%', battered: '1–39%', broken: '0%' }[m[1]])}`;
   if (key === 'state.stolen') return `${code('item.stolen')}`;
   if ((m = /^state\.(\w+)$/.exec(key))) return `${code({ bound: 'item.bound', summoned: 'item.timeForItemToDisappear', keepsake: 'item.livingKeepsake', remains: 'item.legacyRemains' }[m[1]] || m[1])}; в очередь не входит`;
-  if ((m = /^dye\.(\d)$/.exec(key))) return `одежда; ${code('item.dye = ' + m[1])}; в очередь не входит`;
+  if ((m = /^dye\.(\d)$/.exec(key))) return `одежда; ${code('item.dye = ' + m[1])}; отдельной фразой не говорится: цвет одежды — в первой фразе (рамка «одежда + цвет»)`;
+  if ((m = /^clothing\.(\d+)$/.exec(key))) {
+    const t = templates.find(x => x.index === +m[1]);
+    return `${code('templateIndex = ' + m[1])} ${esc(t.ruName)}; одежда с окраской игры ${code('item.dye')} 0–9; цвет — вместо {color}, в роде основы`;
+  }
+  if ((m = /^color\.(\d)$/.exec(key))) return `${code('item.dye = ' + m[1])} (${DYE_NAMES[+m[1]]}); подставляется в {color} рамки одежды`;
   if ((m = /^material\.(.+)$/.exec(key))) return `${code('facts.material = ' + m[1])}, только если у вещи нет рамки «вещь + материал»`;
   if ((m = /^construction\.(.+)$/.exec(key))) return `${code('facts.construction = ' + m[1])}, только без рамки`;
   return '';
@@ -299,6 +306,10 @@ function registrySections() {
   add('gear', '1', 'Вещь + тип брони + материал / вещь + материал', 'Проверяется первой. У оружия рамка «вещь + материал», у брони — по типу (кожа, кольчуга, латы; RRI: mail, мех, бригантина). Вместо {material} подставляется фраза металла.', gearRows);
   add('metals', '1', 'Металл для подстановки {material}', 'Если игра не показывает металл — нейтральная фраза unknown.',
     Object.keys(packs.ru.metals).map(k => ({ key: `metal.${k}`, deps: depsOf(`metal.${k}`), ru: packs.ru.metals[k], en: packs.en.metals[k] })));
+  add('clothing', '1', 'Одежда + цвет', 'У одежды, которую игра окрасила (item.dye 0–9), — рамка с цветом вместо {color}; цвет согласуется с родом основы. Без окраски — обычная основа.',
+    Object.keys(packs.ru.clothing).sort((a, b) => a - b).map(k => ({ key: `clothing.${k}`, deps: depsOf(`clothing.${k}`), ru: packs.ru.clothing[k], en: packs.en.clothing[k] })));
+  add('colors', '1', 'Цвет для подстановки {color}', 'Десять цветов, которыми игра красит одежду (CLOTHING_DYES), в каждом роде.',
+    Object.keys(packs.ru.colors).map(k => ({ key: `color.${k.slice(4)}`, deps: depsOf(`color.${k.slice(4)}`), ru: packs.ru.colors[k], en: packs.en.colors[k] })));
   const baseRows = [];
   for (const file of FILE_ORDER) {
     const list = templates.filter(t => t.file === file);

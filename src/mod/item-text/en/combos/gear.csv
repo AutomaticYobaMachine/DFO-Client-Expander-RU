@@ -46,9 +46,9 @@ key,variant,text,note
 124,,"A flanged head {material} on a short haft, made to dent plate.",Mace
 125,,A spiked ball {material} on a chain that swings around shields.,Flail
 126,,A heavy warhammer {material} with a spike behind its face.,Warhammer
-127,,"A broad two-handed axe {material}, as old as war itself.",Battle Axe
+127,,"A broad two-handed axe {material}, heavy and merciless.",Battle Axe
 128,,"A one-handed axe with a bearded blade {material}, cruel in the cut.",War Axe
-129,,"A short bow with fittings {material}, quick in close country.",Short Bow
+129,,"A short bow with fittings {material}, handy in close country.",Short Bow
 130,,A tall yew bow with fittings {material} that shoots far and hard.,Long Bow
 131,,A fletched arrow with a sharp head {material}.,Arrow
 513,,A light archer's axe {material} for when foes come close.,Archer's Axe
@@ -91,5 +91,5 @@ key,variant,text,note
 526,leather,A leather vambrace that guards the right forearm.,Right Vambrace / leather
 560,,A Dwemer long gun {material} that fires with steam and thunder.,Dwarven Thunderlock
 561,,A brass pellet cast for Dwemer firearms.,Dwemer Pellet
-562,,A short Dwemer pistolet {material} with a loud voice.,Dwarven Pistolet
+562,,A short Dwemer pistolet {material} that fires with a deafening crack.,Dwarven Pistolet
 563,,Cloth strips wound tight around the knuckles for brawling.,Hand Wraps

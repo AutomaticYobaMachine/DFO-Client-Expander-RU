@@ -9,13 +9,13 @@ DFO Online.
 
 ## Скачать готовую программу
 
-Текущая сборка **1.22.0** пока доступна в Actions (ссылка ниже).
-Ранее опубликованная **1.18.0** не содержит новых исправлений установщика.
+Готовый релиз **1.22.0**. Для перехода со старой версии скачайте и запустите
+новый EXE вручную; следующие обновления будут предлагаться диалогом «Да/Нет».
 
-**[Скачать установщик EXE для Windows 10/11 x64](https://github.com/AutomaticYobaMachine/DFO-Client-Expander-RU/releases/download/v1.18.0/DFO-Client-Expander-RU-1.18.0.exe)**
+**[Скачать установщик EXE для Windows 10/11 x64](https://github.com/AutomaticYobaMachine/DFO-Client-Expander-RU/releases/download/v1.22.0/DFO-Client-Expander-RU-1.22.0.exe)**
 
-[ZIP с программой, инструкцией и лицензиями](https://github.com/AutomaticYobaMachine/DFO-Client-Expander-RU/releases/download/v1.18.0/DFO-Client-Expander-RU-1.18.0.zip)
-· [Страница релиза](https://github.com/AutomaticYobaMachine/DFO-Client-Expander-RU/releases/tag/v1.18.0)
+[ZIP с программой, инструкцией и лицензиями](https://github.com/AutomaticYobaMachine/DFO-Client-Expander-RU/releases/download/v1.22.0/DFO-Client-Expander-RU-1.22.0.zip)
+· [Страница релиза](https://github.com/AutomaticYobaMachine/DFO-Client-Expander-RU/releases/tag/v1.22.0)
 
 EXE уже содержит все компоненты. В ZIP находятся только EXE, инструкция и лицензии.
 
@@ -23,12 +23,11 @@ EXE уже содержит все компоненты. В ZIP находятс
 запустите установщик, укажите клиент DFO Online и выберите нужные функции.
 В релизе скачивайте EXE или ZIP с названием программы; **Source code** — исходники.
 
-Рабочая сборка **1.22.0 из main**, ещё без релиза, создаётся в
+Промежуточные сборки `main` доступны в
 [GitHub Actions — Windows installer build](https://github.com/AutomaticYobaMachine/DFO-Client-Expander-RU/actions/workflows/build.yml).
-Откройте последний успешный запуск для `main` и скачайте в разделе **Artifacts**
-архив `DFO-Client-Expander-RU-1.22.0-windows-x64`. Внутри только готовый EXE
-и его контрольная сумма; для скачивания артефакта нужен вход в GitHub.
-Каждая отправка в `main` собирает программу, не создавая релиз.
+Артефакт содержит EXE и контрольную сумму; для его скачивания нужен вход в GitHub.
+Для обычной установки используйте готовый релиз по ссылкам выше — он доступен
+без авторизации. Отправка в `main` сама по себе не создаёт релиз.
 
 ## Родительский проект
 

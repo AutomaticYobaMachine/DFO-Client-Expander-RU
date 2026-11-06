@@ -41,6 +41,18 @@ Flexi IBM VGA False — VileR, © 2020; Creative Commons Attribution-ShareAlike 
 Полный текст лицензии: https://creativecommons.org/licenses/by-sa/4.0/legalcode
 У остальных файлов сохранены все доступные встроенные сведения об авторстве и лицензии; новых прав на них не заявляем.
 
+Flow_B.otf
+Файл: item-font-description.otf; назначение: текст описаний предметов в карточке (12 px; описание
+светло-серое, подсказка игроку белая). Предоставлен пользователем 6 ноября 2026; файл не изменён.
+SHA-256: b784516192e8a645481790e79cb6f2f2f4d0b233c4efd55e9c5e3095d4d1a317
+Family: Flow Ext, Bold (FlowExt-Bold), версия 2.000
+Copyright: (c) 2012 by Andryushkin Artem, Jovanny Lemonad. All rights reserved.
+Manufacturer/Designer: Andryushkin Artem, Jovanny Lemonad; Vendor URL: http://www.jovanny.ru/
+Условия распространения: по сообщению пользователя от 6 ноября 2026, лицензионное соглашение (EULA)
+шрифта требует письменного разрешения авторов только для коммерческого использования.
+DFO-Client-Expander-RU — бесплатная фанатская модификация без монетизации; файл распространяется
+без изменений и вместе с этим уведомлением.
+
 Greengoth Expanded - новые заголовки окон и названия предметов.ttf
 Файл: item-font-title.ttf; назначение: заголовки окон и имена предметов.
 SHA-256: 65a1ba1096fbc200c015867064f15e54f39a6dc4e666202564fdbf57ee822966

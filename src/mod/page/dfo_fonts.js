@@ -4,15 +4,15 @@
   if(root?.document)api.install(root);else if(typeof root?.postMessage==='function')root.__dfoFontTools=api;
 })(typeof globalThis==='object'?globalThis:null,function(){
   'use strict';
-  const files={Gabin:'item-font-text.ttf',Greengoth:'item-font-title.ttf',Flexi:'item-font-numbers.ttf',Hangyaku:'book-font-text.ttf',Ckazka:'item-font-sigil.ttf',Ritalin:'item-font-set.ttf',Wolga:'item-font-legendary.otf'};
-  const stacks={body:"'DFO Gabin','DFO Flexi','DFO Ritalin',sans-serif",title:"'DFO Greengoth','DFO Gabin','DFO Flexi',sans-serif",number:"'DFO Flexi','DFO Gabin','DFO Ritalin',sans-serif",book:"'DFO Hangyaku','DFO Gabin','DFO Flexi',sans-serif",sigil:"'DFO Ckazka','DFO Gabin','DFO Flexi',sans-serif",set:"'DFO Ritalin','DFO Gabin','DFO Flexi',sans-serif",power:"'DFO Wolga','DFO Gabin','DFO Flexi',sans-serif"};
+  const files={Gabin:'item-font-text.ttf',Greengoth:'item-font-title.ttf',Flexi:'item-font-numbers.ttf',Hangyaku:'book-font-text.ttf',Ckazka:'item-font-sigil.ttf',Ritalin:'item-font-set.ttf',Wolga:'item-font-legendary.otf',Flow:'item-font-description.otf'};
+  const stacks={body:"'DFO Gabin','DFO Flexi','DFO Ritalin',sans-serif",title:"'DFO Greengoth','DFO Gabin','DFO Flexi',sans-serif",number:"'DFO Flexi','DFO Gabin','DFO Ritalin',sans-serif",book:"'DFO Hangyaku','DFO Gabin','DFO Flexi',sans-serif",sigil:"'DFO Ckazka','DFO Gabin','DFO Flexi',sans-serif",set:"'DFO Ritalin','DFO Gabin','DFO Flexi',sans-serif",power:"'DFO Wolga','DFO Gabin','DFO Flexi',sans-serif",description:"'DFO Flow','DFO Gabin','DFO Flexi',sans-serif"};
   for(const role of Object.keys(stacks)){const names=[...stacks[role].matchAll(/'DFO ([^']+)'/g)].map(m=>m[1]);stacks[role]=[...new Set([...names,...Object.keys(files)])].map(n=>"'DFO "+n+"'").join(',')+',sans-serif';}
-  const ownFamily=/\bDFO (Gabin|Greengoth|Flexi|Hangyaku|Ckazka|Ritalin|Wolga)\b/;
-  const roles={Gabin:'body',Greengoth:'title',Flexi:'number',Hangyaku:'book',Ckazka:'sigil',Ritalin:'set',Wolga:'power'};
+  const ownFamily=/\bDFO (Gabin|Greengoth|Flexi|Hangyaku|Ckazka|Ritalin|Wolga|Flow)\b/;
+  const roles={Gabin:'body',Greengoth:'title',Flexi:'number',Hangyaku:'book',Ckazka:'sigil',Ritalin:'set',Wolga:'power',Flow:'description'};
   const fontMappings=new Map();
   const bookSize=px=>Math.max(1,Math.round(px*1.35));
   const seed=[...Array.from({length:95},(_,i)=>32+i),...Array.from({length:64},(_,i)=>1040+i),1025,1105,8211,8212,8230,8470,8594,177,215,8734,...Array.from({length:96},(_,i)=>160+i)];
-  function css(base,revision='1.23.0'){
+  function css(base,revision='1.24.0'){
     const faces=Object.entries(files).map(([name,file])=>`@font-face{font-family:'DFO ${name}';src:url(${JSON.stringify(base+file+'?dfo='+encodeURIComponent(revision))}) format('${file.endsWith('.otf')?'opentype':'truetype'}');font-style:normal;font-weight:400;font-display:swap;}`).join('\n');
     return faces+`\n/* DFO community fonts */
 @layer dfo-community-fonts {
@@ -24,6 +24,7 @@
  :root body :is(.sigil-stage,.sigilbox .sigil-stage),:root body :is(.sigil-stage,.sigilbox .sigil-stage) * {font-family:${stacks.sigil}!important;--dfo-title-step:0px!important;}
  :root body :is(.set-name,.setbox .set-name),:root body :is(.set-name,.setbox .set-name) * {font-family:${stacks.set}!important;--dfo-title-step:0px!important;}
  :root body .dfo-item-power-name,:root body .dfo-item-power-name * {font-family:${stacks.power}!important;--dfo-title-step:0px!important;}
+ :root body .dfo-item-text,:root body .dfo-item-text * {font-family:${stacks.description}!important;--dfo-title-step:0px!important;}
  :root body .dfo-item-title h3,:root body .dfo-item-title h3 * {font-family:${stacks.title}!important;--dfo-title-step:2px!important;}
  :root body :is(.itemname>span,.wornname,.inv-menu-head),:root body :is(.itemname>span,.wornname,.inv-menu-head) * {font-family:${stacks.title}!important;--dfo-title-step:2px!important;}
  :root body .pack-shell .wornname,:root body .pack-shell .wornname * {--dfo-title-step:0px!important;}
@@ -182,7 +183,7 @@
     const fontSet=win.document?.fonts||win.fonts,Native=win.FontFace;
     const load=fontSet.load.bind(fontSet),check=fontSet.check.bind(fontSet),add=fontSet.add.bind(fontSet);
     const canonical=family=>Object.keys(files).find(name=>String(family).replace(/["']/g,'').toLowerCase()==='dfo '+name.toLowerCase());
-    const ownUrl=name=>`url(${JSON.stringify(base+files[name]+'?dfo=1.23.0')})`;
+    const ownUrl=name=>`url(${JSON.stringify(base+files[name]+'?dfo=1.24.0')})`;
     win.FontFace=new Proxy(Native,{construct(Type,args,New){
       const name=canonical(args[0])||'Gabin';
       stats.faceRedirects=(stats.faceRedirects||0)+1;
@@ -246,7 +247,7 @@
   function install(win){
     if(win.__dfoFonts||win.__DFO_MOD_CFG__?.fonts?.enabled===false)return;
     const doc=win.document,base=new URL('.',doc.currentScript?.src||new URL('dfo-mod/dfo_fonts.js',doc.baseURI)).href;
-    const style=doc.createElement('style');style.id='dfo-community-fonts';style.textContent=css(base,win.__DFO_MOD_CFG__?.fonts?.revision||'1.23.0');doc.head.append(style);
+    const style=doc.createElement('style');style.id='dfo-community-fonts';style.textContent=css(base,win.__DFO_MOD_CFG__?.fonts?.revision||'1.24.0');doc.head.append(style);
     const stats={canvasChanges:0,classicDraws:0,classicBatches:0,glyphsDrawn:0,faces:0,failures:[]};
     const native={},renderers=new WeakMap(),fnts=new WeakMap(),firstFaces=new Map(),bookFonts=new WeakMap(),fontOwners=new WeakMap(),titleHeights=new WeakMap();let enabled=false,serial=0;
     const translate=text=>typeof win.__translate==='function'?win.__translate(text):text;

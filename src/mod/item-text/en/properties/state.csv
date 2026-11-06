@@ -1,0 +1,36 @@
+key,s,p,note
+curse.cursed,"A curse lies on it, and you feel its unkind weight.","A curse lies on them, and you feel its unkind weight.","cursed, said once identified"
+curse.damned,It is damned for good: the curse has eaten deep into it.,They are damned for good: the curse has eaten deep into them.,"damned: Health Leech, whenever used; no temple lifts it"
+content.potion,Through the stopper you smell herbs and something sharp.,,a bottle holding a potion (potionRecipeKey)
+content.potent,The brew is unusually potent.,,a potent potion (item.potent)
+content.soul,A captured soul swirls inside it.,A captured soul swirls inside them.,a soul trap holding a soul (trappedSoulType)
+content.poison,Poison has been worked into its edge.,Poison has been worked into their edge.,a poisoned weapon (poisonType)
+food.stage.0,It is still fresh and good to eat.,They are still fresh and good to eat.,food stage 0: Fresh
+food.stage.1,It is no longer fresh.,They are no longer fresh.,food stage 1: Stale
+food.stage.2,Mould has crept over it.,Mould has crept over them.,food stage 2: Mouldy
+food.stage.3,"It has rotted, and the smell says so.","They have rotted, and the smell says so.",food stage 3: Rotten
+food.stage.4,"It is putrid, and the smell alone turns the stomach.","They are putrid, and the smell alone turns the stomach.",food stage 4: Putrid
+food.noRot,"It will never spoil, however long it is kept.","They will never spoil, however long they are kept.",never spoils (item.noRot)
+food.slowRot,It keeps far longer than ordinary food.,They keep far longer than ordinary food.,spoils slowly (item.slowRot)
+food.chef,"A real cook prepared it, and it shows.","A real cook prepared them, and it shows.",a chef's dish (item.chef)
+condition.new,"It is in flawless condition, with no sign of wear.","They are in flawless condition, with no sign of wear.",weapon/armour at 100% condition
+condition.used,It shows light signs of use.,They show light signs of use.,75-99% condition
+condition.worn,It is noticeably worn and wants mending.,They are noticeably worn and wants mending.,40-74% condition
+condition.battered,It is badly battered and close to failing.,They are badly battered and close to failing.,1-39% condition
+condition.broken,It is ruined and useless until mended.,They are ruined and useless until mended.,0% condition
+state.unidentified,Whatever magic it holds stays hidden until someone identifies it.,Whatever magic they hold stays hidden until someone identifies them.,unidentified piece with hidden magic
+state.stolen,It is stolen goods; better not show it to the guards.,They are stolen goods; better not show them to the guards.,stolen
+state.bound,It is bound to its owner and cannot change hands.,They are bound to their owner and cannot change hands.,bound to its owner
+state.summoned,It was summoned by magic and will fade before long.,They were summoned by magic and will fade before long.,summoned item that will vanish
+state.keepsake,"It once belonged to someone in town, who may want it back.","They once belonged to someone in town, who may want them back.",a townsperson's keepsake
+state.remains,These are the remains of a fallen hero.,,a fallen character's remains
+dye.0,It has been dyed blue by a careful hand.,They have been dyed blue by a careful hand.,garment dye 0: Blue
+dye.1,It has been dyed grey by a careful hand.,They have been dyed grey by a careful hand.,garment dye 1: Grey
+dye.2,It has been dyed red by a careful hand.,They have been dyed red by a careful hand.,garment dye 2: Red
+dye.3,It has been dyed dark brown by a careful hand.,They have been dyed dark brown by a careful hand.,garment dye 3: Dark Brown
+dye.4,It has been dyed purple by a careful hand.,They have been dyed purple by a careful hand.,garment dye 4: Purple
+dye.5,It has been dyed light brown by a careful hand.,They have been dyed light brown by a careful hand.,garment dye 5: Light Brown
+dye.6,It has been dyed white by a careful hand.,They have been dyed white by a careful hand.,garment dye 6: White
+dye.7,It has been dyed aquamarine by a careful hand.,They have been dyed aquamarine by a careful hand.,garment dye 7: Aquamarine
+dye.8,It has been dyed yellow by a careful hand.,They have been dyed yellow by a careful hand.,garment dye 8: Yellow
+dye.9,It has been dyed green by a careful hand.,They have been dyed green by a careful hand.,garment dye 9: Green

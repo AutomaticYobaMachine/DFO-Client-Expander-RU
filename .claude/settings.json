@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/session-start.sh",
+            "timeout": 900,
+            "statusMessage": "Готовлю среду DFO: исходники оригинала, релиз игры, Chromium"
+          }
+        ]
+      }
+    ]
+  },
+  "permissions": {
+    "allow": [
+      "Bash(node --test *)",
+      "Bash(node tools/*)",
+      "Bash(bash tools/dev-env.sh)",
+      "Bash(bash tools/dev-env.sh *)",
+      "Bash(sh tools/build.sh)",
+      "Bash(go test *)",
+      "Bash(go vet *)",
+      "Bash(git status)",
+      "Bash(git status *)",
+      "Bash(git diff *)",
+      "Bash(git log *)",
+      "Bash(git show *)"
+    ],
+    "ask": [
+      "Bash(git tag *)",
+      "Bash(git push --tags*)",
+      "Bash(git push * --tags*)",
+      "Bash(gh release *)",
+      "Bash(python3 tools/build-ru-pack.py*)"
+    ]
+  }
+}

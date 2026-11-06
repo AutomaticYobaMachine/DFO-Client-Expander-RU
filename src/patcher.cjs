@@ -227,8 +227,11 @@ function install() {
   put.set('main.cjs', Buffer.from(hooked));
 
   // the mod itself
-  for (const rel of ['hook.cjs', 'transforms.cjs', 'item-cards-transform.cjs', 'page/dfo_item_cards.js', 'nearby-loot-transform.cjs', 'loot-tags-transform.cjs', 'dungeon-transform.cjs', 'dungeon-live-transform.cjs', 'dungeon-nav-transform.cjs', 'page/dfo_dungeon_model.js', 'page/dfo_dungeons.js', 'page/dfo_dungeon_live_model.js', 'page/dfo_dungeon_live.js', 'page/dfo_dungeon_graph.js', 'page/dfo_dungeon_nav_model.js', 'page/dfo_dungeon_nav.js', 'loot-store.cjs', 'page/dfo_loot_rules.js', 'page/dfo_loot_ui.js', 'page/dfo_loot.js', 'version.json', 'page/dfo_marks.js', 'page/dfo_town.js', 'page/ru_locale.js', 'page/ru_items.js']) put.set(`dfo-mod/${rel}`, fs.readFileSync(path.join(MOD, ...rel.split('/'))));
+  for (const rel of ['hook.cjs', 'transforms.cjs', 'item-cards-transform.cjs', 'page/dfo_item_cards.js', 'item-text.cjs', 'page/dfo_item_text.js', 'nearby-loot-transform.cjs', 'loot-tags-transform.cjs', 'dungeon-transform.cjs', 'dungeon-live-transform.cjs', 'dungeon-nav-transform.cjs', 'page/dfo_dungeon_model.js', 'page/dfo_dungeons.js', 'page/dfo_dungeon_live_model.js', 'page/dfo_dungeon_live.js', 'page/dfo_dungeon_graph.js', 'page/dfo_dungeon_nav_model.js', 'page/dfo_dungeon_nav.js', 'loot-store.cjs', 'page/dfo_loot_rules.js', 'page/dfo_loot_ui.js', 'page/dfo_loot.js', 'version.json', 'page/dfo_marks.js', 'page/dfo_town.js', 'page/ru_locale.js', 'page/ru_items.js']) put.set(`dfo-mod/${rel}`, fs.readFileSync(path.join(MOD, ...rel.split('/'))));
 
+  // item descriptions: English always (the language without the translation), Russian only with the translation
+  const { installFiles } = require(path.join(MOD, 'item-text.cjs'));
+  for (const rel of installFiles(withRu ? ['en', 'ru'] : ['en'], path.join(MOD, 'item-text'))) put.set(`dfo-mod/item-text/${rel}`, fs.readFileSync(path.join(MOD, 'item-text', ...rel.split('/'))));
   for (const file of [...Object.values(require(path.join(MOD,'page/dfo_fonts.js')).files), 'FONT-NOTICES.txt'])
     put.set(`dfo-mod/fonts/${file}`, fs.readFileSync(path.join(MOD, 'fonts', file)));
   put.set('dfo-mod/fonts-transform.cjs',fs.readFileSync(path.join(MOD,'fonts-transform.cjs')));

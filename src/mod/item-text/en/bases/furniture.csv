@@ -1,0 +1,40 @@
+key,group,name,number,text
+217,Furniture,Plain Single Bed,s,A narrow bed with a straw mattress.
+218,Furniture,Fancy Single Bed,s,A narrow bed with carved posts and a feather mattress.
+219,Furniture,Plain Double Bed,s,"A wide bed for two, plainly made."
+220,Furniture,Fancy Double Bed,s,A wide canopied bed fit for a noble house.
+221,Furniture,Large Oak Table,s,A long oak table that seats a whole household.
+222,Furniture,Large Cherry Table,s,A long table of reddish cherry wood.
+223,Furniture,Large Mahogany Table,s,A long table of dark polished mahogany.
+224,Furniture,Large Teak Table,s,"A long table of oily, durable teak."
+225,Furniture,Small Oak Table,s,"A small, sturdy oak table."
+226,Furniture,Small Cherry Table,s,A small table of cherry wood.
+227,Furniture,Small Mahogany Table,s,A small table of dark mahogany.
+228,Furniture,Small Teak Table,s,A small table of golden teak.
+229,Furniture,Oak Chair,s,"A heavy oak chair, built to outlast its owner."
+230,Furniture,Cherry Chair,s,A cherry wood chair with a carved back.
+231,Furniture,Mahogany Chair,s,A chair of dark mahogany.
+232,Furniture,Teak Chair,s,A chair of golden teak.
+233,Furniture,Curtains,p,Plain curtains against the light and prying eyes.
+234,Furniture,Fancy Curtains,p,Heavy brocade curtains with tasselled ties.
+235,Furniture,Large Pillow,s,A large pillow stuffed with down.
+236,Furniture,Small Pillow,s,A small embroidered pillow for a bench or a bed.
+237,Furniture,Small Plain Rug,s,A small rug of plain weave.
+238,Furniture,Large Plain Rug,s,A large rug of plain weave.
+239,Furniture,Small Fine Rug,s,A small rug of fine patterned weave.
+240,Furniture,Large Fine Rug,s,"A large rug of fine patterned weave, worth a small fortune."
+241,Furniture,Large Tapestry,s,A great woven hanging that tells a story in thread.
+242,Furniture,Medium Tapestry,s,A woven hanging showing a hunt or a battle.
+243,Furniture,Small Tapestry,s,A small woven hanging for a bare wall.
+244,Furniture,Large Skins,p,Large animal skins laid out as a floor covering.
+245,Furniture,Small Skins,p,Small animal skins for a bench or a bed.
+246,,Candelabra,s,A branched candlestick of brass or silver.
+250,,Shrubbery,s,A potted shrub to brighten a hall.
+251,,Flowers,p,A vase of cut flowers.
+266,,Large Statue,s,A large stone statue that few could ever move.
+272,,Altar,s,A consecrated altar for offerings and prayer.
+273,,Font,s,A basin for holy water.
+696,Furniture,Stone Column,s,A dressed stone column for a hall or garden.
+697,Furniture,Stone Bench,s,"A bench of cut stone, cold but lasting."
+698,Furniture,Stone Font,s,A carved stone basin for holy or ordinary water.
+699,Furniture,Statue Plinth,s,A stone base made to raise a statue above the crowd.

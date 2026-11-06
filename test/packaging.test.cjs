@@ -28,7 +28,7 @@ test('distribution installer: install, reinstall and uninstall preserve original
     for(let i=0;i<2;i++){
       run('install');
       const a=openAsar(asar),files=listFiles(a.header);
-      for(const file of ['service-windows-transform.cjs','page/dfo_service_details.js','page/dfo_services.js','fonts-transform.cjs','page/dfo_fonts.js','item-cards-transform.cjs','page/dfo_item_cards.js','nearby-loot-transform.cjs','loot-tags-transform.cjs','dungeon-transform.cjs','dungeon-live-transform.cjs','dungeon-nav-transform.cjs','page/dfo_dungeon_model.js','page/dfo_dungeons.js','page/dfo_dungeon_live_model.js','page/dfo_dungeon_live.js','page/dfo_dungeon_graph.js', 'page/dfo_dungeon_nav_model.js','page/dfo_dungeon_nav.js','loot-store.cjs','page/dfo_loot_rules.js','page/dfo_loot_ui.js','page/dfo_loot.js','transforms.cjs']){
+      for(const file of ['service-windows-transform.cjs','page/dfo_service_details.js','page/dfo_services.js','fonts-transform.cjs','page/dfo_fonts.js','item-cards-transform.cjs','page/dfo_item_cards.js','item-text.cjs','page/dfo_item_text.js','item-text/en/index.json','item-text/en/bases/weapons.csv','item-text/en/properties/state.csv','item-text/ru/index.json','item-text/ru/bases/weapons.csv','item-text/ru/properties/state.csv','item-text/rules.json','item-text/hints.json','item-text/en/properties/hints.csv','item-text/ru/properties/hints.csv','item-text/en/combos/gear.csv','item-text/ru/combos/legendaries.csv','item-text/ru/combos/properties.csv','item-text/ru/combos/metals.csv','nearby-loot-transform.cjs','loot-tags-transform.cjs','dungeon-transform.cjs','dungeon-live-transform.cjs','dungeon-nav-transform.cjs','page/dfo_dungeon_model.js','page/dfo_dungeons.js','page/dfo_dungeon_live_model.js','page/dfo_dungeon_live.js','page/dfo_dungeon_graph.js', 'page/dfo_dungeon_nav_model.js','page/dfo_dungeon_nav.js','loot-store.cjs','page/dfo_loot_rules.js','page/dfo_loot_ui.js','page/dfo_loot.js','transforms.cjs']){
         assert.ok(files.has('dfo-mod/'+file));assert.deepEqual(readFile(a,'dfo-mod/'+file),fs.readFileSync(path.join(dist,'mod',file)));
       }
       assert.match(readFile(a,'main.cjs').toString(),/dfo-mod\/hook.cjs/);
@@ -51,6 +51,8 @@ test('distribution installer: install, reinstall and uninstall preserve original
     assert.equal(cfg.fonts,false);
     assert.equal(cfg.enabled,true);assert.equal(cfg.ru,false);assert.equal(cfg.marks,true);assert.equal(cfg.nearbyLoot,false);assert.equal(cfg.dungeons,false);assert.equal(cfg.marksOptions.onlyVisited,false);assert.equal(cfg.nearbyLootOptions.keyCode,'Mouse4');
     let current=openAsar(asar);assert.equal(listFiles(current.header).has('dfo-mod/page/ru_dict.js'),false);
+    assert.equal(listFiles(current.header).has('dfo-mod/item-text/ru/index.json'),false,'Russian item descriptions come only with the translation');
+    assert.ok(listFiles(current.header).has('dfo-mod/item-text/en/index.json'),'English item descriptions are always installed');
     assert.ok(listFiles(current.header).has('dfo-mod/fonts/item-font-text.ttf'),'Card fonts are independent of the Russian translation');
     assert.doesNotMatch(readFile(current,'launcher/launcher.css').toString(),/DFO community fonts/);current.close();
     run('install','--loot-key','NumpadEnter','--set','ru=1','--set','marks=0','--set','nearbyLoot=1','--set','dungeons=1','--set','onlyVisited=1');

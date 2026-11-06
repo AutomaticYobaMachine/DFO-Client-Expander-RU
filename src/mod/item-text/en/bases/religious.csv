@@ -1,0 +1,14 @@
+key,group,name,number,text
+258,ReligiousItems,Prayer Beads,p,A string of beads for counting prayers.
+259,ReligiousItems,Rare Symbol,s,A rare holy symbol of a lesser-known faith.
+260,ReligiousItems,Common Symbol,s,A common holy symbol of one of the Divines.
+261,ReligiousItems,Bell,s,A small temple bell with a clear voice.
+262,ReligiousItems,Holy Water,s,"Water blessed by a priest, feared by the undead."
+263,ReligiousItems,Talisman,s,A charm worn to turn misfortune away.
+264,ReligiousItems,Religious Item,s,"An object of devotion, worn smooth by faithful hands."
+265,ReligiousItems,Small Statue,s,A small devotional statue of a saint or a god.
+267,ReligiousItems,Icon,s,A painted icon of a Divine in a gilt frame.
+268,ReligiousItems,Scarab,s,"A carved scarab, an old charm against death."
+269,ReligiousItems,Holy Candle,s,A blessed candle burned at temple vigils.
+270,ReligiousItems,Holy Dagger,s,A consecrated ritual dagger used in temple rites.
+271,ReligiousItems,Holy Tome,s,A book of scripture bound in worn leather.

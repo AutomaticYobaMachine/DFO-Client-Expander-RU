@@ -1,0 +1,153 @@
+key,s,p,note
+hint.quest,The task still waits on it: keep it close until it is done.,The task still waits on them: keep them close until it is done.,"a quest item (questItem), before anything else"
+hint.unidentified,The Mages Guild can read the magic hidden in it; show it there first.,The Mages Guild can read the magic hidden in them; show them there first.,unidentified piece with hidden magic
+hint.cursed,A temple priest can lift the curse; after that the piece is safe to wear.,,"cursed, once identified"
+hint.damned,"No temple lifts this curse: keep it for an imprint, or sell it.","No temple lifts this curse: keep them for an imprint, or sell them.","damned (Health Leech), once identified"
+hint.repair,A smith or a repair kit must mend it before it is worth much.,A smith or a repair kit must mend them before they are worth much.,a weapon or armour below 40% condition
+hint.artifact,Artifacts are never salvaged or reforged: a relic like this is worn and guarded.,,an artifact
+hint.aetheric,Aetheric light shines fullest in the whole set; only the Sigil Broker can dismantle it.,Aetheric light shines fullest in the whole set; only the Sigil Broker can dismantle them.,an Aetheric piece (item.aetheric)
+hint.legendary,"Never salvage it: wear it, keep it for an imprint, or sell on the market.","Never salvage them: wear them, keep them for an imprint, or sell on the market.",a Legendary or a Gilded piece
+hint.exalted,"Never salvage an Exalted find: wear it, keep it for an imprint, or sell it.",,an Exalted Legendary
+hint.set,"A set's sigil wakes at two, four and six pieces: gather the rest.",,a sigil of a set
+hint.sigil,The sigil grows with every fight: keep it on and watch it brighten.,The sigil grows with every fight: keep them on and watch it brighten.,a sigil without a set
+hint.crafted,"A crafted piece may be worn, sold, or disenchanted into Arcane Essence.",,"a crafted piece to wear (quality, maker or provenance)"
+hint.rare,Rare magic is worth wearing; the Mages Guild can reforge a weak line.,,a Rare piece
+hint.magic,"If the magic does not suit, reforge a line or break it into Welkynd Shards.","If the magic does not suit, reforge a line or break them into Welkynd Shards.",a Magic piece
+hint.enchanted,"Enchanted goods serve with their magic, and fetch far more than plain ones.",,DFU's own enchanted piece (no tier)
+hint.food.spoiled,"Food this far gone barely feeds you, and on Hard survival it may bring disease.",,food Rotten or Putrid
+hint.soul.filled,The captured soul waits its hour: an enchanter will weave its strength into new magic.,,a soul trap holding a soul
+hint.weapon.common,"Better than nothing in a pinch: fit for a fight, an enchanter or a trader.",,"templates: Dagger, Tanto, Staff, Shortsword, Wakizashi, Broadsword (+17)"
+hint.armor.common,"Better than nothing in a pinch: wear it now, enchant or sell it later.","Better than nothing in a pinch: wear them now, enchant or sell them later.","templates: Cuirass, Gauntlets, Greaves, Left Pauldron, Right Pauldron, Helm (+17)"
+hint.ammo.arrow,Arrows fly off one after another: keep the quiver full before a long road.,,templates: Arrow
+hint.ammo.bullet,Dwemer firearms swallow bullets greedily: a spare supply is never wasted.,,templates: Dwemer Pellet
+hint.jewellery,"A piece without magic is the best ground for an enchanter, and traders pay well.",,"templates: Amulet, Bracer, Ring, Bracelet, Mark, Torc (+2)"
+hint.clothing.common,"In plain clothes commoners take you for one of their own, while nobles wince.",,"templates: Straps, Armbands, Sandals, Casual Pants, Breeches, Casual Cloak (+24)"
+hint.clothing.fine,"In fine clothes nobles and merchants receive you warmly, while common folk keep away.",,"templates: Kimono, Fancy Armbands, Formal Cloak, Dwynnen Surcoat, Formal Tunic, Toga (+6)"
+hint.clothing.religious,Priestly robes open the temples' hearts and win a little favour with scholars.,,"templates: Priest Robes, Priestess Robes"
+hint.clothing.plain,"Clothing keeps the warmth in on a cold day, and any trader buys a spare.",,"templates: Sash, Eodoric, Shoes, Tall Boots, Boots, Short Skirt (+26)"
+hint.gem,"The stone will sit in a weapon's or armour's socket, or in a jeweller's piece.",,"templates: Ruby, Emerald, Sapphire, Diamond, Jade, Turquoise (+2)"
+hint.gem.graded,"A gem like this graces a weapon's socket or a ring, and traders pay dearly.",,"templates: Chipped Ruby, Chipped Emerald, Chipped Sapphire, Chipped Diamond, Chipped Jade, Chipped Turquoise (+26)"
+hint.pearl,"A pearl graces a jeweller's work, and an alchemist finds it a place in potions.",,templates: Pearl
+hint.herb.alchemy,This could go into more than one useful potion; alchemists prize it.,,"templates: Red Flowers, Yellow Flowers, Pine Branch, Red Berries, Yellow Rose, Black Rose (+10)"
+hint.herb.cooking,Over a fire this makes a hearty dish for the road.,,"templates: Root Bulb, Yellow Berries"
+hint.herb.both,Good both for a potion and for a hearty camp meal.,,templates: Green Leaves
+hint.herb.arrows,"An alchemist will find a use for it, and a carpenter will whittle arrow shafts.",,templates: Twigs
+hint.herb.linen,These thin roots are spun into strong linen cloth.,,templates: Root Tendrils
+hint.herb.plain,No known recipe asks for it: such things are best carried straight to market.,,"templates: Green Berries, Clover, Red Rose, Red Poppy"
+hint.reagent,A rare reagent: in skilled hands it becomes a strong potion.,,"templates: Werewolf's Blood, Fairy Dragon's Scales, Unicorn Horn, Ectoplasm, Spider's Venom, Troll's Blood (+8)"
+hint.reagent.base,Hardly any potion of the alchemist's does without such a base.,,"templates: Pure Water, Rain Water, Elixir Vitae, Nectar, Ichor"
+hint.reagent.mineral,An alchemist prizes such a mineral as a rare and strong ingredient.,,templates: Lodestone
+hint.reagent.unused,"No known recipe asks for it, but an alchemist gladly buys a curiosity.","No known recipe asks for them, but an alchemist gladly buys a curiosity.","templates: Wereboar's Tusk, Nymph Hair, Wraith Essence, Ghoul's Tongue, Gorgon Snake, Lich Dust (+6)"
+hint.daedra-heart,They say only such a heart turns ebony into Daedric metal.,,templates: Daedra's Heart
+hint.drug,A drug's effect is brief and treacherous: better sold than tried.,,"templates: Indulcet, Sursum, Quaesto Vil, Aegrotat"
+hint.metal.iron,A couple of lumps like this could make good iron.,,templates: Iron
+hint.metal.tin,"Tin is handy to a smith, and with copper it turns to brass.",,templates: Tin
+hint.metal.copper,"Copper is handy to a smith, and with tin it turns to brass.",,templates: Copper
+hint.metal.brass,Brass itself is of little use to a craft: easier to sell it.,,templates: Brass
+hint.metal.silver,"This silver could become an ingot, or a fine piece of jewellery.",,templates: Silver
+hint.metal.precious,Metal like this begs for a jeweller's hands: rings and amulets.,,"templates: Gold, Platinum"
+hint.metal.mercury,Alchemists prize mercury: with it a common metal can turn noble.,,templates: Mercury
+hint.metal.sulphur,"Sulphur serves the alchemist, and a mason mixes mortar with it.",,templates: Sulphur
+hint.metal.lead,Lead serves a mason: it makes a strong mortar.,,templates: Lead
+hint.ore,This is fit to be smelted down into an ingot.,,"templates: Moonstone Ore, Dwarven Scrap, Mithril Ore, Adamantium Ore, Ebony Ore, Orichalcum Ore"
+hint.ingot,You think a weapon or a piece of armour could well be forged from this.,,"templates: Steel Ingot, Silver Ingot, Moonstone Ingot, Dwarven Ingot, Mithril Ingot, Adamantium Ingot (+3)"
+hint.ingot.iron,"An iron ingot makes weapons, and with charcoal, good steel.",,templates: Iron Ingot
+hint.ingot.ebony,"Ebony makes the finest arms, and with a daedra's heart, Daedric ones.",,templates: Ebony Ingot
+hint.log,"A log makes good planks, or charcoal if it is burned.",,"templates: Pine Log, Oak Log, Cherry Log, Teak Log, Mahogany Log, Ironwood Log (+1)"
+hint.plank,"A carpenter could make a staff, a bow or furniture of planks like these.",,"templates: Pine Plank, Oak Plank, Cherry Plank, Teak Plank, Mahogany Plank, Ironwood Plank (+1)"
+hint.charcoal,"Without charcoal, iron will never become steel.",,templates: Charcoal
+hint.resin,A carpenter needs resin to glue a good bow together.,,templates: Resin
+hint.heartwood,Carpenters keep heartwood for the very best of their work.,,templates: Heartwood
+hint.pelt,A pelt like this could become soft leather or a skein of wool.,,"templates: Rat Pelt, Bear Hide, Tiger Pelt, Wolf Pelt, Boar Hide"
+hint.hide,"Cured, this becomes soft leather for armour and clothing.",,"templates: Bat Leather, Mudcrab Chitin"
+hint.chitin,"Cured, this makes tough leather for armour.",,"templates: Scorpion Chitin, Slaughterfish Scales, Dreugh Shell, Dragonling Scale"
+hint.silk,This raw silk can be woven into fine silk cloth.,,templates: Spider Silk
+hint.feathers,Feathers like these will fletch good arrows.,,templates: Harpy Feathers
+hint.leather,"Leather becomes light armour, clothing and comfortable weapon grips.",,templates: Cured Leather
+hint.leather.hard,Hardened leather is the heart of sturdy leather armour.,,templates: Hardened Leather
+hint.cloth,A tailor could sew clothing of any kind from this cloth.,,"templates: Linen Bolt, Wool Bolt, Silk Bolt, Standard-bearer's Silk"
+hint.stone,This stone will do to cut a block or mix some mortar.,,templates: Rough Stone
+hint.masonry,"A mason could raise a column, a bench or a statue's plinth with this.",,"templates: Cut Stone, Mortar"
+hint.essence,Arcane Essence is the price of reforging a line on Magic and Rare pieces.,,templates: Arcane Essence
+hint.trade,"Cheap where it is made, this good is dear in a port that wants it.",,"templates: Carpenter's Stores, Wine, Grain, Wool, Iron, Spices (+6)"
+hint.food,"When hunger gnaws on the road, this will keep you going.",,"templates: Rations, Apple, Orange, Bread, Cooked Fish, Meat (+2)"
+hint.food.cook,"Fine to eat as it is, but by a fire it makes a heartier dish.",,"templates: Mushroom, Egg"
+hint.food.raw,Better not eaten raw: over a fire it is both safer and more filling.,,"templates: Raw Fish, Raw Meat, Fish, Longnose Butterflyfish, Largemouth Bass, Canary Rockfish (+4)"
+hint.dish,A hearty dish lends strength for long: eat it before a hard road.,A hearty dish lends strength for long: eat them before a hard road.,"templates: Hunter's Stew, Fisherman's Supper, Orchard Tart"
+hint.feast,A feast is laid for everyone: treat your party before a shared venture.,,templates: Feast of the Hearth
+hint.soul-cake,In the days of the Witches' Festival such cakes pass for coin.,,templates: Soul Cake
+hint.hearth-offering,During the Witches' Festival set it out at your own door.,During the Witches' Festival set them out at your own door.,templates: Hearth Offering
+hint.potion,Keep the potion close and drink it when the fight turns against you.,,templates: Glass Bottle
+hint.trinket,A trinket for selling: any trader will give a couple of coins for it.,A trinket for selling: any trader will give a couple of coins for them.,"templates: Glass Jar, Decanter, Clay Jar, Small Sack, Large Sack, Quiver (+5)"
+hint.light,In the dark of a dungeon there is no going without light.,,"templates: Torch, Candle"
+hint.lantern,"A lantern outlasts a torch, if you top it up with oil in time.",,templates: Lantern
+hint.oil,Oil brings a dying lantern back to life.,,templates: Oil
+hint.bandage,A clean bandage stops the bleeding and heals a little on the road.,,templates: Bandage
+hint.camp,Pitch camp to rest and cook a supper under the open sky.,,"templates: Camping Equipment, Campfire"
+hint.waterskin,Fill it at a stream: on a long road thirst shows no mercy.,,templates: Waterskin
+hint.skillet,In a skillet by the fire plain food becomes a proper dish.,,templates: Skillet
+hint.wallet,In a wallet letters of credit and small valuables never get lost in the pack.,,templates: Wallet
+hint.lockpick,A thin pick will open more than one locked door and chest.,,templates: Lockpick
+hint.materials-bag,The bag holds gathered materials beyond your usual load.,,templates: Materials Bag
+hint.skinning-knife,With this knife hides are taken from slain beasts.,,templates: Skinning Knife
+hint.repair-kit,A repair kit restores your gear right on the road.,,templates: Repair Kit
+hint.wood-axe,The axe fells a tree and cuts it into logs for the carpenter.,,templates: Wood-Axe
+hint.pick-axe,The pick bites into a vein and brings out ore and stone.,,templates: Pick-Axe
+hint.sickle,With a sickle herbs are cut for the alchemist and the cook.,,templates: Sickle
+hint.fishing-net,"Cast the net by the water, and by evening there will be a catch.",,templates: Fishing-Net
+hint.wood-bundle,A bundle of wood warms a camp and feeds a fire.,,templates: Wood Bundle
+hint.spade,A spade comes in handy where the ground is hiding something.,,templates: Spade
+hint.basket,"Mushrooms, eggs and fruit found on the way go into the basket.",,templates: Basket
+hint.bedroll,"Roll out the bedroll, and rest is found anywhere, even in a dungeon.",,templates: Bedroll
+hint.ember-jar,The embers in the jar kindle a night's fire for rest and cooking.,,templates: Ember Jar
+hint.firewood,"Throw some wood on your campfire, and it will burn longer.",,templates: Firewood
+hint.tonic,A swallow of tonic drives fatigue from the body at once.,,templates: Restorative Tonic
+hint.meditation-candle,Meditating by this candle brings your magicka back sooner.,,templates: Meditation Candle
+hint.waking-salts,"The salts drive sleep away for an hour, but the debt of tiredness remains.",,templates: Waking Salts
+hint.sleeping-draught,"Drink it before sleep, and you will rest as in a proper bed.",,templates: Sleeping Draught
+hint.oats,A sack of oats is a hearty supper for your horse.,,templates: Sack of Oats
+hint.wagon-kit,With this kit a wagon can be mended right on the road.,,templates: Wagon Repair Kit
+hint.dwarven-oil,Dwarven oil is the favourite treat of your brass dragon.,,templates: Dwarven Oil
+hint.deed,Keep the deed safe: it is your proof of ownership.,,"templates: Deed to Townhouse, Deed to House, Deed to Manor, House Deed, Ship Deed, Deed to"
+hint.spellbook,Open the book to choose a spell and cast it.,,templates: Spellbook
+hint.letter,In banks and shops a letter of credit is taken for ringing coin.,,templates: Letter of Credit
+hint.gold,Ringing coin: spend it with traders and in the guilds.,,templates: Gold Pieces
+hint.book,"Read it, and then the book will grace a shelf in your home.",,templates: Book
+hint.potion-recipe,The recipe tells you which herbs and reagents go into a potion.,,templates: Potion Recipe
+hint.painting,A painting like this belongs on a wall of your home.,,templates: Painting
+hint.map,"Read the map, and a new place opens on your path; the map is spent.",,templates: Map
+hint.portal-book,The book keeps the house doors your Portal Stones will open onto.,,templates: Portal Book
+hint.card,At a tavern's card table this card will find a place in your deck.,,templates: Card
+hint.card-binder,The binder keeps your decks for a tavern's card table.,,templates: Card Binder
+hint.card-pack,Break the seal: new cards are waiting inside.,,templates: Card Pack
+hint.boat-parts,By any water these parts fit together into a boat.,,templates: Parts of
+hint.chart,Read the chart and steer for the sunken cache before others find it.,,templates: Treasure Chart
+hint.sheet-music,"Put the sheet in a music box, and the tune will come alive.",,templates: Sheet music
+hint.quest-prop,"Such things usually matter to someone's task; without one, sell it as a trinket.","Such things usually matter to someone's task; without one, sell them as a trinket.","templates: Telescope, Scales, Globe, Skeleton, Totem, Mantella (+1)"
+hint.dead-body,A body like this usually belongs to someone's task: tell whoever seeks it.,,templates: Dead Body
+hint.soul-trap,"The trap waits for a slain foe's soul, to give its strength to enchantments.",,templates: Soul Trap
+hint.portal-stone,"The stone opens a portal to any place on the map, and is spent.",,templates: Portal Stone
+hint.welkynd-stone,"In a hard moment the stone refills all your magicka at once, and fades.",,templates: Welkynd Stone
+hint.varla-stone,"The stone restores every enchanted piece you wear, and fades.",,templates: Varla Stone
+hint.weir-key,This key unlocks an Elite Breach: save it for your group.,,templates: Weir Key
+hint.starfall-glass,The Mages Guild gladly pays good money for starfall glass.,,templates: Starfall Glass
+hint.trophy,A trophy belongs on a wall of your home; traders value it little.,,templates: Trophy
+hint.keepsake,"Carry the keepsake home, to the family that is waiting for it.",,templates: Keepsake
+hint.remains,The heir must carry the remains home and lay them to rest with honour.,,templates: Remains
+hint.ember,Deadlands Embers are the coin the Sigil Broker accepts.,,templates: Deadlands Ember
+hint.shard,"Welkynd Shards pay for the Reforge, and for Portal Stones in the shops.",,templates: Welkynd Shard
+hint.furniture,"It will grace your home, and any trader will buy a spare.","They will grace your home, and any trader will buy a spare.","templates: Plain Single Bed, Fancy Single Bed, Plain Double Bed, Fancy Double Bed, Large Oak Table, Large Cherry Table (+33)"
+hint.religious,A trinket for selling: traders gladly take temple goods.,,"templates: Prayer Beads, Rare Symbol, Common Symbol, Bell, Holy Water, Talisman (+7)"
+hint.cart,A cart takes part of the load and eases your burden.,,templates: Small Cart
+hint.horse,A horse carries you fast along the roads; just do not forget the oats.,,templates: Horse
+hint.ship,A ship sails the open sea and carries goods from port to port.,,"templates: Rowboat, Large Boat, Small Ship, Large Galley"
+hint.dragon,"Your brass dragon carries you through the sky, if you do not spare its oil.",,templates: Dwarven Dragon
+hint.sell,A trinket for selling: traders will give a few coins for it.,A trinket for selling: traders will give a few coins for them.,a template the map does not name (fallback)
+hint.silver.writ,"What you gather or make by your own hand, the Court buys for silver.",,"second sentence: a market material, the character in no guild"
+hint.silver.writ.guild,"Perhaps my guild would be interested in this, and would pay in silver.",,"second sentence: a market material, the character in a guild (facts.guild)"
+hint.silver.potion,A potion of your own brewing fetches silver from guilds and temples.,,second sentence: a potion (crafting writ)
+hint.silver.dish.fighters,The Fighters Guild pays silver for dishes of your own cooking.,,"second sentence: Hunter's Stew, Fisherman's Supper"
+hint.silver.dish.mara,The Temple of Mara pays silver for treats of your own cooking.,,"second sentence: Orchard Tart, Feast of the Hearth"
+hint.silver.kit,The Fighters Guild pays silver for repair kits of your own make.,,second sentence: a Repair Kit
+hint.siege-gem,It can be set in a socket like any other gem.,,templates: Siege-cracked Gem
+hint.relic,A relic like this is best sold: it fetches a good price.,,templates: Holy Relic

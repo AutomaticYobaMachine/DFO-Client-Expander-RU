@@ -1,0 +1,21 @@
+key,s,p,note
+sigil.power,"A sigil is woven into it, growing stronger as its bearer wins renown.","A sigil is woven into them, growing stronger as their bearer wins renown.",sigil without a set (sigil.power)
+sigil.stage.0,"Its sigil is still faint, barely awake.","Their sigil is still faint, barely awake.",sigil stage 0: Faint
+sigil.stage.1,Its sigil has kindled and glows softly.,Their sigil has kindled and glows softly.,sigil stage 1: Kindled
+sigil.stage.2,Its sigil burns bright and steady.,Their sigil burns bright and steady.,sigil stage 2: Bright
+sigil.stage.3,"Its sigil is radiant, its light hard to look at.","Their sigil is radiant, its light hard to look at.",sigil stage 3: Radiant
+sigil.stage.4,Its sigil has ascended to its full power.,Their sigil has ascended to its full power.,sigil stage 4: Ascendant
+sigil.set.malacath,"It is part of a set sacred to Malacath, god of the spurned.","They are part of a set sacred to Malacath, god of the spurned.",set: Malacath's Bulwark
+sigil.set.dagon,It is part of a set branded with the fire of Mehrunes Dagon.,They are part of a set branded with the fire of Mehrunes Dagon.,set: Dagon's Brand
+sigil.set.nocturnal,It is part of a set woven from Nocturnal's shadows.,They are part of a set woven from Nocturnal's shadows.,set: Nocturnal's Shroud
+sigil.set.mora,It is part of a set steeped in the forbidden knowledge of Hermaeus Mora.,They are part of a set steeped in the forbidden knowledge of Hermaeus Mora.,set: Mora's Mantle
+sigil.set.ruhn,"It is part of the regalia of Ruhn, made for a Dremora lord.","They are part of the regalia of Ruhn, made for a Dremora lord.",set: Ruhn's Regalia
+sigil.set.oath,It is part of a set forged for an oath that was broken.,They are part of a set forged for an oath that was broken.,set: The Broken Oath
+sigil.set.thieftaker,"It is part of a thief-taker's garb, made for running down thieves.","They are part of a thief-taker's garb, made for running down thieves.",set: The Thief-Taker's Garb
+sigil.set.orcsbane,It is part of a harness made for war against the orcs.,They are part of a harness made for war against the orcs.,set: Orcsbane Harness
+sigil.set.coilscale,It is part of a set covered in the scales of the serpent Sethrakul.,They are part of a set covered in the scales of the serpent Sethrakul.,set: Sethrakul's Coilscale
+sigil.set.numidium,It is part of a set cast in the brass of Numidium.,They are part of a set cast in the brass of Numidium.,set: The Brass of Numidium
+sigil.set.panoply,"It is part of a battlemage's panoply, made for steel and spell alike.","They are part of a battlemage's panoply, made for steel and spell alike.",set: The Battlemage's Panoply
+sigil.set.wyrd,It is part of raiment woven by the witches of the Wyrd.,They are part of raiment woven by the witches of the Wyrd.,set: The Wyrd's Raiment
+sigil.set.starspun,It is part of a weave spun from starlight.,They are part of a weave spun from starlight.,set: The Starspun Weave
+sigil.set.eltheric,It is part of a tidemail shaped by the Eltheric Ocean.,They are part of a tidemail shaped by the Eltheric Ocean.,set: The Eltheric Tidemail

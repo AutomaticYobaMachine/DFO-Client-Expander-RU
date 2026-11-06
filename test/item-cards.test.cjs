@@ -39,7 +39,7 @@ test('ten metals have distinct colors; Ebony and Daedric retain black with their
 
 test('all supplied card fonts are served locally with their original bytes and font MIME types',async()=>{
   const handle=wrap(async()=>new Response('native fallback'));
-  for(const file of ['item-font-title.ttf','item-font-text.ttf','item-font-sigil.ttf','item-font-set.ttf','item-font-legendary.otf']){
+  for(const file of ['item-font-title.ttf','item-font-text.ttf','item-font-sigil.ttf','item-font-set.ttf','item-font-legendary.otf','item-font-description.otf']){
     const response=await handle(new Request('dagger://game/dfo-mod/'+file));
     assert.equal(response.status,200);assert.equal(response.headers.get('content-type'),file.endsWith('.otf')?'font/otf':'font/ttf');
     assert.deepEqual(Buffer.from(await response.arrayBuffer()),fs.readFileSync(path.join(__dirname,'../src/mod/fonts',file)));
@@ -143,4 +143,20 @@ test('all card hooks match current published game assets, parse and apply once; 
     }
   }
   assert.deepEqual(seen.sort(),[...EXPECTED.itemCards].sort());
+});
+
+test('the description is told only what the card shows: identification, a shown metal, the native armour type',()=>{
+  // dfo_item_text.js facts, derived beside the card's own rows: never a hidden metal, never a decoded type.
+  assert.deepEqual(derive(sword,line,native,known).facts,{known:true,material:'steel'});
+  assert.deepEqual(derive(sword,line,native,{known:()=>false}).facts,{known:false,material:'steel'});
+  assert.deepEqual(derive(sword,line,{...native,saysMaterial:()=>false},known).facts,{known:true},'a hidden metal is not told');
+  const cuirass={group:'Armor',templateIndex:102,material:513,value:600};
+  assert.deepEqual(derive(cuirass,{...line,armorType:'Plate'},native,known).facts,{known:true,material:'steel',armorType:'plate'});
+  assert.deepEqual(derive({...cuirass,material:256},{...line,armorType:'Chain'},{...native,material:()=>'Chain'},known).facts,{known:true,material:'chain',armorType:'chain'});
+  assert.deepEqual(derive({...cuirass,templateIndex:515},{...line,armorType:'Chain'},{...native,variantWord:()=>'Mail'},known).facts,{known:true,construction:'mail',material:'steel',armorType:'chain'});
+  assert.deepEqual(derive({...cuirass,templateIndex:520,material:0},{...line,armorType:'Leather'},{...native,variantWord:()=>'Fur'},known).facts,{known:true,material:'fur',armorType:'leather'});
+  assert.deepEqual(derive({...cuirass,material:undefined},{...line,armorType:'Plate'},native,known).facts,{known:true,armorType:'plate'},'a missing material is never decoded');
+  assert.deepEqual(derive({group:'Weapons',templateIndex:527,material:0},line,native,known).facts,{known:true,material:'cloth'});
+  assert.deepEqual(derive({group:'WomensClothing',templateIndex:205,dye:0},line,native,known).facts,{known:true});
+  assert.equal(derive({...cuirass,material:513},{...line,armorType:'Robe'},native,known).facts.armorType,undefined,'only the three native types');
 });

@@ -84,7 +84,7 @@ async function main(){
   for(const row of report.books.classic.rows)assert.ok(row.width<=301,JSON.stringify(row));
   assert.match(report.books.canvas.family,/DFO Hangyaku/);assert.match(report.books.canvas.font,/DFO Hangyaku/);assert.equal(report.books.canvas.measured,report.books.canvas.nativeWidth);
   assert.equal(report.repeatedFontAssignments,0,'Repeated canvas font assignments use the cache');assert.match(report.restored,/DFO Gabin/);
-  assert.equal(Object.keys(report.registrations).length,7);for(const count of Object.values(report.registrations))assert.equal(count,1,'One registration per font');
+  assert.equal(Object.keys(report.registrations).length,8);for(const count of Object.values(report.registrations))assert.equal(count,1,'One registration per font');
   const cdp=await page.context().newCDPSession(page);await cdp.send('DOM.enable');await cdp.send('CSS.enable');const document=await cdp.send('DOM.getDocument');report.platform=[];
   for(const selector of ['#font-heading','#font-nested-heading','#font-body','.pack-who','.dfo-item-title h3']){const node=await cdp.send('DOM.querySelector',{nodeId:document.root.nodeId,selector});assert.ok(node.nodeId,selector);const result=await cdp.send('CSS.getPlatformFontsForNode',{nodeId:node.nodeId});report.platform.push({selector,fonts:result.fonts});for(const f of result.fonts)assert.equal(f.isCustomFont,true,'Ordinary text must use the supplied files: '+f.familyName);if(selector!=='#font-body')assert.ok(result.fonts.some(f=>/Greengoth/.test(f.familyName)),selector+': heading letters must use Greengoth; punctuation may use a supplied fallback')}
   report.errors=errors;report.external=external;

@@ -1,6 +1,6 @@
 key,group,name,number,text
 82,UselessItems1,Glass Jar,s,A clear glass jar with a wide mouth.
-83,UselessItems1,Glass Bottle,s,"A glass bottle, empty unless something has been brewed into it."
+83,UselessItems1,Glass Bottle,s,A stoppered glass bottle with a potion swirling inside.
 84,UselessItems1,Decanter,s,A graceful decanter for wine and finer things.
 85,UselessItems1,Clay Jar,s,A glazed clay jar sealed with wax.
 86,UselessItems1,Small Sack,s,A small cloth sack tied with a cord.
@@ -18,9 +18,9 @@ key,group,name,number,text
 530,UselessItems2,Camping Equipment,s,"A bundle of camping gear: tarp, cord and a few pegs."
 539,UselessItems2,Waterskin,s,A leather skin for carrying water on the road.
 540,UselessItems2,Skillet,s,An iron skillet for cooking over a fire.
-541,UselessItems2,Campfire,s,"The makings of a campfire: kindling, stones and patience."
+541,UselessItems2,Campfire,s,"The makings of a campfire: kindling, flint and stones for a hearth."
 580,UselessItems2,Wallet,s,A leather wallet for coin and papers.
-584,UselessItems2,Lockpick,s,A thin bent pick for persuading locks.
+584,UselessItems2,Lockpick,s,A thin bent pick for opening locks.
 600,UselessItems2,Materials Bag,s,A sturdy bag for crafting materials.
 603,UselessItems2,Skinning Knife,s,A short curved knife for skinning game.
 692,UselessItems2,Repair Kit,s,Tools and patches for mending arms and armour.

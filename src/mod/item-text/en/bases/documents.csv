@@ -5,7 +5,7 @@ key,group,name,number,text
 132,MiscItems,Spellbook,s,"A mage's book of spells, annotated in a cramped hand."
 275,MiscItems,Letter of Credit,s,A banker's letter promising gold to whoever presents it.
 276,MiscItems/Currency,Gold Pieces,p,"Septims of the Empire, good in any market."
-277,Books,Book,s,A bound book; whatever it has to tell is written inside.
+277,Books,Book,s,"A bound book in a worn leather cover, worth a read."
 278,MiscItems,Potion Recipe,s,An alchemist's recipe for brewing a potion.
 279,UselessItems2,Parchment,s,"A blank sheet of scraped and treated skin, ready for ink."
 284,Paintings,Painting,s,A painting in a wooden frame.

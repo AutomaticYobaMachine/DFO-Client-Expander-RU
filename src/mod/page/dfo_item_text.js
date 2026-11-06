@@ -19,6 +19,12 @@
   // power, and pairs of crafted or enchanted properties. The shared rules (item-text/rules.json) set one universal
   // order of seven slots; the random slots draw with a seed taken from the item, so one item always reads the same.
   //
+  // Every description ends with the player hint, its own paragraph after one blank line: what to do with the piece -
+  // its state's advice first (a quest's item, an unidentified or cursed piece, a broken one, a Legendary, a set, a
+  // made piece), else its base item's (item-text/hints.json: which craft takes an ingredient, where an ore is smelted,
+  // that a plain sword is better than nothing). What a writ pays silver for gets a second sentence - in the voice of
+  // the character's guild when the character is in one (facts.guild).
+  //
   // Pure reading: an item is never changed. What the game keeps hidden stays hidden: an unidentified piece is
   // described by its base, its visible material, its tier and its state only - never its affixes, enchantments,
   // curse, power, sigil or sockets. The caller supplies what only the game knows (identification, the visible
@@ -36,6 +42,15 @@
   const GEAR = new Set(['Weapons', 'Armor']);
   const CLOTHING = new Set(['MensClothing', 'WomensClothing']);
   const EQUIPPABLE = new Set(['Weapons', 'Armor', 'Jewellery', 'MensClothing', 'WomensClothing']);
+  /** itemKinds.js isPotion: DFU's Glass Bottle (UselessItems1 83) is the potion. Every item carries potionRecipeKey
+   *  (0 by default), so the key alone says nothing - a bed has one too. */
+  const isPotion = item => item.group === 'UselessItems1' && item.templateIndex === 83;
+  /** itemLaw.js: a soul is held by a Soul Trap (MiscItems 274) or by Azura's Star (artifact 9). */
+  const holdsSouls = item => (item.group === 'MiscItems' && item.templateIndex === 274)
+    || (item.artifact === true && isInt(item.artifactIndexBitfield) && item.artifactIndexBitfield >> 1 === 9);
+  /** The share of its condition a piece still has, or null when it does not say. */
+  const conditionOf = item => (Number.isFinite(item.currentCondition) && Number.isFinite(item.maxCondition) && item.maxCondition > 0
+    ? Math.max(0, item.currentCondition) / item.maxCondition : null);
   /** sigil.js SIGIL_STAGES: Faint, Kindled, Bright, Radiant, Ascendant - the experience each begins at. */
   const SIGIL_STAGE_XP = Object.freeze([0, 5000, 12500, 22500, 37500]);
   /** lootRarity.js DAMNED_DRAWBACK: Health Leech, whenever used. */
@@ -151,11 +166,13 @@
       }
     }
 
-    // ── what it holds ──
-    if (isInt(item.potionRecipeKey) && item.potionRecipeKey >= 0) add('content', 'content.potion');
-    if (isInt(item.potent) && item.potent > 0) add('content', 'content.potent');
-    if (isInt(item.trappedSoulType) && item.trappedSoulType >= 0) add('content', 'content.soul');
-    if (GEAR.has(item.group) && isInt(item.poisonType) && item.poisonType >= 0) add('content', [`content.poison.${item.poisonType}`, 'content.poison']);
+    // ── what it holds: a potion only in a potion's bottle, a soul only in what holds souls, poison only on a weapon ──
+    if (isPotion(item)) {
+      add('content', 'content.potion');
+      if (isInt(item.potent) && item.potent > 0) add('content', 'content.potent');
+    }
+    if (holdsSouls(item) && isInt(item.trappedSoulType) && item.trappedSoulType >= 0) add('content', 'content.soul');
+    if (item.group === 'Weapons' && isInt(item.poisonType) && item.poisonType >= 0) add('content', [`content.poison.${item.poisonType}`, 'content.poison']);
 
     // ── food ──
     if (isInt(item.foodStage) && item.foodStage >= 0 && item.foodStage <= 4) add('food', `food.stage.${item.foodStage}`);
@@ -167,15 +184,14 @@
     if (CLOTHING.has(item.group) && isInt(item.dye) && item.dye >= 0) add('dye', `dye.${item.dye}`);
 
     // ── wear: only what a character can put on; every item carries the field, the rest ignore it ──
-    if (EQUIPPABLE.has(item.group) && Number.isFinite(item.currentCondition) && Number.isFinite(item.maxCondition) && item.maxCondition > 0) {
-      const share = Math.max(0, item.currentCondition) / item.maxCondition;
+    const share = conditionOf(item);
+    if (EQUIPPABLE.has(item.group) && share != null) {
       add('condition', share <= 0 ? 'condition.broken' : share < 0.4 ? 'condition.battered' : share < 0.75 ? 'condition.worn'
         : share < 1 ? 'condition.used' : 'condition.new');
     }
 
-    // ── its standing in the world ──
+    // ── its standing in the world (a quest's item is said by the hint, not here) ──
     if (!known && hasHidden(item)) add('state', 'state.unidentified');
-    if (item.questItem === true) add('state', 'state.quest');
     if (item.stolen === true) add('state', 'state.stolen');
     if (item.bound === true) add('state', 'state.bound');
     if (isInt(item.timeForItemToDisappear) && item.timeForItemToDisappear > 0) add('state', 'state.summoned');
@@ -344,15 +360,71 @@
     return { identity: { category: 'identity', key: who.key, text: who.text }, tier: tier && { category: 'tier', ...tier }, candidates };
   }
 
+  /** The hint's key: the piece's state first, from the most pressing; else its base item's own (hints.json). */
+  function hintKey(pack, item, facts) {
+    const known = facts.known === true;
+    if (item.questItem === true) return 'hint.quest';
+    if (!known && hasHidden(item)) return 'hint.unidentified';
+    if (known && item.cursed && typeof item.cursed === 'object') {
+      return item.cursed.type === DAMNED.type && item.cursed.param === DAMNED.param ? 'hint.damned' : 'hint.cursed';
+    }
+    const share = conditionOf(item);
+    if (GEAR.has(item.group) && share != null && share < 0.4) return 'hint.repair';
+    if (item.artifact === true) return 'hint.artifact';
+    if (item.rarity === 'aetheric' || isId(item.aetheric)) return 'hint.aetheric';
+    if (item.rarity === 'legendary' || isId(item.legendary) || isId(item.gilded) || item.rarity === 'gilded') {
+      return item.exalted === true ? 'hint.exalted' : 'hint.legendary';
+    }
+    const sigil = item.sigil && typeof item.sigil === 'object' ? item.sigil : null;
+    if (sigil && isId(sigil.set)) return 'hint.set';
+    if (sigil && Number.isFinite(sigil.power) && sigil.power > 0) return 'hint.sigil';
+    const worn = EQUIPPABLE.has(item.group);
+    if (worn && (isInt(item.quality) || plain(item.maker) || typeof item.provenance === 'string')) return 'hint.crafted';
+    if (item.rarity === 'rare') return 'hint.rare';
+    if (item.rarity === 'magic') return 'hint.magic';
+    if (worn && (item.magic === true || (Array.isArray(item.enchantments) && item.enchantments.length > 0))) return 'hint.enchanted';
+    if (isInt(item.foodStage) && item.foodStage >= 3) return 'hint.food.spoiled';
+    if (holdsSouls(item) && item.artifact !== true && isInt(item.trappedSoulType) && item.trappedSoulType >= 0) return 'hint.soul.filled';
+    return templateHint(pack, item) ?? 'hint.sell';
+  }
+  /** A value of a template-keyed map: a group-specific key first ("Deeds:0"), then the template index. */
+  function byTemplate(map, item) {
+    if (!map || !isInt(item.templateIndex)) return null;
+    const special = typeof item.group === 'string' ? `${item.group}:${item.templateIndex}` : null;
+    if (special && own(map, special)) return map[special];
+    return own(map, String(item.templateIndex)) ? map[String(item.templateIndex)] : null;
+  }
+  const templateHint = (pack, item) => byTemplate(pack.hints?.templates, item);
+  /**
+   * The player hint: one sentence of what to do with the piece, and for what a writ pays silver for (said with the base
+   * item's own hint, never with a state's advice), a second - the guild's own words when the character is in a guild.
+   */
+  function hintOf(pack, item, facts, form) {
+    const key = hintKey(pack, item, facts);
+    const text = sentence(pack, key, form) ?? sentence(pack, 'hint.sell', form);
+    if (text == null) return [];
+    const out = [{ category: 'hint', key: own(pack.properties, key) ? key : 'hint.sell', text }];
+    const kind = key === templateHint(pack, item) ? byTemplate(pack.hints?.silver, item) : null;
+    if (typeof kind === 'string') {
+      const silver = `hint.silver.${kind}`, guild = `${silver}.guild`;
+      const pick = facts.guild === true && own(pack.properties, guild) ? guild : silver;
+      const said = sentence(pack, pick, form);
+      if (said != null) out.push({ category: 'hint', key: pick, text: said });
+    }
+    return out;
+  }
+
   /**
    * The description of one item: [{ slot, category, key, text }] in the universal queue's order (rules.json):
    *  1 base item + armour type + metal / base item + metal / base item;  2 tier + sigil + set (and its shorter forms);
    *  3, 4 one random fragment each of named power, technique, lines (2), contents (2), material, sigil growth;
-   *  5 one random of technique, craft, sockets, hidden magic or curse;  6 wear, on what is worn;  7 quest or stolen.
+   *  5 one random of technique, craft, sockets, hidden magic or curse;  6 wear, on what is worn;  7 stolen;
+   *  8 the player hint (category 'hint': its own paragraph, always last; a second sentence for what writs pay silver for).
    * facts: { known (identified, as the game decides), material ('steel', 'leather', 'chain' for an unknown metal,
    *          'fur', 'cloth' - only when the game shows it), armorType ('leather' | 'chain' | 'plate', the card's Type
-   *          row), construction ('mail' | 'brigandine'), perfect, sigilXp }
-   * options: { seed (another stable draw), max (stop after so many fragments), all (every candidate, no queue) }
+   *          row), construction ('mail' | 'brigandine'), perfect, sigilXp, guild (the character is in a guild) }
+   * options: { seed (another stable draw), max (stop the description after so many fragments; the hint is still said),
+   *            all (every candidate, no queue) }
    * A template the tables do not know gets no description: its grammatical form is unknown.
    */
   function describe(pack, item, facts = {}, options = {}) {
@@ -363,7 +435,8 @@
     const form = pack.forms.includes(base.form) ? base.form : pack.defaultForm;
     const { identity: who, tier, candidates } = fragments(pack, item, facts, base, form);
     const clean = f => ({ slot: f.slot ?? null, category: f.category, key: f.key, text: f.text });
-    if (options.all === true) return [who, ...(tier ? [tier] : []), ...candidates].map(clean);
+    const hint = hintOf(pack, item, facts, form);
+    if (options.all === true) return [who, ...(tier ? [tier] : []), ...candidates, ...hint].map(clean);
 
     const rng = random(options.seed == null ? seedOf(item) : typeof options.seed === 'number' ? options.seed >>> 0 : seedOf({ uid: String(options.seed) }));
     const used = new Set(), taken = new Map(), texts = new Set(), out = [];
@@ -375,7 +448,8 @@
       out.push({ ...fragment, slot });
     };
     for (const step of pack.rules?.queue ?? []) {
-      if (Number.isInteger(options.max) && out.length >= options.max) break;
+      if (step.take === 'hint') { for (const h of hint) out.push({ ...h, slot: step.slot }); continue; }
+      if (Number.isInteger(options.max) && out.length >= options.max) continue;
       if (step.take === 'identity') { keep(step.slot, who); continue; }
       if (step.take === 'tier') { if (tier) keep(step.slot, tier); continue; }
       if (step.equippable && !EQUIPPABLE.has(item.group)) continue;
@@ -395,6 +469,13 @@
     return plan(item, facts).flatMap(step => (Array.isArray(step.key) ? step.key : [step.key]));
   }
 
+  /** The description as the card shows it: the sentences as one paragraph, then the hint after one blank line. */
+  function paragraphs(fragments) {
+    const said = list => list.map(f => f.text).join(' ');
+    const body = said(fragments.filter(f => f.category !== 'hint')), hint = said(fragments.filter(f => f.category === 'hint'));
+    return [body, hint].filter(Boolean).join('\n\n');
+  }
+
   function install(win) {
     if (win.__dfoItemText) return;
     const pack = win.__dfoItemTextPack && typeof win.__dfoItemTextPack === 'object' ? win.__dfoItemTextPack : null;
@@ -410,12 +491,12 @@
       error: pack ? null : String(win.__dfoItemTextError || 'no item text pack'),
       /** [{kind, key, text}] for an item; [] without a pack or for a template the tables do not know. */
       describe: counted,
-      /** The same sentences as one paragraph. */
-      text: (item, facts, options) => counted(item, facts, options).map(s => s.text).join(' '),
+      /** The same sentences as text: one paragraph, a blank line, the hint. */
+      text: (item, facts, options) => paragraphs(counted(item, facts, options)),
       has(key) { return !!pack && own(pack.properties, key); },
       stats: () => ({ ...counters, bases: pack ? Object.keys(pack.bases).length : 0, properties: pack ? Object.keys(pack.properties).length : 0 }),
     });
   }
 
-  return { KINDS, SIGIL_STAGE_XP, baseOf, plan, describe, keysFor, sentence, variantOf, categoryOf, seedOf, install };
+  return { KINDS, SIGIL_STAGE_XP, baseOf, plan, describe, keysFor, sentence, variantOf, categoryOf, seedOf, hintKey, paragraphs, install };
 });

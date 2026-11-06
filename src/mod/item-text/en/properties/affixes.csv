@@ -1,35 +1,35 @@
 key,s,p,note
-affix.damage,It strikes harder than its make would suggest.,They strike harder than their make would suggest.,affix damage
-affix.armor,Warding magic makes it sturdier than the metal alone could.,Warding magic makes them sturdier than the metal alone could.,affix armor
+affix.damage,You feel it strike harder than its make would suggest.,You feel them strike harder than their make would suggest.,affix damage
+affix.armor,You feel warding magic harden it beyond what the metal alone could do.,You feel warding magic harden them beyond what the metal alone could do.,affix armor
 affix.weight,It eases the load on its bearer's back.,They ease the load on their bearer's back.,affix weight
-affix.leech,With every blow it drinks a little of the foe's life for its wielder.,With every blow they drink a little of the foe's life for their wielder.,affix leech
-affix.thorns,Whoever strikes its wearer is hurt in turn.,Whoever strikes their wearer is hurt in turn.,affix thorns
-affix.focus,Spells cost its bearer less magicka.,Spells cost their bearer less magicka.,affix focus
-affix.warmth,It keeps the wearer warm on the coldest nights.,They keep the wearer warm on the coldest nights.,affix warmth
-affix.dry,Rain runs off it as if it had somewhere better to be.,Rain runs off them as if it had somewhere better to be.,affix dry
-affix.castSpeed,Spells leave its bearer's hand a heartbeat sooner.,Spells leave their bearer's hand a heartbeat sooner.,affix castSpeed
+affix.leech,With every blow you feel a little of the foe's life flow into you.,,affix leech
+affix.thorns,You see whoever strikes you flinch from a wound of their own.,,affix thorns
+affix.focus,You feel spells draw less magicka from you while you bear it.,You feel spells draw less magicka from you while you bear them.,affix focus
+affix.warmth,You feel a steady warmth from it even on the coldest nights.,You feel a steady warmth from them even on the coldest nights.,affix warmth
+affix.dry,"You see the rain bead and run off it, leaving you dry.","You see the rain bead and run off them, leaving you dry.",affix dry
+affix.castSpeed,You feel spells leave your hand a heartbeat sooner.,,affix castSpeed
 affix.potency,Spells cast with it strike harder.,Spells cast with them strike harder.,affix potency
-affix.wellspring,Each kill returns some spent magicka to its bearer.,Each kill returns some spent magicka to their bearer.,affix wellspring
+affix.wellspring,With each kill you feel spent magicka trickle back into you.,,affix wellspring
 affix.honed,"Its enchantments have been carefully honed, one by one.","Their enchantments have been carefully honed, one by one.",affix honed at least once (item.honed)
 affix.reforged,It has been reforged and still bears the marks of a second forge.,They have been reforged and still bear the marks of a second forge.,reforged at least once (item.reforges)
-affix.stat.strength,It lends strength to whoever bears it.,They lend strength to whoever bears them.,affix stat: strength
+affix.stat.strength,You feel strength gather in your arms and shoulders.,,affix stat: strength
 affix.stat.intelligence,It sharpens the wits of its owner.,They sharpen the wits of their owner.,affix stat: intelligence
 affix.stat.willpower,It hardens the will against fear and magic.,They harden the will against fear and magic.,affix stat: willpower
-affix.stat.agility,It makes the hands quicker and the feet surer.,They make the hands quicker and the feet surer.,affix stat: agility
+affix.stat.agility,You feel your hands grow quicker and your footing surer.,,affix stat: agility
 affix.stat.endurance,It helps the body bear wounds and long marches.,They help the body bear wounds and long marches.,affix stat: endurance
 affix.stat.personality,People find its owner more agreeable.,People find their owner more agreeable.,affix stat: personality
-affix.stat.speed,It quickens the step of whoever wears it.,They quicken the step of whoever wears them.,affix stat: speed
+affix.stat.speed,You feel your stride lengthen and quicken.,,affix stat: speed
 affix.stat.luck,Fortune smiles a little more often on whoever carries it.,Fortune smiles a little more often on whoever carries them.,affix stat: luck
-affix.resist.fire,It turns aside the bite of flame.,They turn aside the bite of flame.,affix resist: fire
+affix.resist.fire,You feel the bite of flame dull before it reaches you.,,affix resist: fire
 affix.resist.frost,It holds back the grip of frost.,They hold back the grip of frost.,affix resist: frost
-affix.resist.shock,Lightning finds little purchase on its wearer.,Lightning finds little purchase on their wearer.,affix resist: shock
+affix.resist.shock,You feel lightning lose its grip the moment it touches you.,,affix resist: shock
 affix.resist.poison,Poisons and venoms lose their sting against its wearer.,Poisons and venoms lose their sting against their wearer.,affix resist: poison
 affix.resist.magic,Hostile spells slide off its wearer like water off oiled leather.,Hostile spells slide off their wearer like water off oiled leather.,affix resist: magic
-affix.elemental.fire,Flame licks along it with every strike.,Flame licks along them with every strike.,affix elemental: fire
-affix.elemental.frost,Frost gathers on it and bites into every wound.,Frost gathers on them and bites into every wound.,affix elemental: frost
-affix.elemental.shock,Sparks crackle along it with every strike.,Sparks crackle along them with every strike.,affix elemental: shock
+affix.elemental.fire,You see flame lick along it with every strike.,You see flame lick along them with every strike.,affix elemental: fire
+affix.elemental.frost,You see frost gather on it and bite into every wound.,You see frost gather on them and bite into every wound.,affix elemental: frost
+affix.elemental.shock,You hear sparks crackle along it with every strike.,You hear sparks crackle along them with every strike.,affix elemental: shock
 affix.slayer.undead,It strikes the undead with special hatred.,They strike the undead with special hatred.,affix slayer: undead
-affix.slayer.daedra,It bites deep into the flesh of Daedra.,They bite deep into the flesh of Daedra.,affix slayer: daedra
+affix.slayer.daedra,You feel it bite deep whenever it meets Daedric flesh.,You feel them bite deep whenever they meet Daedric flesh.,affix slayer: daedra
 affix.slayer.humanoid,It was made with the killing of men and mer in mind.,They were made with the killing of men and mer in mind.,affix slayer: humanoid
 affix.slayer.animal,"It is a hunter's tool, deadly to beasts.","They are a hunter's tool, deadly to beasts.",affix slayer: animal
 affix.standing.commoners,Common folk warm to whoever wears it.,Common folk warm to whoever wears them.,affix standing: commoners

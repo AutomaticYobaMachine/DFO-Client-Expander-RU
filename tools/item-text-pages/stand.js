@@ -99,6 +99,7 @@
     if ($('quest').checked) item.questItem = true;
     if ($('stolen').checked) item.stolen = true;
     const facts = { known: $('known').checked, perfect: $('perfect').checked };
+    if ($('guild').checked) facts.guild = true;
     if ($('material').value) facts.material = $('material').value;
     if ($('armorType').value) facts.armorType = $('armorType').value;
     if ($('construction').value) facts.construction = $('construction').value;
@@ -120,25 +121,29 @@
     $('cardName').textContent = record && facts.known ? record.name : (locale === 'ru' ? t.ruName : t.name);
     $('cardMaterial').hidden = !facts.material;
     $('cardMetal').textContent = facts.material ? (D.materials.find(m => m.id === facts.material)?.label || facts.material) : '';
-    $('desc').textContent = out.map(f => f.text).join(' ');
+    // The description is one paragraph; the hint comes after one blank line, in white.
+    const said = list => list.map(f => f.text).join(' ');
+    $('descBody').textContent = said(out.filter(f => f.category !== 'hint'));
+    $('descTip').textContent = said(out.filter(f => f.category === 'hint'));
+    $('desc').classList.toggle('none', !out.length);
     // slots
     const slots = $('slots');
     slots.replaceChildren();
     for (const step of pack.rules.queue) {
-      const f = out.find(x => x.slot === step.slot);
+      const here = out.filter(x => x.slot === step.slot);
       const title = D.slotTitles[step.slot];
       const what = el('div', { class: 'what' }, el('span', { text: title }));
-      if (f) what.append(el('code', { text: f.key }));
-      slots.append(el('div', { class: `slot${f ? '' : ' empty'}` }, el('b', { text: String(step.slot) }), what,
-        el('div', { class: 'text', text: f ? f.text : 'пусто: у предмета нет подходящего фрагмента' })));
+      for (const f of here) what.append(el('code', { text: f.key }));
+      slots.append(el('div', { class: `slot${here.length ? '' : ' empty'}${step.take === 'hint' ? ' tip' : ''}` }, el('b', { text: String(step.slot) }), what,
+        el('div', { class: 'text', text: here.length ? here.map(f => f.text).join(' ') : 'пусто: у предмета нет подходящего фрагмента' })));
     }
     $('seedLabel').textContent = seed == null ? 'случайный выбор: по предмету' : `случайный выбор: вариант ${seed}`;
     // every candidate
     const picked = new Set(out.map(f => f.key));
     const titles = new Map(pack.rules.categories.map(c => [c.id, c.title]));
-    $('allRows').replaceChildren(...all.map(f => el('tr', { class: picked.has(f.key) ? 'picked' : '' },
+    $('allRows').replaceChildren(...all.map(f => el('tr', { class: `${picked.has(f.key) ? 'picked' : ''}${f.category === 'hint' ? ' tip' : ''}` },
       el('td', { text: (picked.has(f.key) ? '● ' : '') + (titles.get(f.category) || f.category || '—') }), el('td', {}, el('code', { text: f.key })), el('td', { text: f.text }))));
-    $('allCount').textContent = `${all.length} фрагментов, в описании ${out.length}`;
+    $('allCount').textContent = `${all.length} фрагментов, в описании ${out.filter(f => f.category !== 'hint').length}, в подсказке ${out.filter(f => f.category === 'hint').length}`;
   }
 
   // ── presets: real item shapes from the game's tables, marked as examples ──
@@ -146,7 +151,7 @@
     $('templateSearch').value = ''; fillTemplates();
     const set = (id, v) => { const node = $(id); if (node.type === 'checkbox') node.checked = !!v; else node.value = v ?? ''; };
     for (const id of ['material', 'armorType', 'construction', 'record', 'setId', 'curse', 'socket1', 'socket2', 'socket3', 'quality', 'maker', 'house', 'poison', 'food', 'dye']) set(id, '');
-    for (const id of ['exalted', 'imbued', 'perfect', 'sigilPower', 'honed', 'reforged', 'potion', 'potent', 'soul', 'noRot', 'chef', 'quest', 'stolen', 'wearOn']) set(id, false);
+    for (const id of ['exalted', 'imbued', 'perfect', 'sigilPower', 'honed', 'reforged', 'potion', 'potent', 'soul', 'noRot', 'chef', 'quest', 'stolen', 'guild', 'wearOn']) set(id, false);
     set('known', true); set('rarity', 'common'); set('stage', '0'); set('wear', 100);
     for (const [k, v] of Object.entries(p.set)) set(k, v);
     affixes = [...(p.affixes || [])]; enchants = [...(p.enchants || [])]; seed = null;

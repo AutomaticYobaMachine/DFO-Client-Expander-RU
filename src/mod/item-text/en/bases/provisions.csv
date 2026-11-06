@@ -15,7 +15,7 @@ key,group,name,number,text
 1605,UselessItems2,Fish,s,A fresh fish from the nearest water.
 1608,UselessItems2,Apple,s,"A crisp apple, picked by hand."
 1609,UselessItems2,Orange,s,"A sweet orange, picked by hand."
-1610,UselessItems2,Mushroom,s,"A wild mushroom, hopefully the edible kind."
+1610,UselessItems2,Mushroom,s,"A wild mushroom with a firm cap, picked in the shade."
 1611,UselessItems2,Egg,s,"A fresh egg, fragile and filling."
 2000,UselessItems2,Soul Cake,s,A spiced cake baked to remember the dead.
 2001,UselessItems2,Hearth Offering,s,A small offering left by the hearth for the spirits of the house.
@@ -24,5 +24,5 @@ key,group,name,number,text
 9003,UselessItems2,Canary Rockfish,s,An orange rockfish from the cold coastal shallows.
 9004,UselessItems2,Crucian Carp,s,A round golden carp from still ponds.
 9005,UselessItems2,Mackerel,s,"A striped mackerel, quick and oily."
-9006,UselessItems2,White Zebra Angelfish,s,"A striped tropical angelfish, too pretty for the pan."
+9006,UselessItems2,White Zebra Angelfish,s,"A striped tropical angelfish with bright, trailing fins."
 9007,UselessItems2,Juvenile Finulon,s,"A young finulon from the open ocean, already larger than most fish."

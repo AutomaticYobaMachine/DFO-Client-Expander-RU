@@ -12,6 +12,7 @@
 // combos/tiers.csv      key,<form>...                     - slot 2: tier + sigil + set ({set})
 // combos/sets.csv       key,text                          - a set's name as the game shows it
 // ../rules.json                                            - categories and the universal queue of slots
+// ../hints.json                                            - each base item's player hint, and what a writ pays silver for
 //
 // Forms are the grammar a sentence agrees with: English singular/plural (s, p), Russian gender (m, f, n) and the
 // plural of pluralia tantum (p: «перчатки», «сапоги»). A base row says its item's form; a property row has a text
@@ -184,12 +185,17 @@ function loadLocale(dir) {
     sets[row.key] = row.text;
   });
   const rules = loadRules(path.join(dir, '..', 'rules.json'));
+  const hints = loadHints(path.join(dir, '..', 'hints.json'));
+  // Every hint the map names, and the silver sentences, must be said in this locale: a hint is never left unsaid.
+  const named = new Set([...Object.values(hints.templates), ...Object.values(hints.silver).flatMap(kind => [`hint.silver.${kind}`, ...(kind === 'writ' ? ['hint.silver.writ.guild'] : [])])]);
+  for (const key of named) if (!Object.hasOwn(properties, key)) throw new Error(`${dir}: no text for ${key}`);
+  for (const key of Object.keys(hints.templates)) if (!Object.hasOwn(bases, key)) throw new Error(`${dir}: hints.json names template ${key}, which has no base row`);
   return { locale, name: index.name ?? locale, forms, defaultForm, inlineName: index.inlineName ?? null, bases, properties,
-    gear, metals, combos, legendaries, tiers, sets, rules };
+    gear, metals, combos, legendaries, tiers, sets, rules, hints };
 }
 
 /** The universal order every locale shares: categories that sort fragment keys, and the queue of slots. */
-const TAKES = new Set(['identity', 'tier', 'random', 'first']);
+const TAKES = new Set(['identity', 'tier', 'random', 'first', 'hint']);
 function loadRules(file) {
   if (!fs.existsSync(file)) return { categories: [], queue: [] };
   const rules = JSON.parse(fs.readFileSync(file, 'utf8'));
@@ -216,6 +222,23 @@ function loadRules(file) {
   return { categories, queue };
 }
 
+/** The player hints every locale shares: a hint key for each base item, and what a writ pays silver for. */
+const SILVER_KINDS = new Set(['writ', 'potion', 'dish.fighters', 'dish.mara', 'kit']);
+function loadHints(file) {
+  if (!fs.existsSync(file)) return { templates: {}, silver: {} };
+  const hints = JSON.parse(fs.readFileSync(file, 'utf8'));
+  const templates = {}, silver = {};
+  for (const [key, hint] of Object.entries(hints.templates ?? {})) {
+    if (!KEY.test(key) || typeof hint !== 'string' || !/^hint\.[a-z0-9.-]+$/.test(hint)) throw new Error(`${file}: bad hint ${key}: ${hint}`);
+    templates[key] = hint;
+  }
+  for (const [key, kind] of Object.entries(hints.silver ?? {})) {
+    if (!KEY.test(key) || !SILVER_KINDS.has(kind)) throw new Error(`${file}: bad silver ${key}: ${kind}`);
+    silver[key] = kind;
+  }
+  return { templates, silver };
+}
+
 /** Which locale the page gets: Russian when the Russian translation is installed and on, English otherwise. */
 function chooseLocale(ru, root = ROOT) {
   if (ru && fs.existsSync(path.join(root, LOCALES.ru, 'index.json'))) return LOCALES.ru;
@@ -238,7 +261,7 @@ function localeFiles(locale, root = ROOT) {
   return ['index.json', ...['bases', 'properties', 'gear', 'metals', 'combos', 'legendaries', 'tiers', 'sets'].flatMap(k => index[k] ?? [])]
     .map(rel => `${locale}/${rel}`);
 }
-/** What an install carries: the shared rules and the files of each locale it speaks. */
-const installFiles = (locales, root = ROOT) => ['rules.json', ...locales.flatMap(locale => localeFiles(locale, root))];
+/** What an install carries: the shared rules and hints and the files of each locale it speaks. */
+const installFiles = (locales, root = ROOT) => ['rules.json', 'hints.json', ...locales.flatMap(locale => localeFiles(locale, root))];
 
-module.exports = { ROOT, LOCALES, parseCsv, readTable, loadLocale, loadRules, chooseLocale, bundle, localeFiles, installFiles };
+module.exports = { ROOT, LOCALES, parseCsv, readTable, loadLocale, loadRules, loadHints, chooseLocale, bundle, localeFiles, installFiles };

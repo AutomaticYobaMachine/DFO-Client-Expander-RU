@@ -47,7 +47,8 @@
   "properties/powers.csv",
   "properties/sigils.csv",
   "properties/sockets.csv",
-  "properties/state.csv"
+  "properties/state.csv",
+  "properties/hints.csv"
  ],
  "gear": [
   "combos/gear.csv"

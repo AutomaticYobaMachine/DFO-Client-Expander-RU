@@ -6,11 +6,11 @@ stormcaller,129 130,This {base} carries the storm: each arrow leaps to a second 
 the-warden,102 103 104 105 106 107 108,This {base} stands firmest when its bearer is closest to death.,These {base} stand firmest when their bearer is closest to death.,legendary power: Last Stand
 titanheart,102 103 104 105 106 107 108,This {base} lets no single blow take more than part of a life.,These {base} let no single blow take more than part of a life.,legendary power: Unyielding
 aegis-of-dawn,109 110 111 112,"This {base}, raised against the Underking's host, sometimes turns a blow by itself.","These {base}, raised against the Underking's host, sometimes turn a blow by themselves.",legendary power: Dawnward
-foxglove,133 134 135 136 137 138 139 140,"This {base}, pretty as foxglove, draws legendary finds into its bearer's path.","These {base}, pretty as foxglove, draw legendary finds into their bearer's path.",legendary power: Fortune's Favour
+foxglove,133 134 135 136 137 138 139 140,This {base} draws legendary finds into its bearer's path and brings luck.,These {base} draw legendary finds into their bearer's path and bring luck.,legendary power: Fortune's Favour
 kings-mark,133 134 135 136 137 138 139 140,"This {base} opens doors at court, and every kill pays its bearer tribute.","These {base} open doors at court, and every kill pays their bearer tribute.",legendary power: Tribute
-archmages-loop,133 134 135 136 137 138 139 140,"This {base}, never admitted to by the Mages Guild, makes spells cheaper.","These {base}, never admitted to by the Mages Guild, make spells cheaper.",legendary power: Spell Mastery
+archmages-loop,133 134 135 136 137 138 139 140,"This {base} of an archmage makes every spell cheaper, most of all in need.","These {base} of an archmage make every spell cheaper, most of all in need.",legendary power: Spell Mastery
 anseis-edge,118 119 120 121 122 123,"This {base} follows the Way of the Sword, deadlier with every hit.","These {base} follow the Way of the Sword, deadlier with every hit.",legendary power: Way of the Sword
-tsaesci-fang,114 117 121 123,"This {base} bites like a Tsaesci serpent, cruellest to the weakened.","These {base} bite like a Tsaesci serpent, cruellest to the weakened.",legendary power: Serpent's Kiss
+tsaesci-fang,114 117 121 123,"This {base} carries Tsaesci venom, cruellest to the weakened.","These {base} carry Tsaesci venom, cruellest to the weakened.",legendary power: Serpent's Kiss
 orsiniums-anvil,124 125 126,"This {base}, struck on Orsinium's anvil, shakes the ground with every blow.","These {base}, struck on Orsinium's anvil, shake the ground with every blow.",legendary power: Earthshaker
 glenmoril-bow,129 130,"This {base}, blessed by the Glenmoril witches, hunts best under the moon.","These {base}, blessed by the Glenmoril witches, hunt best under the moon.",legendary power: Hunter's Moon
 direnni-staff,115,This {base} of the Direnni channels magic cheaply and returns it with every hit.,These {base} of the Direnni channel magic cheaply and return it with every hit.,legendary power: Arcane Conduit
@@ -40,7 +40,7 @@ ring-of-artaeum,135,This {base} from Artaeum slowly refills its bearer's magicka
 shalidors-brand,118 119 120,"This {base}, Shalidor's Brand, sharpens spells while magicka runs high.","These {base}, Shalidor's Brand, sharpen spells while magicka runs high.",legendary power: Arcane Surge
 the-last-lock,560 562,"This {base}, the Dwemer's last defiance, strikes hardest at Daedra.","These {base}, the Dwemer's last defiance, strike hardest at Daedra.",legendary power: Dwemer Defiance
 resonant-maul,126,"This {base}, cast from the Colossus's heart-bell, rings against Dwemer brass.","These {base}, cast from the Colossus's heart-bell, ring against Dwemer brass.",legendary power: Resonance
-the-hourlock,130 560,"This {base}, struck in the endless Hour, tolls double with every third shot.","These {base}, struck in the endless Hour, toll double with every third shot.",legendary power: The Hour Tolls
+the-hourlock,130 560,This {base} counts the Hour: every third shot strikes double.,These {base} count the Hour: every third shot strikes double.,legendary power: The Hour Tolls
 the-dragonfire-oath,123,This {base} of a Dragonguard burns Daedra with undying Dragonfire.,These {base} of a Dragonguard burn Daedra with undying Dragonfire.,legendary power: Dragonfire
 the-sunken-sovereign,119 562,"This {base} of a drowned admiral drags foes under, blow by blow.","These {base} of a drowned admiral drag foes under, blow by blow.",legendary power: Undertow
 volendrungs-echo,560,"This {base}, tuned to Volendrung's note, rings lightning around every target.","These {base}, tuned to Volendrung's note, ring lightning around every target.",legendary power: Hammerfall

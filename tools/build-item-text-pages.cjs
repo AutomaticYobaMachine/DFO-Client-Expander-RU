@@ -1,20 +1,21 @@
 #!/usr/bin/env node
 'use strict';
-// Builds the two item-description review pages from the description tables, so they never drift from the data:
+// Builds the item-description review documents from the description tables, so they never drift from the data:
 //   docs/item-text-stand.html     - interactive stand: build an item, read its description in the description face
-//   docs/item-text-registry.html  - every fragment, grouped by the description's queue, with what it depends on
-// node tools/build-item-text-pages.cjs [--artifact-dir <dir>]   (also writes body-only copies for publishing)
-// Self-contained pages: the mod's generator, both locales and the fonts are inlined; nothing is fetched.
+//   docs/item-text-registry.docx  - every fragment, grouped by the description's queue, with what it depends on (Word)
+// node tools/build-item-text-pages.cjs [--artifact-dir <dir>]   (also writes a body-only stand for publishing)
+// The stand is self-contained: the mod's generator, both locales and the fonts are inlined; nothing is fetched.
+// The registry is written by tools/item-text-pages/docx.cjs with fixed timestamps: the same tables, the same file.
 const fs = require('node:fs'), path = require('node:path');
 const text = require('../src/mod/item-text.cjs');
 const gen = require('../src/mod/page/dfo_item_text.js');
+const word = require('./item-text-pages/docx.cjs');
 
 const ROOT = path.resolve(__dirname, '..');
 const catalog = JSON.parse(fs.readFileSync(path.join(ROOT, 'docs/item-field-catalog.json'), 'utf8'));
 const packs = { en: text.loadLocale(path.join(text.ROOT, 'en')), ru: text.loadLocale(path.join(text.ROOT, 'ru')) };
 const raw = (locale, rel) => text.readTable(path.join(text.ROOT, locale, rel)).rows;
 
-const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const json = v => JSON.stringify(v).replace(/</g, '\\u003c').replace(/[\u2028\u2029]/g, c => '\\u' + c.charCodeAt(0).toString(16));
 const fontFace = (family, file, format) => `@font-face{font-family:'${family}';src:url(data:font/${format === 'opentype' ? 'otf' : 'ttf'};base64,${fs.readFileSync(path.join(ROOT, file)).toString('base64')}) format('${format}');font-weight:400;font-style:normal;font-display:block;}`;
 const FONTS = [
@@ -63,12 +64,13 @@ const gildedIds = new Set(catalog.records.gilded.map(g => g.id));
 const legendaries = legendaryRows.map(r => ({ id: r.key, name: recordName[r.key] || r.key, gilded: gildedIds.has(r.key), templates: r.templates.split(/\s+/).map(Number) }));
 const SLOT_TITLES = { 1: 'Вещь + тип брони + материал / вещь + материал / вещь', 2: 'Редкость + сигил + набор / редкость + сигил / редкость + набор / редкость',
   3: 'Случайно: сила, техника, аффиксы и чары, содержимое, материал, рост сигила', 4: 'Случайно: сила, техника, аффиксы и чары, содержимое, материал, рост сигила',
-  5: 'Случайно: техника, ремесло, камни, скрытые чары или проклятие', 6: 'Износ (только то, что надевается)', 7: 'Квестовое или краденое' };
+  5: 'Случайно: техника, ремесло, камни, скрытые чары или проклятие', 6: 'Износ (только то, что надевается)', 7: 'Краденое',
+  8: 'Подсказка игроку: что делать с вещью (отдельный абзац, белым; серебро и гильдия — второе предложение)' };
 
 // ── the stand ──
 function standBody() {
   const presets = [
-    { label: 'Легендарная дай-катана', set: { template: '123', rarity: 'legendary', record: 'warp-edge', material: 'daedric', sigilPower: true, setId: 'oath', stage: '37500', quest: true, wearOn: true, wear: 90 },
+    { label: 'Легендарная дай-катана', set: { template: '123', rarity: 'legendary', record: 'warp-edge', material: 'daedric', sigilPower: true, setId: 'oath', stage: '37500', stolen: true, wearOn: true, wear: 90 },
       affixes: ['damage', 'stat:strength', 'technique:whirlwind'], enchants: ['2:20'] },
     { label: 'Эфирные поножи Руна', set: { template: '104', rarity: 'aetheric', material: 'daedric', armorType: 'plate', setId: 'ruhn', stage: '12500', wearOn: true, wear: 100 }, affixes: ['armor', 'resist:fire'] },
     { label: 'Неопознанный меч с сигилом', set: { template: '120', rarity: 'magic', known: false, sigilPower: true, stage: '0' }, affixes: ['damage'] },
@@ -76,7 +78,12 @@ function standBody() {
     { label: 'Проклятая секира', set: { template: '128', rarity: 'rare', material: 'ebony', curse: 'cursed', stolen: true, wearOn: true, wear: 30 }, affixes: ['damage', 'elemental:fire'] },
     { label: 'Кольцо мастера', set: { template: '135', rarity: 'magic', quality: '4', maker: 'AutomaticYobaMachine', house: 'Iokan' }, affixes: ['focus', 'potency'] },
     { label: 'Меховой колет (RRI)', set: { template: '520', material: 'fur', armorType: 'leather', wearOn: true, wear: 80 } },
+    { label: 'Простой стальной меч', set: { template: '120', material: 'steel', wearOn: true, wear: 85 } },
+    { label: 'Железная руда, персонаж в гильдии', set: { template: '71', guild: true } },
+    { label: 'Сосновое бревно', set: { template: '635' } },
+    { label: 'Квестовый тотем', set: { template: '280', quest: true } },
     { label: 'Бутылка с зельем', set: { template: '83', potion: true, potent: true } },
+    { label: 'Рагу охотника', set: { template: '685', noRot: true, chef: true } },
     { label: 'Чёрствый хлеб', set: { template: '534', food: '1' } },
   ];
   const data = {
@@ -100,7 +107,7 @@ ${fs.readFileSync(path.join(__dirname, 'item-text-pages/stand.css'), 'utf8')}
 <div class="page">
  <header class="top">
   <div><h1>Стенд описаний предметов</h1>
-  <p>Соберите вещь и её свойства: описание строит генератор мода по той же очереди из семи позиций, что и в игре. Свойства карточки здесь не показаны, только описание у цены.</p></div>
+  <p>Соберите вещь и её свойства: описание строит генератор мода по той же очереди из семи позиций, что и в игре, а подсказка игроку идёт последней, отдельным абзацем, белым. Свойства карточки здесь не показаны, только описание у цены.</p></div>
   <div class="lang" role="group" aria-label="Язык описаний"><button type="button" data-locale="ru" aria-pressed="true">Русский</button><button type="button" data-locale="en" aria-pressed="false">English</button></div>
  </header>
  <div class="layout">
@@ -132,13 +139,13 @@ ${fs.readFileSync(path.join(__dirname, 'item-text-pages/stand.css'), 'utf8')}
     <div class="row">${select('socket1', 'Гнездо 1')}${select('socket2', 'Гнездо 2')}${select('socket3', 'Гнездо 3')}</div>
    </fieldset>
    <fieldset><legend>Содержимое, еда, окраска</legend>
-    <div class="row">${check('potion', 'Зелье внутри')}${check('potent', 'Усиленное')}${check('soul', 'Душа в ловушке')}</div>
+    <div class="row">${check('potion', 'Ключ рецепта (зелье — только в бутылке)')}${check('potent', 'Усиленное')}${check('soul', 'Душа (только в ловушке душ)')}</div>
     <div class="row">${select('poison', 'Яд на клинке')}${select('food', 'Свежесть')}${select('dye', 'Окраска (вне очереди)')}</div>
     <div class="row">${check('noRot', 'Не портится')}${check('chef', 'Блюдо шефа')}</div>
    </fieldset>
-   <fieldset><legend>Износ и состояние</legend>
+   <fieldset><legend>Износ, состояние, персонаж</legend>
     <div class="row">${check('wearOn', 'Есть поле прочности')}<label class="field grow" for="wear">Прочность <output id="wearValue"></output><input type="range" id="wear" min="0" max="100" step="1" value="100"></label></div>
-    <div class="row">${check('quest', 'Квестовое')}${check('stolen', 'Краденое')}</div>
+    <div class="row">${check('quest', 'Квестовое')}${check('stolen', 'Краденое')}${check('guild', 'Персонаж в гильдии')}</div>
    </fieldset>
   </form>
   <div class="preview">
@@ -146,7 +153,7 @@ ${fs.readFileSync(path.join(__dirname, 'item-text-pages/stand.css'), 'utf8')}
     <div class="card-head"><div class="card-tier" id="cardTier"></div><h3 class="card-name" id="cardName"></h3>
      <div class="card-material" id="cardMaterial"><span>Материал</span><span id="cardMetal"></span></div></div>
     <div class="card-body">Здесь в игре свойства, сравнение, сигил и набор.</div>
-    <div class="card-foot"><p class="desc" id="desc" data-empty="Нет описания: шаблона нет в таблицах."></p><span class="price" aria-hidden="true">~ цена</span></div>
+    <div class="card-foot"><p class="desc" id="desc" data-empty="Нет описания: шаблона нет в таблицах."><span class="body" id="descBody"></span><span class="tip" id="descTip"></span></p><span class="price" aria-hidden="true">~ цена</span></div>
    </div>
    <div class="row"><button type="button" class="act" id="reroll">Другой случайный выбор</button><button type="button" class="act" id="reseed">Как в игре</button><span class="hint" id="seedLabel"></span></div>
    <section class="slots" aria-label="Очередь фрагментов"><h2><span>Очередь фрагментов</span></h2><div id="slots"></div></section>
@@ -164,18 +171,55 @@ ${fs.readFileSync(path.join(__dirname, 'item-text-pages/stand.js'), 'utf8')}
 </script>`;
 }
 
-// ── the registry ──
+// ── the registry (Word) ──
 const RU_FORM = { m: 'м', f: 'ж', n: 'ср', p: 'мн' }, EN_FORM = { s: 'ед', p: 'мн' };
 const enchantName = Object.fromEntries(catalog.records.enchants.map(e => [e.type, e]));
-const code = s => `<code>${esc(s)}</code>`;
-function forms(row, labels) {
-  if (typeof row === 'string') return esc(row);
-  const entries = Object.entries(row).filter(([, t]) => t);
-  if (entries.length === 1 || entries.every(([, t]) => t === entries[0][1])) return esc(entries[0][1]);
-  return `<div class="forms">${entries.map(([f, t]) => `<i>${labels[f]}</i><span>${esc(t)}</span>`).join('')}</div>`;
-}
+/** Field names and values are set in a monospace run: \u0001…\u0002 inside a dependency's text. */
+const code = s => `\u0001${s}\u0002`;
+const esc = s => String(s);
+const runsOf = (s, base = {}) => String(s).split(/\u0001|\u0002/).map((t, i) => ({ ...base, text: t, ...(i % 2 ? { mono: true, size: 15 } : {}) })).filter(r => r.text);
+const hints = JSON.parse(fs.readFileSync(path.join(text.ROOT, 'hints.json'), 'utf8'));
+const hintTemplates = new Map();
+for (const [key, hint] of Object.entries(hints.templates)) { if (!hintTemplates.has(hint)) hintTemplates.set(hint, []); hintTemplates.get(hint).push(+key); }
+const SILVER_DEPS = {
+  writ: 'материал рынка: Предписание Двора (или гильдии) платит серебром — net/marketLaw.js marketCatalogue',
+  potion: 'зелье: ремесленное предписание гильдий и храмов', 'dish.fighters': 'рагу охотника, ужин рыбака: предписание Гильдии бойцов',
+  'dish.mara': 'фруктовый пирог, пир у очага: предписание храма Мары', kit: 'ремкомплект: предписание Гильдии бойцов',
+};
+/** The hints the piece's state gives, in the order the generator checks them (dfo_item_text.js hintKey). */
+const HINT_STATES = [
+  ['hint.quest', `${code('item.questItem')} — прежде всего`],
+  ['hint.unidentified', 'не опознана, и у вещи есть скрытая магия'],
+  ['hint.damned', `опознана; ${code('item.cursed = Health Leech 0')}`],
+  ['hint.cursed', `опознана; ${code('item.cursed')}, другое проклятие`],
+  ['hint.repair', 'оружие или броня; прочность ниже 40%'],
+  ['hint.artifact', code('item.artifact')],
+  ['hint.aetheric', `${code('rarity = aetheric')} или ${code('item.aetheric')}`],
+  ['hint.exalted', `${code('rarity = legendary')} и ${code('item.exalted')}`],
+  ['hint.legendary', `${code('rarity = legendary')}, ${code('item.legendary')} или ${code('item.gilded')}`],
+  ['hint.set', code('sigil.set')],
+  ['hint.sigil', `${code('sigil.power')} без набора`],
+  ['hint.crafted', `надеваемое; ${code('item.quality')}, ${code('item.maker')} или ${code('item.provenance')}`],
+  ['hint.rare', code('rarity = rare')],
+  ['hint.magic', code('rarity = magic')],
+  ['hint.enchanted', `надеваемое без редкости; ${code('item.magic')} или зачарования DFU`],
+  ['hint.food.spoiled', `${code('item.foodStage ≥ 3')} (гнилая или тухлая)`],
+  ['hint.soul.filled', `ловушка душ (${code('MiscItems 274')}); ${code('item.trappedSoulType ≥ 0')}`],
+];
+const HINT_STATE_KEYS = new Set(HINT_STATES.map(([k]) => k));
 function depsOf(key) {
   let m;
+  if (HINT_STATE_KEYS.has(key)) return HINT_STATES.find(([k]) => k === key)[1];
+  if (key === 'hint.sell') return 'запасная: шаблон, которого нет в hints.json';
+  if ((m = /^hint\.silver\.(.+?)(\.guild)?$/.exec(key)) && SILVER_DEPS[m[1]]) {
+    return `второе предложение после подсказки основы; ${SILVER_DEPS[m[1]]}`
+      + (m[1] === 'writ' ? (m[2] ? `; персонаж в гильдии (${code('facts.guild')})` : `; персонаж не в гильдии`) : '');
+  }
+  if (key.startsWith('hint.')) {
+    const list = (hintTemplates.get(key) || []).map(i => templates.find(t => t.index === i)?.ruName || i);
+    const shown = [...new Set(list)];
+    return `основа (${list.length}): ${esc(shown.slice(0, 10).join(', '))}${shown.length > 10 ? ` и ещё ${shown.length - 10}` : ''}; если состояние вещи не требует другой подсказки`;
+  }
   if ((m = /^gear\.(\d+)\.(.+)$/.exec(key))) {
     const name = templates.find(t => t.index === +m[1]);
     const variant = m[2];
@@ -207,7 +251,7 @@ function depsOf(key) {
   }
   if ((m = /^sigil\.set\.(.+)$/.exec(key))) return `${code('sigil.set = ' + m[1])} у вещи без редкости`;
   if (key === 'sigil.power') return `${code('sigil.power')} у вещи без редкости`;
-  if ((m = /^sigil\.stage\.(\d)$/.exec(key))) { const s = catalog.enums.sigilStages[+m[1]]; return `${code('sigil.xp ≥ ' + s.xp)} (${esc(s.name)})`; }
+  if ((m = /^sigil\.stage\.(\d)$/.exec(key))) { const st = catalog.enums.sigilStages[+m[1]]; return `${code('sigil.xp ≥ ' + st.xp)} (${esc(st.name)})`; }
   if ((m = /^power\.(.+)$/.exec(key))) return m[1] === 'imprint' ? `опознана; ${code('item.imprint')}` : `опознана; отпечаток ${code('item.imprint = ' + m[1])} (у самой легендарки — её уникальная фраза)`;
   if ((m = /^technique\.(.+)$/.exec(key))) return `опознана; аффикс ${code('technique')} с параметром ${code(m[1])} (${esc(techniqueNames[m[1]])})`;
   if ((m = /^skill\.(\d+)$/.exec(key))) return `опознана; аффикс ${code('skill ' + m[1])} или зачарование ${code('EnhancesSkill ' + m[1])} — ${esc(skills[+m[1]])}`;
@@ -228,22 +272,23 @@ function depsOf(key) {
   if (key === 'curse.cursed') return `опознана; ${code('item.cursed')}`;
   if (key === 'curse.damned') return `опознана; ${code('item.cursed = Health Leech 0')}`;
   if (key === 'state.unidentified') return 'не опознана, и у вещи есть скрытая магия';
-  if (key === 'content.potion') return `${code('item.potionRecipeKey')}`;
-  if (key === 'content.potent') return `${code('item.potent')}`;
-  if (key === 'content.soul') return `${code('item.trappedSoulType ≥ 0')}`;
-  if (key === 'content.poison') return `оружие или броня; ${code('item.poisonType')}`;
+  if (key === 'content.potion') return `только бутылка зелья ${code('UselessItems1 83')} (поле ${code('potionRecipeKey')} есть у всех вещей и само ничего не значит)`;
+  if (key === 'content.potent') return `бутылка зелья; ${code('item.potent')}`;
+  if (key === 'content.soul') return `ловушка душ ${code('MiscItems 274')} или Звезда Азуры; ${code('item.trappedSoulType ≥ 0')}`;
+  if (key === 'content.poison') return `только оружие; ${code('item.poisonType')}`;
   if ((m = /^food\.stage\.(\d)$/.exec(key))) return `${code('item.foodStage = ' + m[1])} (${esc(Object.keys(catalog.records.foodStages)[+m[1]])})`;
   if ((m = /^food\.(\w+)$/.exec(key))) return `${code('item.' + m[1])}`;
   if ((m = /^condition\.(\w+)$/.exec(key))) return `надеваемое (оружие, броня, украшения, одежда); прочность ${esc({ new: '100%', used: '75–99%', worn: '40–74%', battered: '1–39%', broken: '0%' }[m[1]])}`;
-  if (key === 'state.quest') return `${code('item.questItem')}; раньше краденого`;
-  if (key === 'state.stolen') return `${code('item.stolen')}, если вещь не квестовая`;
+  if (key === 'state.stolen') return `${code('item.stolen')}`;
   if ((m = /^state\.(\w+)$/.exec(key))) return `${code({ bound: 'item.bound', summoned: 'item.timeForItemToDisappear', keepsake: 'item.livingKeepsake', remains: 'item.legacyRemains' }[m[1]] || m[1])}; в очередь не входит`;
   if ((m = /^dye\.(\d)$/.exec(key))) return `одежда; ${code('item.dye = ' + m[1])}; в очередь не входит`;
   if ((m = /^material\.(.+)$/.exec(key))) return `${code('facts.material = ' + m[1])}, только если у вещи нет рамки «вещь + материал»`;
   if ((m = /^construction\.(.+)$/.exec(key))) return `${code('facts.construction = ' + m[1])}, только без рамки`;
   return '';
 }
-function registryBody() {
+
+/** Every fragment, in sections that follow the description's queue: [{ id, slot, title, about, rows }]. */
+function registrySections() {
   const rules = packs.ru.rules, cat = key => gen.categoryOf(rules, key);
   const sections = [];
   const add = (id, slot, title, about, rows) => sections.push({ id, slot, title, about, rows });
@@ -275,64 +320,77 @@ function registryBody() {
     [...Object.keys(packs.ru.legendaries).map(id => ({ key: `legendary.${id}`, deps: depsOf(`legendary.${id}`), ru: packs.ru.legendaries[id], en: packs.en.legendaries[id] })), ...props.filter(k => cat(k) === 'power').map(propRow)]);
   add('technique', '3–5', 'Техника', 'Может попасть в позиции 3, 4 или 5, но только один раз.', props.filter(k => cat(k) === 'technique').map(propRow));
   const comboRows = c => packs.ru.combos.filter(x => cat(x.key) === c).map(x => ({ key: x.key, deps: depsOf(x.key), ru: x.text, en: packs.en.combos.find(e => e.key === x.key).text }));
-  add('lines', '3–4', 'Аффиксы и чары', 'До двух фрагментов на описание. Сочетания заменяют свои части.',
+  add('lines', '3–4', 'Аффиксы и чары', 'До двух фрагментов на описание. Сочетания заменяют свои части. Около двух пятых фраз эффектов написаны от лица игрока: «Вы чувствуете, как…», «Вы видите…».',
     [{ sub: 'Сочетания' }, ...comboRows('lines'), { sub: 'Аффиксы' }, ...props.filter(k => cat(k) === 'lines' && k.startsWith('affix.')).map(propRow),
       { sub: 'Навыки (аффикс skill и Enhances Skill)' }, ...props.filter(k => k.startsWith('skill.')).map(propRow),
       { sub: 'Зачарования' }, ...props.filter(k => k.startsWith('enchantment.')).map(propRow)]);
-  add('contents', '3–4', 'Содержимое и еда', 'До двух фрагментов на описание.', props.filter(k => cat(k) === 'contents').map(propRow));
+  add('contents', '3–4', 'Содержимое и еда', 'До двух фрагментов на описание. Зелье — только в бутылке зелья, душа — только в ловушке душ, яд — только на оружии.', props.filter(k => cat(k) === 'contents').map(propRow));
   add('material', '3–4', 'Отдельная фраза о материале', 'Только у вещи без рамки «вещь + материал»; у оружия и брони материал уже в позиции 1.', props.filter(k => cat(k) === 'material').map(propRow));
   add('growth', '3–4', 'Рост сигила', '', props.filter(k => cat(k) === 'growth').map(propRow));
   add('craft', '5', 'Ремесло, клеймо, наследие, перековка', 'Сочетания заменяют свои части.', [{ sub: 'Сочетания' }, ...comboRows('craft'), { sub: 'Отдельные фрагменты' }, ...props.filter(k => cat(k) === 'craft').map(propRow)]);
   add('sockets', '5', 'Камни в гнёздах', '', props.filter(k => cat(k) === 'sockets').map(propRow));
   add('secret', '5', 'Скрытые чары или проклятие', '', props.filter(k => cat(k) === 'secret').map(propRow));
-  // slots 6-7 and the rest
+  // slots 6-8 and the rest
   add('wear', '6', 'Износ', 'Только у того, что надевается; у остальных поле прочности не читается.', props.filter(k => cat(k) === 'wear').map(propRow));
-  add('standing', '7', 'Квестовое или краденое', 'Квестовое важнее краденого.', props.filter(k => cat(k) === 'standing').map(propRow));
+  add('standing', '7', 'Краденое', 'Квестовое теперь не здесь: о нём говорит подсказка.', props.filter(k => cat(k) === 'standing').map(propRow));
+  const hintKeys = props.filter(k => cat(k) === 'hint');
+  add('hint', '8', 'Подсказка игроку', 'Всегда последняя, отдельным абзацем после одной пустой строки, белым цветом. Сначала проверяется состояние вещи сверху вниз; если оно ничего не требует — подсказка основы. Для того, за что платят серебром, добавляется второе предложение; у персонажа в гильдии — от лица гильдии.',
+    [{ sub: 'Состояние вещи — в порядке проверки' }, ...HINT_STATES.map(([k]) => propRow(k)),
+      { sub: 'По основе (hints.json)' }, ...hintKeys.filter(k => !HINT_STATE_KEYS.has(k) && !k.startsWith('hint.silver.')).map(propRow),
+      { sub: 'Серебро: второе предложение' }, ...hintKeys.filter(k => k.startsWith('hint.silver.')).map(propRow)]);
   add('unused', '—', 'Вне очереди', 'Фразы есть в таблицах, но в описание сейчас не попадают.', props.filter(k => cat(k) === 'unused').map(propRow));
+  return sections;
+}
 
+/** The registry as a Word document: landscape tables, a header row repeated on every page. */
+function registryDocx() {
+  const sections = registrySections();
   const total = sections.reduce((n, s) => n + s.rows.filter(r => !r.sub).length, 0);
-  const row = r => r.sub ? `<tr class="sub"><td colspan="4">${esc(r.sub)}</td></tr>`
-    : `<tr><td class="key">${code(r.key)}${r.ruNote ? `<br><small>${esc(r.ruNote)}</small>` : ''}</td><td class="dep">${r.deps}</td><td class="frag">${forms(r.ru, RU_FORM)}</td><td class="frag">${forms(r.en, EN_FORM)}</td></tr>`;
-  return `<title>Реестр фрагментов описаний</title>
-<meta name="claude:viewport-fit-sides" content="cover">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=PT+Sans:wght@400;700&display=swap">
-<style>
-${FONTS}
-${fs.readFileSync(path.join(__dirname, 'item-text-pages/registry.css'), 'utf8')}
-</style>
-<div class="page">
- <header class="top">
-  <h1>Реестр фрагментов описаний</h1>
-  <p>Все ${total} фрагментов описаний предметов на двух языках, сгруппированные по очереди описания. Для каждого указано, от каких полей предмета он зависит. Русские фразы даны во всех формах рода основы: м, ж, ср и мн (для слов без единственного числа). Таблица собрана из файлов src/mod/item-text.</p>
-  <ol class="queue">${[1, 2, 3, 4, 5, 6, 7].map(n => `<li><b>${n}</b>${esc(SLOT_TITLES[n])}</li>`).join('')}</ol>
- </header>
- <div class="tools"><input type="search" id="q" placeholder="Поиск по ключу, фрагменту или зависимости" aria-label="Поиск"><span id="shown">${total} фрагментов</span></div>
- <nav class="toc">${sections.map(s => `<a href="#${s.id}">${esc(s.slot)} · ${esc(s.title)}</a>`).join('')}</nav>
- ${sections.map(s => `<section class="group" id="${s.id}"><header><h2><span class="slotno">Позиция ${esc(s.slot)}</span>${esc(s.title)}<span class="count">${s.rows.filter(r => !r.sub).length}</span></h2>${s.about ? `<p>${esc(s.about)}</p>` : ''}</header>
-  <div class="scroll"><table><thead><tr><th>Ключ</th><th>Зависит от</th><th>Русский</th><th>English</th></tr></thead><tbody>${s.rows.map(row).join('')}</tbody></table></div></section>`).join('\n ')}
-</div>
-<script>
-(() => {
-  const q = document.getElementById('q'), shown = document.getElementById('shown');
-  const rows = [...document.querySelectorAll('tbody tr:not(.sub)')];
-  const hay = rows.map(r => r.textContent.toLowerCase());
-  q.addEventListener('input', () => {
-    const v = q.value.trim().toLowerCase();
-    let n = 0;
-    rows.forEach((r, i) => { const hit = !v || hay[i].includes(v); r.hidden = !hit; if (hit) n++; });
-    for (const s of document.querySelectorAll('section.group')) s.hidden = !!v && !s.querySelector('tbody tr:not(.sub):not([hidden])');
-    shown.textContent = n + ' фрагментов';
+  const { para, table } = word;
+  const cellText = (runs, extra) => para(runs, { style: 'Cell', ...extra });
+  const formsCell = (row, labels) => {
+    if (typeof row === 'string') return [cellText(row)];
+    const entries = Object.entries(row).filter(([, t]) => t);
+    if (entries.length === 1 || entries.every(([, t]) => t === entries[0][1])) return [cellText(entries[0][1])];
+    return entries.map(([f, t]) => cellText([{ text: `${labels[f]}  `, bold: true, color: '7D6125' }, t]));
+  };
+  const WIDTHS = [2700, 3900, 4600, 4198];
+  const head = { header: true, cells: ['Ключ', 'Зависит от', 'Русский', 'English'].map(h => [cellText({ text: h, bold: true, color: '5D6470' })]) };
+  const rowOf = r => (r.sub ? { band: r.sub } : {
+    cells: [
+      [cellText({ text: r.key, mono: true, size: 15 }), ...(r.ruNote ? [cellText({ text: r.ruNote, color: '5D6470', size: 15 })] : []), ...(r.enNote ? [cellText({ text: r.enNote, color: '5D6470', size: 15 })] : [])],
+      [cellText(runsOf(r.deps, { color: '3A4049' }))],
+      formsCell(r.ru, RU_FORM), formsCell(r.en, EN_FORM),
+    ],
   });
-})();
-</script>`;
+  const body = [
+    para('Реестр фрагментов описаний предметов', { style: 'Title' }),
+    para(`Все ${total} фрагментов описаний на двух языках, сгруппированные по очереди описания. Для каждого указано, от каких полей предмета он зависит. Русские фразы даны во всех формах рода основы: м, ж, ср и мн (для слов без единственного числа); английские — ед и мн. Документ собран из таблиц src/mod/item-text командой node tools/build-item-text-pages.cjs; править нужно таблицы, а не этот файл.`),
+    para('Очередь описания', { style: 'Heading2' }),
+    table([1000, 14398], [{ header: true, cells: [[cellText({ text: '№', bold: true, color: '5D6470' })], [cellText({ text: 'Что попадает в позицию', bold: true, color: '5D6470' })]] },
+      ...[1, 2, 3, 4, 5, 6, 7, 8].map(n => ({ cells: [[cellText({ text: String(n), bold: true, color: '2F5F8A' })], [cellText(SLOT_TITLES[n])]] }))]),
+    para('Описание — один абзац из позиций 1–7; подсказка (позиция 8) — после пустой строки, белым. Шрифт описаний в игре — Flow Ext Bold, 12 px.', { spacingAfter: 120 }),
+    para('Разделы', { style: 'Heading2' }),
+    ...sections.map(s => para([{ text: `Позиция ${s.slot} · `, color: '2F5F8A' }, `${s.title} — ${s.rows.filter(r => !r.sub).length}`], { spacingAfter: 20 })),
+  ];
+  for (const s of sections) {
+    body.push(para([{ text: `Позиция ${s.slot} · `, color: '5D6470' }, `${s.title} `, { text: `(${s.rows.filter(r => !r.sub).length})`, color: '5D6470' }], { style: 'Heading1' }));
+    if (s.about) body.push(para({ text: s.about, color: '3A4049' }, { keepNext: true }));
+    body.push(table(WIDTHS, [head, ...s.rows.map(rowOf)]));
+  }
+  return { total, sections, ...word.docx(body.join(''), { title: 'Реестр фрагментов описаний предметов', subject: 'DFO-Client-Expander-RU' }) };
 }
 
 const wrap = (body, lang = 'ru') => `<!doctype html>\n<html lang="${lang}">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n${body}\n</html>\n`;
-const pages = { 'item-text-stand.html': standBody(), 'item-text-registry.html': registryBody() };
-module.exports = { pages, wrap };
+const pages = { 'item-text-stand.html': standBody() };
+const registry = registryDocx();
+module.exports = { pages, wrap, registry };
 if (require.main === module) {
   for (const [name, body] of Object.entries(pages)) fs.writeFileSync(path.join(ROOT, 'docs', name), wrap(body));
+  fs.writeFileSync(path.join(ROOT, 'docs', 'item-text-registry.docx'), registry.buffer);
+  const old = path.join(ROOT, 'docs', 'item-text-registry.html');
+  if (fs.existsSync(old)) fs.rmSync(old);
   const at = process.argv.indexOf('--artifact-dir');
   if (at > 0) { fs.mkdirSync(process.argv[at + 1], { recursive: true }); for (const [name, body] of Object.entries(pages)) fs.writeFileSync(path.join(process.argv[at + 1], name), body + '\n'); }
-  console.log(Object.entries(pages).map(([n, b]) => `${n}: ${(b.length / 1024).toFixed(0)} KiB`).join(', '));
+  console.log(`${Object.entries(pages).map(([n, b]) => `${n}: ${(b.length / 1024).toFixed(0)} KiB`).join(', ')}, item-text-registry.docx: ${(registry.buffer.length / 1024).toFixed(0)} KiB, ${registry.total} fragments`);
 }

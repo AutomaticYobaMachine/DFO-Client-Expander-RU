@@ -9,7 +9,7 @@ key,group,name,number,text
 15,PlantIngredients1/PlantIngredients2,Green Berries,p,"Hard unripe berries, sour enough to make the eyes water."
 16,PlantIngredients1/PlantIngredients2,Red Berries,p,Ripe red berries that stain the fingers.
 17,PlantIngredients1/PlantIngredients2,Yellow Berries,p,Small yellow berries with a bitter skin.
-18,PlantIngredients1,Clover,s,"A sprig of clover, common as grass and twice as lucky."
+18,PlantIngredients1,Clover,s,A sprig of clover with three round leaves.
 19,PlantIngredients1,Red Rose,s,"A red rose, its thorns still sharp."
 20,PlantIngredients1,Yellow Rose,s,"A yellow rose, pale as winter sunlight."
 21,PlantIngredients2,Black Rose,s,"A rare black rose, said to grow best on graves."
@@ -70,6 +70,6 @@ key,group,name,number,text
 76,MiscellaneousIngredients2,Ivory,s,"A piece of polished ivory, smooth and creamy white."
 77,MiscellaneousIngredients2,Pearl,s,A lustrous pearl from the depths of the sea.
 78,Drugs,Indulcet,s,"A sweet-smelling narcotic resin, banned in most of the Empire."
-79,Drugs,Sursum,s,A stimulant powder that lifts the spirits and empties the purse.
+79,Drugs,Sursum,s,A stimulant powder that lifts the spirits for a while.
 80,Drugs,Quaesto Vil,s,A dark powder that sharpens the senses until they hurt.
 81,Drugs,Aegrotat,s,A sickly-sweet drug that dulls pain and will alike.

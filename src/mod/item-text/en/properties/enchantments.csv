@@ -1,13 +1,13 @@
 key,s,p,note
-enchantment.0,"A spell sleeps in it, waiting to be called on.","A spell sleeps in them, waiting to be called on.",CastWhenUsed (0) - any parameter
-enchantment.1,"While it is held or worn, a spell works quietly through it.","While they are held or worn, a spell works quietly through them.",CastWhenHeld (1) - any parameter
-enchantment.2,A spell bursts from it at the moment of the strike.,A spell bursts from them at the moment of the strike.,CastWhenStrikes (2) - any parameter
-enchantment.3,Under the right conditions it draws extra magicka from the world.,Under the right conditions they draw extra magicka from the world.,ExtraSpellPts (3) - any parameter
-enchantment.3.0,In winter it brims with extra magicka.,In winter they brim with extra magicka.,ExtraSpellPts (3): During Winter
+enchantment.0,"You feel a spell sleeping in it, waiting to be called.","You feel a spell sleeping in them, waiting to be called.",CastWhenUsed (0) - any parameter
+enchantment.1,"While you hold or wear it, you feel a spell quietly at work.","While you hold or wear them, you feel a spell quietly at work.",CastWhenHeld (1) - any parameter
+enchantment.2,You see a spell burst from it the moment you strike.,You see a spell burst from them the moment you strike.,CastWhenStrikes (2) - any parameter
+enchantment.3,You feel it draw extra magicka from the world when the time is right.,You feel them draw extra magicka from the world when the time is right.,ExtraSpellPts (3) - any parameter
+enchantment.3.0,In winter you feel it brim with extra magicka.,In winter you feel them brim with extra magicka.,ExtraSpellPts (3): During Winter
 enchantment.3.1,In spring it brims with extra magicka.,In spring they brim with extra magicka.,ExtraSpellPts (3): During Spring
-enchantment.3.2,In summer it brims with extra magicka.,In summer they brim with extra magicka.,ExtraSpellPts (3): During Summer
+enchantment.3.2,In summer you feel it brim with extra magicka.,In summer you feel them brim with extra magicka.,ExtraSpellPts (3): During Summer
 enchantment.3.3,In autumn it brims with extra magicka.,In autumn they brim with extra magicka.,ExtraSpellPts (3): During Fall
-enchantment.3.4,Under a full moon it brims with extra magicka.,Under a full moon they brim with extra magicka.,ExtraSpellPts (3): During Full Moon
+enchantment.3.4,Under a full moon you feel it brim with extra magicka.,Under a full moon you feel them brim with extra magicka.,ExtraSpellPts (3): During Full Moon
 enchantment.3.5,Under a half moon it brims with extra magicka.,Under a half moon they brim with extra magicka.,ExtraSpellPts (3): During Half Moon
 enchantment.3.6,At the new moon it brims with extra magicka.,At the new moon they brim with extra magicka.,ExtraSpellPts (3): During New Moon
 enchantment.3.7,Near the undead it brims with extra magicka.,Near the undead they brim with extra magicka.,ExtraSpellPts (3): Near Undead
@@ -19,25 +19,25 @@ enchantment.4.0,It strikes the undead with particular force.,They strike the und
 enchantment.4.1,It strikes Daedra with particular force.,They strike Daedra with particular force.,PotentVs (4): Daedra
 enchantment.4.2,It strikes men and mer with particular force.,They strike men and mer with particular force.,PotentVs (4): Humanoid
 enchantment.4.3,It strikes beasts with particular force.,They strike beasts with particular force.,PotentVs (4): Animals
-enchantment.5,It slowly mends the wounds of its bearer.,They slowly mend the wounds of their bearer.,RegensHealth (5) - any parameter
-enchantment.5.0,It slowly mends the wounds of its bearer.,They slowly mend the wounds of their bearer.,RegensHealth (5): all the time
-enchantment.5.1,In sunlight it slowly mends the wounds of its bearer.,In sunlight they slowly mend the wounds of their bearer.,RegensHealth (5): in sunlight
-enchantment.5.2,In darkness it slowly mends the wounds of its bearer.,In darkness they slowly mend the wounds of their bearer.,RegensHealth (5): in darkness
-enchantment.6,With each blow it drinks the foe's life.,With each blow they drink the foe's life.,VampiricEffect (6) - any parameter
-enchantment.6.0,It drinks the life of nearby foes for its bearer.,They drink the life of nearby foes for their bearer.,VampiricEffect (6): at range
-enchantment.6.1,With each blow it drinks the foe's life.,With each blow they drink the foe's life.,VampiricEffect (6): when strikes
-enchantment.7,It lets its bearer carry more than usual.,They let their bearer carry more than usual.,IncreasedWeightAllowance (7) - any parameter
-enchantment.7.0,It lets its bearer carry more than usual.,They let their bearer carry more than usual.,IncreasedWeightAllowance (7): 25% additional
-enchantment.7.1,It lets its bearer carry far more than usual.,They let their bearer carry far more than usual.,IncreasedWeightAllowance (7): 50% additional
-enchantment.8,It slowly mends the gear of its bearer.,They slowly mend the gear of their bearer.,RepairsObjects (8) - any parameter
-enchantment.9,Now and then it swallows spells aimed at its bearer.,Now and then they swallow spells aimed at their bearer.,AbsorbsSpells (9) - any parameter
+enchantment.5,You feel your wounds slowly close while you bear it.,You feel your wounds slowly close while you bear them.,RegensHealth (5) - any parameter
+enchantment.5.0,You feel your wounds slowly close while you bear it.,You feel your wounds slowly close while you bear them.,RegensHealth (5): all the time
+enchantment.5.1,In sunlight you feel your wounds slowly close.,,RegensHealth (5): in sunlight
+enchantment.5.2,In darkness you feel your wounds slowly close.,,RegensHealth (5): in darkness
+enchantment.6,With each blow you feel it drink the foe's life for you.,With each blow you feel them drink the foe's life for you.,VampiricEffect (6) - any parameter
+enchantment.6.0,You feel it draw the life of nearby foes into you.,You feel them draw the life of nearby foes into you.,VampiricEffect (6): at range
+enchantment.6.1,With each blow you feel it drink the foe's life for you.,With each blow you feel them drink the foe's life for you.,VampiricEffect (6): when strikes
+enchantment.7,"You feel your load grow lighter, and you can carry more.",,IncreasedWeightAllowance (7) - any parameter
+enchantment.7.0,"You feel your load grow lighter, and you can carry more.",,IncreasedWeightAllowance (7): 25% additional
+enchantment.7.1,You feel your load grow far lighter than it should.,,IncreasedWeightAllowance (7): 50% additional
+enchantment.8,You see your gear slowly mend itself while you bear it.,You see your gear slowly mend itself while you bear them.,RepairsObjects (8) - any parameter
+enchantment.9,Now and then you feel a spell aimed at you vanish into it.,Now and then you feel a spell aimed at you vanish into them.,AbsorbsSpells (9) - any parameter
 enchantment.10,It sharpens one of its bearer's skills.,They sharpen one of their bearer's skills.,EnhancesSkill (10) - any parameter
-enchantment.11,It weighs next to nothing.,They weigh next to nothing.,FeatherWeight (11) - any parameter
-enchantment.12,It hardens the armour of its bearer.,They harden the armour of their bearer.,StrengthensArmor (12) - any parameter
+enchantment.11,You barely feel its weight at all.,You barely feel their weight at all.,FeatherWeight (11) - any parameter
+enchantment.12,You feel all your armour grow harder while you wear it.,You feel all your armour grow harder while you wear them.,StrengthensArmor (12) - any parameter
 enchantment.13,It awakens a hidden talent.,They awaken a hidden talent.,ImprovesTalents (13) - any parameter
-enchantment.13.0,It sharpens the hearing of its bearer.,They sharpen the hearing of their bearer.,ImprovesTalents (13): Hearing
-enchantment.13.1,It lends the body an athlete's ease.,They lend the body an athlete's ease.,ImprovesTalents (13): Athleticism
-enchantment.13.2,In mortal danger it floods the body with fury.,In mortal danger they flood the body with fury.,ImprovesTalents (13): Adrenaline Rush
+enchantment.13.0,You hear the faintest sounds as sharply as a beast would.,,ImprovesTalents (13): Hearing
+enchantment.13.1,You feel an athlete's ease settle into your body.,,ImprovesTalents (13): Athleticism
+enchantment.13.2,In mortal danger you feel fury flood your body.,,ImprovesTalents (13): Adrenaline Rush
 enchantment.14,It earns its bearer a good name.,They earn their bearer a good name.,GoodRepWith (14) - any parameter
 enchantment.25,It earns its bearer a bad name.,They earn their bearer a bad name.,BadRepWith (25) - any parameter
 enchantment.14.0,Common folk look kindly on its bearer.,Common folk look kindly on their bearer.,GoodRepWith (14): Commoners
@@ -52,29 +52,29 @@ enchantment.14.4,The underworld looks kindly on its bearer.,The underworld looks
 enchantment.25.4,The underworld distrusts its bearer on sight.,The underworld distrusts their bearer on sight.,BadRepWith (25): Underworld
 enchantment.14.5,Everyone seems to look kindly on its bearer.,Everyone seems to look kindly on their bearer.,GoodRepWith (14): All
 enchantment.25.5,Nobody quite trusts its bearer.,Nobody quite trusts their bearer.,BadRepWith (25): All
-enchantment.15,"A soul is bound within it, and sometimes it stirs.","A soul is bound within them, and sometimes it stirs.",SoulBound (15) - any parameter
-enchantment.16,"It slowly crumbles, however carefully it is kept.","They slowly crumble, however carefully they are kept.",ItemDeteriorates (16) - any parameter
-enchantment.16.0,"It slowly crumbles, however carefully it is kept.","They slowly crumble, however carefully they are kept.",ItemDeteriorates (16): all the time
-enchantment.16.1,In sunlight it slowly crumbles.,In sunlight they slowly crumble.,ItemDeteriorates (16): in sunlight
-enchantment.16.2,In holy places it slowly crumbles.,In holy places they slowly crumble.,ItemDeteriorates (16): in holy places
-enchantment.17,It wounds its own bearer.,They wound their own bearer.,UserTakesDamage (17) - any parameter
-enchantment.17.0,Sunlight burns whoever bears it.,Sunlight burns whoever bears them.,UserTakesDamage (17): in sunlight
+enchantment.15,Sometimes you feel the soul bound within it stir.,Sometimes you feel the soul bound within them stir.,SoulBound (15) - any parameter
+enchantment.16,"You see it slowly crumble, however carefully it is kept.","You see them slowly crumble, however carefully they are kept.",ItemDeteriorates (16) - any parameter
+enchantment.16.0,"You see it slowly crumble, however carefully it is kept.","You see them slowly crumble, however carefully they are kept.",ItemDeteriorates (16): all the time
+enchantment.16.1,In sunlight you see it slowly crumble.,In sunlight you see them slowly crumble.,ItemDeteriorates (16): in sunlight
+enchantment.16.2,In holy places you see it slowly crumble.,In holy places you see them slowly crumble.,ItemDeteriorates (16): in holy places
+enchantment.17,"You feel it slowly wound you, steady and relentless.","You feel them slowly wound you, steady and relentless.",UserTakesDamage (17) - any parameter
+enchantment.17.0,In sunlight you feel it burn your skin.,In sunlight you feel them burn your skin.,UserTakesDamage (17): in sunlight
 enchantment.17.1,Holy places burn whoever bears it.,Holy places burn whoever bears them.,UserTakesDamage (17): in holy places
-enchantment.18,It clouds the eyes of its bearer.,They cloud the eyes of their bearer.,VisionProblems (18) - any parameter
-enchantment.19,It hobbles its bearer's stride.,They hobble their bearer's stride.,WalkingProblems (19) - any parameter
+enchantment.18,You see the world through a grey haze while you bear it.,You see the world through a grey haze while you bear them.,VisionProblems (18) - any parameter
+enchantment.19,"You feel your stride hobbled, as if by unseen tethers.",,WalkingProblems (19) - any parameter
 enchantment.20,It strikes weakly against one kind of foe.,They strike weakly against one kind of foe.,LowDamageVs (20) - any parameter
-enchantment.20.0,It strikes weakly against the undead.,They strike weakly against the undead.,LowDamageVs (20): Undead
-enchantment.20.1,It strikes weakly against Daedra.,They strike weakly against Daedra.,LowDamageVs (20): Daedra
-enchantment.20.2,It strikes weakly against men and mer.,They strike weakly against men and mer.,LowDamageVs (20): Humanoid
-enchantment.20.3,It strikes weakly against beasts.,They strike weakly against beasts.,LowDamageVs (20): Animals
-enchantment.21,It drinks its bearer's blood whenever it is used.,They drink their bearer's blood whenever they are used.,HealthLeech (21) - any parameter
-enchantment.21.0,It drinks its bearer's blood whenever it is used.,They drink their bearer's blood whenever they are used.,HealthLeech (21): Whenever used
+enchantment.20.0,It strikes the undead noticeably weaker.,They strike the undead noticeably weaker.,LowDamageVs (20): Undead
+enchantment.20.1,It strikes Daedra noticeably weaker.,They strike Daedra noticeably weaker.,LowDamageVs (20): Daedra
+enchantment.20.2,It strikes men and mer noticeably weaker.,They strike men and mer noticeably weaker.,LowDamageVs (20): Humanoid
+enchantment.20.3,It strikes beasts noticeably weaker.,They strike beasts noticeably weaker.,LowDamageVs (20): Animals
+enchantment.21,"Whenever you use it, you feel it drink your blood.","Whenever you use them, you feel them drink your blood.",HealthLeech (21) - any parameter
+enchantment.21.0,"Whenever you use it, you feel it drink your blood.","Whenever you use them, you feel them drink your blood.",HealthLeech (21): Whenever used
 enchantment.21.1,"Unless used every day, it feeds on its bearer's life.","Unless used every day, they feed on their bearer's life.",HealthLeech (21): Unless used daily
 enchantment.21.2,"Unless used every week, it feeds on its bearer's life.","Unless used every week, they feed on their bearer's life.",HealthLeech (21): Unless used weekly
 enchantment.22,Some creatures take an instant dislike to its bearer.,Some creatures take an instant dislike to their bearer.,BadReactionsFrom (22) - any parameter
 enchantment.22.0,Men and mer grow uneasy and hostile near its bearer.,Men and mer grow uneasy and hostile near their bearer.,BadReactionsFrom (22): Humanoids
 enchantment.22.1,Animals bristle and snarl at its bearer.,Animals bristle and snarl at their bearer.,BadReactionsFrom (22): Animals
 enchantment.22.2,Daedra take offence at its bearer.,Daedra take offence at their bearer.,BadReactionsFrom (22): Daedra
-enchantment.23,It is far heavier than it ought to be.,They are far heavier than they ought to be.,ExtraWeight (23) - any parameter
-enchantment.24,It weakens the armour of its bearer.,They weaken the armour of their bearer.,WeakensArmor (24) - any parameter
+enchantment.23,You feel it weigh far more than it ought to.,You feel them weigh far more than they ought to.,ExtraWeight (23) - any parameter
+enchantment.24,You feel your armour grow brittle while you wear it.,You feel your armour grow brittle while you wear them.,WeakensArmor (24) - any parameter
 enchantment.26,"It holds an artifact's power, unlike any common enchantment.","They hold an artifact's power, unlike any common enchantment.",SpecialArtifactEffect (26) - any parameter

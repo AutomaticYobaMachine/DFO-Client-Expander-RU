@@ -9,6 +9,7 @@
   --sand: #b7a071;
   --dim: #8d929b;
   --desc: #c4c6ca;
+  --tip: #ffffff;
   --gold: #f5d451;
   --focus: #e4c34f;
   --chip: #232831;
@@ -59,8 +60,11 @@ button.act:hover { border-color: var(--sand); }
 .card-material span:last-child { color: var(--bone); }
 .card-body { padding: 10px 14px; color: var(--dim); font: 12px var(--font-card); min-height: 36px; }
 .card-foot { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; border-top: 1px solid #756346; padding: 9px 12px 11px; }
-.desc { margin: 0; flex: 1 1 auto; min-width: 0; font: 400 11px/1.45 var(--font-desc); color: var(--desc); letter-spacing: .01em; }
-.desc:empty::before { content: attr(data-empty); color: var(--dim); }
+.desc { margin: 0; flex: 1 1 auto; min-width: 0; font: 400 12px/1.45 var(--font-desc); color: var(--desc); letter-spacing: .01em; }
+.desc .body, .desc .tip { display: block; }
+.desc .tip { margin-top: 1.45em; color: var(--tip); }
+.desc .tip:empty { display: none; }
+.desc.none::before { content: attr(data-empty); color: var(--dim); }
 .price { flex: none; color: var(--gold); font-size: 13px; opacity: .55; white-space: nowrap; }
 .slots { border: 1px solid var(--line); border-radius: 6px; background: var(--panel); overflow: hidden; }
 .slots h2, .all h2 { margin: 0; padding: 8px 12px; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--sand); font-weight: 400; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
@@ -70,7 +74,8 @@ button.act:hover { border-color: var(--sand); }
 .slot .what { color: var(--dim); font-size: 12px; display: flex; flex-wrap: wrap; gap: 4px 10px; min-width: 0; }
 .slot .what code { overflow-wrap: anywhere; }
 .slot .what code { color: var(--bone); font: 11px ui-monospace, Consolas, monospace; }
-.slot .text { font: 11px/1.45 var(--font-desc); color: var(--desc); }
+.slot .text { font: 12px/1.45 var(--font-desc); color: var(--desc); }
+.slot.tip .text { color: var(--tip); }
 .slot.empty .text { color: #5c6168; font-family: var(--font-ui); }
 .all { border: 1px solid var(--line); border-radius: 6px; background: var(--panel); }
 .all > div { overflow-x: auto; }
@@ -78,6 +83,7 @@ button.act:hover { border-color: var(--sand); }
 .all td, .all th { text-align: left; padding: 5px 10px; border-top: 1px solid var(--line); vertical-align: top; }
 .all th { color: var(--dim); font-weight: 400; }
 .all td:nth-child(2) code { font: 11px ui-monospace, Consolas, monospace; color: var(--bone); }
-.all td:last-child { font: 11px/1.45 var(--font-desc); color: var(--desc); min-width: 220px; }
+.all td:last-child { font: 12px/1.45 var(--font-desc); color: var(--desc); min-width: 220px; }
+.all tr.tip td:last-child { color: var(--tip); }
 .all tr.picked td:first-child { color: var(--gold); }
 @media (prefers-reduced-motion: no-preference) { .desc { transition: opacity .15s; } }

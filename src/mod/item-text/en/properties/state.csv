@@ -1,7 +1,7 @@
 key,s,p,note
 curse.cursed,"A curse lies on it; a temple priest could lift it, for a price.","A curse lies on them; a temple priest could lift it, for a price.","cursed, said once identified"
 curse.damned,It is damned: no temple will lift this curse.,They are damned: no temple will lift this curse.,"damned: Health Leech, whenever used; no temple lifts it"
-content.potion,It holds a brewed potion.,They hold a brewed potion.,a bottle holding a potion (potionRecipeKey)
+content.potion,Through the stopper you smell herbs and something sharp.,,a bottle holding a potion (potionRecipeKey)
 content.potent,The brew is unusually potent.,,a potent potion (item.potent)
 content.soul,A captured soul swirls inside it.,A captured soul swirls inside them.,a soul trap holding a soul (trappedSoulType)
 content.poison,Poison has been worked into its edge.,Poison has been worked into their edge.,a poisoned weapon (poisonType)
@@ -9,7 +9,7 @@ food.stage.0,It is still fresh and good to eat.,They are still fresh and good to
 food.stage.1,It is no longer fresh.,They are no longer fresh.,food stage 1: Stale
 food.stage.2,Mould has crept over it.,Mould has crept over them.,food stage 2: Mouldy
 food.stage.3,"It has rotted, and the smell says so.","They have rotted, and the smell says so.",food stage 3: Rotten
-food.stage.4,It is putrid; even the flies think twice.,They are putrid; even the flies think twice.,food stage 4: Putrid
+food.stage.4,"It is putrid, and the smell alone turns the stomach.","They are putrid, and the smell alone turns the stomach.",food stage 4: Putrid
 food.noRot,"It will never spoil, however long it is kept.","They will never spoil, however long they are kept.",never spoils (item.noRot)
 food.slowRot,It keeps far longer than ordinary food.,They keep far longer than ordinary food.,spoils slowly (item.slowRot)
 food.chef,"A real cook prepared it, and it shows.","A real cook prepared them, and it shows.",a chef's dish (item.chef)
@@ -19,7 +19,6 @@ condition.worn,It is well worn and could use a smith's attention.,They are well 
 condition.battered,It is badly battered and close to failing.,They are badly battered and close to failing.,1-39% condition
 condition.broken,It is broken and useless until repaired.,They are broken and useless until repaired.,0% condition
 state.unidentified,Whatever magic it holds stays hidden until someone identifies it.,Whatever magic they hold stays hidden until someone identifies them.,unidentified piece with hidden magic
-state.quest,It matters to a task you have taken on.,They matter to a task you have taken on.,quest item
 state.stolen,It is stolen goods; better not show it to the guards.,They are stolen goods; better not show them to the guards.,stolen
 state.bound,It is bound to its owner and cannot change hands.,They are bound to their owner and cannot change hands.,bound to its owner
 state.summoned,It was summoned by magic and will fade before long.,They were summoned by magic and will fade before long.,summoned item that will vanish

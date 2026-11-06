@@ -9,7 +9,9 @@
 // combos/metals.csv     key,text                          - the metal slot's phrase; "unknown" when it is not shown
 // combos/properties.csv key,requires,<form>...            - one sentence for two properties ("a+b", "x.*")
 // combos/legendaries.csv key,templates,<form>...          - a Legendary's own sentence of {base} and power
-// ../rules.json                                            - groups ranked by relevance and the fragment limit
+// combos/tiers.csv      key,<form>...                     - slot 2: tier + sigil + set ({set})
+// combos/sets.csv       key,text                          - a set's name as the game shows it
+// ../rules.json                                            - categories and the universal queue of slots
 //
 // Forms are the grammar a sentence agrees with: English singular/plural (s, p), Russian gender (m, f, n) and the
 // plural of pluralia tantum (p: «перчатки», «сапоги»). A base row says its item's form; a property row has a text
@@ -72,7 +74,7 @@ const PLACEHOLDERS = new Set(['maker', 'house', 'gen', 'count']);
 const VARIANTS = new Set(['', 'leather', 'chain', 'plate', 'mail', 'brigandine', 'fur']);
 const METAL_KEYS = new Set(['iron', 'steel', 'silver', 'elven', 'dwarven', 'mithril', 'adamantium', 'ebony', 'orcish', 'daedric', 'unknown']);
 /** Sigils, sets and wear are never part of a combination; nor is what the identity sentence already says. */
-const NEVER_COMBINED = /^(?:sigil|condition|base|gear|legendary|material|construction)(?:\.|$)/;
+const NEVER_COMBINED = /^(?:sigil|condition|base|gear|legendary|material|construction|tier)(?:\.|$)|^rarity\.(?!imbued$)/;
 
 /** One locale's folder, validated. Throws on any malformed row: a broken table must not ship half a language. */
 function loadLocale(dir) {
@@ -171,26 +173,47 @@ function loadLocale(dir) {
     if (Object.values(text).some(t => !t.includes('{base}'))) throw new Error(`${where}: a legendary's sentence names its base item`);
     legendaries[row.key] = text;
   });
+  const tiers = {}, sets = {};
+  tables(index.tiers, ['key', ...forms], (row, where) => {
+    if (!/^tier\.(?:magic|rare|perfect|legendary|exalted|aetheric|artifact|gilded)\.(?:sigil|set|sigil\.set)$/.test(row.key) || Object.hasOwn(tiers, row.key)) throw new Error(`${where}: bad or repeated tier ${row.key}`);
+    tiers[row.key] = formsOf(where, row, new Set(['set']));
+  });
+  tables(index.sets, ['key', 'text'], (row, where) => {
+    if (!/^[a-z][a-z0-9-]{0,63}$/.test(row.key) || Object.hasOwn(sets, row.key)) throw new Error(`${where}: bad or repeated set ${row.key}`);
+    checkText(where, row.text, new Set());
+    sets[row.key] = row.text;
+  });
   const rules = loadRules(path.join(dir, '..', 'rules.json'));
   return { locale, name: index.name ?? locale, forms, defaultForm, inlineName: index.inlineName ?? null, bases, properties,
-    gear, metals, combos, legendaries, rules };
+    gear, metals, combos, legendaries, tiers, sets, rules };
 }
 
-/** The ranking every locale shares: groups from the most relevant, each with its cap, and the overall limit. */
+/** The universal order every locale shares: categories that sort fragment keys, and the queue of slots. */
+const TAKES = new Set(['identity', 'tier', 'random', 'first']);
 function loadRules(file) {
-  if (!fs.existsSync(file)) return { limit: null, groups: [] };
+  if (!fs.existsSync(file)) return { categories: [], queue: [] };
   const rules = JSON.parse(fs.readFileSync(file, 'utf8'));
-  if (!Number.isInteger(rules.limit) || rules.limit < 1) throw new Error(`${file}: limit must be a positive integer`);
-  if (!Array.isArray(rules.groups)) throw new Error(`${file}: no groups`);
+  if (!Array.isArray(rules.categories) || !Array.isArray(rules.queue)) throw new Error(`${file}: categories and queue are required`);
   const ids = new Set();
-  const groups = rules.groups.map((g, i) => {
-    if (typeof g.id !== 'string' || ids.has(g.id)) throw new Error(`${file}: group ${i} has no unique id`);
-    ids.add(g.id);
-    if (!Array.isArray(g.keys) || !g.keys.length || g.keys.some(k => typeof k !== 'string' || !k)) throw new Error(`${file}: group ${g.id} has no keys`);
-    if (!Number.isInteger(g.max) || g.max < 1) throw new Error(`${file}: group ${g.id} needs a positive max`);
-    return { id: g.id, keys: [...g.keys], max: g.max };
+  const categories = rules.categories.map((c, i) => {
+    if (typeof c.id !== 'string' || ids.has(c.id)) throw new Error(`${file}: category ${i} has no unique id`);
+    ids.add(c.id);
+    if (!Array.isArray(c.keys) || !c.keys.length || c.keys.some(k => typeof k !== 'string' || !k)) throw new Error(`${file}: category ${c.id} has no keys`);
+    return { id: c.id, title: String(c.title ?? c.id), keys: [...c.keys] };
   });
-  return { limit: rules.limit, groups };
+  const slots = new Set();
+  const queue = rules.queue.map((q, i) => {
+    if (!Number.isInteger(q.slot) || slots.has(q.slot)) throw new Error(`${file}: queue entry ${i} needs a unique slot number`);
+    slots.add(q.slot);
+    if (!TAKES.has(q.take)) throw new Error(`${file}: slot ${q.slot} takes ${q.take}`);
+    const from = (q.from ?? []).map(f => {
+      if (!ids.has(f.category) || !Number.isInteger(f.max) || f.max < 1) throw new Error(`${file}: slot ${q.slot} draws from a bad category`);
+      return { category: f.category, max: f.max };
+    });
+    if ((q.take === 'random' || q.take === 'first') && !from.length) throw new Error(`${file}: slot ${q.slot} draws from nothing`);
+    return { slot: q.slot, take: q.take, from, equippable: q.equippable === true };
+  });
+  return { categories, queue };
 }
 
 /** Which locale the page gets: Russian when the Russian translation is installed and on, English otherwise. */
@@ -212,7 +235,7 @@ function bundle(locale, root = ROOT) {
 /** Every file a locale needs, relative to the item-text folder: what the patcher puts into the game's archive. */
 function localeFiles(locale, root = ROOT) {
   const index = JSON.parse(fs.readFileSync(path.join(root, locale, 'index.json'), 'utf8'));
-  return ['index.json', ...['bases', 'properties', 'gear', 'metals', 'combos', 'legendaries'].flatMap(k => index[k] ?? [])]
+  return ['index.json', ...['bases', 'properties', 'gear', 'metals', 'combos', 'legendaries', 'tiers', 'sets'].flatMap(k => index[k] ?? [])]
     .map(rel => `${locale}/${rel}`);
 }
 /** What an install carries: the shared rules and the files of each locale it speaks. */

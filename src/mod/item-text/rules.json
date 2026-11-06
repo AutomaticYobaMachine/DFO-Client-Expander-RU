@@ -1,21 +1,28 @@
 {
- "about": "Item description ranking, shared by every locale. A description keeps at most `limit` fragments. Groups are listed from the most relevant to the least: the first pass takes up to `max` fragments from each group in this order, the second fills any room left in the same order. The kept fragments are then said in reading order (base, material, tier, craft, lines, power, sigil, sockets, curse, contents, food, dye, wear, state). A key belongs to the first group with a matching prefix; a prefix ending in '.' matches that family, any other prefix matches the key exactly.",
- "limit": 5,
- "groups": [
-  { "id": "identity", "title": "Что это за вещь: основа, основа+материал, легендарка", "keys": ["base", "gear.", "legendary."], "max": 1 },
-  { "id": "secret", "title": "Скрытые чары и проклятие", "keys": ["state.unidentified", "curse."], "max": 1 },
-  { "id": "power", "title": "Именная сила и отпечаток", "keys": ["power."], "max": 1 },
-  { "id": "tier", "title": "Редкость", "keys": ["rarity."], "max": 1 },
-  { "id": "set", "title": "Набор и сигил", "keys": ["sigil.set.", "sigil.power"], "max": 1 },
-  { "id": "technique", "title": "Техника", "keys": ["technique."], "max": 1 },
-  { "id": "lines", "title": "Аффиксы и зачарования, их сочетания", "keys": ["combo.affix.", "combo.enchantment.", "affix.", "skill.", "enchantment."], "max": 2 },
-  { "id": "contents", "title": "Содержимое и еда", "keys": ["content.", "food."], "max": 2 },
-  { "id": "standing", "title": "Квестовое, краденое, привязанное", "keys": ["state."], "max": 1 },
-  { "id": "craft", "title": "Ремесло, клеймо, наследие", "keys": ["combo.craft.", "craft.", "heirloom"], "max": 1 },
-  { "id": "material", "title": "Отдельная фраза о материале", "keys": ["material.", "construction."], "max": 1 },
-  { "id": "sockets", "title": "Камни в гнёздах", "keys": ["socket."], "max": 1 },
-  { "id": "growth", "title": "Рост сигила", "keys": ["sigil.stage."], "max": 1 },
-  { "id": "look", "title": "Окраска", "keys": ["dye."], "max": 1 },
-  { "id": "wear", "title": "Износ", "keys": ["condition."], "max": 1 }
+ "about": "The universal order of an item description, shared by every locale. `categories` sorts every fragment key: the first category with a matching prefix wins (a prefix ending in '.' matches that family, any other prefix the key itself or its sub-keys), so the more specific categories come first. `queue` is the description, slot by slot, in reading order: identity, tier, a random pick, a random pick, a random pick, wear, standing. A random slot draws one fragment from the categories it lists that still have fragments and room under their `max` (the cap counts every slot of the description, so a fragment or category is never repeated past it); the draw is seeded by the item, so one item always reads the same.",
+ "categories": [
+  { "id": "identity", "title": "Вещь + тип брони + материал / вещь + материал / вещь", "keys": ["base", "gear."] },
+  { "id": "craft", "title": "Ремесло: качество, клеймо, наследие, перековка, заточка", "keys": ["combo.craft.", "craft.", "heirloom", "affix.honed", "affix.reforged", "rarity.imbued"] },
+  { "id": "secret", "title": "Скрытые чары или проклятие", "keys": ["state.unidentified", "curse."] },
+  { "id": "standing", "title": "Квестовое или краденое", "keys": ["state.quest", "state.stolen"] },
+  { "id": "growth", "title": "Рост сигила", "keys": ["sigil.stage."] },
+  { "id": "tier", "title": "Редкость + сигил + набор / редкость + сигил / редкость + набор / редкость", "keys": ["tier.", "rarity.", "sigil.set.", "sigil.power"] },
+  { "id": "power", "title": "Именная сила (у легендарок — «база + сила»)", "keys": ["legendary.", "power."] },
+  { "id": "technique", "title": "Техника", "keys": ["technique."] },
+  { "id": "lines", "title": "Аффиксы и чары, их сочетания", "keys": ["combo.affix.", "combo.enchantment.", "affix.", "skill.", "enchantment."] },
+  { "id": "contents", "title": "Содержимое и еда", "keys": ["content.", "food."] },
+  { "id": "material", "title": "Отдельная фраза о материале", "keys": ["material.", "construction."] },
+  { "id": "sockets", "title": "Камни в гнёздах", "keys": ["socket."] },
+  { "id": "wear", "title": "Износ (только то, что надевается)", "keys": ["condition."] },
+  { "id": "unused", "title": "Вне очереди: окраска, привязка, призыв, памятная вещь, останки", "keys": ["dye.", "state."] }
+ ],
+ "queue": [
+  { "slot": 1, "take": "identity" },
+  { "slot": 2, "take": "tier" },
+  { "slot": 3, "take": "random", "from": [ { "category": "power", "max": 1 }, { "category": "technique", "max": 1 }, { "category": "lines", "max": 2 }, { "category": "contents", "max": 2 }, { "category": "material", "max": 1 }, { "category": "growth", "max": 1 } ] },
+  { "slot": 4, "take": "random", "from": [ { "category": "power", "max": 1 }, { "category": "technique", "max": 1 }, { "category": "lines", "max": 2 }, { "category": "contents", "max": 2 }, { "category": "material", "max": 1 }, { "category": "growth", "max": 1 } ] },
+  { "slot": 5, "take": "random", "from": [ { "category": "technique", "max": 1 }, { "category": "craft", "max": 1 }, { "category": "sockets", "max": 1 }, { "category": "secret", "max": 1 } ] },
+  { "slot": 6, "take": "first", "from": [ { "category": "wear", "max": 1 } ], "equippable": true },
+  { "slot": 7, "take": "first", "from": [ { "category": "standing", "max": 1 } ] }
  ]
 }

@@ -1,0 +1,14 @@
+Шрифт описаний предметов DFO-Client-Expander-RU
+
+Предоставлен пользователем (файл «Flow_B.otf», 6 ноября 2026) для всех описаний предметов.
+Авторство шрифта не принадлежит автору расширения. Файл не изменён.
+
+Flow_B.otf
+Файл: item-font-description.otf; назначение: текст описаний предметов (около 11 px, светло-серый).
+SHA-256: b784516192e8a645481790e79cb6f2f2f4d0b233c4efd55e9c5e3095d4d1a317
+Copyright: (c) 2012 by Andryushkin Artem, Jovanny Lemonad. All rights reserved.
+Family: Flow Ext, Bold (FlowExt-Bold), версия 2.000
+Manufacturer/Designer: Andryushkin Artem, Jovanny Lemonad
+Vendor URL: http://www.jovanny.ru/
+OS/2 fsType: 4 (встраивание только для просмотра и печати). Условия распространения в файле не указаны:
+пока шрифт используется только в стендах docs/, в установщик и игру не входит.

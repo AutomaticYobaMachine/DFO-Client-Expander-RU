@@ -6,7 +6,7 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs'), path = require('node:path'), os = require('node:os');
 const text = require('../src/mod/item-text.cjs');
-const { describe, keysFor, KINDS, variantOf, groupIndex } = require('../src/mod/page/dfo_item_text.js');
+const { describe, keysFor, variantOf, categoryOf, seedOf } = require('../src/mod/page/dfo_item_text.js');
 const { injectPage } = require('../src/mod/transforms.cjs');
 
 const catalog = JSON.parse(fs.readFileSync(path.join(__dirname, '../docs/item-field-catalog.json'), 'utf8'));
@@ -112,7 +112,7 @@ test('every property the game catalogues allow has a sentence, and no sentence i
   }
 });
 
-const ALL = { max: Infinity };
+const ALL = { all: true };
 const METAL_IDS = ['iron', 'steel', 'silver', 'elven', 'dwarven', 'mithril', 'adamantium', 'ebony', 'orcish', 'daedric'];
 /** The frames each armour template can take: classic pieces and shields are leather, chain or plate (raw material
  *  0, 256/259, 512+metal); Roleplay & Realism's chain set adds mail of a metal, its light set fur and brigandine. */
@@ -137,10 +137,10 @@ test('sentences agree with the base item: Russian gender and plural, English num
   assert.match(say(en, { group: 'MensClothing', templateIndex: 141, dye: 2 }, steel)[1], /^They have been dyed/);
   assert.match(say(en, { group: 'MensClothing', templateIndex: 143, dye: 2 }, steel)[1], /^It has been dyed/);
   // A Legendary's own sentence takes the base's name and form.
-  const rose = say(ru, { group: 'Armor', templateIndex: 103, rarity: 'legendary', legendary: 'gauntlets-of-the-rose' }, { known: true })[0];
-  assert.match(rose, /^Эти латные перчатки Розы бьют/);
-  assert.match(say(ru, { group: 'Weapons', templateIndex: 128, legendary: 'graveward' }, { known: true })[0], /^Эта секира упокаивает/);
-  assert.match(say(en, { group: 'Weapons', templateIndex: 120, legendary: 'wyrmbane' }, { known: true })[0], /^This longsword, forged/);
+  const legend = (pack, item) => describe(pack, item, { known: true }, ALL).find(f => f.category === 'power').text;
+  assert.match(legend(ru, { group: 'Armor', templateIndex: 103, rarity: 'legendary', legendary: 'gauntlets-of-the-rose' }), /^Эти латные перчатки Розы бьют/);
+  assert.match(legend(ru, { group: 'Weapons', templateIndex: 128, legendary: 'graveward' }), /^Эта секира упокаивает/);
+  assert.match(legend(en, { group: 'Weapons', templateIndex: 120, legendary: 'wyrmbane' }), /^This longsword, forged/);
   // A group-specific row wins over the template's own (keys like "Deeds:0" are allowed by the loader).
   const pack = { ...ru, bases: { ...ru.bases, 'Deeds:0': { name: 'Грамота', form: 'f', text: 'Грамота.' } } };
   assert.equal(describe(pack, { group: 'Deeds', templateIndex: 0 }, {})[0].text, 'Грамота.');
@@ -207,6 +207,7 @@ test('every fragment is one sentence of 5 to 15 words, in every form and with ev
     for (const [key, row] of Object.entries(pack.properties)) for (const [form, t] of Object.entries(row)) check(`${pack.locale} ${key} ${form}`, t);
     for (const combo of pack.combos) for (const [form, t] of Object.entries(combo.text)) check(`${pack.locale} ${combo.key} ${form}`, t);
     for (const [id, frame] of Object.entries(pack.gear)) for (const metal of Object.values(pack.metals)) check(`${pack.locale} frame ${id}`, frame.replace('{material}', metal));
+    for (const [key, row] of Object.entries(pack.tiers)) for (const [form, t] of Object.entries(row)) for (const set of Object.values(pack.sets)) check(`${pack.locale} ${key} ${form}`, t.replace('{set}', set));
     const rows = text.readTable(path.join(text.ROOT, pack.locale, 'combos', 'legendaries.csv')).rows;
     for (const row of rows) for (const t of row.templates.split(/\s+/)) {
       const base = pack.bases[t];
@@ -217,7 +218,7 @@ test('every fragment is one sentence of 5 to 15 words, in every form and with ev
   }
 });
 
-test('the identity sentence: a Legendary, else base + armour type + metal, else the plain base', () => {
+test('slot 1: base + armour type + metal, else base + metal, else the plain base', () => {
   const keys = (pack, item, facts) => describe(pack, item, facts, ALL).map(s => s.key);
   const first = (pack, item, facts) => describe(pack, item, facts, ALL)[0];
   // The frame says the metal: the separate material sentence gives way to it.
@@ -236,17 +237,18 @@ test('the identity sentence: a Legendary, else base + armour type + metal, else 
   assert.equal(first(ru, { group: 'Armor', templateIndex: 520 }, { known: true, material: 'fur', armorType: 'leather' }).key, 'gear.520.fur');
   assert.equal(first(ru, { group: 'Armor', templateIndex: 524 }, { known: true, material: 'steel', construction: 'brigandine', armorType: 'leather' }).key, 'gear.524.brigandine');
   assert.equal(variantOf({ group: 'Jewellery' }, { material: 'steel' }), null);
-  // A Legendary's own sentence once identified; before that its frame, and its power stays hidden.
+  // A Legendary keeps its frame as slot 1; its named power is its own sentence of base and power, once identified.
   const legendary = { group: 'Weapons', templateIndex: 123, rarity: 'legendary', legendary: 'warp-edge' };
-  assert.deepEqual(keys(en, legendary, { known: true, material: 'daedric' }).slice(0, 1), ['legendary.warp-edge']);
+  assert.equal(first(en, legendary, { known: true, material: 'daedric' }).key, 'gear.123.weapon');
+  assert.ok(keys(en, legendary, { known: true }).includes('legendary.warp-edge'));
   assert.ok(!keys(en, legendary, { known: true }).includes('power.warp-edge'), 'the power is in the Legendary sentence');
-  assert.equal(first(en, legendary, { known: false }).key, 'gear.123.weapon');
+  assert.ok(!keys(en, legendary, { known: false }).some(k => k.startsWith('legendary.') || k.startsWith('power.')));
   assert.ok(!keys(en, { ...legendary, imprint: 'warp-edge', legendary: undefined }, { known: true }).includes('legendary.warp-edge'), 'an imprint is not the record');
   // Ordinary items have no frame and no combination.
   assert.equal(first(ru, { group: 'UselessItems2', templateIndex: 534, foodStage: 1 }, { known: true }).key, 'base');
 });
 
-test('combined properties replace their parts; sigils, sets and wear stay on their own', () => {
+test('combined properties replace their parts; sigils, sets and wear are never among them', () => {
   const keys = (item, facts = { known: true, material: 'steel' }) => describe(ru, item, facts, ALL).map(s => s.key);
   const sword = { group: 'Weapons', templateIndex: 120, rarity: 'rare', currentCondition: 10, maxCondition: 100,
     affixes: [{ id: 'damage', value: 10 }, { id: 'elemental', param: 'fire', value: 3 }, { id: 'leech', value: 4 }],
@@ -255,7 +257,7 @@ test('combined properties replace their parts; sigils, sets and wear stay on the
   assert.ok(out.includes('combo.affix.damage-fire'));
   assert.ok(!out.includes('affix.damage') && !out.includes('affix.elemental.fire'), 'the parts give way');
   assert.ok(out.includes('affix.leech'), 'a part is used by one combination only');
-  for (const key of ['sigil.set.ruhn', 'sigil.stage.2', 'condition.battered']) assert.ok(out.includes(key), `${key} stays on its own`);
+  for (const key of ['tier.rare.set', 'sigil.stage.2', 'condition.battered']) assert.ok(out.includes(key), `${key} stays out of the property combinations`);
   // Wildcards take a parameter; a missing part leaves the single sentences.
   assert.ok(keys({ group: 'Jewellery', templateIndex: 135, affixes: [{ id: 'stat', param: 'personality', value: 3 }, { id: 'standing', param: 'nobility', value: 3 }] }).includes('combo.affix.charm'));
   assert.ok(keys({ group: 'Jewellery', templateIndex: 135, affixes: [{ id: 'focus', value: 3 }] }).includes('affix.focus'));
@@ -267,33 +269,75 @@ test('combined properties replace their parts; sigils, sets and wear stay on the
   assert.ok(!keys(sword, { known: false }).some(k => k.startsWith('combo.')));
 });
 
-test('ranking keeps the most relevant fragments up to the limit and says them in reading order', () => {
-  const rules = JSON.parse(fs.readFileSync(path.join(text.ROOT, 'rules.json'), 'utf8'));
-  assert.equal(rules.limit, 5);
-  assert.deepEqual(ru.rules.groups.map(g => g.id), rules.groups.map(g => g.id));
-  const busy = { group: 'Weapons', templateIndex: 123, rarity: 'legendary', legendary: 'warp-edge', currentCondition: 50, maxCondition: 100, stolen: true,
-    affixes: [{ id: 'damage', value: 30 }, { id: 'stat', param: 'strength', value: 12 }, { id: 'skill', param: 29, value: 20 }, { id: 'technique', param: 'whirlwind', value: 20 }, { id: 'stat', param: 'luck', value: 5 }],
-    enchantments: [{ type: 2, param: 20 }, { type: 3, param: 4 }], cursed: { type: 21, param: 0 }, sockets: ['ruby', 'empty'], sigil: { set: 'ruhn', xp: 40000 },
-    quality: 3, maker: 'Мастер' };
-  const all = describe(ru, busy, { known: true, material: 'daedric' }, ALL);
-  const kept = describe(ru, busy, { known: true, material: 'daedric' });
-  assert.ok(all.length > 5);
-  assert.equal(kept.length, 5, 'the default limit');
-  assert.equal(kept[0].group, 'identity', 'what the thing is comes first');
-  assert.deepEqual(kept.map(s => s.group).sort(), ['identity', 'secret', 'set', 'technique', 'tier'], 'the five most relevant groups');
-  // Reading order, not rank order: kinds follow KINDS.
-  const order = kept.map(s => KINDS.indexOf(s.kind));
-  assert.deepEqual(order, [...order].sort((a, b) => a - b));
-  // A group's cap holds in the first pass; the room left is filled in rank order.
-  const lines = describe(ru, { group: 'Jewellery', templateIndex: 135, affixes: ['strength', 'intelligence', 'willpower', 'agility', 'luck'].map(param => ({ id: 'stat', param, value: 2 })) }, { known: true });
-  assert.equal(lines.length, 5);
-  assert.deepEqual(lines.map(s => s.group), ['identity', 'lines', 'lines', 'lines', 'lines']);
-  assert.equal(describe(ru, busy, { known: true }, { max: 2 }).length, 2);
-  assert.deepEqual(describe(en, { ...busy, cursed: undefined }, { known: true }, { kinds: ['state'] }).map(s => s.key), ['state.stolen']);
-  // Every key a description can ask for belongs to a ranked group.
-  for (const key of [...expectedKeys(), ...ru.combos.map(c => c.key), 'base', 'gear.102.plate', 'legendary.wyrmbane']) {
-    assert.ok(groupIndex(ru.rules, key) < ru.rules.groups.length, `${key} has a group`);
+test('slot 2: tier + sigil + set, tier + sigil, tier + set, tier - in that order', () => {
+  const second = (item, facts = { known: true }) => describe(ru, item, facts).find(f => f.slot === 2);
+  const sword = { group: 'Weapons', templateIndex: 120, rarity: 'rare' };
+  assert.equal(second({ ...sword, sigil: { power: 6, set: 'ruhn', xp: 0 } }).key, 'tier.rare.sigil.set');
+  assert.match(second({ ...sword, sigil: { power: 6, set: 'ruhn', xp: 0 } }).text, /^Сильно зачарованный, он несёт растущий сигил набора «Регалии Руна»\.$/);
+  assert.equal(second({ ...sword, sigil: { power: 6, xp: 0 } }).key, 'tier.rare.sigil');
+  assert.equal(second({ ...sword, sigil: { set: 'ruhn', xp: 0 } }).key, 'tier.rare.set');
+  assert.equal(second(sword).key, 'rarity.rare');
+  assert.equal(second({ ...sword, rarity: 'legendary', exalted: true, sigil: { set: 'oath', xp: 0 } }).key, 'tier.exalted.set');
+  assert.equal(second({ ...sword, sigil: { power: 6 } }, { known: true, perfect: true }).key, 'tier.perfect.sigil');
+  // The game shows a sigil and its set before identification; Perfect waits for it.
+  assert.equal(second({ ...sword, sigil: { power: 6 } }, { known: false, perfect: true }).key, 'tier.rare.sigil');
+  // Without a tier a set or a sigil speaks alone; without either, slot 2 stays empty.
+  assert.equal(second({ group: 'Armor', templateIndex: 102, sigil: { set: 'ruhn' } }).key, 'sigil.set.ruhn');
+  assert.equal(second({ group: 'Armor', templateIndex: 102 }), undefined);
+  // Every tier with a sigil, a set, or both has its combined sentence in both languages; every set has its name.
+  for (const pack of [en, ru]) {
+    for (const tier of ['magic', 'rare', 'perfect', 'legendary', 'exalted', 'aetheric']) for (const rest of ['sigil', 'set', 'sigil.set']) {
+      assert.ok(pack.tiers[`tier.${tier}.${rest}`], `${pack.locale}: tier.${tier}.${rest}`);
+    }
+    assert.deepEqual(Object.keys(pack.sets).sort(), [...catalog.enums.sigilSets].sort());
   }
+});
+
+test('the universal queue: seven slots in order, random slots stable per item, no fragment twice', () => {
+  const rules = JSON.parse(fs.readFileSync(path.join(text.ROOT, 'rules.json'), 'utf8'));
+  assert.deepEqual(rules.queue.map(q => q.slot), [1, 2, 3, 4, 5, 6, 7]);
+  assert.deepEqual(rules.queue.map(q => q.take), ['identity', 'tier', 'random', 'random', 'random', 'first', 'first']);
+  const busy = { group: 'Weapons', templateIndex: 123, rarity: 'legendary', legendary: 'warp-edge', currentCondition: 50, maxCondition: 100, stolen: true, questItem: true,
+    affixes: [{ id: 'damage', value: 30 }, { id: 'stat', param: 'strength', value: 12 }, { id: 'skill', param: 29, value: 20 }, { id: 'technique', param: 'whirlwind', value: 20 }, { id: 'stat', param: 'luck', value: 5 }],
+    enchantments: [{ type: 2, param: 20 }, { type: 3, param: 4 }], cursed: { type: 21, param: 0 }, sockets: ['ruby', 'empty'], sigil: { power: 9, set: 'ruhn', xp: 40000 },
+    quality: 3, maker: 'Мастер' };
+  const facts = { known: true, material: 'daedric' };
+  const out = describe(ru, busy, facts);
+  assert.deepEqual(out.map(f => f.slot), [1, 2, 3, 4, 5, 6, 7]);
+  assert.equal(out[0].category, 'identity');
+  assert.equal(out[1].key, 'tier.legendary.sigil.set');
+  const poolA = ['power', 'technique', 'lines', 'contents', 'material', 'growth'], poolB = ['technique', 'craft', 'sockets', 'secret'];
+  assert.ok(poolA.includes(out[2].category) && poolA.includes(out[3].category));
+  assert.ok(poolB.includes(out[4].category));
+  assert.equal(out[5].category, 'wear');
+  assert.equal(out[6].key, 'state.quest', 'quest before stolen');
+  // The same item reads the same every time; another seed may read otherwise; nothing is said twice.
+  assert.deepEqual(describe(ru, busy, facts), out);
+  assert.deepEqual(describe(ru, { ...busy }, facts), out, 'the seed is the item, not the object');
+  const draws = new Set();
+  for (let seed = 0; seed < 40; seed++) {
+    const d = describe(ru, busy, facts, { seed });
+    draws.add(d.slice(2, 5).map(f => f.key).join());
+    assert.equal(new Set(d.map(f => f.key)).size, d.length);
+    assert.ok(d.filter(f => f.category === 'technique').length <= 1, 'technique once across slots 3-5');
+    assert.ok(d.filter(f => f.category === 'lines').length <= 2);
+  }
+  assert.ok(draws.size > 3, `random slots vary with the seed (${draws.size} draws)`);
+  assert.ok(seedOf({ uid: 'a1' }) !== seedOf({ uid: 'a2' }));
+  // Wear only on what is worn; a loaf of bread has the field and says nothing of it.
+  assert.ok(!describe(ru, { group: 'UselessItems2', templateIndex: 534, currentCondition: 1, maxCondition: 100 }, { known: true }).some(f => f.category === 'wear'));
+  assert.ok(describe(ru, { group: 'MensClothing', templateIndex: 143, currentCondition: 1, maxCondition: 100 }, { known: true }).some(f => f.category === 'wear'));
+  // Stolen when not a quest item; slots with nothing to say are skipped.
+  assert.deepEqual(describe(ru, { group: 'UselessItems2', templateIndex: 534, stolen: true }, { known: true }).map(f => [f.slot, f.key]), [[1, 'base'], [7, 'state.stolen']]);
+  assert.equal(describe(ru, busy, facts, { max: 2 }).length, 2);
+  // Every key a description can ask for has a category; the unused ones never enter the queue.
+  for (const key of [...expectedKeys(), ...ru.combos.map(c => c.key), ...Object.keys(ru.tiers), 'base', 'gear.102.plate', 'legendary.wyrmbane']) {
+    assert.ok(categoryOf(ru.rules, key), `${key} has a category`);
+  }
+  assert.equal(categoryOf(ru.rules, 'dye.3'), 'unused');
+  assert.ok(!describe(ru, { group: 'MensClothing', templateIndex: 143, dye: 3 }, { known: true }).some(f => f.key.startsWith('dye.')));
+  assert.equal(categoryOf(ru.rules, 'rarity.imbued'), 'craft');
+  assert.equal(categoryOf(ru.rules, 'affix.honed'), 'craft');
 });
 
 test('an unidentified piece says its tier and state, never its hidden lines', () => {
@@ -301,16 +345,16 @@ test('an unidentified piece says its tier and state, never its hidden lines', ()
     affixes: Object.freeze([Object.freeze({ id: 'damage', value: 30 })]), enchantments: Object.freeze([Object.freeze({ type: 2, param: 20 })]),
     cursed: Object.freeze({ type: 21, param: 0 }), sockets: Object.freeze(['ruby']), sigil: Object.freeze({ set: 'ruhn', xp: 40000 }) });
   const hidden = describe(ru, item, { known: false }, ALL).map(s => s.key);
-  assert.deepEqual(hidden, ['gear.121.weapon', 'rarity.exalted', 'state.unidentified']);
+  assert.deepEqual(hidden, ['gear.121.weapon', 'tier.exalted.set', 'sigil.stage.4', 'state.unidentified'], 'the sigil and its set are seen at once');
   const known = describe(ru, item, { known: true }, ALL).map(s => s.key);
-  for (const key of ['legendary.warp-edge', 'affix.damage', 'enchantment.2', 'sigil.set.ruhn', 'sigil.stage.4', 'socket.gem.ruby', 'curse.damned']) {
+  for (const key of ['legendary.warp-edge', 'affix.damage', 'enchantment.2', 'tier.exalted.set', 'sigil.stage.4', 'socket.gem.ruby', 'curse.damned']) {
     assert.ok(known.includes(key), `${key} once identified`);
   }
   assert.ok(!known.includes('state.unidentified'));
   // A Perfect Rare and a curse are words of an identified piece only.
   const rare = { group: 'Weapons', templateIndex: 120, rarity: 'rare', affixes: [{ id: 'damage', value: 25 }], cursed: { type: 25, param: 0 } };
   assert.ok(!describe(en, rare, { known: false, perfect: true }, ALL).some(s => s.key === 'rarity.perfect' || s.key.startsWith('curse')));
-  assert.deepEqual(describe(en, rare, { known: true, perfect: true }, ALL).filter(s => s.kind === 'rarity' || s.kind === 'curse').map(s => s.key), ['rarity.perfect', 'curse.cursed']);
+  assert.deepEqual(describe(en, rare, { known: true, perfect: true }, ALL).filter(s => s.category === 'tier' || s.category === 'secret').map(s => s.key), ['rarity.perfect', 'curse.cursed']);
   // Without facts nothing is guessed: no metal from the raw code, nothing magical without identification.
   assert.match(describe(en, { group: 'Weapons', templateIndex: 120, material: 9 }, {}, ALL)[0].text, /of bright metal/);
 });
@@ -355,10 +399,10 @@ test('the page gets Russian only with the translation installed, and the scripts
     assert.equal(win.__dfoItemTextPack.locale, locale);
     assert.equal(Object.keys(win.__dfoItemTextPack.bases).length, 483);
     const index = JSON.parse(fs.readFileSync(path.join(text.ROOT, locale, 'index.json')));
-    const listed = ['bases', 'properties', 'gear', 'metals', 'combos', 'legendaries'].flatMap(k => index[k] ?? []);
+    const listed = ['bases', 'properties', 'gear', 'metals', 'combos', 'legendaries', 'tiers', 'sets'].flatMap(k => index[k] ?? []);
     assert.deepEqual(text.localeFiles(locale).filter(f => f.endsWith('.csv')), listed.map(f => `${locale}/${f}`));
     for (const file of text.localeFiles(locale)) assert.ok(fs.existsSync(path.join(text.ROOT, file)), file);
-    assert.equal(win.__dfoItemTextPack.rules.limit, 5);
+    assert.deepEqual(win.__dfoItemTextPack.rules.queue.map(q => q.slot), [1, 2, 3, 4, 5, 6, 7]);
   }
   const html = '<html><head></head><body><script type="module" src="x.js"></script></body></html>';
   const on = injectPage(html, './', { itemCards: true });
@@ -386,7 +430,19 @@ test('the hook serves the chosen locale as data and the runtime exposes it to th
     assert.equal(win.__dfoItemText.locale, 'en');
     assert.match(win.__dfoItemText.text({ group: 'Armor', templateIndex: 103 }, { known: true, material: 'steel', armorType: 'plate' }), /^Plate gauntlets of tempered steel/);
     assert.equal(win.__dfoItemText.describe({ group: 'Weapons', templateIndex: 120, rarity: 'rare', currentCondition: 1, maxCondition: 9, stolen: true,
-      affixes: ['strength', 'luck', 'agility', 'speed'].map(param => ({ id: 'stat', param, value: 2 })) }, { known: true }).length, 5);
+      affixes: ['strength', 'luck', 'agility', 'speed'].map(param => ({ id: 'stat', param, value: 2 })) }, { known: true }).map(f => f.slot).join(), '1,2,3,4,6,7');
     assert.equal(win.__dfoItemText.stats().bases, 483);
   } finally { fs.rmSync(dir, { recursive: true, force: true }); }
+});
+
+test('the stand and the registry in docs are built from the current tables', () => {
+  const { pages, wrap } = require('../tools/build-item-text-pages.cjs');
+  for (const [name, body] of Object.entries(pages)) {
+    assert.equal(fs.readFileSync(path.join(__dirname, '..', 'docs', name), 'utf8'), wrap(body), `${name}: run node tools/build-item-text-pages.cjs`);
+  }
+  // The registry lists every fragment of the tables once.
+  const registry = pages['item-text-registry.html'];
+  const count = Object.keys(ru.bases).length + Object.keys(ru.properties).length + Object.keys(ru.gear).length + Object.keys(ru.metals).length
+    + ru.combos.length + Object.keys(ru.legendaries).length + Object.keys(ru.tiers).length + Object.keys(ru.sets).length;
+  assert.equal((registry.match(/<td class="key">/g) || []).length, count);
 });

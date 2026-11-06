@@ -14,10 +14,10 @@
   // of a word that has no singular (p). Only the locale chosen at install is loaded: Russian with the translation
   // installed, English otherwise.
   //
-  // Sentences combine where properties read as one thought: a weapon or armour piece is described together with its
-  // armour type and metal (a neutral metal when the game does not show it), a Legendary by its own sentence of base
-  // and power, and pairs of crafted or enchanted properties by one sentence (never sigils, sets or wear). The shared
-  // rules (item-text/rules.json) rank the groups of fragments and keep at most `limit` of them.
+  // Sentences combine where properties read as one thought: a weapon or armour piece with its armour type and metal
+  // (a neutral metal when the game does not show it), the tier with its sigil and set, a Legendary's base with its
+  // power, and pairs of crafted or enchanted properties. The shared rules (item-text/rules.json) set one universal
+  // order of seven slots; the random slots draw with a seed taken from the item, so one item always reads the same.
   //
   // Pure reading: an item is never changed. What the game keeps hidden stays hidden: an unidentified piece is
   // described by its base, its visible material, its tier and its state only - never its affixes, enchantments,
@@ -35,6 +35,7 @@
   const GEMS = new Set(['ruby', 'emerald', 'sapphire', 'diamond', 'jade', 'turquoise', 'malachite', 'amber']);
   const GEAR = new Set(['Weapons', 'Armor']);
   const CLOTHING = new Set(['MensClothing', 'WomensClothing']);
+  const EQUIPPABLE = new Set(['Weapons', 'Armor', 'Jewellery', 'MensClothing', 'WomensClothing']);
   /** sigil.js SIGIL_STAGES: Faint, Kindled, Bright, Radiant, Ascendant - the experience each begins at. */
   const SIGIL_STAGE_XP = Object.freeze([0, 5000, 12500, 22500, 37500]);
   /** lootRarity.js DAMNED_DRAWBACK: Health Leech, whenever used. */
@@ -120,19 +121,6 @@
       for (const id of [item.legendary, item.gilded]) if (isId(id)) add('power', `power.${id}`);
       if (isId(item.imprint)) { add('power', 'power.imprint'); add('power', `power.${item.imprint}`); }
 
-      // ── a sigil: its set, then how far it has grown ──
-      const sigil = item.sigil;
-      if (sigil && typeof sigil === 'object') {
-        if (isId(sigil.set)) add('sigil', `sigil.set.${sigil.set}`);
-        else if (Number.isFinite(sigil.power)) add('sigil', 'sigil.power');
-        const xp = Number.isFinite(facts.sigilXp) ? facts.sigilXp : sigil.xp;
-        if (Number.isFinite(xp) && xp >= 0) {
-          let stage = 0;
-          for (let i = 0; i < SIGIL_STAGE_XP.length; i++) if (xp >= SIGIL_STAGE_XP[i]) stage = i;
-          add('sigil', `sigil.stage.${stage}`);
-        }
-      }
-
       // ── sockets: each gem's kind once, then whether any socket is still empty ──
       const sockets = Array.isArray(item.sockets) ? item.sockets : typeof item.socket === 'string' ? [item.socket] : [];
       let empty = false;
@@ -147,6 +135,19 @@
       const cursed = item.cursed;
       if (cursed && typeof cursed === 'object') {
         add('curse', cursed.type === DAMNED.type && cursed.param === DAMNED.param ? 'curse.damned' : 'curse.cursed');
+      }
+    }
+
+    // ── a sigil: the game shows it and its set at once, identified or not; then how far it has grown ──
+    const sigil = item.sigil;
+    if (sigil && typeof sigil === 'object') {
+      if (isId(sigil.set)) add('sigil', `sigil.set.${sigil.set}`);
+      if (Number.isFinite(sigil.power) && sigil.power > 0) add('sigil', 'sigil.power');
+      const xp = Number.isFinite(facts.sigilXp) ? facts.sigilXp : sigil.xp;
+      if (Number.isFinite(xp) && xp >= 0) {
+        let stage = 0;
+        for (let i = 0; i < SIGIL_STAGE_XP.length; i++) if (xp >= SIGIL_STAGE_XP[i]) stage = i;
+        add('sigil', `sigil.stage.${stage}`);
       }
     }
 
@@ -165,8 +166,8 @@
     // ── a garment's dye ──
     if (CLOTHING.has(item.group) && isInt(item.dye) && item.dye >= 0) add('dye', `dye.${item.dye}`);
 
-    // ── a weapon's or armour's wear ──
-    if (GEAR.has(item.group) && Number.isFinite(item.currentCondition) && Number.isFinite(item.maxCondition) && item.maxCondition > 0) {
+    // ── wear: only what a character can put on; every item carries the field, the rest ignore it ──
+    if (EQUIPPABLE.has(item.group) && Number.isFinite(item.currentCondition) && Number.isFinite(item.maxCondition) && item.maxCondition > 0) {
       const share = Math.max(0, item.currentCondition) / item.maxCondition;
       add('condition', share <= 0 ? 'condition.broken' : share < 0.4 ? 'condition.battered' : share < 0.75 ? 'condition.worn'
         : share < 1 ? 'condition.used' : 'condition.new');
@@ -223,16 +224,8 @@
     if (pack.inlineName === 'lowerFirst') return name.charAt(0).toLowerCase() + name.slice(1);
     return name;
   }
-  /** The identity sentence: a Legendary's own (its base and its power together), else the base item with its armour
-   *  type and metal, else the plain base. Answers it with the property keys it already says. */
-  function identity(pack, item, facts, base, form, known) {
-    if (known) {
-      for (const id of [item.legendary, item.gilded]) {
-        if (!isId(id) || !own(pack.legendaries, id)) continue;
-        const text = fill(pack.legendaries[id], form, pack, { base: inlineName(pack, base) });
-        if (text) return { key: `legendary.${id}`, text, says: key => key === `power.${id}` };
-      }
-    }
+  /** Slot 1, checked in this order: base item + armour type + metal, base item + metal (a weapon), base item. */
+  function identity(pack, item, facts, base, form) {
     const variant = variantOf(item, facts);
     const frame = variant == null || !pack.gear ? null : pack.gear[`${item.templateIndex}:${variant}`];
     if (typeof frame === 'string') {
@@ -242,46 +235,71 @@
     }
     return { key: 'base', text: base.text, says: () => false };
   }
+  /** Slot 2, checked in this order: tier + sigil + set, tier + sigil, tier + set, tier; a sigil or set alone only
+   *  when the piece has no tier. The game shows the sigil and its set whether or not the piece is identified. */
+  function tierOf(pack, item, facts, form, known) {
+    const rarity = RARITIES.has(item.rarity) ? item.rarity : item.artifact === true ? 'artifact' : null;
+    const tier = rarity === 'legendary' && item.exalted === true ? 'exalted'
+      : rarity === 'rare' && known && facts.perfect === true ? 'perfect' : rarity;
+    const sigil = item.sigil && typeof item.sigil === 'object' ? item.sigil : null;
+    const power = !!sigil && Number.isFinite(sigil.power) && sigil.power > 0;
+    const set = sigil && isId(sigil.set) ? sigil.set : null;
+    const chain = [];
+    if (tier) {
+      if (power && set) chain.push(`tier.${tier}.sigil.set`);
+      if (power) chain.push(`tier.${tier}.sigil`);
+      if (set) chain.push(`tier.${tier}.set`);
+      chain.push(`rarity.${tier}`);
+    } else {
+      if (set) chain.push(`sigil.set.${set}`);
+      if (power) chain.push('sigil.power');
+    }
+    const values = set && own(pack.sets, set) ? { set: pack.sets[set] } : {};
+    for (const key of chain) {
+      const row = own(pack.tiers, key) ? pack.tiers[key] : own(pack.properties, key) ? pack.properties[key] : null;
+      const text = fill(row, form, pack, values);
+      if (text) return { key, text };
+    }
+    return null;
+  }
   /** Does a combination's pattern take this key? "x.*" is x itself or any x.<param>. */
   const takes = (pattern, key) => (pattern.endsWith('.*') ? key === pattern.slice(0, -2) || key.startsWith(pattern.slice(0, -1)) : key === pattern);
-  /** Which ranking group a key belongs to: the first whose prefix matches. */
-  function groupIndex(rules, key) {
-    const groups = rules?.groups ?? [];
-    for (let i = 0; i < groups.length; i++) {
-      for (const prefix of groups[i].keys) {
-        if (prefix.endsWith('.') ? key.startsWith(prefix) : key === prefix || key.startsWith(prefix + '.')) return i;
+  /** The category a key belongs to: the first whose prefix matches. */
+  function categoryOf(rules, key) {
+    for (const category of rules?.categories ?? []) {
+      for (const prefix of category.keys) {
+        if (prefix.endsWith('.') ? key.startsWith(prefix) : key === prefix || key.startsWith(prefix + '.')) return category.id;
       }
     }
-    return groups.length;
+    return null;
+  }
+  /** A stable seed for an item: its own id, else what makes it this piece. One item always reads the same. */
+  function seedOf(item) {
+    const parts = typeof item.uid === 'string' && item.uid ? [item.uid]
+      : [item.templateIndex, item.group, item.name, item.value, item.material, item.rarity, item.legendary, item.gilded,
+        JSON.stringify(item.affixes ?? null), JSON.stringify(item.enchantments ?? null), JSON.stringify(item.sigil ?? null), item.maker];
+    let h = 2166136261;   // FNV-1a
+    for (const ch of parts.map(v => (v == null ? '' : String(v))).join('\u0001')) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619) >>> 0; }
+    return h >>> 0;
+  }
+  /** mulberry32: a small seeded generator, the same sequence for the same item. */
+  function random(seed) {
+    let a = seed >>> 0;
+    return () => {
+      a = (a + 0x6D2B79F5) >>> 0;
+      let t = a;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
   }
 
-  /**
-   * The description of one item: [{ kind, key, group, text }] in reading order.
-   * facts: { known (identified, as the game decides), material ('steel', 'leather', 'chain' for an unknown metal,
-   *          'fur', 'cloth' - only when the game shows it), armorType ('leather' | 'chain' | 'plate', the card's Type
-   *          row), construction ('mail' | 'brigandine'), perfect, sigilXp }
-   * options: { max (fragments; the rules' limit by default, Infinity for all), kinds (only these), skip (not these) }
-   * A template the tables do not know gets no description: its grammatical form is unknown.
-   *
-   * Steps: the identity sentence (Legendary, base + armour type + metal, or base); one candidate per property;
-   * combinations of crafted and enchanted properties replace their parts; the rules rank the groups and keep at most
-   * the limit; what is kept is said in reading order.
-   */
-  function describe(pack, item, facts = {}, options = {}) {
-    if (!pack || !item || typeof item !== 'object' || Array.isArray(item)) return [];
-    const base = baseOf(pack, item);
-    if (!base) return [];
-    facts = facts && typeof facts === 'object' ? facts : {};
-    const form = pack.forms.includes(base.form) ? base.form : pack.defaultForm;
-    const only = Array.isArray(options.kinds) ? new Set(options.kinds) : null;
-    const skip = new Set(Array.isArray(options.skip) ? options.skip : []);
-    const wanted = kind => (!only || only.has(kind)) && !skip.has(kind);
-    const limit = options.max === Infinity ? Infinity : Number.isInteger(options.max) && options.max >= 0 ? options.max
-      : Number.isInteger(pack.rules?.limit) ? pack.rules.limit : Infinity;
+  /** Every fragment the item could say, before the queue: { identity, tier, candidates: [{category, key, text, order}] }. */
+  function fragments(pack, item, facts, base, form) {
     const known = facts.known === true;
-
     // 1. One candidate per property, the first key of a step that has a sentence; a key is said once.
-    const candidates = [], said = new Set();
+    let candidates = [];
+    const said = new Set();
     plan(item, facts).forEach((step, order) => {
       for (const key of Array.isArray(step.key) ? step.key : [step.key]) {
         if (said.has(key)) break;
@@ -292,43 +310,84 @@
         break;
       }
     });
-    // 2. The identity sentence, and the separate sentences it already says (the material, the power).
-    const who = identity(pack, item, facts, base, form, known);
-    let live = candidates.filter(c => !who.says(c.key));
-    live.unshift({ kind: 'base', key: who.key, text: who.text, order: 0 });
-    // 3. Combinations: every part present and not yet combined; the parts give way to the one sentence.
+    // 2. Slot 1 says the material; slot 2 says the tier, the sigil and the set.
+    const who = identity(pack, item, facts, base, form);
+    const tier = tierOf(pack, item, facts, form, known);
+    candidates = candidates.filter(c => !who.says(c.key) && categoryOf(pack.rules, c.key) !== 'tier');
+    // 3. A Legendary's named power is its own sentence of base and power, once the piece is identified.
+    if (known) {
+      for (const id of [item.legendary, item.gilded]) {
+        if (!isId(id) || !own(pack.legendaries, id)) continue;
+        const text = fill(pack.legendaries[id], form, pack, { base: inlineName(pack, base) });
+        if (!text) continue;
+        const at = candidates.findIndex(c => c.key === `power.${id}`);
+        const fragment = { kind: 'power', key: `legendary.${id}`, text, order: at >= 0 ? candidates[at].order : 0.5 };
+        if (at >= 0) candidates.splice(at, 1, fragment); else candidates.unshift(fragment);
+      }
+    }
+    // 4. Combinations: every part present and not yet combined; the parts give way to the one sentence.
     for (const combo of Array.isArray(pack.combos) ? pack.combos : []) {
       const parts = [];
       for (const pattern of combo.requires) {
-        const part = live.find(c => c.order > 0 && !parts.includes(c) && takes(pattern, c.key));
+        const part = candidates.find(c => !parts.includes(c) && takes(pattern, c.key));
         if (!part) break;
         parts.push(part);
       }
       if (parts.length !== combo.requires.length) continue;
-      const values = Object.assign({}, ...parts.map(p => p.values || {}));
-      const text = fill(combo.text, form, pack, values);
+      const text = fill(combo.text, form, pack, Object.assign({}, ...parts.map(p => p.values || {})));
       if (text == null) continue;
-      live = live.filter(c => !parts.includes(c));
-      live.push({ kind: combo.key.split('.')[1], key: combo.key, text, order: Math.min(...parts.map(p => p.order)) });
+      candidates = candidates.filter(c => !parts.includes(c));
+      candidates.push({ kind: combo.key.split('.')[1], key: combo.key, text, order: Math.min(...parts.map(p => p.order)) });
     }
-    // 4. Rank: up to each group's max in group order, then any room left in the same order.
-    live = live.filter(c => wanted(c.kind));
-    const rules = pack.rules ?? { groups: [] };
-    for (const c of live) c.group = groupIndex(rules, c.key);
-    const ranked = [...live].sort((a, b) => a.group - b.group || a.order - b.order);
-    const kept = [], texts = new Set(), taken = new Map();
-    const keep = c => {
-      if (kept.length >= limit || kept.includes(c) || texts.has(c.text)) return;
-      kept.push(c); texts.add(c.text); taken.set(c.group, (taken.get(c.group) || 0) + 1);
+    candidates.sort((a, b) => a.order - b.order);
+    for (const c of candidates) c.category = categoryOf(pack.rules, c.key);
+    return { identity: { category: 'identity', key: who.key, text: who.text }, tier: tier && { category: 'tier', ...tier }, candidates };
+  }
+
+  /**
+   * The description of one item: [{ slot, category, key, text }] in the universal queue's order (rules.json):
+   *  1 base item + armour type + metal / base item + metal / base item;  2 tier + sigil + set (and its shorter forms);
+   *  3, 4 one random fragment each of named power, technique, lines (2), contents (2), material, sigil growth;
+   *  5 one random of technique, craft, sockets, hidden magic or curse;  6 wear, on what is worn;  7 quest or stolen.
+   * facts: { known (identified, as the game decides), material ('steel', 'leather', 'chain' for an unknown metal,
+   *          'fur', 'cloth' - only when the game shows it), armorType ('leather' | 'chain' | 'plate', the card's Type
+   *          row), construction ('mail' | 'brigandine'), perfect, sigilXp }
+   * options: { seed (another stable draw), max (stop after so many fragments), all (every candidate, no queue) }
+   * A template the tables do not know gets no description: its grammatical form is unknown.
+   */
+  function describe(pack, item, facts = {}, options = {}) {
+    if (!pack || !item || typeof item !== 'object' || Array.isArray(item)) return [];
+    const base = baseOf(pack, item);
+    if (!base) return [];
+    facts = facts && typeof facts === 'object' ? facts : {};
+    const form = pack.forms.includes(base.form) ? base.form : pack.defaultForm;
+    const { identity: who, tier, candidates } = fragments(pack, item, facts, base, form);
+    const clean = f => ({ slot: f.slot ?? null, category: f.category, key: f.key, text: f.text });
+    if (options.all === true) return [who, ...(tier ? [tier] : []), ...candidates].map(clean);
+
+    const rng = random(options.seed == null ? seedOf(item) : typeof options.seed === 'number' ? options.seed >>> 0 : seedOf({ uid: String(options.seed) }));
+    const used = new Set(), taken = new Map(), texts = new Set(), out = [];
+    const room = (category, max) => (taken.get(category) || 0) < max;
+    const left = category => candidates.filter(c => c.category === category && !used.has(c) && !texts.has(c.text));
+    const keep = (slot, fragment) => {
+      used.add(fragment); texts.add(fragment.text);
+      taken.set(fragment.category, (taken.get(fragment.category) || 0) + 1);
+      out.push({ ...fragment, slot });
     };
-    for (const c of ranked) {
-      const cap = rules.groups?.[c.group]?.max;
-      if (!Number.isInteger(cap) || (taken.get(c.group) || 0) < cap) keep(c);
+    for (const step of pack.rules?.queue ?? []) {
+      if (Number.isInteger(options.max) && out.length >= options.max) break;
+      if (step.take === 'identity') { keep(step.slot, who); continue; }
+      if (step.take === 'tier') { if (tier) keep(step.slot, tier); continue; }
+      if (step.equippable && !EQUIPPABLE.has(item.group)) continue;
+      const open = step.from.filter(f => room(f.category, f.max) && left(f.category).length);
+      if (!open.length) continue;
+      if (step.take === 'first') { keep(step.slot, left(open[0].category)[0]); continue; }
+      // Random: a category first, then a fragment in it - a long list of lines does not crowd out the rest.
+      const category = open[Math.floor(rng() * open.length)].category;
+      const pool = left(category);
+      keep(step.slot, pool[Math.floor(rng() * pool.length)]);
     }
-    for (const c of ranked) keep(c);
-    // 5. Read in order: what the thing is, then its make, magic and state.
-    return kept.sort((a, b) => KINDS.indexOf(a.kind) - KINDS.indexOf(b.kind) || a.order - b.order)
-      .map(c => ({ kind: c.kind, key: c.key, group: rules.groups?.[c.group]?.id ?? null, text: c.text }));
+    return out.map(clean);
   }
 
   /** Every property key a description could ask for, by kind - the tables' coverage checks read this. */
@@ -358,5 +417,5 @@
     });
   }
 
-  return { KINDS, SIGIL_STAGE_XP, baseOf, plan, describe, keysFor, sentence, variantOf, groupIndex, install };
+  return { KINDS, SIGIL_STAGE_XP, baseOf, plan, describe, keysFor, sentence, variantOf, categoryOf, seedOf, install };
 });

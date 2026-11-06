@@ -54,5 +54,11 @@
  "legendaries": [
   "combos/legendaries.csv"
  ],
+ "tiers": [
+  "combos/tiers.csv"
+ ],
+ "sets": [
+  "combos/sets.csv"
+ ],
  "inlineName": "lower"
 }

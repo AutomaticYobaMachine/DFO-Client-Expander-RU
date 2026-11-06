@@ -1,0 +1,43 @@
+key,group,name,number,text
+82,UselessItems1,Glass Jar,s,A clear glass jar with a wide mouth.
+83,UselessItems1,Glass Bottle,s,"A glass bottle, empty unless something has been brewed into it."
+84,UselessItems1,Decanter,s,A graceful decanter for wine and finer things.
+85,UselessItems1,Clay Jar,s,A glazed clay jar sealed with wax.
+86,UselessItems1,Small Sack,s,A small cloth sack tied with a cord.
+87,UselessItems1,Large Sack,s,A large sack of coarse cloth.
+88,UselessItems1,Quiver,s,A leather quiver for carrying arrows.
+89,UselessItems1,Backpack,s,A traveller's pack with stout straps.
+90,UselessItems1,Small Chest,s,A small iron-bound chest.
+91,UselessItems1,Wine Rack,s,A wooden rack that holds bottles on their sides.
+92,UselessItems1,Large Chest,s,A heavy chest with a stout lock.
+247,UselessItems2,Torch,s,A pitch-soaked torch that burns bright and brief.
+248,UselessItems2,Lantern,s,A shuttered lantern that keeps its flame out of the wind.
+249,UselessItems2,Bandage,s,A roll of clean linen for binding wounds.
+252,UselessItems2,Oil,s,A flask of lamp oil.
+253,UselessItems2,Candle,s,A tallow candle for a few hours of light.
+530,UselessItems2,Camping Equipment,s,"A bundle of camping gear: tarp, cord and a few pegs."
+539,UselessItems2,Waterskin,s,A leather skin for carrying water on the road.
+540,UselessItems2,Skillet,s,An iron skillet for cooking over a fire.
+541,UselessItems2,Campfire,s,"The makings of a campfire: kindling, stones and patience."
+580,UselessItems2,Wallet,s,A leather wallet for coin and papers.
+584,UselessItems2,Lockpick,s,A thin bent pick for persuading locks.
+600,UselessItems2,Materials Bag,s,A sturdy bag for crafting materials.
+603,UselessItems2,Skinning Knife,s,A short curved knife for skinning game.
+692,UselessItems2,Repair Kit,s,Tools and patches for mending arms and armour.
+1600,UselessItems2,Wood-Axe,s,A woodcutter's axe for felling trees.
+1601,UselessItems2,Pick-Axe,s,A miner's pick for breaking ore from rock.
+1602,UselessItems2,Sickle,s,A curved blade for cutting herbs and grain.
+1603,UselessItems2,Fishing-Net,s,A knotted net for catching fish.
+1604,UselessItems2,Wood Bundle,s,A bundle of cut wood tied with twine.
+1606,UselessItems2,Spade,s,A spade for digging.
+1607,UselessItems2,Basket,s,A woven basket for gathering.
+1700,UselessItems2,Bedroll,s,A rolled blanket and pad for sleeping out of doors.
+1701,UselessItems2,Ember Jar,s,A clay jar that keeps live embers for starting a fire.
+1702,UselessItems2,Firewood,s,"Split firewood, dry enough to catch."
+1703,UselessItems2,Restorative Tonic,s,A bitter tonic that steadies a tired body.
+1704,UselessItems2,Meditation Candle,s,A scented candle for calming the mind.
+1705,UselessItems2,Waking Salts,p,Pungent salts that snap the drowsy awake.
+1706,UselessItems2,Sleeping Draught,s,"A draught that brings deep, dreamless sleep."
+1710,UselessItems2,Sack of Oats,s,A sack of oats to keep a horse fed.
+1711,UselessItems2,Wagon Repair Kit,s,"Spare spokes, pins and tools for mending a wagon."
+1712,UselessItems2,Dwarven Oil,s,Fine Dwemer oil for brass gears and joints.

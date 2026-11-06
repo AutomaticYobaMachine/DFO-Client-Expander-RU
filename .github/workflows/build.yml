@@ -46,7 +46,7 @@ jobs:
         shell: bash
         run: |
           (cd src/gui && go test ./...)
-          node --test test/font-assets.test.cjs test/fonts.test.cjs test/item-cards.test.cjs test/packaging.test.cjs test/loot-input.test.cjs test/loot-access.test.cjs test/loot-hosts.test.cjs test/loot-physical.test.cjs test/local-import.test.cjs test/dungeon-intel.test.cjs test/dungeon-live.test.cjs test/dungeon-navigation.test.cjs test/dungeon-quest-navigation.test.cjs test/dungeon-graph.test.cjs test/dungeon-complex.test.cjs test/dungeon-shafts.test.cjs
+          node --test test/font-assets.test.cjs test/fonts.test.cjs test/item-cards.test.cjs test/item-text.test.cjs test/packaging.test.cjs test/loot-input.test.cjs test/loot-access.test.cjs test/loot-hosts.test.cjs test/loot-physical.test.cjs test/local-import.test.cjs test/dungeon-intel.test.cjs test/dungeon-live.test.cjs test/dungeon-navigation.test.cjs test/dungeon-quest-navigation.test.cjs test/dungeon-graph.test.cjs test/dungeon-complex.test.cjs test/dungeon-shafts.test.cjs
           (cd dist && sha256sum --check "DFO-Client-Expander-RU-$BUILD_VERSION.exe.sha256")
 
       - name: Keep the EXE and checksum without publishing a release

@@ -1,0 +1,39 @@
+key,s,p,note
+affix.damage,It strikes harder than its make would suggest.,They strike harder than their make would suggest.,affix damage
+affix.armor,Warding magic makes it sturdier than the metal alone could.,Warding magic makes them sturdier than the metal alone could.,affix armor
+affix.weight,It eases the load on its bearer's back.,They ease the load on their bearer's back.,affix weight
+affix.leech,With every blow it drinks a little of the foe's life for its wielder.,With every blow they drink a little of the foe's life for their wielder.,affix leech
+affix.thorns,Whoever strikes its wearer is hurt in turn.,Whoever strikes their wearer is hurt in turn.,affix thorns
+affix.focus,Spells cost its bearer less magicka.,Spells cost their bearer less magicka.,affix focus
+affix.warmth,It keeps the wearer warm on the coldest nights.,They keep the wearer warm on the coldest nights.,affix warmth
+affix.dry,Rain runs off it as if it had somewhere better to be.,Rain runs off them as if it had somewhere better to be.,affix dry
+affix.castSpeed,Spells leave its bearer's hand a heartbeat sooner.,Spells leave their bearer's hand a heartbeat sooner.,affix castSpeed
+affix.potency,Spells cast with it strike harder.,Spells cast with them strike harder.,affix potency
+affix.wellspring,Each kill returns some spent magicka to its bearer.,Each kill returns some spent magicka to their bearer.,affix wellspring
+affix.honed,"Its enchantments have been carefully honed, one by one.","Their enchantments have been carefully honed, one by one.",affix honed at least once (item.honed)
+affix.reforged,It has been reforged and still bears the marks of a second forge.,They have been reforged and still bear the marks of a second forge.,reforged at least once (item.reforges)
+affix.stat.strength,It lends strength to whoever bears it.,They lend strength to whoever bears them.,affix stat: strength
+affix.stat.intelligence,It sharpens the wits of its owner.,They sharpen the wits of their owner.,affix stat: intelligence
+affix.stat.willpower,It hardens the will against fear and magic.,They harden the will against fear and magic.,affix stat: willpower
+affix.stat.agility,It makes the hands quicker and the feet surer.,They make the hands quicker and the feet surer.,affix stat: agility
+affix.stat.endurance,It helps the body bear wounds and long marches.,They help the body bear wounds and long marches.,affix stat: endurance
+affix.stat.personality,People find its owner more agreeable.,People find their owner more agreeable.,affix stat: personality
+affix.stat.speed,It quickens the step.,They quicken the step.,affix stat: speed
+affix.stat.luck,Fortune smiles a little more often on whoever carries it.,Fortune smiles a little more often on whoever carries them.,affix stat: luck
+affix.resist.fire,It turns aside the bite of flame.,They turn aside the bite of flame.,affix resist: fire
+affix.resist.frost,It holds back the grip of frost.,They hold back the grip of frost.,affix resist: frost
+affix.resist.shock,Lightning finds little purchase on its wearer.,Lightning finds little purchase on their wearer.,affix resist: shock
+affix.resist.poison,Poisons and venoms lose their sting against its wearer.,Poisons and venoms lose their sting against their wearer.,affix resist: poison
+affix.resist.magic,Hostile spells slide off its wearer like water off oiled leather.,Hostile spells slide off their wearer like water off oiled leather.,affix resist: magic
+affix.elemental.fire,Flame licks along it with every strike.,Flame licks along them with every strike.,affix elemental: fire
+affix.elemental.frost,Frost gathers on it and bites into every wound.,Frost gathers on them and bites into every wound.,affix elemental: frost
+affix.elemental.shock,Sparks crackle along it with every strike.,Sparks crackle along them with every strike.,affix elemental: shock
+affix.slayer.undead,It strikes the undead with special hatred.,They strike the undead with special hatred.,affix slayer: undead
+affix.slayer.daedra,It bites deep into the flesh of Daedra.,They bite deep into the flesh of Daedra.,affix slayer: daedra
+affix.slayer.humanoid,It was made with the killing of men and mer in mind.,They were made with the killing of men and mer in mind.,affix slayer: humanoid
+affix.slayer.animal,"It is a hunter's tool, deadly to beasts.","They are a hunter's tool, deadly to beasts.",affix slayer: animal
+affix.standing.commoners,Common folk warm to whoever wears it.,Common folk warm to whoever wears them.,affix standing: commoners
+affix.standing.merchants,Merchants treat its wearer as one of their own.,Merchants treat their wearer as one of their own.,affix standing: merchants
+affix.standing.scholars,Scholars take its wearer more seriously.,Scholars take their wearer more seriously.,affix standing: scholars
+affix.standing.nobility,"It lends a noble air, and the nobility notice.","They lend a noble air, and the nobility notice.",affix standing: nobility
+affix.standing.underworld,The underworld trusts its wearer a little more than it should.,The underworld trusts their wearer a little more than it should.,affix standing: underworld

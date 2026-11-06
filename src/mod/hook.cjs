@@ -14,6 +14,7 @@ const path = require('node:path');
 const { transformAsset, injectPage, expectedHooks } = require('./transforms.cjs');
 const { createLootStore } = require('./loot-store.cjs');
 const {replacement,stripFaces}=require('./font-assets.cjs');
+const itemText = require('./item-text.cjs');
 
 const VERSION = (() => { try { return JSON.parse(fs.readFileSync(path.join(__dirname, 'version.json'), 'utf8')).version; } catch { return '?'; } })();
 const DEFAULTS = Object.freeze({
@@ -26,6 +27,7 @@ const OWN = Object.freeze({   // served at dagger://game/dfo-mod/<name>
   'dfo_fonts.js': 'page/dfo_fonts.js',
   'dfo_font_data.js':'page/dfo_font_data.js',
   'dfo_item_cards.js': 'page/dfo_item_cards.js',
+  'dfo_item_text.js': 'page/dfo_item_text.js',
   'item-font-title.ttf': 'fonts/item-font-title.ttf', 'item-font-text.ttf': 'fonts/item-font-text.ttf',
   'item-font-numbers.ttf': 'fonts/item-font-numbers.ttf', 'book-font-text.ttf': 'fonts/book-font-text.ttf',
   'item-font-sigil.ttf': 'fonts/item-font-sigil.ttf', 'item-font-set.ttf': 'fonts/item-font-set.ttf',
@@ -79,11 +81,13 @@ function wrap(handleDagger, { app = null } = {}) {
     let pack = null;
     if (ru) { try { pack = JSON.parse(fs.readFileSync(path.join(__dirname, 'ru-pack', 'index.json'), 'utf8')); } catch { pack = null; } }
     ctx = { ru, marks: !!cfg.marks, nearbyLoot: cfg.nearbyLoot !== false, dungeons: cfg.dungeons !== false, itemCards: cfg.itemCards !== false, fonts: cfg.fonts !== false, fontB64, quests, ql,
-      pageCfg: { fonts: {enabled:cfg.fonts!==false,revision:VERSION}, itemCards: { enabled: cfg.itemCards !== false }, dungeons: { ...cfg.dungeonOptions, enabled: cfg.dungeons !== false }, nearbyLoot: { ...cfg.nearbyLootOptions, enabled: cfg.nearbyLoot !== false }, marks: { marks: !!cfg.marks, ...cfg.marksOptions }, ru: { on: ru, pack, gameLanguage: cfg.gameLanguage !== false } } };
+      itemTextLocale: itemText.chooseLocale(ru),
+      pageCfg: { fonts: {enabled:cfg.fonts!==false,revision:VERSION}, itemCards: { enabled: cfg.itemCards !== false }, itemText: { locale: itemText.chooseLocale(ru) }, dungeons: { ...cfg.dungeonOptions, enabled: cfg.dungeons !== false }, nearbyLoot: { ...cfg.nearbyLootOptions, enabled: cfg.nearbyLoot !== false }, marks: { marks: !!cfg.marks, ...cfg.marksOptions }, ru: { on: ru, pack, gameLanguage: cfg.gameLanguage !== false } } };
     return ctx;
   };
   const cache = new Map();   // rel -> { key, text }
   const own = new Map();     // name -> Buffer
+  let itemTextData = null;   // the page's item description locale, built once
   const seenHooks = new Map();   // hook id -> places found, this session
   let summaryTimer = null;
   /** Once the game's files have come (no new one for a few seconds): which expected hooks found no place at all. */
@@ -200,6 +204,11 @@ function wrap(handleDagger, { app = null } = {}) {
         const body = fs.readFileSync(path.join(__dirname, 'ru-pack', ...packFile[1].split('/')));
         return new Response(body, { headers: { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-cache' } });
       } catch { return new Response('not found', { status: 404 }); }
+    }
+    // Item descriptions: the one locale this install speaks (Russian with the translation installed and on), as data.
+    if (/^(?:play\/)?dfo-mod\/dfo_item_text_data\.js$/.test(rel)) {
+      if (!itemTextData) { try { itemTextData = Buffer.from(itemText.bundle(context().itemTextLocale)); } catch (e) { log(`item text: ${e?.message ?? e}`); itemTextData = Buffer.from('globalThis.__dfoItemTextPack=null;\n'); } }
+      return new Response(itemTextData, { headers: { 'Content-Type': 'text/javascript; charset=utf-8', 'Cache-Control': 'no-store' } });
     }
     const own1 = /^(?:play\/)?dfo-mod\/(?:fonts\/)?([\w.-]+)$/.exec(rel);
     if (own1) { try { return serveOwn(own1[1],url.searchParams.get('dfo')===VERSION); } catch (e) { log(`own ${rel}: ${e?.message}`); return new Response('not found', { status: 404 }); } }

@@ -1,0 +1,52 @@
+{
+ "locale": "ru",
+ "name": "Русский",
+ "forms": [
+  "m",
+  "f",
+  "n",
+  "p"
+ ],
+ "formColumn": "gender",
+ "defaultForm": "m",
+ "requiredForms": [
+  "m",
+  "f",
+  "n",
+  "p"
+ ],
+ "formNames": {
+  "m": "мужской род",
+  "f": "женский род",
+  "n": "средний род",
+  "p": "только множественное число (перчатки, сапоги)"
+ },
+ "bases": [
+  "bases/armor.csv",
+  "bases/clothing.csv",
+  "bases/curios.csv",
+  "bases/documents.csv",
+  "bases/furniture.csv",
+  "bases/gear.csv",
+  "bases/gems.csv",
+  "bases/ingredients.csv",
+  "bases/jewellery.csv",
+  "bases/materials.csv",
+  "bases/provisions.csv",
+  "bases/religious.csv",
+  "bases/transport.csv",
+  "bases/weapons.csv"
+ ],
+ "properties": [
+  "properties/materials.csv",
+  "properties/rarity.csv",
+  "properties/affixes.csv",
+  "properties/skills.csv",
+  "properties/techniques.csv",
+  "properties/enchantments.csv",
+  "properties/powers.csv",
+  "properties/sigils.csv",
+  "properties/sockets.csv",
+  "properties/state.csv"
+ ]
+}

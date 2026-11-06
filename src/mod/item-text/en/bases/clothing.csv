@@ -1,0 +1,77 @@
+key,group,name,number,text
+141,MensClothing,Straps,p,"Leather straps crossed over a bare chest, more boast than protection."
+142,MensClothing,Armbands,p,Simple bands of cloth worn around the upper arms.
+143,MensClothing,Kimono,s,A wrapped Akaviri robe tied with a sash.
+144,MensClothing,Fancy Armbands,p,Embroidered armbands that catch the eye at court and in the tavern.
+145,MensClothing,Sash,s,A broad band of cloth wound about the waist.
+146,MensClothing,Eodoric,s,A sleeveless Breton overgarment cut in the old style.
+147,MensClothing,Shoes,p,Light shoes for town streets and dry floors.
+148,MensClothing,Tall Boots,p,Knee-high riding boots of soft leather.
+149,MensClothing,Boots,p,Everyday leather boots that have walked a long way.
+150,MensClothing,Sandals,p,"Open sandals laced with thongs, cool in the southern heat."
+151,MensClothing,Casual Pants,p,Plain trousers of sturdy cloth.
+152,MensClothing,Breeches,p,Breeches buttoned just below the knee.
+153,MensClothing,Short Skirt,s,A short wrapped skirt that leaves the legs free for running and fighting.
+154,MensClothing,Casual Cloak,s,A plain hooded cloak against wind and rain.
+155,MensClothing,Formal Cloak,s,"A fine cloak with a broad collar, worn to be seen."
+156,MensClothing,Khajiit Suit,s,Loose garments cut in the fashion of Elsweyr.
+157,MensClothing,Dwynnen Surcoat,s,A surcoat bearing the colours of Dwynnen.
+158,MensClothing,Short Tunic,s,A short tunic belted at the waist.
+159,MensClothing,Formal Tunic,s,A tunic of good cloth with embroidered hems.
+160,MensClothing,Toga,s,A draped garment of Imperial fashion.
+161,MensClothing,Reversible Tunic,s,A tunic sewn to be worn on either side.
+162,MensClothing,Loincloth,s,"A strip of cloth about the hips, and little else."
+163,MensClothing,Plain Robes,p,"Long plain robes, the garb of scholars and pilgrims."
+164,MensClothing,Priest Robes,p,Robes cut for temple service.
+165,MensClothing,Short Shirt,s,A short-sleeved shirt of plain cloth.
+166,MensClothing,Short Shirt,s,A short-sleeved shirt of plain cloth.
+167,MensClothing,Long Shirt,s,A long-sleeved shirt of plain cloth.
+168,MensClothing,Long Shirt,s,A long-sleeved shirt of plain cloth.
+169,MensClothing,Short Shirt,s,A short-sleeved shirt of plain cloth.
+170,MensClothing,Short Shirt,s,A short-sleeved shirt of plain cloth.
+171,MensClothing,Long Shirt,s,A long-sleeved shirt of plain cloth.
+172,MensClothing,Long Shirt,s,A long-sleeved shirt of plain cloth.
+173,MensClothing,Open Tunic,s,A tunic worn open at the chest.
+174,MensClothing,Wrap,s,A length of cloth wound about the body.
+175,MensClothing,Long Skirt,s,A long skirt that sweeps the floor.
+176,MensClothing,Anticlere Surcoat,s,A surcoat bearing the colours of Anticlere.
+177,MensClothing,Challenger Straps,p,Studded straps worn by those who seek a fight in the arena.
+178,MensClothing,Short Shirt,s,A short-sleeved shirt of plain cloth.
+179,MensClothing,Long Shirt,s,A long-sleeved shirt of plain cloth.
+180,MensClothing,Vest,s,A sleeveless vest worn over a shirt.
+181,MensClothing,Champion Straps,p,"The straps of an arena champion, worn with pride."
+182,WomensClothing,Brassiere,s,A simple band of cloth worn over the breast.
+183,WomensClothing,Formal Brassiere,s,An embroidered breastband for festive occasions.
+184,WomensClothing,Peasant Blouse,s,A loose blouse of the countryside.
+185,WomensClothing,Eodoric,s,A sleeveless Breton overgarment cut in the old style.
+186,WomensClothing,Shoes,p,Light shoes for town streets and dry floors.
+187,WomensClothing,Tall Boots,p,Knee-high riding boots of soft leather.
+188,WomensClothing,Boots,p,Everyday leather boots that have walked a long way.
+189,WomensClothing,Sandals,p,"Open sandals laced with thongs, cool in the southern heat."
+190,WomensClothing,Casual Pants,p,Plain trousers of sturdy cloth.
+191,WomensClothing,Casual Cloak,s,A plain hooded cloak against wind and rain.
+192,WomensClothing,Formal Cloak,s,"A fine cloak with a broad collar, worn to be seen."
+193,WomensClothing,Khajiit Suit,s,Loose garments cut in the fashion of Elsweyr.
+194,WomensClothing,Formal Eodoric,s,An eodoric of fine cloth for court and ceremony.
+195,WomensClothing,Evening Gown,s,A long gown made for candlelit halls.
+196,WomensClothing,Day Gown,s,A modest gown for daytime wear.
+197,WomensClothing,Casual Dress,s,A simple dress for everyday work.
+198,WomensClothing,Strapless Dress,s,A daring dress that bares the shoulders.
+199,WomensClothing,Loincloth,s,"A strip of cloth about the hips, and little else."
+200,WomensClothing,Plain Robes,p,"Long plain robes, the garb of scholars and pilgrims."
+201,WomensClothing,Priestess Robes,p,Robes cut for a priestess's service.
+202,WomensClothing,Short Shirt,s,A short-sleeved shirt of plain cloth.
+203,WomensClothing,Short Shirt,s,A short-sleeved shirt of plain cloth.
+204,WomensClothing,Long Shirt,s,A long-sleeved shirt of plain cloth.
+205,WomensClothing,Long Shirt,s,A long-sleeved shirt of plain cloth.
+206,WomensClothing,Short Shirt,s,A short-sleeved shirt of plain cloth.
+207,WomensClothing,Short Shirt,s,A short-sleeved shirt of plain cloth.
+208,WomensClothing,Long Shirt,s,A long-sleeved shirt of plain cloth.
+209,WomensClothing,Long Shirt,s,A long-sleeved shirt of plain cloth.
+210,WomensClothing,Open Tunic,s,A tunic worn open at the chest.
+211,WomensClothing,Wrap,s,A length of cloth wound about the body.
+212,WomensClothing,Long Skirt,s,A long skirt that sweeps the floor.
+213,WomensClothing,Tights,p,Close-fitting hose that cover the legs.
+214,WomensClothing,Short Shirt,s,A short-sleeved shirt of plain cloth.
+215,WomensClothing,Long Shirt,s,A long-sleeved shirt of plain cloth.
+216,WomensClothing,Vest,s,A sleeveless vest worn over a shirt.

@@ -1,0 +1,17 @@
+key,s,p,note
+material.iron,"It is made of plain iron: heavy, honest and quick to rust.","They are made of plain iron: heavy, honest and quick to rust.",material: iron
+material.steel,"It is forged of good tempered steel, true and dependable.","They are forged of good tempered steel, true and dependable.",material: steel
+material.silver,"Silver runs through its make, and the restless dead fear its touch.","Silver runs through their make, and the restless dead fear its touch.",material: silver
+material.elven,"Elven smiths shaped it from a light, pale alloy of moonstone.","Elven smiths shaped them from a light, pale alloy of moonstone.",material: elven
+material.dwarven,"It is Dwemer work, made of a warm-coloured metal no rust can touch.","They are Dwemer work, made of a warm-coloured metal no rust can touch.",material: dwarven
+material.mithril,Mithril makes it light in the hand yet harder than steel.,Mithril makes them light in the hand yet harder than steel.,material: mithril
+material.adamantium,"It is wrought of adamantium, a metal that wears out its smith before it wears out itself.","They are wrought of adamantium, a metal that wears out its smith before it wears out itself.",material: adamantium
+material.ebony,Black ebony gives it a dark sheen and a terrible weight of purpose.,Black ebony gives them a dark sheen and a terrible weight of purpose.,material: ebony
+material.orcish,"Orcish smiths beat it out of dark, heavy orichalcum.","Orcish smiths beat them out of dark, heavy orichalcum.",material: orcish
+material.daedric,"Daedric metal, forged under a dark moon, fills it with a faint and hungry heat.","Daedric metal, forged under a dark moon, fills them with a faint and hungry heat.",material: daedric
+material.leather,It is made of boiled and hardened leather.,They are made of boiled and hardened leather.,material: leather
+material.chain,"It is made of linked rings, though the metal is not recorded.","They are made of linked rings, though the metal is not recorded.",chain mail whose metal is not recorded (raw 256/259)
+material.fur,Thick fur keeps the wearer warm in the cold.,,Roleplay & Realism fur variant
+material.cloth,It is made of tightly wound cloth.,They are made of tightly wound cloth.,hand wraps
+construction.mail,Interlocking rings let it move with the body.,Interlocking rings let them move with the body.,Roleplay & Realism mail construction
+construction.brigandine,Metal plates riveted beneath the cloth make this a brigandine.,,Roleplay & Realism brigandine

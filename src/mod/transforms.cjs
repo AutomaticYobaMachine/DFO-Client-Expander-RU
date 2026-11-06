@@ -455,7 +455,7 @@ function injectPage(html, prefix, ctx) {
   if (ctx.fonts === true) tags.push(`<script src="${prefix}dfo-mod/dfo_font_data.js?dfo=1.22.0"></script>`,`<script src="${prefix}dfo-mod/dfo_fonts.js?dfo=1.22.0"></script>`);
   if (ctx.ru && !html.includes('ru_dict.js')) tags.push(`<script src="${prefix}dfo-mod/ru_dict.js"></script>`, `<script src="${prefix}dfo-mod/ru_i18n.js"></script>`);
   tags.push(`<script src="${prefix}dfo-mod/ru_locale.js"></script>`, `<script src="${prefix}dfo-mod/ru_items.js"></script>`);
-  if (ctx.itemCards === true) tags.push(`<script src="${prefix}dfo-mod/dfo_item_cards.js"></script>`);
+  if (ctx.itemCards === true) tags.push(`<script src="${prefix}dfo-mod/dfo_item_text_data.js"></script>`, `<script src="${prefix}dfo-mod/dfo_item_text.js"></script>`, `<script src="${prefix}dfo-mod/dfo_item_cards.js"></script>`);
   tags.push(`<script src="${prefix}dfo-mod/dfo_marks.js"></script>`, `<script src="${prefix}dfo-mod/dfo_town.js"></script>`);
   if (ctx.dungeons !== false) tags.push(...['dfo_dungeon_model.js', 'dfo_dungeons.js', 'dfo_dungeon_live_model.js', 'dfo_dungeon_graph.js', 'dfo_dungeon_nav_model.js', 'dfo_dungeon_nav.js', 'dfo_dungeon_live.js'].map(f => `<script src="${prefix}dfo-mod/${f}"></script>`));
   if (ctx.nearbyLoot !== false) tags.push(...['dfo_loot_rules.js', 'dfo_loot_ui.js', 'dfo_loot.js'].map(f => `<script src="${prefix}dfo-mod/${f}"></script>`));

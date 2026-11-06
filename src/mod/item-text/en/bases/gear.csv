@@ -7,7 +7,7 @@ key,group,name,number,text
 87,UselessItems1,Large Sack,s,A large sack of coarse cloth.
 88,UselessItems1,Quiver,s,A leather quiver for carrying arrows.
 89,UselessItems1,Backpack,s,A traveller's pack with stout straps.
-90,UselessItems1,Small Chest,s,A small iron-bound chest.
+90,UselessItems1,Small Chest,s,A small iron-bound chest for coin and keepsakes.
 91,UselessItems1,Wine Rack,s,A wooden rack that holds bottles on their sides.
 92,UselessItems1,Large Chest,s,A heavy chest with a stout lock.
 247,UselessItems2,Torch,s,A pitch-soaked torch that burns bright and brief.
@@ -29,7 +29,7 @@ key,group,name,number,text
 1602,UselessItems2,Sickle,s,A curved blade for cutting herbs and grain.
 1603,UselessItems2,Fishing-Net,s,A knotted net for catching fish.
 1604,UselessItems2,Wood Bundle,s,A bundle of cut wood tied with twine.
-1606,UselessItems2,Spade,s,A spade for digging.
+1606,UselessItems2,Spade,s,"A sturdy spade for digging earth, snow or graves."
 1607,UselessItems2,Basket,s,A woven basket for gathering.
 1700,UselessItems2,Bedroll,s,A rolled blanket and pad for sleeping out of doors.
 1701,UselessItems2,Ember Jar,s,A clay jar that keeps live embers for starting a fire.

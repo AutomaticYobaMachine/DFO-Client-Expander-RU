@@ -2,7 +2,7 @@ key,s,p,note
 rarity.magic,A faint enchantment clings to it.,A faint enchantment clings to them.,tier: magic
 rarity.rare,"Strong magic has been worked into it, more than most enchanters could manage.","Strong magic has been worked into them, more than most enchanters could manage.",tier: rare
 rarity.legendary,"It is the stuff of legend, and bards still argue over who carried it first.","They are the stuff of legend, and bards still argue over who carried them first.",tier: legendary
-rarity.exalted,"Even among legends it stands apart: an Exalted find, blessed with one gift more than its kind.","Even among legends they stand apart: an Exalted find, blessed with one gift more than their kind.",Exalted Legendary (item.exalted)
+rarity.exalted,Even among legends it stands apart: an Exalted find with one gift more.,Even among legends they stand apart: an Exalted find with one gift more.,Exalted Legendary (item.exalted)
 rarity.perfect,Every enchantment on it came out as strong as it can be.,Every enchantment on them came out as strong as it can be.,"Perfect Rare: every line at the top of its band, once identified"
 rarity.aetheric,"It shimmers with the light of Aetherius, the realm beyond the stars.","They shimmer with the light of Aetherius, the realm beyond the stars.",tier: aetheric
 rarity.artifact,"It is a true artifact, older than the kingdoms that fought over it.","They are a true artifact, older than the kingdoms that fought over them.",tier: artifact

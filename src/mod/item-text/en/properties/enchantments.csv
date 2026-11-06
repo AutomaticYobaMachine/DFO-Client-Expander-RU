@@ -35,21 +35,21 @@ enchantment.10,It sharpens one of its bearer's skills.,They sharpen one of their
 enchantment.11,It weighs next to nothing.,They weigh next to nothing.,FeatherWeight (11) - any parameter
 enchantment.12,It hardens the armour of its bearer.,They harden the armour of their bearer.,StrengthensArmor (12) - any parameter
 enchantment.13,It awakens a hidden talent.,They awaken a hidden talent.,ImprovesTalents (13) - any parameter
-enchantment.13.0,It sharpens the hearing.,They sharpen the hearing.,ImprovesTalents (13): Hearing
+enchantment.13.0,It sharpens the hearing of its bearer.,They sharpen the hearing of their bearer.,ImprovesTalents (13): Hearing
 enchantment.13.1,It lends the body an athlete's ease.,They lend the body an athlete's ease.,ImprovesTalents (13): Athleticism
 enchantment.13.2,In mortal danger it floods the body with fury.,In mortal danger they flood the body with fury.,ImprovesTalents (13): Adrenaline Rush
 enchantment.14,It earns its bearer a good name.,They earn their bearer a good name.,GoodRepWith (14) - any parameter
 enchantment.25,It earns its bearer a bad name.,They earn their bearer a bad name.,BadRepWith (25) - any parameter
 enchantment.14.0,Common folk look kindly on its bearer.,Common folk look kindly on their bearer.,GoodRepWith (14): Commoners
-enchantment.25.0,Common folk distrust its bearer.,Common folk distrust their bearer.,BadRepWith (25): Commoners
+enchantment.25.0,Common folk distrust its bearer on sight.,Common folk distrust their bearer on sight.,BadRepWith (25): Commoners
 enchantment.14.1,Merchants look kindly on its bearer.,Merchants look kindly on their bearer.,GoodRepWith (14): Merchants
-enchantment.25.1,Merchants distrust its bearer.,Merchants distrust their bearer.,BadRepWith (25): Merchants
+enchantment.25.1,Merchants distrust its bearer on sight.,Merchants distrust their bearer on sight.,BadRepWith (25): Merchants
 enchantment.14.2,Scholars look kindly on its bearer.,Scholars look kindly on their bearer.,GoodRepWith (14): Scholars
-enchantment.25.2,Scholars distrust its bearer.,Scholars distrust their bearer.,BadRepWith (25): Scholars
+enchantment.25.2,Scholars distrust its bearer on sight.,Scholars distrust their bearer on sight.,BadRepWith (25): Scholars
 enchantment.14.3,The nobility looks kindly on its bearer.,The nobility looks kindly on their bearer.,GoodRepWith (14): Nobility
-enchantment.25.3,The nobility distrusts its bearer.,The nobility distrusts their bearer.,BadRepWith (25): Nobility
+enchantment.25.3,The nobility distrusts its bearer on sight.,The nobility distrusts their bearer on sight.,BadRepWith (25): Nobility
 enchantment.14.4,The underworld looks kindly on its bearer.,The underworld looks kindly on their bearer.,GoodRepWith (14): Underworld
-enchantment.25.4,The underworld distrusts its bearer.,The underworld distrusts their bearer.,BadRepWith (25): Underworld
+enchantment.25.4,The underworld distrusts its bearer on sight.,The underworld distrusts their bearer on sight.,BadRepWith (25): Underworld
 enchantment.14.5,Everyone seems to look kindly on its bearer.,Everyone seems to look kindly on their bearer.,GoodRepWith (14): All
 enchantment.25.5,Nobody quite trusts its bearer.,Nobody quite trusts their bearer.,BadRepWith (25): All
 enchantment.15,"A soul is bound within it, and sometimes it stirs.","A soul is bound within them, and sometimes it stirs.",SoulBound (15) - any parameter

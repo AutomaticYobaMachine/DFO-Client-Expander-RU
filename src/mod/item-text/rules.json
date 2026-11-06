@@ -1,0 +1,21 @@
+{
+ "about": "Item description ranking, shared by every locale. A description keeps at most `limit` fragments. Groups are listed from the most relevant to the least: the first pass takes up to `max` fragments from each group in this order, the second fills any room left in the same order. The kept fragments are then said in reading order (base, material, tier, craft, lines, power, sigil, sockets, curse, contents, food, dye, wear, state). A key belongs to the first group with a matching prefix; a prefix ending in '.' matches that family, any other prefix matches the key exactly.",
+ "limit": 5,
+ "groups": [
+  { "id": "identity", "title": "Что это за вещь: основа, основа+материал, легендарка", "keys": ["base", "gear.", "legendary."], "max": 1 },
+  { "id": "secret", "title": "Скрытые чары и проклятие", "keys": ["state.unidentified", "curse."], "max": 1 },
+  { "id": "power", "title": "Именная сила и отпечаток", "keys": ["power."], "max": 1 },
+  { "id": "tier", "title": "Редкость", "keys": ["rarity."], "max": 1 },
+  { "id": "set", "title": "Набор и сигил", "keys": ["sigil.set.", "sigil.power"], "max": 1 },
+  { "id": "technique", "title": "Техника", "keys": ["technique."], "max": 1 },
+  { "id": "lines", "title": "Аффиксы и зачарования, их сочетания", "keys": ["combo.affix.", "combo.enchantment.", "affix.", "skill.", "enchantment."], "max": 2 },
+  { "id": "contents", "title": "Содержимое и еда", "keys": ["content.", "food."], "max": 2 },
+  { "id": "standing", "title": "Квестовое, краденое, привязанное", "keys": ["state."], "max": 1 },
+  { "id": "craft", "title": "Ремесло, клеймо, наследие", "keys": ["combo.craft.", "craft.", "heirloom"], "max": 1 },
+  { "id": "material", "title": "Отдельная фраза о материале", "keys": ["material.", "construction."], "max": 1 },
+  { "id": "sockets", "title": "Камни в гнёздах", "keys": ["socket."], "max": 1 },
+  { "id": "growth", "title": "Рост сигила", "keys": ["sigil.stage."], "max": 1 },
+  { "id": "look", "title": "Окраска", "keys": ["dye."], "max": 1 },
+  { "id": "wear", "title": "Износ", "keys": ["condition."], "max": 1 }
+ ]
+}

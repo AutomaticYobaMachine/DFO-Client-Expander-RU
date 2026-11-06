@@ -40,7 +40,7 @@ key,group,name,number,text
 659,UselessItems2,Spider Silk,s,"Strong, fine silk taken from a giant spider."
 660,UselessItems2,Scorpion Chitin,s,Plates of hard scorpion chitin.
 661,UselessItems2,Slaughterfish Scales,p,Sharp-edged scales from a slaughterfish.
-662,UselessItems2,Harpy Feathers,p,"Greasy, foul-smelling harpy feathers."
+662,UselessItems2,Harpy Feathers,p,"Greasy, foul-smelling harpy feathers, still useful to a fletcher."
 663,UselessItems2,Dreugh Shell,s,"A piece of dreugh shell, light and hard as horn."
 664,UselessItems2,Dragonling Scale,s,"A small, hard scale from a dragonling."
 665,UselessItems2,Cured Leather,s,Leather cured and softened for working.
@@ -55,11 +55,11 @@ key,group,name,number,text
 678,UselessItems2,Siege-cracked Gem,s,"A gem cracked in the fury of a siege, still worth something to a jeweller."
 680,UselessItems2,Arcane Essence,s,A faintly glowing essence distilled from pure magicka.
 681,UselessItems2,Wolf Pelt,s,"A grey wolf pelt, rough and warm."
-682,UselessItems2,Boar Hide,s,A bristly boar hide.
+682,UselessItems2,Boar Hide,s,"A bristly boar hide, tough enough for boots."
 683,UselessItems2,Mudcrab Chitin,s,"A slab of mudcrab shell, sturdier than it looks."
 1330,UselessItems2,Carpenter's Stores,p,"Nails, pegs, glue and timber: a carpenter's stock in trade."
 1332,UselessItems2,Grain,s,Sacks of grain bound for market.
-1333,UselessItems2,Wool,s,Bales of raw wool.
+1333,UselessItems2,Wool,s,"Bales of raw wool, waiting for the spinner."
 1334,UselessItems2,Iron,s,Iron bars bundled for trade.
 1335,UselessItems2,Spices,p,Fragrant spices from distant markets.
 1336,UselessItems2,Silk,s,Bolts of fine silk for the merchant trade.

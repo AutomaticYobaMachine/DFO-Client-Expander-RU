@@ -14,6 +14,11 @@
   // of a word that has no singular (p). Only the locale chosen at install is loaded: Russian with the translation
   // installed, English otherwise.
   //
+  // Sentences combine where properties read as one thought: a weapon or armour piece is described together with its
+  // armour type and metal (a neutral metal when the game does not show it), a Legendary by its own sentence of base
+  // and power, and pairs of crafted or enchanted properties by one sentence (never sigils, sets or wear). The shared
+  // rules (item-text/rules.json) rank the groups of fragments and keep at most `limit` of them.
+  //
   // Pure reading: an item is never changed. What the game keeps hidden stays hidden: an unidentified piece is
   // described by its base, its visible material, its tier and its state only - never its affixes, enchantments,
   // curse, power, sigil or sockets. The caller supplies what only the game knows (identification, the visible
@@ -178,11 +183,10 @@
     return out;
   }
 
-  /** A property's sentence in the base's form: the form's own text, else the locale's default form's. */
-  function sentence(pack, key, form, values) {
-    const row = own(pack.properties, key) ? pack.properties[key] : null;
+  /** Text in the base's form from a row of forms, its placeholders filled; null when a value is missing. */
+  function fill(row, form, pack, values) {
     if (!row) return null;
-    const text = row[form] ?? row[pack.defaultForm];
+    const text = typeof row === 'string' ? row : row[form] ?? row[pack.defaultForm];
     if (typeof text !== 'string') return null;
     let missing = false;
     const filled = text.replace(/\{([a-z]+)\}/g, (all, name) => {
@@ -192,42 +196,139 @@
     });
     return missing ? null : filled;
   }
+  /** A property's sentence in the base's form: the form's own text, else the locale's default form's. */
+  function sentence(pack, key, form, values) {
+    return fill(own(pack.properties, key) ? pack.properties[key] : null, form, pack, values);
+  }
+
+  const METALS = new Set(['iron', 'steel', 'silver', 'elven', 'dwarven', 'mithril', 'adamantium', 'ebony', 'orcish', 'daedric']);
+  const ARMOR_TYPES = new Set(['leather', 'chain', 'plate']);
+  const lower = value => (typeof value === 'string' ? value.toLowerCase() : null);
+  /** Which frame a weapon or a piece of armour takes: '' for a weapon; for armour its type as the game shows it
+   *  (leather, chain, plate) or a Roleplay & Realism variant (mail, brigandine, fur). Null when it cannot be told. */
+  function variantOf(item, facts) {
+    if (item.group === 'Weapons') return '';
+    if (item.group !== 'Armor') return null;
+    const construction = lower(facts.construction), material = lower(facts.material), type = lower(facts.armorType);
+    if (construction === 'mail' || construction === 'brigandine') return construction;
+    if (material === 'fur') return 'fur';
+    if (ARMOR_TYPES.has(type)) return type;
+    if (material === 'leather' || material === 'chain') return material;
+    return METALS.has(material) ? 'plate' : null;
+  }
+  /** The base's name as it stands inside a sentence ("longsword", «длинный меч»). */
+  function inlineName(pack, base) {
+    const name = String(base.name || '');
+    if (pack.inlineName === 'lower') return name.toLowerCase();
+    if (pack.inlineName === 'lowerFirst') return name.charAt(0).toLowerCase() + name.slice(1);
+    return name;
+  }
+  /** The identity sentence: a Legendary's own (its base and its power together), else the base item with its armour
+   *  type and metal, else the plain base. Answers it with the property keys it already says. */
+  function identity(pack, item, facts, base, form, known) {
+    if (known) {
+      for (const id of [item.legendary, item.gilded]) {
+        if (!isId(id) || !own(pack.legendaries, id)) continue;
+        const text = fill(pack.legendaries[id], form, pack, { base: inlineName(pack, base) });
+        if (text) return { key: `legendary.${id}`, text, says: key => key === `power.${id}` };
+      }
+    }
+    const variant = variantOf(item, facts);
+    const frame = variant == null || !pack.gear ? null : pack.gear[`${item.templateIndex}:${variant}`];
+    if (typeof frame === 'string') {
+      const metal = METALS.has(lower(facts.material)) ? lower(facts.material) : 'unknown';
+      const text = fill(frame, form, pack, { material: pack.metals?.[metal] ?? pack.metals?.unknown });
+      if (text) return { key: `gear.${item.templateIndex}.${variant || 'weapon'}`, text, says: key => key.startsWith('material.') || key.startsWith('construction.') };
+    }
+    return { key: 'base', text: base.text, says: () => false };
+  }
+  /** Does a combination's pattern take this key? "x.*" is x itself or any x.<param>. */
+  const takes = (pattern, key) => (pattern.endsWith('.*') ? key === pattern.slice(0, -2) || key.startsWith(pattern.slice(0, -1)) : key === pattern);
+  /** Which ranking group a key belongs to: the first whose prefix matches. */
+  function groupIndex(rules, key) {
+    const groups = rules?.groups ?? [];
+    for (let i = 0; i < groups.length; i++) {
+      for (const prefix of groups[i].keys) {
+        if (prefix.endsWith('.') ? key.startsWith(prefix) : key === prefix || key.startsWith(prefix + '.')) return i;
+      }
+    }
+    return groups.length;
+  }
 
   /**
-   * The description of one item: [{ kind, key, text }] in saying order, at most one sentence per key.
+   * The description of one item: [{ kind, key, group, text }] in reading order.
    * facts: { known (identified, as the game decides), material ('steel', 'leather', 'chain' for an unknown metal,
-   *          'fur', 'cloth' - only when the game shows it), construction ('mail' | 'brigandine'), perfect, sigilXp }
-   * options: { max (sentences), kinds (only these), skip (not these) }
+   *          'fur', 'cloth' - only when the game shows it), armorType ('leather' | 'chain' | 'plate', the card's Type
+   *          row), construction ('mail' | 'brigandine'), perfect, sigilXp }
+   * options: { max (fragments; the rules' limit by default, Infinity for all), kinds (only these), skip (not these) }
    * A template the tables do not know gets no description: its grammatical form is unknown.
+   *
+   * Steps: the identity sentence (Legendary, base + armour type + metal, or base); one candidate per property;
+   * combinations of crafted and enchanted properties replace their parts; the rules rank the groups and keep at most
+   * the limit; what is kept is said in reading order.
    */
   function describe(pack, item, facts = {}, options = {}) {
     if (!pack || !item || typeof item !== 'object' || Array.isArray(item)) return [];
     const base = baseOf(pack, item);
     if (!base) return [];
+    facts = facts && typeof facts === 'object' ? facts : {};
     const form = pack.forms.includes(base.form) ? base.form : pack.defaultForm;
     const only = Array.isArray(options.kinds) ? new Set(options.kinds) : null;
     const skip = new Set(Array.isArray(options.skip) ? options.skip : []);
-    const max = Number.isInteger(options.max) && options.max >= 0 ? options.max : Infinity;
     const wanted = kind => (!only || only.has(kind)) && !skip.has(kind);
-    const out = [], said = new Set(), texts = new Set();
-    if (wanted('base')) { out.push({ kind: 'base', key: 'base', text: base.text }); texts.add(base.text); }
-    const steps = plan(item, facts && typeof facts === 'object' ? facts : {});
-    for (const kind of KINDS) {
-      if (kind === 'base' || !wanted(kind)) continue;
-      for (const step of steps) {
-        if (step.kind !== kind || out.length >= max) continue;
-        for (const key of Array.isArray(step.key) ? step.key : [step.key]) {
-          if (said.has(key)) break;
-          const text = sentence(pack, key, form, step.values);
-          if (text == null) continue;
-          said.add(key);
-          // Two keys may share one sentence (a skill line and a skill enchantment): say it once.
-          if (!texts.has(text)) { texts.add(text); out.push({ kind, key, text }); }
-          break;
-        }
+    const limit = options.max === Infinity ? Infinity : Number.isInteger(options.max) && options.max >= 0 ? options.max
+      : Number.isInteger(pack.rules?.limit) ? pack.rules.limit : Infinity;
+    const known = facts.known === true;
+
+    // 1. One candidate per property, the first key of a step that has a sentence; a key is said once.
+    const candidates = [], said = new Set();
+    plan(item, facts).forEach((step, order) => {
+      for (const key of Array.isArray(step.key) ? step.key : [step.key]) {
+        if (said.has(key)) break;
+        const text = sentence(pack, key, form, step.values);
+        if (text == null) continue;
+        said.add(key);
+        candidates.push({ kind: step.kind, key, text, values: step.values, order: order + 1 });
+        break;
       }
+    });
+    // 2. The identity sentence, and the separate sentences it already says (the material, the power).
+    const who = identity(pack, item, facts, base, form, known);
+    let live = candidates.filter(c => !who.says(c.key));
+    live.unshift({ kind: 'base', key: who.key, text: who.text, order: 0 });
+    // 3. Combinations: every part present and not yet combined; the parts give way to the one sentence.
+    for (const combo of Array.isArray(pack.combos) ? pack.combos : []) {
+      const parts = [];
+      for (const pattern of combo.requires) {
+        const part = live.find(c => c.order > 0 && !parts.includes(c) && takes(pattern, c.key));
+        if (!part) break;
+        parts.push(part);
+      }
+      if (parts.length !== combo.requires.length) continue;
+      const values = Object.assign({}, ...parts.map(p => p.values || {}));
+      const text = fill(combo.text, form, pack, values);
+      if (text == null) continue;
+      live = live.filter(c => !parts.includes(c));
+      live.push({ kind: combo.key.split('.')[1], key: combo.key, text, order: Math.min(...parts.map(p => p.order)) });
     }
-    return out.slice(0, max);
+    // 4. Rank: up to each group's max in group order, then any room left in the same order.
+    live = live.filter(c => wanted(c.kind));
+    const rules = pack.rules ?? { groups: [] };
+    for (const c of live) c.group = groupIndex(rules, c.key);
+    const ranked = [...live].sort((a, b) => a.group - b.group || a.order - b.order);
+    const kept = [], texts = new Set(), taken = new Map();
+    const keep = c => {
+      if (kept.length >= limit || kept.includes(c) || texts.has(c.text)) return;
+      kept.push(c); texts.add(c.text); taken.set(c.group, (taken.get(c.group) || 0) + 1);
+    };
+    for (const c of ranked) {
+      const cap = rules.groups?.[c.group]?.max;
+      if (!Number.isInteger(cap) || (taken.get(c.group) || 0) < cap) keep(c);
+    }
+    for (const c of ranked) keep(c);
+    // 5. Read in order: what the thing is, then its make, magic and state.
+    return kept.sort((a, b) => KINDS.indexOf(a.kind) - KINDS.indexOf(b.kind) || a.order - b.order)
+      .map(c => ({ kind: c.kind, key: c.key, group: rules.groups?.[c.group]?.id ?? null, text: c.text }));
   }
 
   /** Every property key a description could ask for, by kind - the tables' coverage checks read this. */
@@ -257,5 +358,5 @@
     });
   }
 
-  return { KINDS, SIGIL_STAGE_XP, baseOf, plan, describe, keysFor, sentence, install };
+  return { KINDS, SIGIL_STAGE_XP, baseOf, plan, describe, keysFor, sentence, variantOf, groupIndex, install };
 });

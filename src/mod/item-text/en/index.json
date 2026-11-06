@@ -41,5 +41,18 @@
   "properties/sigils.csv",
   "properties/sockets.csv",
   "properties/state.csv"
- ]
+ ],
+ "gear": [
+  "combos/gear.csv"
+ ],
+ "metals": [
+  "combos/metals.csv"
+ ],
+ "combos": [
+  "combos/properties.csv"
+ ],
+ "legendaries": [
+  "combos/legendaries.csv"
+ ],
+ "inlineName": "lower"
 }

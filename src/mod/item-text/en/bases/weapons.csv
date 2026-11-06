@@ -1,5 +1,5 @@
 key,group,name,number,text
-113,Weapons,Dagger,s,"A short double-edged blade, light enough to hide in a boot and quick enough to end a quarrel."
+113,Weapons,Dagger,s,"A short double-edged blade, easy to hide and quick to draw."
 114,Weapons,Tanto,s,"An Akaviri knife with a chisel point, made to pierce armour at close quarters."
 115,Weapons,Staff,s,"A long shaft of seasoned wood, as useful for walking as for breaking heads."
 116,Weapons,Shortsword,s,"A soldier's sidearm: short, sturdy and easy to draw in a crowded fight."
@@ -10,15 +10,15 @@ key,group,name,number,text
 121,Weapons,Katana,s,"A single-edged Akaviri sword, folded and polished until it parts silk."
 122,Weapons,Claymore,s,"A great two-handed sword of the northern highlands, heavy enough to cleave shields."
 123,Weapons,Dai-katana,s,"The long two-handed sword of Akaviri masters, as graceful as it is deadly."
-124,Weapons,Mace,s,"A flanged head on a short haft, made to dent plate and break the bone beneath it."
+124,Weapons,Mace,s,"A flanged head on a short haft, made to dent plate."
 125,Weapons,Flail,s,A spiked ball on a chain that swings around shields and over parries.
 126,Weapons,Warhammer,s,"A heavy hammer with a spike behind its face, built to crush armour."
 127,Weapons,Battle Axe,s,"A broad-bladed axe for two hands, as old as war itself."
-128,Weapons,War Axe,s,"A one-handed axe with a bearded blade, quick in the hand and cruel in the cut."
+128,Weapons,War Axe,s,"A one-handed axe with a bearded blade, cruel in the cut."
 129,Weapons,Short Bow,s,"A compact bow of horn and wood, quick to draw in close country."
 130,Weapons,Long Bow,s,A tall bow of yew that sends arrows far and hard.
 131,Weapons,Arrow,s,"A fletched shaft with a sharpened head, useless without a bow."
-513,Weapons,Archer's Axe,s,A light axe an archer keeps at the belt for when the enemy comes too close.
+513,Weapons,Archer's Axe,s,A light axe an archer keeps at the belt for close fighting.
 514,Weapons,Light Flail,s,A lighter flail that recovers quickly after a swing.
 560,Weapons,Dwarven Thunderlock,s,A Dwemer long gun that hurls brass pellets with a roar of steam and thunder.
 561,Weapons,Dwemer Pellet,s,A small brass ball cast for Dwemer firearms.

@@ -18,7 +18,7 @@ affix.stat.willpower,It hardens the will against fear and magic.,They harden the
 affix.stat.agility,It makes the hands quicker and the feet surer.,They make the hands quicker and the feet surer.,affix stat: agility
 affix.stat.endurance,It helps the body bear wounds and long marches.,They help the body bear wounds and long marches.,affix stat: endurance
 affix.stat.personality,People find its owner more agreeable.,People find their owner more agreeable.,affix stat: personality
-affix.stat.speed,It quickens the step.,They quicken the step.,affix stat: speed
+affix.stat.speed,It quickens the step of whoever wears it.,They quicken the step of whoever wears them.,affix stat: speed
 affix.stat.luck,Fortune smiles a little more often on whoever carries it.,Fortune smiles a little more often on whoever carries them.,affix stat: luck
 affix.resist.fire,It turns aside the bite of flame.,They turn aside the bite of flame.,affix resist: fire
 affix.resist.frost,It holds back the grip of frost.,They hold back the grip of frost.,affix resist: frost

@@ -2,10 +2,10 @@ key,s,p,note
 sigil.power,"A sigil is woven into it, growing stronger as its bearer wins renown.","A sigil is woven into them, growing stronger as their bearer wins renown.",sigil without a set (sigil.power)
 sigil.stage.0,"Its sigil is still faint, barely awake.","Their sigil is still faint, barely awake.",sigil stage 0: Faint
 sigil.stage.1,Its sigil has kindled and glows softly.,Their sigil has kindled and glows softly.,sigil stage 1: Kindled
-sigil.stage.2,Its sigil burns bright.,Their sigil burns bright.,sigil stage 2: Bright
+sigil.stage.2,Its sigil burns bright and steady.,Their sigil burns bright and steady.,sigil stage 2: Bright
 sigil.stage.3,"Its sigil is radiant, its light hard to look at.","Their sigil is radiant, its light hard to look at.",sigil stage 3: Radiant
 sigil.stage.4,Its sigil has ascended to its full power.,Their sigil has ascended to its full power.,sigil stage 4: Ascendant
-sigil.set.malacath,"It is part of a set sacred to Malacath, god of the spurned and of oaths of vengeance.","They are part of a set sacred to Malacath, god of the spurned and of oaths of vengeance.",set: Malacath's Bulwark
+sigil.set.malacath,"It is part of a set sacred to Malacath, god of the spurned.","They are part of a set sacred to Malacath, god of the spurned.",set: Malacath's Bulwark
 sigil.set.dagon,It is part of a set branded with the fire of Mehrunes Dagon.,They are part of a set branded with the fire of Mehrunes Dagon.,set: Dagon's Brand
 sigil.set.nocturnal,It is part of a set woven from Nocturnal's shadows.,They are part of a set woven from Nocturnal's shadows.,set: Nocturnal's Shroud
 sigil.set.mora,It is part of a set steeped in the forbidden knowledge of Hermaeus Mora.,They are part of a set steeped in the forbidden knowledge of Hermaeus Mora.,set: Mora's Mantle

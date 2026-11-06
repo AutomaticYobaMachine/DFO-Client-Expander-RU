@@ -1,0 +1,95 @@
+key,variant,text,note
+102,chain,A mail shirt {material} that guards the chest and back.,Cuirass / chain
+102,leather,A cuirass of boiled leather that guards the chest and back.,Cuirass / leather
+102,plate,A plate cuirass {material}: a forged breastplate and backplate.,Cuirass / plate
+103,chain,"Mail mittens {material}, flexible and strong.",Gauntlets / chain
+103,leather,Leather gauntlets with thick cuffs that guard the hands.,Gauntlets / leather
+103,plate,Plate gauntlets {material} with articulated fingers.,Gauntlets / plate
+104,chain,Mail leggings {material} that guard the legs.,Greaves / chain
+104,leather,Leather greaves strapped on from hip to ankle.,Greaves / leather
+104,plate,"Plate greaves {material}, strapped on from hip to ankle.",Greaves / plate
+105,chain,A mail pauldron {material} for the left shoulder.,Left Pauldron / chain
+105,leather,A leather pauldron that guards the left shoulder.,Left Pauldron / leather
+105,plate,A curved plate {material} that guards the left shoulder.,Left Pauldron / plate
+106,chain,A mail pauldron {material} for the right shoulder.,Right Pauldron / chain
+106,leather,A leather pauldron that guards the right shoulder.,Right Pauldron / leather
+106,plate,A curved plate {material} that guards the right shoulder.,Right Pauldron / plate
+107,chain,A mail coif {material} that covers the head and neck.,Helm / chain
+107,leather,A leather helm that fits the skull snugly.,Helm / leather
+107,plate,A plate helm {material} that guards the skull and face.,Helm / plate
+108,chain,Boots sheathed in mail {material} to guard the shins.,Boots / chain
+108,leather,Leather boots with thick soles and buckled straps.,Boots / leather
+108,plate,Plate boots {material} that guard the feet and shins.,Boots / plate
+109,chain,A small buckler faced with mail {material}.,Buckler / chain
+109,leather,A small leather buckler on a wooden frame.,Buckler / leather
+109,plate,"A small round buckler {material}, quick to turn a blade.",Buckler / plate
+110,chain,A round shield faced with mail {material}.,Round Shield / chain
+110,leather,A round wooden shield covered in thick leather.,Round Shield / leather
+110,plate,"A round shield clad in plates {material}, a soldier's companion.",Round Shield / plate
+111,chain,A kite shield faced with mail {material}.,Kite Shield / chain
+111,leather,A kite shield of wood and leather made for a rider.,Kite Shield / leather
+111,plate,"A kite shield clad in plates {material}, covering shoulder to knee.",Kite Shield / plate
+112,chain,A tower shield faced with mail {material}.,Tower Shield / chain
+112,leather,A towering wooden shield wrapped in layers of leather.,Tower Shield / leather
+112,plate,A tower shield clad in plates {material} that hides a whole soldier.,Tower Shield / plate
+113,,"A short double-edged dagger {material}, quick at close quarters.",Dagger
+114,,"An Akaviri knife with a chisel point {material}, made to pierce armour.",Tanto
+115,,"A long staff with fittings {material}, both support and weapon.",Staff
+116,,"A soldier's short sword {material}, sturdy and dependable.",Shortsword
+117,,"A curved Akaviri blade {material}, the katana's shorter companion.",Wakizashi
+118,,"A broad cutting blade {material}, favoured by Breton knights.",Broadsword
+119,,A curved cavalry blade {material} that cuts cleanly from the saddle.,Saber
+120,,A straight long blade {material} for one hand or two.,Longsword
+121,,"A single-edged Akaviri sword {material}, polished to a mirror.",Katana
+122,,"A great two-handed sword {material}, heavy enough to cleave shields.",Claymore
+123,,"A long two-handed Akaviri sword {material}, graceful and deadly.",Dai-katana
+124,,"A flanged head {material} on a short haft, made to dent plate.",Mace
+125,,A spiked ball {material} on a chain that swings around shields.,Flail
+126,,A heavy warhammer {material} with a spike behind its face.,Warhammer
+127,,"A broad two-handed axe {material}, as old as war itself.",Battle Axe
+128,,"A one-handed axe with a bearded blade {material}, cruel in the cut.",War Axe
+129,,"A short bow with fittings {material}, quick in close country.",Short Bow
+130,,A tall yew bow with fittings {material} that shoots far and hard.,Long Bow
+131,,A fletched arrow with a sharp head {material}.,Arrow
+513,,A light archer's axe {material} for when foes come close.,Archer's Axe
+514,,A light flail {material} that recovers quickly after a swing.,Light Flail
+515,chain,A long mail coat {material} that hangs to the knees.,Hauberk / chain
+515,leather,A long padded leather coat that hangs to the knees.,Hauberk / leather
+515,mail,"A long fine-mail hauberk {material}, reaching the knees.",Hauberk / mail
+516,chain,Mail chausses {material} laced to the belt.,Chausses / chain
+516,leather,Padded leather chausses laced to the belt.,Chausses / leather
+516,mail,"Fine-mail chausses {material}, laced to the belt.",Chausses / mail
+517,chain,A mail spaulder {material} for the left shoulder.,Left Spaulder / chain
+517,leather,A leather spaulder for the left shoulder and arm.,Left Spaulder / leather
+517,mail,A fine mail spaulder {material} on the left shoulder.,Left Spaulder / mail
+518,chain,A mail spaulder {material} for the right shoulder.,Right Spaulder / chain
+518,leather,A leather spaulder for the right shoulder and arm.,Right Spaulder / leather
+518,mail,A fine mail spaulder {material} on the right shoulder.,Right Spaulder / mail
+519,chain,Mail sollerets {material} that guard the feet.,Sollerets / chain
+519,leather,Leather sollerets with stiff toes to guard the feet.,Sollerets / leather
+519,mail,Fine-mail sollerets {material} that guard the feet.,Sollerets / mail
+520,brigandine,A brigandine jerkin with plates {material} under the cloth.,Jerkin / brigandine
+520,fur,"A fur jerkin, warm and soft for cold lands.",Jerkin / fur
+520,leather,"A close-fitting jerkin of thick leather, worn as light armour.",Jerkin / leather
+521,brigandine,A brigandine cuisse with plates {material} under the cloth.,Cuisse / brigandine
+521,fur,A fur cuisse that keeps the thigh warm in frost.,Cuisse / fur
+521,leather,A leather cuisse strapped over the thigh.,Cuisse / leather
+522,brigandine,A brigandine helmet with plates {material} under the cloth.,Helmet / brigandine
+522,fur,"A fur helmet, warm and soft against the wind.",Helmet / fur
+522,leather,A plain leather helmet that keeps the skull whole.,Helmet / leather
+523,brigandine,Boots with plates {material} sewn under the leather.,Boots / brigandine
+523,fur,Fur boots that make light work of deep snow.,Boots / fur
+523,leather,Sturdy leather boots for the road and the fight.,Boots / leather
+524,brigandine,Gloves with plates {material} sewn under the leather.,Gloves / brigandine
+524,fur,Fur gloves that keep the fingers warm in frost.,Gloves / fur
+524,leather,"Leather gloves, flexible enough for a firm grip.",Gloves / leather
+525,brigandine,A brigandine vambrace with plates {material} for the left forearm.,Left Vambrace / brigandine
+525,fur,A fur vambrace that warms the left forearm.,Left Vambrace / fur
+525,leather,A leather vambrace that guards the left forearm.,Left Vambrace / leather
+526,brigandine,A brigandine vambrace with plates {material} for the right forearm.,Right Vambrace / brigandine
+526,fur,A fur vambrace that warms the right forearm.,Right Vambrace / fur
+526,leather,A leather vambrace that guards the right forearm.,Right Vambrace / leather
+560,,A Dwemer long gun {material} that fires with steam and thunder.,Dwarven Thunderlock
+561,,A brass pellet cast for Dwemer firearms.,Dwemer Pellet
+562,,A short Dwemer pistolet {material} with a loud voice.,Dwarven Pistolet
+563,,Cloth strips wound tight around the knuckles for brawling.,Hand Wraps

@@ -184,6 +184,12 @@ function loadLocale(dir) {
     checkText(where, row.text, new Set());
     sets[row.key] = row.text;
   });
+  // Openings a sentence may trade for a synonym when the one before it opens alike.
+  const openings = {};
+  for (const [from, to] of Object.entries(index.openings ?? {})) {
+    if (typeof to !== 'string' || !from.trim() || !to.trim() || /[{}]/.test(from + to)) throw new Error(`${dir}: bad opening ${from}`);
+    openings[from] = to;
+  }
   const rules = loadRules(path.join(dir, '..', 'rules.json'));
   const hints = loadHints(path.join(dir, '..', 'hints.json'));
   // Every hint the map names, and the silver sentences, must be said in this locale: a hint is never left unsaid.
@@ -191,7 +197,7 @@ function loadLocale(dir) {
   for (const key of named) if (!Object.hasOwn(properties, key)) throw new Error(`${dir}: no text for ${key}`);
   for (const key of Object.keys(hints.templates)) if (!Object.hasOwn(bases, key)) throw new Error(`${dir}: hints.json names template ${key}, which has no base row`);
   return { locale, name: index.name ?? locale, forms, defaultForm, inlineName: index.inlineName ?? null, bases, properties,
-    gear, metals, combos, legendaries, tiers, sets, rules, hints };
+    gear, metals, combos, legendaries, tiers, sets, rules, hints, openings };
 }
 
 /** The universal order every locale shares: categories that sort fragment keys, and the queue of slots. */

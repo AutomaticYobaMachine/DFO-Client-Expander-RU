@@ -42,6 +42,9 @@
   const GEAR = new Set(['Weapons', 'Armor']);
   const CLOTHING = new Set(['MensClothing', 'WomensClothing']);
   const EQUIPPABLE = new Set(['Weapons', 'Armor', 'Jewellery', 'MensClothing', 'WomensClothing']);
+  /** Ammunition (DFU's Arrow, the Dwemer bullet): spent by the stack, never worn down or mended. */
+  const AMMUNITION = new Set([131, 561]);
+  const wearable = item => EQUIPPABLE.has(item.group) && !(item.group === 'Weapons' && AMMUNITION.has(item.templateIndex));
   /** itemKinds.js isPotion: DFU's Glass Bottle (UselessItems1 83) is the potion. Every item carries potionRecipeKey
    *  (0 by default), so the key alone says nothing - a bed has one too. */
   const isPotion = item => item.group === 'UselessItems1' && item.templateIndex === 83;
@@ -185,7 +188,7 @@
 
     // ── wear: only what a character can put on; every item carries the field, the rest ignore it ──
     const share = conditionOf(item);
-    if (EQUIPPABLE.has(item.group) && share != null) {
+    if (wearable(item) && share != null) {
       add('condition', share <= 0 ? 'condition.broken' : share < 0.4 ? 'condition.battered' : share < 0.75 ? 'condition.worn'
         : share < 1 ? 'condition.used' : 'condition.new');
     }
@@ -298,6 +301,8 @@
     for (const ch of parts.map(v => (v == null ? '' : String(v))).join('\u0001')) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619) >>> 0; }
     return h >>> 0;
   }
+  /** A sentence's first two words, as a reader hears its opening. */
+  const opening = text => (typeof text === 'string' ? text.toLowerCase().split(/\s+/).slice(0, 2).join(' ').replace(/[,.:;—]+$/, '') : '');
   /** mulberry32: a small seeded generator, the same sequence for the same item. */
   function random(seed) {
     let a = seed >>> 0;
@@ -369,7 +374,7 @@
       return item.cursed.type === DAMNED.type && item.cursed.param === DAMNED.param ? 'hint.damned' : 'hint.cursed';
     }
     const share = conditionOf(item);
-    if (GEAR.has(item.group) && share != null && share < 0.4) return 'hint.repair';
+    if (GEAR.has(item.group) && wearable(item) && share != null && share < 0.4) return 'hint.repair';
     if (item.artifact === true) return 'hint.artifact';
     if (item.rarity === 'aetheric' || isId(item.aetheric)) return 'hint.aetheric';
     if (item.rarity === 'legendary' || isId(item.legendary) || isId(item.gilded) || item.rarity === 'gilded') {
@@ -420,6 +425,7 @@
    *  3, 4 one random fragment each of named power, technique, lines (2), contents (2), material, sigil growth;
    *  5 one random of technique, craft, sockets, hidden magic or curse;  6 wear, on what is worn;  7 stolen;
    *  8 the player hint (category 'hint': its own paragraph, always last; a second sentence for what writs pay silver for).
+   * The stolen mark (category 'standing') stands on its own line under the description, in red; the hint in white.
    * facts: { known (identified, as the game decides), material ('steel', 'leather', 'chain' for an unknown metal,
    *          'fur', 'cloth' - only when the game shows it), armorType ('leather' | 'chain' | 'plate', the card's Type
    *          row), construction ('mail' | 'brigandine'), perfect, sigilXp, guild (the character is in a guild) }
@@ -438,6 +444,12 @@
     const hint = hintOf(pack, item, facts, form);
     if (options.all === true) return [who, ...(tier ? [tier] : []), ...candidates, ...hint].map(clean);
 
+    /** A sentence that opens as the one before it takes its opening's synonym (the locale's `openings`). */
+    const varied = (text, before) => {
+      if (!before || opening(text) !== opening(before)) return text;
+      for (const [from, to] of Object.entries(pack.openings ?? {})) if (text.startsWith(from + ' ') || text.startsWith(from + ',')) return to + text.slice(from.length);
+      return text;
+    };
     const rng = random(options.seed == null ? seedOf(item) : typeof options.seed === 'number' ? options.seed >>> 0 : seedOf({ uid: String(options.seed) }));
     const used = new Set(), taken = new Map(), texts = new Set(), out = [];
     const room = (category, max) => (taken.get(category) || 0) < max;
@@ -445,20 +457,24 @@
     const keep = (slot, fragment) => {
       used.add(fragment); texts.add(fragment.text);
       taken.set(fragment.category, (taken.get(fragment.category) || 0) + 1);
-      out.push({ ...fragment, slot });
+      out.push({ ...fragment, slot, text: varied(fragment.text, out.at(-1)?.text) });
     };
     for (const step of pack.rules?.queue ?? []) {
       if (step.take === 'hint') { for (const h of hint) out.push({ ...h, slot: step.slot }); continue; }
       if (Number.isInteger(options.max) && out.length >= options.max) continue;
       if (step.take === 'identity') { keep(step.slot, who); continue; }
       if (step.take === 'tier') { if (tier) keep(step.slot, tier); continue; }
-      if (step.equippable && !EQUIPPABLE.has(item.group)) continue;
+      if (step.equippable && !wearable(item)) continue;
       const open = step.from.filter(f => room(f.category, f.max) && left(f.category).length);
       if (!open.length) continue;
       if (step.take === 'first') { keep(step.slot, left(open[0].category)[0]); continue; }
-      // Random: a category first, then a fragment in it - a long list of lines does not crowd out the rest.
-      const category = open[Math.floor(rng() * open.length)].category;
-      const pool = left(category);
+      // Random: a category first, then a fragment in it - a long list of lines does not crowd out the rest. Two
+      // sentences in a row do not open alike («Вы чувствуете… Вы чувствуете…») while another fragment can stand there.
+      const last = opening(out.at(-1)?.text);
+      const fresh = category => left(category).filter(f => opening(f.text) !== last);
+      const choices = open.filter(f => fresh(f.category).length);
+      const category = (choices.length ? choices : open)[Math.floor(rng() * (choices.length || open.length))].category;
+      const pool = fresh(category).length ? fresh(category) : left(category);
       keep(step.slot, pool[Math.floor(rng() * pool.length)]);
     }
     return out.map(clean);
@@ -469,11 +485,13 @@
     return plan(item, facts).flatMap(step => (Array.isArray(step.key) ? step.key : [step.key]));
   }
 
-  /** The description as the card shows it: the sentences as one paragraph, then the hint after one blank line. */
+  /** The description as the card shows it: the sentences as one paragraph; the stolen mark on a line of its own right
+   *  under it (the card sets it in red); then the hint after one blank line (in white). */
   function paragraphs(fragments) {
     const said = list => list.map(f => f.text).join(' ');
-    const body = said(fragments.filter(f => f.category !== 'hint')), hint = said(fragments.filter(f => f.category === 'hint'));
-    return [body, hint].filter(Boolean).join('\n\n');
+    const body = said(fragments.filter(f => f.category !== 'hint' && f.category !== 'standing'));
+    const stolen = said(fragments.filter(f => f.category === 'standing')), hint = said(fragments.filter(f => f.category === 'hint'));
+    return [[body, stolen].filter(Boolean).join('\n'), hint].filter(Boolean).join('\n\n');
   }
 
   function install(win) {
@@ -491,7 +509,7 @@
       error: pack ? null : String(win.__dfoItemTextError || 'no item text pack'),
       /** [{kind, key, text}] for an item; [] without a pack or for a template the tables do not know. */
       describe: counted,
-      /** The same sentences as text: one paragraph, a blank line, the hint. */
+      /** The same sentences as text: one paragraph, the stolen mark on its own line, a blank line, the hint. */
       text: (item, facts, options) => paragraphs(counted(item, facts, options)),
       has(key) { return !!pack && own(pack.properties, key); },
       stats: () => ({ ...counters, bases: pack ? Object.keys(pack.bases).length : 0, properties: pack ? Object.keys(pack.properties).length : 0 }),

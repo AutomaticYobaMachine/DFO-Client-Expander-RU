@@ -149,7 +149,7 @@ test('sentences agree with the base item: Russian gender and plural, English num
   const legend = (pack, item) => describe(pack, item, { known: true }, ALL).find(f => f.category === 'power').text;
   assert.match(legend(ru, { group: 'Armor', templateIndex: 103, rarity: 'legendary', legendary: 'gauntlets-of-the-rose' }), /^Эти латные перчатки Розы бьют/);
   assert.match(legend(ru, { group: 'Weapons', templateIndex: 128, legendary: 'graveward' }), /^Эта секира упокаивает/);
-  assert.match(legend(en, { group: 'Weapons', templateIndex: 120, legendary: 'wyrmbane' }), /^This longsword, forged/);
+  assert.match(legend(en, { group: 'Weapons', templateIndex: 120, legendary: 'wyrmbane' }), /^This longsword, made/);
   // A group-specific row wins over the template's own (keys like "Deeds:0" are allowed by the loader).
   const pack = { ...ru, bases: { ...ru.bases, 'Deeds:0': { name: 'Грамота', form: 'f', text: 'Грамота.' } } };
   assert.equal(describe(pack, { group: 'Deeds', templateIndex: 0 }, {})[0].text, 'Грамота.');
@@ -272,7 +272,7 @@ test('combined properties replace their parts; sigils, sets and wear are never a
   assert.ok(keys({ group: 'Jewellery', templateIndex: 135, affixes: [{ id: 'focus', value: 3 }] }).includes('affix.focus'));
   // Crafted: a masterwork with its maker's name in one sentence.
   const ring = describe(ru, { group: 'Jewellery', templateIndex: 135, quality: 4, maker: 'Мастер' }, { known: true }, ALL);
-  assert.equal(ring.find(s => s.key === 'combo.craft.masterwork-maker').text, 'Шедевр с клеймом мастера Мастер, достойный королевского двора.');
+  assert.equal(ring.find(s => s.key === 'combo.craft.masterwork-maker').text, 'Шедевр с клеймом Мастер, достойный королевского двора.');
   assert.ok(!ring.some(s => s.key === 'craft.quality.4' || s.key === 'craft.maker'));
   // An unidentified piece combines nothing it hides.
   assert.ok(!keys(sword, { known: false }).some(k => k.startsWith('combo.')));
@@ -387,6 +387,37 @@ test('every item ends with the player hint: its own paragraph, the state first, 
   assert.equal(describe(ru, { ...iron, questItem: true }, { guild: true }).filter(f => f.category === 'hint').length, 1, 'a quest item is no writ good');
   assert.deepEqual(describe(en, { group: 'UselessItems2', templateIndex: 685 }).filter(f => f.category === 'hint').map(f => f.key), ['hint.dish', 'hint.silver.dish.fighters']);
   assert.equal(describe(en, { group: 'Furniture', templateIndex: 217 }, { guild: true }).filter(f => f.category === 'hint').length, 1, 'furniture is no writ good');
+});
+
+test('the stolen mark stands on its own line; ammunition is never worn down; two sentences never open alike', () => {
+  // Description, then the stolen mark on the next line (the card sets it in red), then a blank line and the hint.
+  const stolen = { group: 'Weapons', templateIndex: 120, stolen: true, currentCondition: 90, maxCondition: 100 };
+  for (const pack of [en, ru]) {
+    const out = describe(pack, stolen, { known: true, material: 'steel' });
+    const [description, hint] = paragraphs(out).split('\n\n');
+    const lines = description.split('\n');
+    assert.equal(lines.length, 2, `${pack.locale}: the stolen mark is its own line`);
+    assert.equal(lines[1], out.find(f => f.category === 'standing').text);
+    assert.equal(hint, out.filter(f => f.category === 'hint').map(f => f.text).join(' '));
+    assert.equal(paragraphs(describe(pack, { ...stolen, stolen: false }, { known: true, material: 'steel' })).split('\n').length, 3, 'no stolen line, no extra line');
+  }
+  // An arrow or a bullet is spent, never worn down or mended.
+  for (const templateIndex of [131, 561]) {
+    const keys = describe(ru, { group: 'Weapons', templateIndex, currentCondition: 0, maxCondition: 1 }, { known: true }).map(f => f.key);
+    assert.ok(!keys.some(k => k.startsWith('condition.')) && !keys.includes('hint.repair'), `${templateIndex}: ${keys}`);
+  }
+  // Two sensory lines and nothing else to say: the second trades its opening for the locale's synonym.
+  const opening = t => t.split(/\s+/).slice(0, 2).join(' ').toLowerCase();
+  const cloak = { group: 'MensClothing', templateIndex: 154, rarity: 'magic', affixes: [{ id: 'skill', param: 13, value: 5 }, { id: 'skill', param: 17, value: 5 }] };
+  for (let seed = 0; seed < 20; seed++) {
+    const body = describe(ru, cloak, { known: true }, { seed }).filter(f => f.category !== 'hint');
+    for (let i = 1; i < body.length; i++) assert.notEqual(opening(body[i].text), opening(body[i - 1].text), `seed ${seed}: ${body[i].text}`);
+  }
+  assert.deepEqual(ru.openings, { 'Вы чувствуете': 'Вы ощущаете', 'Вы ощущаете': 'Вы чувствуете', 'Вы видите': 'Вы замечаете' });
+  // A Legendary is kept: worn, saved for an imprint, or sold - never broken into shards.
+  const legend = describe(ru, { group: 'Weapons', templateIndex: 120, rarity: 'legendary', legendary: 'warp-edge' }, { known: true }).at(-1);
+  assert.equal(legend.key, 'hint.legendary');
+  assert.match(legend.text, /^Не разбирайте его: носите сами, берегите для отпечатка силы или продайте на рынке\.$/);
 });
 
 test('a potion only in a potion bottle, a soul only in what holds souls, poison only on a weapon', () => {

@@ -121,9 +121,10 @@
     $('cardName').textContent = record && facts.known ? record.name : (locale === 'ru' ? t.ruName : t.name);
     $('cardMaterial').hidden = !facts.material;
     $('cardMetal').textContent = facts.material ? (D.materials.find(m => m.id === facts.material)?.label || facts.material) : '';
-    // The description is one paragraph; the hint comes after one blank line, in white.
+    // The description is one paragraph; the stolen mark on its own line, in red; the hint after one blank line, in white.
     const said = list => list.map(f => f.text).join(' ');
-    $('descBody').textContent = said(out.filter(f => f.category !== 'hint'));
+    $('descBody').textContent = said(out.filter(f => f.category !== 'hint' && f.category !== 'standing'));
+    $('descStolen').textContent = said(out.filter(f => f.category === 'standing'));
     $('descTip').textContent = said(out.filter(f => f.category === 'hint'));
     $('desc').classList.toggle('none', !out.length);
     // slots
@@ -134,14 +135,14 @@
       const title = D.slotTitles[step.slot];
       const what = el('div', { class: 'what' }, el('span', { text: title }));
       for (const f of here) what.append(el('code', { text: f.key }));
-      slots.append(el('div', { class: `slot${here.length ? '' : ' empty'}${step.take === 'hint' ? ' tip' : ''}` }, el('b', { text: String(step.slot) }), what,
+      slots.append(el('div', { class: `slot${here.length ? '' : ' empty'}${step.take === 'hint' ? ' tip' : ''}${here.some(f => f.category === 'standing') ? ' stolen' : ''}` }, el('b', { text: String(step.slot) }), what,
         el('div', { class: 'text', text: here.length ? here.map(f => f.text).join(' ') : 'пусто: у предмета нет подходящего фрагмента' })));
     }
     $('seedLabel').textContent = seed == null ? 'случайный выбор: по предмету' : `случайный выбор: вариант ${seed}`;
     // every candidate
     const picked = new Set(out.map(f => f.key));
     const titles = new Map(pack.rules.categories.map(c => [c.id, c.title]));
-    $('allRows').replaceChildren(...all.map(f => el('tr', { class: `${picked.has(f.key) ? 'picked' : ''}${f.category === 'hint' ? ' tip' : ''}` },
+    $('allRows').replaceChildren(...all.map(f => el('tr', { class: `${picked.has(f.key) ? 'picked' : ''}${f.category === 'hint' ? ' tip' : ''}${f.category === 'standing' ? ' stolen' : ''}` },
       el('td', { text: (picked.has(f.key) ? '● ' : '') + (titles.get(f.category) || f.category || '—') }), el('td', {}, el('code', { text: f.key })), el('td', { text: f.text }))));
     $('allCount').textContent = `${all.length} фрагментов, в описании ${out.filter(f => f.category !== 'hint').length}, в подсказке ${out.filter(f => f.category === 'hint').length}`;
   }

@@ -68,5 +68,10 @@
  "sets": [
   "combos/sets.csv"
  ],
- "inlineName": "lowerFirst"
+ "inlineName": "lowerFirst",
+ "openings": {
+  "Вы чувствуете": "Вы ощущаете",
+  "Вы ощущаете": "Вы чувствуете",
+  "Вы видите": "Вы замечаете"
+ }
 }

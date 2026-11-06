@@ -61,5 +61,10 @@
  "sets": [
   "combos/sets.csv"
  ],
- "inlineName": "lower"
+ "inlineName": "lower",
+ "openings": {
+  "You feel": "You sense",
+  "You sense": "You feel",
+  "You see": "You notice"
+ }
 }

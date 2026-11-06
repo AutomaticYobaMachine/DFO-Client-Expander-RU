@@ -1,5 +1,5 @@
 key,templates,s,p,note
-wyrmbane,113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 513 514,"This {base}, forged for a dragon hunt, strikes dragonlings and giants hardest.","These {base}, forged for a dragon hunt, strike dragonlings and giants hardest.",legendary power: Dragonsbane
+wyrmbane,113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 513 514,"This {base}, made for a dragon hunt, strikes dragonlings and giants hardest.","These {base}, made for a dragon hunt, strike dragonlings and giants hardest.",legendary power: Dragonsbane
 nightwhisper,113 114 116 117,"This {base} kills silently, twice as deadly to foes who never saw it.","These {base} kill silently, twice as deadly to foes who never saw them.",legendary power: Silent Death
 graveward,124 125 126 127 128,"This {base} lays the dead to rest, and each one restores its bearer.","These {base} lay the dead to rest, and each one restores their bearer.",legendary power: Sanctified
 stormcaller,129 130,This {base} carries the storm: each arrow leaps to a second foe.,These {base} carry the storm: each arrow leaps to a second foe.,legendary power: Chain Lightning
@@ -34,7 +34,7 @@ wrothgar-mantle,155 192,This {base} from the Wrothgar pass keeps out the bittere
 stendarr-vestments,164 201,This {base} of Stendarr makes healing magic come more cheaply.,These {base} of Stendarr make healing magic come more cheaply.,legendary power: Stendarr's Mercy
 pilgrims-sandals,150 189 147 186,This {base} of a pilgrim spares strength on the road and softens falls.,These {base} of a pilgrim spare strength on the road and soften falls.,legendary power: The Long Road
 barenziah-silks,195 196 194 159 160 143,This {base} of Queen Barenziah lends a royal bearing everyone respects.,These {base} of Queen Barenziah lend a royal bearing everyone respects.,legendary power: Royal Bearing
-shades-cowl,154 191,This {base} of a shade hides its wearer whenever the hood is up.,These {base} of a shade hide their wearer whenever the hood is up.,legendary power: Unseen
+shades-cowl,154 191,"This {base}, woven of shadow, hides its wearer whenever the hood is up.","These {base}, woven of shadow, hide their wearer whenever the hood is up.",legendary power: Unseen
 eye-of-magnus,133 139,"This {base}, the Eye of Magnus, lets spells pierce any resistance.","These {base}, the Eye of Magnus, let spells pierce any resistance.",legendary power: Magnus's Gaze
 ring-of-artaeum,135,This {base} from Artaeum slowly refills its bearer's magicka.,These {base} from Artaeum slowly refill their bearer's magicka.,legendary power: Wellspring of Artaeum
 shalidors-brand,118 119 120,"This {base}, Shalidor's Brand, sharpens spells while magicka runs high.","These {base}, Shalidor's Brand, sharpen spells while magicka runs high.",legendary power: Arcane Surge

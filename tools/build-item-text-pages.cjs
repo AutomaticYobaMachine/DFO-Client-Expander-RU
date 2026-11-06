@@ -64,7 +64,7 @@ const gildedIds = new Set(catalog.records.gilded.map(g => g.id));
 const legendaries = legendaryRows.map(r => ({ id: r.key, name: recordName[r.key] || r.key, gilded: gildedIds.has(r.key), templates: r.templates.split(/\s+/).map(Number) }));
 const SLOT_TITLES = { 1: 'Вещь + тип брони + материал / вещь + материал / вещь', 2: 'Редкость + сигил + набор / редкость + сигил / редкость + набор / редкость',
   3: 'Случайно: сила, техника, аффиксы и чары, содержимое, материал, рост сигила', 4: 'Случайно: сила, техника, аффиксы и чары, содержимое, материал, рост сигила',
-  5: 'Случайно: техника, ремесло, камни, скрытые чары или проклятие', 6: 'Износ (только то, что надевается)', 7: 'Краденое',
+  5: 'Случайно: техника, ремесло, камни, скрытые чары или проклятие', 6: 'Износ (только то, что надевается)', 7: 'Краденое (отдельной строкой, красным)',
   8: 'Подсказка игроку: что делать с вещью (отдельный абзац, белым; серебро и гильдия — второе предложение)' };
 
 // ── the stand ──
@@ -153,7 +153,7 @@ ${fs.readFileSync(path.join(__dirname, 'item-text-pages/stand.css'), 'utf8')}
     <div class="card-head"><div class="card-tier" id="cardTier"></div><h3 class="card-name" id="cardName"></h3>
      <div class="card-material" id="cardMaterial"><span>Материал</span><span id="cardMetal"></span></div></div>
     <div class="card-body">Здесь в игре свойства, сравнение, сигил и набор.</div>
-    <div class="card-foot"><p class="desc" id="desc" data-empty="Нет описания: шаблона нет в таблицах."><span class="body" id="descBody"></span><span class="tip" id="descTip"></span></p><span class="price" aria-hidden="true">~ цена</span></div>
+    <div class="card-foot"><p class="desc" id="desc" data-empty="Нет описания: шаблона нет в таблицах."><span class="body" id="descBody"></span><span class="stolen" id="descStolen"></span><span class="tip" id="descTip"></span></p><span class="price" aria-hidden="true">~ цена</span></div>
    </div>
    <div class="row"><button type="button" class="act" id="reroll">Другой случайный выбор</button><button type="button" class="act" id="reseed">Как в игре</button><span class="hint" id="seedLabel"></span></div>
    <section class="slots" aria-label="Очередь фрагментов"><h2><span>Очередь фрагментов</span></h2><div id="slots"></div></section>
@@ -332,7 +332,7 @@ function registrySections() {
   add('secret', '5', 'Скрытые чары или проклятие', '', props.filter(k => cat(k) === 'secret').map(propRow));
   // slots 6-8 and the rest
   add('wear', '6', 'Износ', 'Только у того, что надевается; у остальных поле прочности не читается.', props.filter(k => cat(k) === 'wear').map(propRow));
-  add('standing', '7', 'Краденое', 'Квестовое теперь не здесь: о нём говорит подсказка.', props.filter(k => cat(k) === 'standing').map(propRow));
+  add('standing', '7', 'Краденое', 'Отдельной строкой сразу под описанием, красным. Квестовое не здесь: о нём говорит подсказка.', props.filter(k => cat(k) === 'standing').map(propRow));
   const hintKeys = props.filter(k => cat(k) === 'hint');
   add('hint', '8', 'Подсказка игроку', 'Всегда последняя, отдельным абзацем после одной пустой строки, белым цветом. Сначала проверяется состояние вещи сверху вниз; если оно ничего не требует — подсказка основы. Для того, за что платят серебром, добавляется второе предложение; у персонажа в гильдии — от лица гильдии.',
     [{ sub: 'Состояние вещи — в порядке проверки' }, ...HINT_STATES.map(([k]) => propRow(k)),
@@ -369,7 +369,7 @@ function registryDocx() {
     para('Очередь описания', { style: 'Heading2' }),
     table([1000, 14398], [{ header: true, cells: [[cellText({ text: '№', bold: true, color: '5D6470' })], [cellText({ text: 'Что попадает в позицию', bold: true, color: '5D6470' })]] },
       ...[1, 2, 3, 4, 5, 6, 7, 8].map(n => ({ cells: [[cellText({ text: String(n), bold: true, color: '2F5F8A' })], [cellText(SLOT_TITLES[n])]] }))]),
-    para('Описание — один абзац из позиций 1–7; подсказка (позиция 8) — после пустой строки, белым. Шрифт описаний в игре — Flow Ext Bold, 12 px.', { spacingAfter: 120 }),
+    para('Описание — один абзац из позиций 1–6; краденое (позиция 7) — отдельной строкой под ним, красным; подсказка (позиция 8) — после пустой строки, белым. Шрифт описаний в игре — Flow Ext Bold, 12 px.', { spacingAfter: 120 }),
     para('Разделы', { style: 'Heading2' }),
     ...sections.map(s => para([{ text: `Позиция ${s.slot} · `, color: '2F5F8A' }, `${s.title} — ${s.rows.filter(r => !r.sub).length}`], { spacingAfter: 20 })),
   ];

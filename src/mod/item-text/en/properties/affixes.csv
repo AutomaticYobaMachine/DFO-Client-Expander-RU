@@ -1,6 +1,6 @@
 key,s,p,note
 affix.damage,You feel it strike harder than its make would suggest.,You feel them strike harder than their make would suggest.,affix damage
-affix.armor,You feel warding magic harden it beyond what the metal alone could do.,You feel warding magic harden them beyond what the metal alone could do.,affix armor
+affix.armor,You feel warding magic harden it beyond what the material alone allows.,You feel warding magic harden them beyond what the material alone allows.,affix armor
 affix.weight,It eases the load on its bearer's back.,They ease the load on their bearer's back.,affix weight
 affix.leech,With every blow you feel a little of the foe's life flow into you.,,affix leech
 affix.thorns,You see whoever strikes you flinch from a wound of their own.,,affix thorns
@@ -15,7 +15,7 @@ affix.reforged,It has been reforged and still bears the marks of a second forge.
 affix.stat.strength,You feel strength gather in your arms and shoulders.,,affix stat: strength
 affix.stat.intelligence,It sharpens the wits of its owner.,They sharpen the wits of their owner.,affix stat: intelligence
 affix.stat.willpower,It hardens the will against fear and magic.,They harden the will against fear and magic.,affix stat: willpower
-affix.stat.agility,You feel your hands grow quicker and your footing surer.,,affix stat: agility
+affix.stat.agility,You feel your fingers grow nimbler and your movements surer.,,affix stat: agility
 affix.stat.endurance,It helps the body bear wounds and long marches.,They help the body bear wounds and long marches.,affix stat: endurance
 affix.stat.personality,People find its owner more agreeable.,People find their owner more agreeable.,affix stat: personality
 affix.stat.speed,You feel your stride lengthen and quicken.,,affix stat: speed

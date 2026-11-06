@@ -10,6 +10,7 @@
   --dim: #8d929b;
   --desc: #c4c6ca;
   --tip: #ffffff;
+  --stolen: #e2574c;
   --gold: #f5d451;
   --focus: #e4c34f;
   --chip: #232831;
@@ -61,7 +62,9 @@ button.act:hover { border-color: var(--sand); }
 .card-body { padding: 10px 14px; color: var(--dim); font: 12px var(--font-card); min-height: 36px; }
 .card-foot { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; border-top: 1px solid #756346; padding: 9px 12px 11px; }
 .desc { margin: 0; flex: 1 1 auto; min-width: 0; font: 400 12px/1.45 var(--font-desc); color: var(--desc); letter-spacing: .01em; }
-.desc .body, .desc .tip { display: block; }
+.desc .body, .desc .stolen, .desc .tip { display: block; }
+.desc .stolen { color: var(--stolen); }
+.desc .stolen:empty { display: none; }
 .desc .tip { margin-top: 1.45em; color: var(--tip); }
 .desc .tip:empty { display: none; }
 .desc.none::before { content: attr(data-empty); color: var(--dim); }
@@ -76,6 +79,7 @@ button.act:hover { border-color: var(--sand); }
 .slot .what code { color: var(--bone); font: 11px ui-monospace, Consolas, monospace; }
 .slot .text { font: 12px/1.45 var(--font-desc); color: var(--desc); }
 .slot.tip .text { color: var(--tip); }
+.slot.stolen .text { color: var(--stolen); }
 .slot.empty .text { color: #5c6168; font-family: var(--font-ui); }
 .all { border: 1px solid var(--line); border-radius: 6px; background: var(--panel); }
 .all > div { overflow-x: auto; }
@@ -85,5 +89,6 @@ button.act:hover { border-color: var(--sand); }
 .all td:nth-child(2) code { font: 11px ui-monospace, Consolas, monospace; color: var(--bone); }
 .all td:last-child { font: 12px/1.45 var(--font-desc); color: var(--desc); min-width: 220px; }
 .all tr.tip td:last-child { color: var(--tip); }
+.all tr.stolen td:last-child { color: var(--stolen); }
 .all tr.picked td:first-child { color: var(--gold); }
 @media (prefers-reduced-motion: no-preference) { .desc { transition: opacity .15s; } }

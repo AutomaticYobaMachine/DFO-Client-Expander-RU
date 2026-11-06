@@ -1,22 +1,22 @@
 key,group,name,number,text
 531,UselessItems2,Rations,p,"Dried meat, hard bread and cheese, packed for the road."
-532,UselessItems2,Apple,s,A crisp apple from a Breton orchard.
-533,UselessItems2,Orange,s,A sweet orange from the southern coast.
-534,UselessItems2,Bread,s,"A loaf of bread, best eaten fresh."
+532,UselessItems2,Apple,s,"An apple from a Breton orchard, packed for the road."
+533,UselessItems2,Orange,s,"An orange from the southern coast, packed for the road."
+534,UselessItems2,Bread,s,"A loaf of village bread, best eaten fresh."
 535,UselessItems2,Raw Fish,s,A raw fish that should be cooked before long.
-536,UselessItems2,Cooked Fish,s,A fish roasted over the fire.
-537,UselessItems2,Meat,s,"Cooked meat, filling and hot."
+536,UselessItems2,Cooked Fish,s,A fish roasted over the fire with salt and herbs.
+537,UselessItems2,Meat,s,"Meat cooked over a fire, filling and plain."
 538,UselessItems2,Raw Meat,s,Raw meat that needs a fire.
 685,UselessItems2,Hunter's Stew,s,A thick stew of game and roots.
 686,UselessItems2,Fisherman's Supper,s,"Fish and bread, the way fishermen eat after a long day."
 687,UselessItems2,Orchard Tart,s,A sweet tart of orchard fruit.
 688,UselessItems2,Feast of the Hearth,s,"A hearty spread of roast, bread and drink for weary travellers."
 1331,UselessItems2,Wine,s,A cask of wine bound for market.
-1605,UselessItems2,Fish,s,A fresh fish from the nearest water.
-1608,UselessItems2,Apple,s,"A crisp apple, picked by hand."
-1609,UselessItems2,Orange,s,"A sweet orange, picked by hand."
+1605,UselessItems2,Fish,s,A fish caught in the nearest water.
+1608,UselessItems2,Apple,s,"An apple, picked by your own hand."
+1609,UselessItems2,Orange,s,"An orange, picked by your own hand."
 1610,UselessItems2,Mushroom,s,"A wild mushroom with a firm cap, picked in the shade."
-1611,UselessItems2,Egg,s,"A fresh egg, fragile and filling."
+1611,UselessItems2,Egg,s,"An egg in a fragile shell, plain and filling."
 2000,UselessItems2,Soul Cake,s,A spiced cake baked to remember the dead.
 2001,UselessItems2,Hearth Offering,s,A small offering left by the hearth for the spirits of the house.
 9001,UselessItems2,Longnose Butterflyfish,s,"A bright reef fish with a long, slender snout."

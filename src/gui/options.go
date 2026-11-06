@@ -9,7 +9,7 @@ import (
 
 const (
 	appName      = "DFO-Client-Expander-RU"
-	appVersion   = "1.21.2"
+	appVersion   = "1.22.0"
 	appAuthor    = "AutomaticYobaMachine"
 	appCommunity = "Создано специально для русского сообщества DFO Online."
 )
@@ -38,6 +38,8 @@ const (
 	idDungeonKey
 	idItemCards
 	idFonts
+	idInstallerLog
+	idCheckUpdates
 )
 
 type feature struct {

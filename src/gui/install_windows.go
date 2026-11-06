@@ -1,9 +1,9 @@
 package main
 
 import (
-	"bufio"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -27,17 +27,15 @@ func (a *app) patcherCmd(ctx context.Context, exe string, args ...string) *exec.
 }
 
 func (a *app) appendLog(s string) {
-	s = strings.ReplaceAll(strings.ReplaceAll(s, "\r\n", "\n"), "\n", "\r\n")
-	a.mu.Lock()
-	a.pending.WriteString(s)
-	a.fullLog.WriteString(s)
-	a.mu.Unlock()
-	pPostMessageW.Call(a.hwnd, wmLog, 0, 0)
+	a.logbook.append(s)
+	if a.hwnd != 0 && a.logPosted.CompareAndSwap(false, true) {
+		pPostMessageW.Call(a.hwnd, wmLog, 0, 0)
+	}
 }
 
 func (a *app) startSearch() {
 	a.mu.Lock()
-	if a.busy || a.searching {
+	if a.busy || a.searching || a.startupError != nil {
 		a.mu.Unlock()
 		return
 	}
@@ -83,7 +81,6 @@ func (a *app) setGame(exe, how string) {
 	resuming := a.updateResume != nil && a.updateResume.Dirty && (a.updateResume.Game == "" || sameUpdatePath(a.updateResume.Game, exe))
 	if a.updateResume != nil && a.updateResume.Game != "" && !sameUpdatePath(a.updateResume.Game, exe) {
 		a.updateResume = nil
-		a.autoUpgrade = false
 	}
 	a.generation++
 	a.exe = exe
@@ -110,7 +107,7 @@ func (a *app) requestStatus(restoreChoices bool) {
 		return
 	}
 	a.mu.Lock()
-	if a.exe == "" || a.querying || a.busy {
+	if a.exe == "" || a.querying || a.busy || a.startupError != nil {
 		a.mu.Unlock()
 		return
 	}
@@ -123,16 +120,27 @@ func (a *app) requestStatus(restoreChoices bool) {
 		defer a.wg.Done()
 		ctx, cancel := context.WithTimeout(a.ctx, 20*time.Second)
 		defer cancel()
-		out, err := a.patcherCmd(ctx, exe, "status", "--json").Output()
+		a.appendLog("Проверка клиента: " + exe)
+		out, err := a.patcherCmd(ctx, exe, "status", "--json").CombinedOutput()
+		if ctx.Err() != nil {
+			err = errors.Join(err, ctx.Err())
+		}
+		a.appendLog("Вывод проверки клиента:\r\n" + string(out))
+		if err != nil {
+			a.appendLog("Результат проверки клиента: " + err.Error())
+		}
 		var st *gameStatus
 		if err == nil {
 			for _, line := range strings.Split(string(out), "\n") {
 				var value gameStatus
-				if strings.HasPrefix(strings.TrimSpace(line), "{") && json.Unmarshal([]byte(strings.TrimSpace(line)), &value) == nil {
+				if strings.HasPrefix(strings.TrimSpace(line), "{") && json.Unmarshal([]byte(strings.TrimSpace(line)), &value) == nil && value.Asar != "" {
 					st = &value
 					break
 				}
 			}
+		}
+		if st == nil && err == nil {
+			err = errors.New("патчер не вернул корректный JSON состояния")
 		}
 		a.mu.Lock()
 		if token != a.generation || a.ctx.Err() != nil {
@@ -154,6 +162,7 @@ func (a *app) requestStatus(restoreChoices bool) {
 		if st == nil {
 			a.note = "Не удалось проверить клиент. Нажмите «Проверить» или выберите игру заново."
 			a.noteCol = colRed
+			a.page = idJournal
 		}
 		if st != nil && a.toggles[idLoot] && a.toggles[idDungeons] && a.lootKey == a.dungeonKey {
 			a.note = "Для лута и сведений о данже выбрана одна кнопка. Назначьте разные; до этого сводку можно открыть кнопкой в игре."
@@ -161,8 +170,17 @@ func (a *app) requestStatus(restoreChoices bool) {
 		}
 		a.mu.Unlock()
 		if st == nil {
-			a.appendLog(fmt.Sprintf("Проверка клиента: %v\r\n%s\r\n", err, out))
+			a.appendLog("Проверка клиента завершилась с ошибкой: " + err.Error())
 		} else {
+			if st.UserData != "" {
+				if e := a.logbook.move(st.UserData); e != nil {
+					a.appendLog("Не удалось перенести полный журнал в кеш игры: " + e.Error())
+				} else {
+					_ = a.logbook.captureCrashes()
+				}
+			}
+			path, _ := a.logbook.location()
+			a.appendLog("Полный журнал: " + path)
 			key := resolveLootKey(st)
 			source := "профиле"
 			if validLootKey(st.CachedLootKey) {
@@ -170,6 +188,7 @@ func (a *app) requestStatus(restoreChoices bool) {
 			}
 			a.appendLog("Кнопка лута в " + source + ": " + lootKeyLabel(key) + ". Профиль: " + st.UserData + "\r\n")
 		}
+		a.logbook.sync()
 		pPostMessageW.Call(a.hwnd, wmStatus, 0, 0)
 	}()
 }
@@ -177,20 +196,15 @@ func (a *app) requestStatus(restoreChoices bool) {
 var pctRe = regexp.MustCompile(`^\s*(\d{1,3})%\s*$`)
 
 func (a *app) run(what string) {
+	if what != "install" && what != "uninstall" {
+		return
+	}
 	a.mu.Lock()
-	automatic := what == "upgrade"
-	if automatic {
-		what = "install"
-	}
-	if a.busy || a.updateHandoff || a.handedOff || a.resumePath != "" && !a.resumeCommitted || a.querying || a.capturingKey || a.exe == "" || a.status == nil || a.status.Running {
+	if a.startupError != nil || a.busy || a.updateDownloading || a.updateHandoff || a.handedOff || a.resumePath != "" && !a.resumeCommitted || a.querying || a.capturingKey || a.exe == "" || a.status == nil || a.status.Running {
 		a.mu.Unlock()
 		return
 	}
-	if automatic && (!a.autoUpgrade || !upgradeEligible(a.status, a.pendingChoices())) {
-		a.mu.Unlock()
-		return
-	}
-	if what == "install" && !automatic && selectedCount(a.toggles) == 0 {
+	if what == "install" && selectedCount(a.toggles) == 0 {
 		a.note = "Выберите хотя бы один компонент."
 		a.noteCol = colDim
 		a.mu.Unlock()
@@ -202,7 +216,6 @@ func (a *app) run(what string) {
 		return
 	}
 	a.busy = true
-	a.autoUpgrade = false
 	a.updateText = ""
 	a.operation = what
 	a.progress = 0
@@ -211,9 +224,6 @@ func (a *app) run(what string) {
 	exe := a.exe
 	keyOverride := a.lootKey
 	args := operationArgs(what, a.toggles, keyOverride, a.dungeonKey)
-	if automatic {
-		args = append(args, "--set", "enabled="+boolFlag(enabledSetting(a.status.Cfg)))
-	}
 	a.mu.Unlock()
 	a.syncControls()
 	invalidate(a.hwnd)
@@ -224,47 +234,30 @@ func (a *app) run(what string) {
 		// Closing the window is disabled while the archive is being replaced.
 		// A UI/status timeout must never kill an installation mid-write.
 		c := a.patcherCmd(context.Background(), exe, args...)
-		r, w, err := os.Pipe()
-		if err == nil {
-			c.Stdout, c.Stderr = w, w
-			err = c.Start()
-			w.Close()
-			if err == nil {
-				s := bufio.NewScanner(r)
-				s.Buffer(make([]byte, 4096), 512*1024)
-				for s.Scan() {
-					line := s.Text()
-					if m := pctRe.FindStringSubmatch(line); m != nil {
-						p, _ := strconv.Atoi(m[1])
-						if p > 100 {
-							p = 100
-						}
-						a.mu.Lock()
-						a.progress = p
-						a.mu.Unlock()
-						pPostMessageW.Call(a.hwnd, wmLog, 0, 0)
-						continue
-					}
-					a.appendLog(line + "\r\n")
-					if strings.TrimSpace(line) != "" {
-						a.mu.Lock()
-						a.stage = line
-						a.mu.Unlock()
-					}
+		a.appendLog("Команда: " + c.String())
+		err := runLoggedCommand(c, func(line string) {
+			a.appendLog(line)
+			if m := pctRe.FindStringSubmatch(line); m != nil {
+				p, _ := strconv.Atoi(m[1])
+				if p > 100 {
+					p = 100
 				}
-				readErr := s.Err()
-				r.Close()
-				err = c.Wait()
-				if err == nil {
-					err = readErr
-				}
-			} else {
-				r.Close()
+				a.mu.Lock()
+				a.progress = p
+				a.mu.Unlock()
+			} else if strings.TrimSpace(line) != "" {
+				a.mu.Lock()
+				a.stage = diagnosticStage(line)
+				a.mu.Unlock()
 			}
-		}
+		})
 		if err != nil {
 			a.appendLog("Операция завершилась с ошибкой: " + err.Error() + "\r\n")
 		}
+		if err == nil {
+			a.appendLog("Операция завершена успешно.")
+		}
+		a.logbook.sync()
 		a.mu.Lock()
 		a.busy = false
 		if err == nil {
@@ -275,9 +268,7 @@ func (a *app) run(what string) {
 				a.dungeonKeyDirty = false
 				a.savedChoiceRevision = a.choiceRevision
 				a.note = "Готово. Выбранные функции включены. Запускайте игру как обычно."
-				if automatic {
-					a.note = "Расширение обновлено автоматически. Ваши настройки сохранены."
-				}
+
 			} else {
 				a.note = "Расширение удалено. Исходный клиент восстановлен; ваши настройки сохранены."
 			}
@@ -310,9 +301,10 @@ func (a *app) browse() {
 	}
 }
 
-func (a *app) message(s string, kind uintptr) {
+func (a *app) message(s string, kind uintptr) uintptr {
 	defer a.updateModal()()
-	pMessageBoxW.Call(a.hwnd, uintptr(unsafe.Pointer(u16(s))), uintptr(unsafe.Pointer(u16(appName))), kind)
+	r, _, _ := pMessageBoxW.Call(a.hwnd, uintptr(unsafe.Pointer(u16(s))), uintptr(unsafe.Pointer(u16(appName))), kind)
+	return r
 }
 func (a *app) openGuide() {
 	p := filepath.Join(a.payloadDir, "README.txt")
@@ -354,10 +346,21 @@ func (a *app) saveLog() {
 	if r, _, _ := pGetSaveFileNameW.Call(uintptr(unsafe.Pointer(&ofn))); r == 0 {
 		return
 	}
-	a.mu.Lock()
-	s := versionTitle() + "\r\nАвтор: " + appAuthor + "\r\n" + appCommunity + "\r\n" + a.fullLog.String()
-	a.mu.Unlock()
+	s := a.logbook.snapshot(0)
 	if err := os.WriteFile(syscall.UTF16ToString(file), []byte(s), 0600); err != nil {
 		a.message("Не удалось сохранить журнал: "+err.Error(), 0x10)
+	}
+}
+
+func (a *app) openInstallerLog() {
+	a.logbook.sync()
+	path, err := a.logbook.location()
+	if path == "" || err != nil {
+		a.message(fmt.Sprintf("Не удалось записать полный журнал: %v. Нажмите «Сохранить журнал…» для экспорта.", err), 0x30)
+		return
+	}
+	r, _, _ := pShellExecuteW.Call(a.hwnd, uintptr(unsafe.Pointer(u16("open"))), uintptr(unsafe.Pointer(u16(path))), 0, 0, 1)
+	if r <= 32 {
+		a.message("Не удалось открыть журнал. Файл: "+path, 0x30)
 	}
 }

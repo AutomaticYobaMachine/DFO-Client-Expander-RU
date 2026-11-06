@@ -14,40 +14,41 @@ var installerUpdater = func() *releaseUpdater { return newReleaseUpdater(appVers
 
 func (a *app) startSelfUpdate() {
 	a.mu.Lock()
+	if a.updatesDisabled || a.updateChecking || a.updateDownloading || a.updateReady != nil || a.updateHandoff || a.handedOff || a.busy {
+		a.mu.Unlock()
+		return
+	}
 	a.updateChecking = true
+	a.updateAvailable = nil
 	a.updateText = "Проверяю обновления программы…"
 	a.mu.Unlock()
+	a.syncControls()
+	a.appendLog("Проверка релизов: " + updateAPI)
 	a.wg.Add(1)
 	go func() {
 		defer a.wg.Done()
 		self, _ := os.Executable()
 		pruneUpdateCache(updatesRoot(), self)
-		u := installerUpdater()
 		ctx, cancel := context.WithTimeout(a.ctx, 10*time.Second)
-		release, err := u.latest(ctx)
-		cancel()
-		var ready *downloadedUpdate
-		if err == nil && release != nil {
-			a.mu.Lock()
-			a.updateText = "Скачиваю программу " + release.Version + "…"
-			a.mu.Unlock()
-			a.appendLog("Найдена новая программа: " + release.Version + ".\r\n")
-			ctx, cancel = context.WithTimeout(a.ctx, 2*time.Minute)
-			ready, err = u.download(ctx, release, updatesRoot(), func(p int) { a.mu.Lock(); a.updateProgress = p; a.mu.Unlock() })
-			cancel()
-		}
+		defer cancel()
+		release, err := installerUpdater().latest(ctx)
 		a.mu.Lock()
-		a.updateReady = ready
 		a.updateChecking = false
-		a.updateChecked = true
-		a.updateText = ""
-		a.updateProgress = 0
-		if err != nil && a.ctx.Err() == nil {
-			a.updateText = "Обновления временно недоступны. Можно работать с текущей версией."
+		a.updateAvailable = release
+		a.updateText = "Установлена актуальная версия программы."
+		if release != nil {
+			a.updateText = "Доступна программа " + release.Version + ". Ожидаю вашего решения."
+		}
+		if err != nil {
+			a.updateText = "Не удалось проверить обновления. Можно работать с текущей версией."
 		}
 		a.mu.Unlock()
-		if err != nil && a.ctx.Err() == nil {
-			a.appendLog("Проверка обновлений: " + err.Error() + "\r\n")
+		if err != nil {
+			a.appendLog("Проверка обновлений: " + err.Error())
+		} else if release != nil {
+			a.appendLog("Найдена программа " + release.Version + ". До согласия скачивание и замена не выполняются.")
+		} else {
+			a.appendLog("Более свежего стабильного релиза нет.")
 		}
 		pPostMessageW.Call(a.hwnd, wmUpdater, 0, 0)
 	}()
@@ -57,105 +58,116 @@ func (a *app) pendingChoices() bool {
 	return a.choiceRevision != a.savedChoiceRevision || a.lootKeyDirty || a.dungeonKeyDirty
 }
 
-// Called only on the window thread. Downloads can finish while the user edits;
-// the handoff captures the current controls and waits for ASAR/key operations.
+// Window thread only: metadata checks never download or replace anything.
+// A completed download carries explicit consent, and ASAR operations are never
+// invoked from the timer, status completion, or self-update resume.
 func (a *app) maybeUpdate() {
 	a.mu.Lock()
 	if a.ctx.Err() != nil || a.busy || a.querying || a.searching || a.capturingKey || a.modalDepth > 0 || a.updateHandoff || a.handedOff {
 		a.mu.Unlock()
 		return
 	}
+	if a.resumePath != "" && !a.resumeCommitted {
+		var r updateResult
+		if err := readUpdateJSON(filepath.Join(filepath.Dir(a.resumePath), "result.json"), &r); err != nil || r.State != "committed" {
+			a.mu.Unlock()
+			return
+		}
+		a.resumeCommitted = true
+		a.updateText = "Программа обновлена до " + appVersion + ". Применение к игре — по кнопке."
+		pPostMessageW.Call(a.hwnd, wmUpdater, 0, 0)
+	}
+	if release := a.updateAvailable; release != nil {
+		if time.Since(a.lastUserInput) < 300*time.Millisecond {
+			a.mu.Unlock()
+			return
+		}
+		a.updateAvailable = nil // Consume once, including No and window cancellation.
+		a.mu.Unlock()
+		answer := a.message(fmt.Sprintf("Доступна новая версия %s (сейчас %s).\n\nСкачать её и перезапустить программу?\nНастройки сохранятся. Применение расширения к игре выполняется отдельно, по кнопке.", release.Version, appVersion), 0x124)
+		if answer != 6 { // IDYES; No is the default button.
+			a.mu.Lock()
+			a.updateText = "Обновление отложено. Повторная проверка — кнопкой «Обновления…»."
+			a.mu.Unlock()
+			a.appendLog("Пользователь отложил обновление до " + release.Version + ".")
+			a.syncControls()
+			return
+		}
+		a.downloadSelfUpdate(release)
+		return
+	}
 	ready := a.updateReady
-	if (ready != nil || a.autoUpgrade) && otherInstallerOpen(a.hwnd) {
+	if ready == nil || !a.updateAccepted {
+		a.mu.Unlock()
+		return
+	}
+	if otherInstallerOpen(a.hwnd) {
 		changed := !a.updateWaitOthers
 		a.updateWaitOthers = true
-		a.updateText = "Для автообновления закройте другие окна установщика."
+		a.updateText = "Обновление скачано. Для перезапуска закройте другие окна установщика."
 		a.mu.Unlock()
 		if changed {
 			a.syncControls()
 		}
 		return
 	}
-	if a.updateWaitOthers {
-		a.updateWaitOthers = false
-		a.updateText = ""
-		restore := !a.pendingChoices()
-		haveGame := a.exe != ""
-		a.mu.Unlock()
-		if haveGame {
-			a.requestStatus(restore)
-		}
-		return
+	a.updateWaitOthers = false
+	a.updateReady = nil
+	a.updateHandoff = true
+	a.updateText = "Подготавливаю подтверждённое обновление программы…"
+	choices := map[string]bool{"onlyVisited": a.toggles[idVisited]}
+	for _, f := range features {
+		choices[f.Key] = a.toggles[f.ID]
 	}
-	if ready != nil {
-		if time.Since(a.lastUserInput) < 2*time.Second {
-			a.mu.Unlock()
-			return
-		}
-		a.updateReady = nil
-		a.updateHandoff = true
-		a.updateText = "Подготавливаю обновление программы…"
-		choices := map[string]bool{"onlyVisited": a.toggles[idVisited]}
-		for _, f := range features {
-			choices[f.Key] = a.toggles[f.ID]
-		}
-		state := updateResume{Game: a.exe, Choices: choices, LootKey: a.lootKey, DungeonKey: a.dungeonKey, Dirty: a.pendingChoices(), AutoApply: a.status != nil && a.status.Installed && !a.pendingChoices()}
-		foreground, _, _ := updateForeground.Call()
-		state.Background = foreground != a.hwnd
-		if a.status == nil {
-			state.LootKey = ""
-			state.DungeonKey = ""
-		}
-		a.mu.Unlock()
-		a.syncControls()
-		a.beginUpdateHandoff(ready, state)
-		return
+	state := updateResume{Game: a.exe, Choices: choices, LootKey: a.lootKey, DungeonKey: a.dungeonKey, Dirty: a.pendingChoices()}
+	if path, _ := a.logbook.location(); path != "" {
+		state.LogDir = filepath.Dir(path)
 	}
-	if a.resumePath != "" && !a.resumeCommitted {
-		var r updateResult
-		err := readUpdateJSON(filepath.Join(filepath.Dir(a.resumePath), "result.json"), &r)
-		if err == nil && r.State == "committed" {
-			a.resumeCommitted = true
-			a.updateText = "Программа обновлена до " + appVersion + "."
-			pPostMessageW.Call(a.hwnd, wmUpdater, 0, 0)
-		} else {
-			a.mu.Unlock()
-			return
-		}
-	}
-	if !a.autoUpgrade || !a.updateChecked {
-		a.mu.Unlock()
-		return
-	}
-	if !upgradeEligible(a.status, a.pendingChoices()) {
-		a.autoUpgrade = false
-		a.mu.Unlock()
-		return
-	}
-	if time.Since(a.lastUserInput) < 2*time.Second {
-		a.mu.Unlock()
-		return
-	}
-	// tasklist can be unavailable even when the game is running. Never rely
-	// on that fallback's "false" alone before an automatic archive write.
-	if !a.status.Running && nativeGameRunning() {
-		a.status.Running = true
-		pPostMessageW.Call(a.hwnd, wmUpdater, 0, 0)
-	}
-	if a.status.Running {
-		poll := time.Since(a.updatePoll) > 2*time.Second
-		if poll {
-			a.updatePoll = time.Now()
-		}
-		a.updateText = "Программа обновлена. Расширение обновится после закрытия игры."
-		a.mu.Unlock()
-		if poll && !nativeGameRunning() {
-			a.requestStatus(false)
-		}
-		return
+	foreground, _, _ := updateForeground.Call()
+	state.Background = foreground != a.hwnd
+	if a.status == nil {
+		state.LootKey, state.DungeonKey = "", ""
 	}
 	a.mu.Unlock()
-	a.run("upgrade")
+	a.syncControls()
+	a.beginUpdateHandoff(ready, state)
+}
+
+func (a *app) downloadSelfUpdate(release *updateRelease) {
+	a.mu.Lock()
+	a.updateAccepted, a.updateDownloading = true, true
+	a.updateText = "Скачиваю программу " + release.Version + "…"
+	a.mu.Unlock()
+	a.syncControls()
+	a.appendLog("Пользователь подтвердил обновление до " + release.Version + ".")
+	a.wg.Add(1)
+	go func() {
+		defer a.wg.Done()
+		ctx, cancel := context.WithTimeout(a.ctx, 2*time.Minute)
+		defer cancel()
+		ready, err := installerUpdater().download(ctx, release, updatesRoot(), func(p int) {
+			a.mu.Lock()
+			a.updateProgress = p
+			a.mu.Unlock()
+		})
+		a.mu.Lock()
+		a.updateDownloading = false
+		a.updateProgress = 0
+		a.updateReady = ready
+		if err != nil {
+			a.updateAccepted = false
+			a.updateText = "Обновление не выполнено. Текущая версия продолжает работу."
+			a.page = idJournal
+		}
+		a.mu.Unlock()
+		if err != nil {
+			a.appendLog("Скачивание/проверка обновления: " + err.Error())
+		} else {
+			a.appendLog("Размер, SHA-256, продукт и версия нового EXE проверены.")
+		}
+		a.logbook.sync()
+		pPostMessageW.Call(a.hwnd, wmUpdater, 0, 0)
+	}()
 }
 
 func (a *app) updateModal() func() {
@@ -178,7 +190,7 @@ func (a *app) beginUpdateHandoff(ready *downloadedUpdate, state updateResume) {
 			digest, err = fileSHA256(self)
 		}
 		path := filepath.Join(ready.Dir, "plan.json")
-		p := updatePlan{Product: appName, Protocol: updateProtocol, Target: self, Download: ready.EXE, Version: ready.Version, FromVersion: appVersion, SHA256: ready.SHA256, OldSHA256: digest, ParentPID: os.Getpid(), Resume: state}
+		p := updatePlan{Product: appName, Protocol: updateProtocol, UserApproved: true, Target: self, Download: ready.EXE, Version: ready.Version, FromVersion: appVersion, SHA256: ready.SHA256, OldSHA256: digest, ParentPID: os.Getpid(), Resume: state}
 		if err == nil {
 			err = writeUpdateJSON(path, p)
 		}
@@ -207,6 +219,8 @@ func (a *app) beginUpdateHandoff(ready *downloadedUpdate, state updateResume) {
 		a.updateHandoff = false
 		a.handedOff = helperStarted
 		if err != nil {
+			a.updateAccepted = false
+			a.page = idJournal
 			a.updateText = "Не удалось заменить программу. Текущая версия продолжает работу."
 		}
 		a.mu.Unlock()
@@ -214,6 +228,7 @@ func (a *app) beginUpdateHandoff(ready *downloadedUpdate, state updateResume) {
 			a.appendLog("Самообновление: " + err.Error() + "\r\n")
 			_ = os.RemoveAll(ready.Dir)
 		}
+		a.logbook.sync()
 		pPostMessageW.Call(a.hwnd, wmUpdater, 0, 0)
 	}()
 }
@@ -229,9 +244,6 @@ func (a *app) restoreUpdateChoices(st *gameStatus, exe string) {
 			base = loadChoices(st.Cfg, base)
 		}
 		a.toggles = resumeChoices(r.Choices, base)
-	}
-	if r.Dirty {
-		a.autoUpgrade = false
 	}
 	a.updateResume = nil
 }

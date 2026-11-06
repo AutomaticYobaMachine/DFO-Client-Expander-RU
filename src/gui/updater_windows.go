@@ -126,11 +126,27 @@ func restoreUpdateFile(target, backup string) error {
 }
 
 func runUpdateHelper(path string) (err error) {
+	journal := newSessionJournal(filepath.Join(os.Getenv("APPDATA"), "DFO Online"), filepath.Join(os.Getenv("LOCALAPPDATA"), appName, "logs"))
+	defer journal.close()
+	defer func() {
+		if err != nil {
+			journal.append("Помощник обновления: " + err.Error())
+		} else {
+			journal.append("Замена EXE подтверждена. Автоматическое применение к игре отключено.")
+		}
+	}()
+	journal.append(fmt.Sprintf("Помощник обновления PID=%d. План: %s", os.Getpid(), path))
 	path, _ = filepath.Abs(path)
 	p, err := loadUpdatePlan(path, updatesRoot())
 	if err != nil {
 		return err
 	}
+	if p.Resume.LogDir != "" {
+		if e := journal.move(p.Resume.LogDir); e != nil {
+			journal.append("Перенос журнала помощника: " + e.Error())
+		}
+	}
+	_ = journal.captureCrashes()
 	dir := filepath.Dir(path)
 	ready := filepath.Join(dir, "ready.json")
 	defer func() {

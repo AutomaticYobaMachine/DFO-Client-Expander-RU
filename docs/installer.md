@@ -1,4 +1,4 @@
-# Установщик DFO-Client-Expander-RU 1.16.2
+# Установщик DFO-Client-Expander-RU 1.22.0
 
 Автор: **AutomaticYobaMachine**. Создано специально для русского сообщества
 DFO Online. Имя используется в окне, именах дистрибутива, свойствах PE/EXE,
@@ -6,7 +6,7 @@ DFO Online. Имя используется в окне, именах дистр
 
 ## Для игрока
 
-Готовый EXE можно [скачать напрямую](https://github.com/AutomaticYobaMachine/DFO-Client-Expander-RU/releases/download/v1.16.2/DFO-Client-Expander-RU-1.16.2.exe).
+Рабочий EXE 1.22.0 доступен в артефактах [сборки main](https://github.com/AutomaticYobaMachine/DFO-Client-Expander-RU/actions/workflows/build.yml) до публикации релиза.
 EXE и ZIP также публикуются в
 [GitHub Releases](https://github.com/AutomaticYobaMachine/DFO-Client-Expander-RU/releases/latest).
 Скачивайте файл с именем программы; стандартные архивы GitHub `Source code`
@@ -253,3 +253,13 @@ WebGL, двери и продолжение маршрута после пере
 сценарий проверяет WebGL без Worker и отсутствие старой линии в первом
 кадре после смены комнаты. На исходных данных Privateer’s Hold также проверены
 целые маршруты между этажами и видимость линии по всей длине найденного пути.
+
+## Запуск и обновления 1.22.0
+
+Изменения игры применяются исключительно кнопкой. Даже старый ярлык с
+`--auto-install` или `--auto-uninstall` открывает обычное окно без установки.
+Обнаруженный новый Release предлагается диалогом «Да/Нет» до скачивания.
+После согласия обновляется только EXE; установка мода — отдельным нажатием.
+Сбой не закрывает окно: откройте «Журнал» → «Полный журнал».
+Полный файл `dfo-mod-installer.log` находится рядом с игровым кешем
+(обычно `%APPDATA%\DFO Online`). Подробнее: [обновления и диагностика](auto-update.md).

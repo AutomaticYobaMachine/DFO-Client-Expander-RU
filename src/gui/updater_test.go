@@ -212,7 +212,7 @@ func TestUpdateRejectsWrongProductProtocolAndFailedLaunch(t *testing.T) {
 			f := newUpdateFixture(t)
 			r, _ := f.u.latest(context.Background())
 			f.u.probe = func(context.Context, string) (installerInfo, error) {
-				v := installerInfo{Product: appName, Version: f.version, Protocol: 1}
+				v := installerInfo{Product: appName, Version: f.version, Protocol: updateProtocol}
 				switch mode {
 				case "product":
 					v.Product = "other"
@@ -302,7 +302,7 @@ func TestUpdatePlanIsBoundToPrivateCacheAndKnownFiles(t *testing.T) {
 	dir := filepath.Join(root, "update-123")
 	os.Mkdir(dir, 0700)
 	path := filepath.Join(dir, "plan.json")
-	p := updatePlan{Product: appName, Protocol: 1, Target: filepath.Join(t.TempDir(), "portable.exe"), Download: filepath.Join(dir, "update.exe"), Version: "1.20.0", FromVersion: "1.19.0", SHA256: strings.Repeat("a", 64), OldSHA256: strings.Repeat("b", 64), ParentPID: 123}
+	p := updatePlan{UserApproved: true, Product: appName, Protocol: updateProtocol, Target: filepath.Join(t.TempDir(), "portable.exe"), Download: filepath.Join(dir, "update.exe"), Version: "1.20.0", FromVersion: "1.19.0", SHA256: strings.Repeat("a", 64), OldSHA256: strings.Repeat("b", 64), ParentPID: 123}
 	if err := writeUpdateJSON(path, p); err != nil {
 		t.Fatal(err)
 	}
@@ -312,6 +312,18 @@ func TestUpdatePlanIsBoundToPrivateCacheAndKnownFiles(t *testing.T) {
 	if _, err := loadUpdatePlan(path, t.TempDir()); err == nil {
 		t.Fatal("accepted foreign plan")
 	}
+	p.UserApproved = false
+	writeUpdateJSON(path, p)
+	if _, err := loadUpdatePlan(path, root); err == nil {
+		t.Fatal("accepted an unapproved update")
+	}
+	p.UserApproved = true
+	p.Protocol = 1
+	writeUpdateJSON(path, p)
+	if _, err := loadUpdatePlan(path, root); err == nil {
+		t.Fatal("accepted silent legacy update protocol")
+	}
+	p.Protocol = updateProtocol
 	p.Incoming = filepath.Join(t.TempDir(), "unrelated.exe")
 	writeUpdateJSON(path, p)
 	if _, err := loadUpdatePlan(path, root); err == nil {
@@ -325,30 +337,7 @@ func TestUpdatePlanIsBoundToPrivateCacheAndKnownFiles(t *testing.T) {
 	}
 }
 
-func TestAutomaticModUpgradePreservesDisabledStateAndRequiresInstalledOlderVersion(t *testing.T) {
-	old := "1.18.0"
-	st := &gameStatus{Installed: true, ModVersion: &old, Cfg: json.RawMessage(`{"enabled":false,"ru":false,"marks":true}`)}
-	if !upgradeEligible(st, false) || upgradeEligible(st, true) || upgradeEligible(nil, false) {
-		t.Fatal("unsafe upgrade eligibility")
-	}
-	if enabledSetting(st.Cfg) {
-		t.Fatal("enabled a disabled extension")
-	}
-	st.Installed = false
-	if upgradeEligible(st, false) {
-		t.Fatal("automatically installed an absent extension")
-	}
-	st.Installed = true
-	current := appVersion
-	st.ModVersion = &current
-	if upgradeEligible(st, false) {
-		t.Fatal("repeated the same install")
-	}
-	future := "999.0.0"
-	st.ModVersion = &future
-	if upgradeEligible(st, false) {
-		t.Fatal("downgraded a newer extension")
-	}
+func TestUpdateResumePreservesAllPendingChoices(t *testing.T) {
 	saved := map[string]bool{"ru": false, "marks": true, "nearbyLoot": false, "dungeons": true, "itemCards": false, "fonts": false, "onlyVisited": false}
 	choices := resumeChoices(saved, defaults())
 	for _, feature := range features {
@@ -386,7 +375,7 @@ func TestUpdateCacheCleanupKeepsRecentActiveAndUnrelatedFiles(t *testing.T) {
 	for i := 0; i < 6; i++ {
 		path := filepath.Join(root, fmt.Sprintf("update-%d", i))
 		os.Mkdir(path, 0700)
-		writeUpdateJSON(filepath.Join(path, "owner.json"), installerInfo{Product: appName, Protocol: 1})
+		writeUpdateJSON(filepath.Join(path, "owner.json"), installerInfo{Product: appName, Protocol: updateProtocol})
 		when := time.Now().Add(-time.Duration(i+1) * time.Hour)
 		os.Chtimes(path, when, when)
 		paths = append(paths, path)

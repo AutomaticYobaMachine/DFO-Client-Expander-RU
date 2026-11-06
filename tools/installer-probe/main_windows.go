@@ -69,7 +69,7 @@ func text(h uintptr) string {
 func box(h uintptr) rect { var r rect; windowRect.Call(h, uintptr(unsafe.Pointer(&r))); return r }
 func main() {
 	h, _, _ := find.Call(ptr("DFOClientExpanderInstaller"), 0)
-	if len(os.Args) > 1 && (os.Args[1] == "dialog" || os.Args[1] == "savepath" || os.Args[1] == "cancel-save") {
+	if len(os.Args) > 1 && (os.Args[1] == "dialog" || os.Args[1] == "dialogclick" || os.Args[1] == "savepath" || os.Args[1] == "cancel-save") {
 		h, _, _ = find.Call(ptr("#32770"), 0)
 	}
 	if h == 0 {
@@ -85,7 +85,7 @@ func main() {
 		v, _, _ := visible.Call(c)
 		e, _, _ := enabled.Call(c)
 		checked := -1
-		if (id >= 103 && id <= 107) || id == 122 {
+		if (id >= 103 && id <= 107) || id == 122 || id == 123 {
 			n, _, _ := send.Call(c, 0xf0, 0, 0)
 			checked = int(n)
 		}
@@ -96,6 +96,10 @@ func main() {
 	enum.Call(h, cb, 0)
 	if len(os.Args) > 1 {
 		switch os.Args[1] {
+		case "dialogclick":
+			id, _ := strconv.Atoi(os.Args[2])
+			// Posting avoids waiting for a modal call to unwind in another process.
+			post.Call(h, 0x0111, uintptr(id), handles[id])
 		case "key":
 			vk, _ := strconv.ParseUint(os.Args[2], 0, 16)
 			scan, _ := strconv.ParseUint(os.Args[3], 0, 16)

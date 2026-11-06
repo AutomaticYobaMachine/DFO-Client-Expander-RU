@@ -11,6 +11,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync/atomic"
 	"syscall"
 	"testing"
 	"time"
@@ -39,11 +40,15 @@ func TestNativeSelfUpdateStartup(t *testing.T) {
 	}
 	digest := sha256.Sum256(data)
 	hash := hex.EncodeToString(digest[:])
-	version := "1.20.0"
+	version := os.Getenv("DFO_TEST_UPDATE_VERSION")
 	name := appName + "-" + version + ".exe"
 	base := updateDownload + "v" + version + "/"
 	sum := []byte(hash + "  " + name + "\n")
+	if os.Getenv("DFO_TEST_UPDATE_FAILURE") == "checksum" {
+		sum = []byte(strings.Repeat("a", 64) + "  " + name + "\n")
+	}
 	metadata, _ := json.Marshal(map[string]any{"tag_name": "v" + version, "assets": []updateAsset{{Name: name, URL: base + name, Size: int64(len(data)), Digest: "sha256:" + hash}, {Name: name + ".sha256", URL: base + name + ".sha256", Size: int64(len(sum))}}})
+	var downloads atomic.Int32
 	installerUpdater = func() *releaseUpdater {
 		client := &http.Client{Transport: updateTransport(func(r *http.Request) (*http.Response, error) {
 			var body io.Reader
@@ -51,8 +56,10 @@ func TestNativeSelfUpdateStartup(t *testing.T) {
 			case updateAPI:
 				body = bytes.NewReader(metadata)
 			case base + name + ".sha256":
+				downloads.Add(1)
 				body = bytes.NewReader(sum)
 			case base + name:
+				downloads.Add(1)
 				// Keep the old UI visible long enough to exercise pending input.
 				select {
 				case <-r.Context().Done():
@@ -70,8 +77,12 @@ func TestNativeSelfUpdateStartup(t *testing.T) {
 	}
 	os.Args = []string{os.Args[0], "--game", game}
 	main()
-	if !A.handedOff {
-		t.Fatalf("update handoff did not finish; log: %s", A.fullLog.String())
+	wantHandoff := os.Getenv("DFO_TEST_EXPECT_HANDOFF") != "false"
+	if A.handedOff != wantHandoff {
+		t.Fatalf("update handoff did not finish; log: %s", A.logbook.snapshot(0))
+	}
+	if os.Getenv("DFO_TEST_EXPECT_NO_DOWNLOAD") == "true" && downloads.Load() != 0 {
+		t.Fatal("downloaded an update without consent")
 	}
 }
 

@@ -7,56 +7,58 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
-	"strings"
 	"sync"
+	"sync/atomic"
 	"syscall"
 	"time"
 	"unsafe"
 )
 
 type app struct {
-	mu                                           sync.Mutex
-	wg                                           sync.WaitGroup
-	ctx                                          context.Context
-	cancel                                       context.CancelFunc
-	hwnd, pane                                   uintptr
-	dpi                                          int32
-	modDir, payloadDir, prefsDir                 string
-	exe                                          string
-	status                                       *gameStatus
-	busy, querying, searching                    bool
-	lootKey, dungeonKey                          string
-	lootKeyDirty, dungeonKeyDirty, capturingKey  bool
-	captureTarget                                int
-	recordedKey, recordedMouse                   uint32
-	generation, choiceRevision                   uint64
-	searchFound                                  []string
-	searchHow                                    string
-	searchReady                                  bool
-	note, stage, operation                       string
-	noteCol                                      uintptr
-	progress                                     int
-	page                                         int
-	pending, fullLog                             strings.Builder
-	toggles                                      map[int]bool
-	ctl, descriptions                            map[int]uintptr
-	fonts                                        map[string]uintptr
-	brushBg, brushCard, brushField, brushLog     uintptr
-	rows                                         map[int]rect
-	scroll, contentHeight, wheel                 int32
-	anim                                         int32
-	auto                                         string
-	updateChecking, updateChecked, updateHandoff bool
-	handedOff, autoUpgrade, resumeCommitted      bool
-	updateText, resumePath                       string
-	updateProgress                               int
-	updateReady                                  *downloadedUpdate
-	updateResume                                 *updateResume
-	updatePoll                                   time.Time
-	lastUserInput                                time.Time
-	modalDepth                                   int
-	updateWaitOthers                             bool
-	savedChoiceRevision, resumeRevision          uint64
+	mu                                               sync.Mutex
+	wg                                               sync.WaitGroup
+	ctx                                              context.Context
+	cancel                                           context.CancelFunc
+	hwnd, pane                                       uintptr
+	dpi                                              int32
+	modDir, payloadDir, prefsDir                     string
+	exe                                              string
+	status                                           *gameStatus
+	busy, querying, searching                        bool
+	lootKey, dungeonKey                              string
+	lootKeyDirty, dungeonKeyDirty, capturingKey      bool
+	captureTarget                                    int
+	recordedKey, recordedMouse                       uint32
+	generation, choiceRevision                       uint64
+	searchFound                                      []string
+	searchHow                                        string
+	searchReady                                      bool
+	note, stage, operation                           string
+	noteCol                                          uintptr
+	progress                                         int
+	page                                             int
+	logbook                                          *sessionJournal
+	logPosted                                        atomic.Bool
+	startupError                                     error
+	toggles                                          map[int]bool
+	ctl, descriptions                                map[int]uintptr
+	fonts                                            map[string]uintptr
+	brushBg, brushCard, brushField, brushLog         uintptr
+	rows                                             map[int]rect
+	scroll, contentHeight, wheel                     int32
+	anim                                             int32
+	updateChecking, updateDownloading, updateHandoff bool
+	handedOff, resumeCommitted, updateAccepted       bool
+	updatesDisabled                                  bool
+	updateText, resumePath                           string
+	updateProgress                                   int
+	updateReady                                      *downloadedUpdate
+	updateAvailable                                  *updateRelease
+	updateResume                                     *updateResume
+	lastUserInput                                    time.Time
+	modalDepth                                       int
+	updateWaitOthers                                 bool
+	savedChoiceRevision, resumeRevision              uint64
 }
 
 var A = &app{dpi: 96, page: idComponents, lootKey: defaultLootKey, dungeonKey: defaultDungeonKey, toggles: defaults(), ctl: map[int]uintptr{}, descriptions: map[int]uintptr{}, fonts: map[string]uintptr{}, rows: map[int]rect{}}
@@ -112,7 +114,7 @@ func (a *app) createControls() {
 	for _, v := range []struct {
 		id    int
 		label string
-	}{{idSaveLog, "Сохранить журнал…"}, {idOpenLog, "Журнал игры"}, {idOpenReport, "Отчёт меток"}, {idReadme, "Инструкция"}, {idUninstall, "Удалить расширение"}, {idInstall, "Установить выбранное"}} {
+	}{{idSaveLog, "Сохранить журнал…"}, {idOpenLog, "Журнал игры"}, {idOpenReport, "Отчёт меток"}, {idInstallerLog, "Полный журнал"}, {idCheckUpdates, "Обновления…"}, {idReadme, "Инструкция"}, {idUninstall, "Удалить расширение"}, {idInstall, "Установить выбранное"}} {
 		a.button(v.id, v.label)
 	}
 	pSendMessageW.Call(a.ctl[idLog], emSetLimit, 1024*1024, 0)
@@ -135,7 +137,9 @@ func (a *app) syncControls() {
 	for id, on := range a.toggles {
 		choices[id] = on
 	}
-	busy, querying, searching, st, page, operation := a.busy || a.updateHandoff || a.handedOff, a.querying, a.searching, a.status, a.page, a.operation
+	busy, querying, searching, st, page, operation := a.busy || a.updateDownloading || a.updateHandoff || a.handedOff, a.querying, a.searching, a.status, a.page, a.operation
+	checking, updatesDisabled := a.updateChecking, a.updatesDisabled
+	updating, updatePending := a.updateDownloading || a.updateHandoff || a.handedOff, a.updateReady != nil
 	resumePending := a.resumePath != "" && !a.resumeCommitted
 	key, dungeonKey, recording, target := a.lootKey, a.dungeonKey, a.capturingKey, a.captureTarget
 	a.mu.Unlock()
@@ -165,6 +169,7 @@ func (a *app) syncControls() {
 	enable(a.ctl[idUninstall], ready && st.Installed)
 	enable(a.ctl[idBrowse], !busy)
 	enable(a.ctl[idRefresh], !busy && !querying && !searching)
+	enable(a.ctl[idCheckUpdates], !busy && !checking && !updatePending && !resumePending && !updatesDisabled)
 	label := "Установить выбранное"
 	if st != nil && st.Installed {
 		label = "Обновить расширение"
@@ -173,7 +178,9 @@ func (a *app) syncControls() {
 		}
 	}
 	if busy {
-		if operation == "uninstall" {
+		if updating {
+			label = "Обновление программы…"
+		} else if operation == "uninstall" {
 			label = "Удаление…"
 		} else {
 			label = "Установка…"
@@ -182,7 +189,7 @@ func (a *app) syncControls() {
 	caption(a.ctl[idInstall], label)
 	show(a.pane, page == idComponents)
 	show(a.ctl[idLog], page == idJournal)
-	for _, id := range []int{idSaveLog, idOpenLog, idOpenReport} {
+	for _, id := range []int{idSaveLog, idOpenLog, idOpenReport, idInstallerLog} {
 		show(a.ctl[id], page == idJournal)
 	}
 	for _, id := range []int{idComponents, idJournal, idInstall, idUninstall, idBrowse, idRefresh} {
@@ -217,6 +224,7 @@ func (a *app) layout() {
 	tabTop := P(paneTop - 44)
 	move(a.ctl[idComponents], rect{P(24), tabTop, P(180), tabTop + P(32)})
 	move(a.ctl[idJournal], rect{P(188), tabTop, P(294), tabTop + P(32)})
+	move(a.ctl[idCheckUpdates], rect{P(302), tabTop, P(460), tabTop + P(32)})
 	bottom := r.bottom - P(foot) - P(10)
 	if bottom < P(paneTop+40) {
 		bottom = P(paneTop + 40)
@@ -226,6 +234,7 @@ func (a *app) layout() {
 	move(a.ctl[idSaveLog], rect{P(32), bottom - P(38), P(224), bottom - P(8)})
 	move(a.ctl[idOpenLog], rect{P(232), bottom - P(38), P(372), bottom - P(8)})
 	move(a.ctl[idOpenReport], rect{P(380), bottom - P(38), P(514), bottom - P(8)})
+	move(a.ctl[idInstallerLog], rect{P(522), bottom - P(38), P(680), bottom - P(8)})
 	base := r.bottom - P(60)
 	move(a.ctl[idInstall], rect{r.right - P(276), base, r.right - P(24), base + P(42)})
 	move(a.ctl[idUninstall], rect{r.right - P(470), base, r.right - P(288), base + P(42)})
@@ -379,11 +388,7 @@ func (a *app) paint(hdc uintptr, r rect) {
 			}
 		}
 		if st.Running {
-			if a.autoUpgrade {
-				line += " · закройте игру для обновления"
-			} else {
-				line += " · закройте игру и нажмите «Проверить»"
-			}
+			line += " · закройте игру и нажмите «Проверить»"
 			col = colRed
 		} else {
 			line += " · клиент готов"
@@ -433,13 +438,13 @@ func (a *app) paint(hdc uintptr, r rect) {
 	bar := rect{P(24), barY, r.right - P(24), barY + P(3)}
 	fill(hdc, bar, colEdge)
 	progress := a.progress
-	if !a.busy && a.updateChecking {
+	if !a.busy && (a.updateChecking || a.updateDownloading) {
 		progress = a.updateProgress
 	}
 	if progress > 0 {
 		bar.right = bar.left + (bar.right-bar.left)*int32(progress)/100
 		fill(hdc, bar, colBrass)
-	} else if a.busy || a.updateChecking || a.updateHandoff {
+	} else if a.busy || a.updateChecking || a.updateDownloading || a.updateHandoff {
 		width := bar.right - bar.left
 		start := (a.anim*a.px(14))%(width+a.px(130)) - a.px(130)
 		seg := rect{bar.left + start, bar.top, bar.left + start + a.px(130), bar.bottom}
@@ -669,7 +674,7 @@ func wndProc(hwnd uintptr, m uint32, wp, lp uintptr) uintptr {
 		}
 	case wmTimer:
 		a.mu.Lock()
-		busy := a.busy || a.updateChecking || a.updateHandoff
+		busy := a.busy || a.updateChecking || a.updateDownloading || a.updateHandoff
 		a.mu.Unlock()
 		if busy {
 			a.anim++
@@ -727,6 +732,10 @@ func wndProc(hwnd uintptr, m uint32, wp, lp uintptr) uintptr {
 			a.openFile("dfo-mod.log")
 		case idOpenReport:
 			a.openFile("dfo-mod-marks.txt")
+		case idInstallerLog:
+			a.openInstallerLog()
+		case idCheckUpdates:
+			a.startSelfUpdate()
 		case idReadme:
 			a.openGuide()
 		case 2:
@@ -734,28 +743,14 @@ func wndProc(hwnd uintptr, m uint32, wp, lp uintptr) uintptr {
 		}
 		return 0
 	case wmLog:
-		a.mu.Lock()
-		s := a.pending.String()
-		a.pending.Reset()
-		a.mu.Unlock()
-		if s != "" {
-			pSendMessageW.Call(a.ctl[idLog], emSetSel, 0x7fffffff, 0x7fffffff)
-			pSendMessageW.Call(a.ctl[idLog], emReplaceSel, 0, uintptr(unsafe.Pointer(u16(s))))
-		}
+		a.logPosted.Store(false)
+		caption(a.ctl[idLog], a.logbook.snapshot(64<<10))
+		pSendMessageW.Call(a.ctl[idLog], emSetSel, 0x7fffffff, 0x7fffffff)
+		pSendMessageW.Call(a.ctl[idLog], 0xB7, 0, 0) // EM_SCROLLCARET
 		invalidate(hwnd)
 		return 0
 	case wmStatus, wmDone:
 		a.syncControls()
-		a.mu.Lock()
-		auto := a.auto
-		ready := !a.busy && !a.querying && a.status != nil && !a.status.Running
-		if ready {
-			a.auto = ""
-		}
-		a.mu.Unlock()
-		if auto != "" && ready {
-			a.run(auto)
-		}
 		a.maybeUpdate()
 		return 0
 	case wmUpdater:
@@ -849,31 +844,34 @@ func main() {
 	self, _ := os.Executable()
 	a.modDir = filepath.Dir(self)
 	a.prefsDir = filepath.Join(os.Getenv("LOCALAPPDATA"), appName)
-	var gameArg, resumeArg string
-	noUpdate := false
-	for i, arg := range os.Args[1:] {
-		if arg == "--auto-install" {
-			a.auto = "install"
-		} else if arg == "--auto-uninstall" {
-			a.auto = "uninstall"
-		} else if arg == "--game" && i+2 < len(os.Args) {
-			gameArg = os.Args[i+2]
-		} else if arg == "--no-self-update" {
-			noUpdate = true
-		} else if arg == "--dfo-resume-update" && i+2 < len(os.Args) {
-			resumeArg = os.Args[i+2]
-		}
+	opts := parseStartup(os.Args[1:])
+	gameArg, resumeArg, noUpdate := opts.game, opts.resume, opts.noUpdate
+	a.updatesDisabled = noUpdate
+	a.logbook = newSessionJournal(filepath.Join(os.Getenv("APPDATA"), "DFO Online"), filepath.Join(a.prefsDir, "logs"))
+	defer a.logbook.close()
+	_ = a.logbook.captureCrashes()
+	a.appendLog(versionTitle() + "\r\nАвтор: " + appAuthor + "\r\n" + appCommunity)
+	a.appendLog(fmt.Sprintf("Запуск PID=%d, %s/%s. EXE: %s", os.Getpid(), runtime.GOOS, runtime.GOARCH, self))
+	if path, err := a.logbook.location(); err != nil || path == "" {
+		a.appendLog(fmt.Sprintf("Полный журнал недоступен на диске: %v. Доступно ручное сохранение.", err))
+	} else {
+		a.appendLog("Полный журнал: " + path)
 	}
-	a.autoUpgrade = !noUpdate && a.auto == ""
-	a.updateChecked = noUpdate || a.auto != ""
+	if opts.legacyAuto {
+		a.appendLog("Устаревший параметр автоматической установки проигнорирован. Изменение клиента возможно только по кнопке.")
+	}
 	if resumeArg != "" {
 		plan, rolledBack, e := loadResumeUpdate(resumeArg, self)
 		if e == nil {
+			if plan.Resume.LogDir != "" {
+				if err := a.logbook.move(plan.Resume.LogDir); err != nil {
+					a.appendLog("Восстановление пути журнала: " + err.Error())
+				}
+				_ = a.logbook.captureCrashes()
+			}
 			a.resumePath = resumeArg
 			a.resumeCommitted = rolledBack
 			a.updateResume = &plan.Resume
-			a.autoUpgrade = plan.Resume.AutoApply && !rolledBack
-			a.updateChecked = true
 			if plan.Resume.Dirty {
 				a.toggles = resumeChoices(plan.Resume.Choices, a.toggles)
 				a.choiceRevision++
@@ -889,20 +887,26 @@ func main() {
 			a.resumeRevision = a.choiceRevision
 			if rolledBack {
 				a.updateText = "Обновление не завершено. Запущена предыдущая рабочая версия."
+				var result updateResult
+				if readUpdateJSON(filepath.Join(filepath.Dir(resumeArg), "result.json"), &result) == nil {
+					a.appendLog("Откат обновления: " + result.Error)
+				}
 			}
 		} else {
-			a.autoUpgrade = false
-			a.updateChecked = true
+			a.appendLog("Восстановление после обновления: " + e.Error())
 			a.updateText = "Не удалось восстановить состояние обновления. Проверьте настройки перед установкой."
 		}
 	}
 	var err error
 	a.payloadDir, err = unpackPayload()
 	if err != nil {
-		a.message("Не удалось подготовить файлы установщика. Проверьте свободное место и повторите запуск.\n\n"+err.Error(), 0x10)
-		return
+		a.startupError = err
+		a.note = "Файлы установщика не подготовлены. Причина — в журнале; можно проверить обновления."
+		a.noteCol, a.page = colRed, idJournal
+		a.appendLog("Распаковка установщика: " + err.Error())
+	} else {
+		defer os.RemoveAll(a.payloadDir)
 	}
-	defer os.RemoveAll(a.payloadDir)
 	hdc, _, _ := pGetDC.Call(0)
 	dpi, _, _ := pGetDeviceCaps.Call(hdc, 90)
 	pReleaseDC.Call(0, hdc)
@@ -944,7 +948,8 @@ func main() {
 	}
 	hwnd, _, _ := pCreateWindowExW.Call(wsExControlParent, uintptr(unsafe.Pointer(u16("DFOClientExpanderInstaller"))), uintptr(unsafe.Pointer(u16(versionTitle()))), style, signed(work.left+(work.right-work.left-w)/2), signed(work.top+(work.bottom-work.top-h)/2), signed(w), signed(h), 0, 0, inst, 0)
 	if hwnd == 0 {
-		a.message("Не удалось открыть окно установщика.", 0x10)
+		a.appendLog("Не удалось создать окно установщика.")
+		a.message("Не удалось открыть окно установщика. Полный журнал: "+func() string { p, _ := a.logbook.location(); return p }(), 0x10)
 		return
 	}
 	if pDwmSetWindowAttribute.Find() == nil {
@@ -961,8 +966,10 @@ func main() {
 	if !background {
 		pSetFocus.Call(a.ctl[idRu])
 	}
-	a.appendLog(versionTitle() + "\r\nАвтор: " + appAuthor + "\r\n" + appCommunity + "\r\n\r\n")
-	if gameArg != "" {
+	a.appendLog("Окно готово. Инъекция выполняется только по кнопке.")
+	if a.startupError != nil {
+		// Keep the diagnostics window usable even if payload extraction failed.
+	} else if gameArg != "" {
 		if exe := gameIn(filepath.Dir(gameArg)); exe != "" {
 			a.setGame(exe, "параметр запуска")
 		} else {
@@ -972,8 +979,10 @@ func main() {
 	} else {
 		a.startSearch()
 	}
-	a.announceUpdateStartup()
-	if !noUpdate && a.auto == "" && resumeArg == "" {
+	if a.startupError == nil {
+		a.announceUpdateStartup()
+	}
+	if !noUpdate && resumeArg == "" {
 		a.startSelfUpdate()
 	}
 	var mm msg
@@ -1006,6 +1015,7 @@ func main() {
 		pDispatchMessageW.Call(uintptr(unsafe.Pointer(&mm)))
 	}
 	a.wg.Wait()
+	a.appendLog("Окно установщика закрыто.")
 	if !a.handedOff && a.updateReady != nil {
 		_ = os.RemoveAll(a.updateReady.Dir)
 	}

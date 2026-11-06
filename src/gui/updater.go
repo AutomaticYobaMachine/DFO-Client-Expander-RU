@@ -21,7 +21,9 @@ import (
 
 const updateAPI = "https://api.github.com/repos/AutomaticYobaMachine/DFO-Client-Expander-RU/releases/latest"
 const updateDownload = "https://github.com/AutomaticYobaMachine/DFO-Client-Expander-RU/releases/download/"
-const updateProtocol = 1
+
+// Protocol 1 installers updated silently. They must not silently migrate to this policy.
+const updateProtocol = 2
 const maxUpdateSize = 128 << 20
 
 var releaseVersion = regexp.MustCompile(`^v?(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$`)
@@ -342,27 +344,28 @@ func readUpdateJSON(path string, value any) error {
 }
 
 type updateResume struct {
+	LogDir     string          `json:"logDir,omitempty"`
 	Game       string          `json:"game"`
 	Choices    map[string]bool `json:"choices"`
 	LootKey    string          `json:"lootKey"`
 	DungeonKey string          `json:"dungeonKey"`
 	Dirty      bool            `json:"dirty"`
-	AutoApply  bool            `json:"autoApply"`
 	Background bool            `json:"background"`
 }
 type updatePlan struct {
-	Product     string       `json:"product"`
-	Protocol    int          `json:"protocol"`
-	Target      string       `json:"target"`
-	Download    string       `json:"download"`
-	Incoming    string       `json:"incoming"`
-	Backup      string       `json:"backup"`
-	Version     string       `json:"version"`
-	FromVersion string       `json:"fromVersion"`
-	SHA256      string       `json:"sha256"`
-	OldSHA256   string       `json:"oldSha256"`
-	ParentPID   int          `json:"parentPID"`
-	Resume      updateResume `json:"resume"`
+	UserApproved bool         `json:"userApproved"`
+	Product      string       `json:"product"`
+	Protocol     int          `json:"protocol"`
+	Target       string       `json:"target"`
+	Download     string       `json:"download"`
+	Incoming     string       `json:"incoming"`
+	Backup       string       `json:"backup"`
+	Version      string       `json:"version"`
+	FromVersion  string       `json:"fromVersion"`
+	SHA256       string       `json:"sha256"`
+	OldSHA256    string       `json:"oldSha256"`
+	ParentPID    int          `json:"parentPID"`
+	Resume       updateResume `json:"resume"`
 }
 type updateResult struct {
 	State string `json:"state"`
@@ -382,8 +385,11 @@ func loadUpdatePlan(path, root string) (*updatePlan, error) {
 	if err = readUpdateJSON(abs, &p); err != nil {
 		return nil, err
 	}
-	if p.Product != appName || p.Protocol != updateProtocol || p.ParentPID <= 0 || !filepath.IsAbs(p.Target) || !strings.EqualFold(filepath.Ext(p.Target), ".exe") || p.Download != filepath.Join(filepath.Dir(abs), "update.exe") {
+	if !p.UserApproved || p.Product != appName || p.Protocol != updateProtocol || p.ParentPID <= 0 || !filepath.IsAbs(p.Target) || !strings.EqualFold(filepath.Ext(p.Target), ".exe") || p.Download != filepath.Join(filepath.Dir(abs), "update.exe") {
 		return nil, errors.New("неверный план обновления")
+	}
+	if p.Resume.LogDir != "" && !filepath.IsAbs(p.Resume.LogDir) {
+		return nil, errors.New("неверный путь журнала обновления")
 	}
 	comparison, err := compareVersions(p.Version, p.FromVersion)
 	if err != nil || comparison <= 0 {
@@ -481,24 +487,6 @@ func awaitUpdateResult(ctx context.Context, path string) (updateResult, error) {
 		case <-ticker.C:
 		}
 	}
-}
-
-func upgradeEligible(st *gameStatus, dirty bool) bool {
-	if dirty || st == nil || !st.Installed || st.ModVersion == nil {
-		return false
-	}
-	comparison, err := compareVersions(appVersion, *st.ModVersion)
-	return err == nil && comparison > 0
-}
-
-func enabledSetting(cfg json.RawMessage) bool {
-	var c struct {
-		Enabled *bool `json:"enabled"`
-	}
-	if json.Unmarshal(cfg, &c) == nil && c.Enabled != nil {
-		return *c.Enabled
-	}
-	return true
 }
 
 // Reuse canonical names when handing settings to a future installer. Numeric

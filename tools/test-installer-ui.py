@@ -114,10 +114,10 @@ def main():
         executable = standalone/INSTALLER.name
         shutil.copyfile(INSTALLER, executable)
 
-        def launch():
-            return subprocess.Popen([WINE, winpath(executable), '--no-self-update', '--game', winpath(game/'DFO Online.exe')], env=env, stdout=log, stderr=log)
+        def launch(*flags):
+            return subprocess.Popen([WINE, winpath(executable), '--no-self-update', *flags, '--game', winpath(game/'DFO Online.exe')], env=env, stdout=log, stderr=log)
 
-        app = launch()
+        app = launch("--auto-install")
         s = wait(lambda: (v if (v := state()) and v['by_id'][108]['Enabled'] and v['by_id'][108]['Visible'] and v['by_id'][120]['Enabled'] and v['by_id'][121]['Enabled'] and v['by_id'][117]['Title']==winpath(game/'DFO Online.exe') else None))
         assert 'DFO-Client-Expander-RU' in s['Title']
         assert all(s['by_id'][i]['Checked'] == 1 for i in [103,104,105,106,107,122])
@@ -127,6 +127,22 @@ def main():
         for i in [103,104,105,106]:
             assert s['by_id'][i]['Rect']['Top']>=pane['Top'] and s['by_id'][1000+i]['Rect']['Bottom']<=pane['Bottom'], 'all four features and descriptions should fit the initial test screen'
         shot('installer-components.png')
+        # Old launch flags and a failed backend must never terminate the UI.
+        time.sleep(3)
+        assert archive.read_bytes()==original and json.loads(config.read_text())['enabled'] is False
+        archive.write_bytes(b'broken ASAR for failure test')
+        state('click',108)
+        wait(lambda:'Операция завершилась с ошибкой' in str(state()))
+        assert app.poll() is None and state()['by_id'][112]['Visible']
+        journal=profile/'dfo-mod-installer.log'
+        assert journal.exists() and 'Операция завершилась с ошибкой' in journal.read_text()
+        assert 'автоматической установки проигнорирован' in journal.read_text()
+        assert json.loads(config.read_text())['enabled'] is False and cache.read_bytes()==cached
+        archive.write_bytes(original)
+        state('click',102)
+        wait(lambda:state()['by_id'][108]['Enabled'])
+        state('click',110)
+        s=state()
         assert s['by_id'][121]['Title']=='Клавиша: K' and s['by_id'][121]['Enabled'], 'dungeon shortcut should default to K independently of loot'
 
         assert s['by_id'][120]['Title']=='Клавиша: K', f'uninstalled client lost its saved binding: {s["by_id"][120]["Title"]}; game={s["by_id"][117]["Title"]}; config={config}; log={s["by_id"][112]["Title"]}'
@@ -221,6 +237,12 @@ def main():
         primary, outer = s['by_id'][108]['Rect'], s['Window']
         assert primary['Bottom']<=outer['Bottom'] and primary['Right']<=outer['Right']
         shot('installer-small.png')
+        # At minimum width the updater must not overlap destructive actions.
+        state('resize',760,620)
+        narrow=state()['by_id']
+        assert narrow[125]['Rect']['Top'] < narrow[108]['Rect']['Top']
+        assert narrow[124]['Rect']['Right'] <= state()['Window']['Right']
+        state('resize',820,620)
         state('click',105)
         state('focus',120)
         s=state();child,pane=s['by_id'][120]['Rect'],s['by_id'][118]['Rect']

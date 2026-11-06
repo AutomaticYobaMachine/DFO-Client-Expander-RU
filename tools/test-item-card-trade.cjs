@@ -40,7 +40,7 @@ async function main(){
    }
    throw Error('Native window has no row: '+(await host.innerText()).slice(0,500));
   }
-  async function value(row){await page.mouse.move(1,1);await row.hover();await card.waitFor();return card.locator('.dfo-item-price-value').innerText();}
+  async function value(row){await page.mouse.move(1,1);await row.hover();await card.waitFor();assert.equal(await card.locator('.dfo-item-title h3').evaluate(n=>getComputedStyle(n).fontSize),'22px','Trade/inventory styles preserve the item-card title');return card.locator('.dfo-item-price-value').innerText();}
   const baselines={},rows=[];
   for(const id of await page.evaluate(()=>cardCases)){
    await page.evaluate(id=>{probe.entity.items=[probe.cases[id]];probe.view.repaint()},id);

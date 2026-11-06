@@ -55,7 +55,7 @@ async function main(){
    const originalFont=font,bookFont=__dfoFonts.bookFont(originalFont),bookAgain=__dfoFonts.bookFont(originalFont);
    const bookLines=[{text:'Книга о герое Dragonborn. Ёжик и йод. '+ 'Длинный текст проверяет переносы строк. '.repeat(8),font:0},...Array.from({length:5},(_,i)=>({text:'Другой размер: '+i,font:i+1}))];
    const placed=nativeBookReader.place(bookLines,()=>originalFont,300);
-   const classicBook={role:bookFont.fnt.dfoFontRole,stable:bookAgain===bookFont,sharedFontUnchanged:originalFont.fnt.dfoFontRole===undefined,fonts:placed.placed.map(p=>p.face.fnt.dfoFontRole),rows:placed.placed.flatMap(p=>p.rows.map(text=>({text,width:nativeFontTest.measure(p.face.fnt,text)}))),height:placed.maxHeight};
+   const classicBook={role:bookFont.fnt.dfoFontRole,stable:bookAgain===bookFont,idempotent:__dfoFonts.bookFont(bookFont)===bookFont,sharedFontUnchanged:originalFont.fnt.dfoFontRole===undefined,fonts:placed.placed.map(p=>p.face.fnt.dfoFontRole),rows:placed.placed.flatMap(p=>p.rows.map(text=>({text,width:nativeFontTest.measure(p.face.fnt,text)}))),height:placed.maxHeight};
    const reader=new nativeBookReader.Reader({title:'Книга испытаний',author:'DFO RU',content:bookLines[0].text});
    reader.draw(makeRenderer(document.createElement('canvas').getContext('2d')),{width:580,height:290},originalFont,1);
    const cf=nativeCanvasBook.canvasFace(24),paint=document.createElement('canvas');paint.width=580;paint.height=100;const pg=paint.getContext('2d');
@@ -73,13 +73,13 @@ async function main(){
   for(const n of report.nodes){assert.match(n.font,/DFO /,n.text);assert.doesNotMatch(n.font,/Pixelify|Cormorant|Barlow|Jacquard|Alagard/)}
   for(const row of report.classic){assert.ok(row.measured>0);assert.ok(Math.abs(row.drawn-row.measured*row.scale)<.0001,JSON.stringify(row));assert.ok(row.batches<=2);assert.equal(row.nativeBitmapUnused,true)}
   assert.deepEqual(report.classic.map(r=>r.height),[13,14,5,7,8]);
-  assert.deepEqual(report.classic.map(r=>r.bookHeight),[11,14,5,7,6],'Hangyaku keeps its book sizes');
+  assert.deepEqual(report.classic.map(r=>r.bookHeight),[15,19,7,9,8],'Hangyaku is enlarged once from original FNT heights');
   for(const key of ['defaultFont','resetFont','invalidFont','mapped','offscreen'])assert.match(report[key],/DFO Gabin/);
   assert.match(report.mapped,/24px/);assert.match(report.mapped,/italic/);
   assert.equal(report.uploadsBefore,report.uploadsAfter,'Hot strings cannot re-upload glyph atlases');
   assert.equal(report.hot.classicBatches-report.warm.classicBatches,1000,'One draw batch per name, not per glyph');
   assert.deepEqual(report.hot.failures,[]);assert.deepEqual(errors,[]);assert.deepEqual(external,[],'No old remote font requests');
-  assert.equal(report.books.classic.role,'book');assert.equal(report.books.classic.stable,true);assert.equal(report.books.classic.sharedFontUnchanged,true);
+  assert.equal(report.books.classic.role,'book');assert.equal(report.books.classic.stable,true);assert.equal(report.books.classic.idempotent,true);assert.equal(report.books.classic.sharedFontUnchanged,true);
   for(const role of report.books.classic.fonts)assert.equal(role,'book');
   for(const row of report.books.classic.rows)assert.ok(row.width<=301,JSON.stringify(row));
   assert.match(report.books.canvas.family,/DFO Hangyaku/);assert.match(report.books.canvas.font,/DFO Hangyaku/);assert.equal(report.books.canvas.measured,report.books.canvas.nativeWidth);
@@ -102,8 +102,8 @@ async function main(){
   });
   try{
    for(let i=0;i<18;i++){await page.evaluate(()=>bookRenderingTest.view.frame());await page.waitForTimeout(100)}
-   report.books.window=await page.evaluate(()=>({spreads:bookRenderingTest.view.spreads(),fonts:[...bookRenderingTest.fonts],paints:bookRenderingTest.paints,facesBuilt:globalThis.__bookFaceCalls-bookRenderingTest.beforeFaces}));
-   assert.ok(report.books.window.spreads>0);assert.ok(report.books.window.paints>0);for(const f of report.books.window.fonts)assert.match(f,/DFO Hangyaku/);
+   report.books.window=await page.evaluate(()=>({bodySize:nativeCanvasBook.bodySize(nativeCanvasBook.leafSize(innerWidth*devicePixelRatio,innerHeight*devicePixelRatio).ph,devicePixelRatio),spreads:bookRenderingTest.view.spreads(),fonts:[...bookRenderingTest.fonts],paints:bookRenderingTest.paints,facesBuilt:globalThis.__bookFaceCalls-bookRenderingTest.beforeFaces}));
+   assert.equal(report.books.window.bodySize,35,'Full HD book body grows from 26 to 35 px');assert.ok(report.books.window.fonts.some(f=>/\b35px\b/.test(f)),'Enlarged body reaches the actual page painter');assert.ok(report.books.window.spreads>0);assert.ok(report.books.window.paints>0);for(const f of report.books.window.fonts)assert.match(f,/DFO Hangyaku/);
    assert.equal(report.books.window.facesBuilt,6,'Six book cuts, built once with fonts already loaded');
    if(process.env.DFO_SCREENSHOT_DIR)await page.screenshot({path:path.join(process.env.DFO_SCREENSHOT_DIR,'book-fonts.png')});
    await page.setViewportSize({width:1280,height:720});

@@ -219,12 +219,14 @@ async function main() {
     // The same shared card is used for local, shop, remote/trade and chat links.
     for(const side of ['local','shop','remote']){
       await page.evaluate(side=>probe.show('rare',side),side);await card.waitFor();assert.match(await card.locator('.dfo-item-price-value').innerText(),/^~1\s370$/);
+      assert.equal(await card.locator('.dfo-item-title h3').evaluate(n=>getComputedStyle(n).fontSize),'22px','Item title size survives every hover context');
     }
     await page.evaluate(()=>probe.hide());await page.locator('#hover-target').hover();await card.waitFor();
     await page.mouse.move(2,2);assert.equal(await page.locator('.inv-tip').count(),0,'Leaving item dismisses tooltip');
     // Inventory's real pointer and selected-detail flow, including native action controls.
     const row=page.locator('#enhanced-inventory .itemrow').first();await row.hover();await card.waitFor();
     await row.click();await page.locator('.packdetail .dfo-item-card').waitFor();
+    assert.equal(await page.locator('.packdetail .dfo-item-title h3').evaluate(n=>getComputedStyle(n).fontSize),'22px','Selected inventory detail cannot override the title size');
     assert.equal(await page.locator('.inv-tip').count(),0,'Selection must not stack a hover over its own card');
     assert.ok(await page.locator('.packdetail .acts button').count()>0,'Native selected actions survive');
     const detail=await page.locator('.packdetail .dfo-item-card').boundingBox();assert.ok(detail.x>=0&&detail.y>=0&&detail.x+detail.width<=1920&&detail.y+detail.height<=1080,JSON.stringify(detail));

@@ -1,0 +1,307 @@
+{
+  "version": "1.21.2",
+  "baseline": "61b34b69ecc831f6e5dde676d2307a633fe109bc",
+  "upstream": {
+    "repository": "https://github.com/Lattymoy/daggerfall-js-source",
+    "publicSnapshot": "a3eb1605ea1dc391b691fe314377458a7e63e483",
+    "verifiedRelease": "app-v0.1.14545",
+    "freshManifest": {
+      "version": "0.1.14545",
+      "checked": 1075,
+      "mismatches": [],
+      "manifestSha256": "e812bddf62b425b8988a5c51f442809659c6abb77c37e98249655b68550bd11a"
+    }
+  },
+  "payloadComparedToSource": true,
+  "sha256": {
+    "fonts-transform.cjs": "a73a047a42c81b0204b01a605413a7dda7394c8717754e454462c53666d08d4f",
+    "ui-calibration-transform.cjs": "ac158920d2ccdbb41eb1c7848349ac2d28be3db6cd8ad5b708dba312d1b39202",
+    "page/dfo_fonts.js": "6ea17036702081d38d145f32e3e9c665aa64a66bbed8c6272af57c26a65e3495",
+    "page/dfo_item_cards.js": "b50be8c9bce0f015939cd6fd3d4ccdde4f9e7d919cf433aea7cad5f4ba25d592",
+    "page/dfo_dungeons.js": "29d2256027c9c49be1b6cf8138bc9e6d60ba595f95dbcb4fe704a54cf123bc7d",
+    "transforms.cjs": "ba879cf26f0f80b52e9212da9be3417c5234bc8beebd23fdbba88d5df412bf0f",
+    "hook.cjs": "7ff33d2f8234aabf802b5ae6158ab2c92ed929d86a752a15f40ef6a722688530",
+    "version.json": "bc2881ccd8176bd6a2a87caf60ef9c0afdc21ba629550d879b29ada32721ec07",
+    "font-assets.cjs": "8ec5a374c466306309a8dbb9a7394660198bb5a193a0a95047ce2dd91999997c",
+    "page/dfo_font_data.js": "0c91dea2da66f889b3bca2a2a226dd3053e672d43ba0480899fd9d0d87910953",
+    "fonts/item-font-text.ttf": "f2a009268cc0f4cf5305f2039470def5cc7ad4bd3b43e8451c97627238f46bc1",
+    "fonts/item-font-title.ttf": "65a1ba1096fbc200c015867064f15e54f39a6dc4e666202564fdbf57ee822966",
+    "fonts/item-font-numbers.ttf": "10e6edc2e999a2b83728ba9eb27fdbbe79a685022f7cdb6a76ebece55c907708",
+    "fonts/book-font-text.ttf": "1e2f236e0ced3853a780ad8bfcb65612f62aba466c5df7df9459b16a8a92c30d",
+    "fonts/item-font-sigil.ttf": "1aa16df54414a45b16f15d601340143287e7def62ffc5c8a6425f968703f8067",
+    "fonts/item-font-set.ttf": "16fcbd56ca32e92f4551649434793f8da873337e87d1e81e3a35c4569603c6a6",
+    "fonts/item-font-legendary.otf": "431b3d0fd0e324d427dc8076d0bd9591713797362f0d959c3fbc601cc815e21d"
+  },
+  "validation": {
+    "unitTests": {
+      "pass": 21,
+      "fail": 0,
+      "skip": 0
+    },
+    "goTests": "pass",
+    "hooks": {
+      "changedModules": 423,
+      "syntaxErrors": 0,
+      "missing": [],
+      "fontWarnings": [],
+      "preexistingOtherVariantWarnings": [
+        "dungeon.rewards: duplicate variant data array absent",
+        "dungeon.scaling: duplicate variant data array absent",
+        "loot.types: unrelated variant signature absent"
+      ]
+    },
+    "restoration": {
+      "modules": [
+        "enhancedStyle-B3rgnPNH.js",
+        "world-CH4OgQLi.js"
+      ],
+      "total": 1079,
+      "ordinaryRestored": 1073,
+      "quantityRules": 6,
+      "failures": []
+    },
+    "calibration": {
+      "viewports": [
+        {
+          "width": 1920,
+          "height": 1080
+        },
+        {
+          "width": 1366,
+          "height": 768
+        },
+        {
+          "width": 1280,
+          "height": 720
+        },
+        {
+          "width": 1024,
+          "height": 768
+        },
+        {
+          "width": 860,
+          "height": 640
+        }
+      ],
+      "sizes": [
+        {
+          "sel": ".pack-id .act",
+          "size": "14px"
+        },
+        {
+          "sel": ".pack-who",
+          "size": "22px"
+        },
+        {
+          "sel": "dfchat-line",
+          "size": "12px"
+        },
+        {
+          "sel": "notice-row",
+          "size": "13px"
+        }
+      ],
+      "titles": [
+        {
+          "sel": ".pack-id h2",
+          "size": 22,
+          "family": "\"DFO Greengoth\", \"DFO Gabin\", \"DFO Flexi\", \"DFO Hangyaku\", \"DFO Ckazka\", \"DFO Ritalin\", \"DFO Wolga\", sans-serif",
+          "base": 20,
+          "delta": 2
+        },
+        {
+          "sel": ".pack-who",
+          "size": 22,
+          "family": "\"DFO Greengoth\", \"DFO Gabin\", \"DFO Flexi\", \"DFO Hangyaku\", \"DFO Ckazka\", \"DFO Ritalin\", \"DFO Wolga\", sans-serif",
+          "base": 20,
+          "delta": 2
+        },
+        {
+          "sel": ".pack-dock .itemname>span",
+          "size": 16,
+          "family": "\"DFO Greengoth\", \"DFO Gabin\", \"DFO Flexi\", \"DFO Hangyaku\", \"DFO Ckazka\", \"DFO Ritalin\", \"DFO Wolga\", sans-serif",
+          "base": 14,
+          "delta": 2
+        },
+        {
+          "sel": ".pack-main .wornname",
+          "size": 14,
+          "family": "\"DFO Greengoth\", \"DFO Gabin\", \"DFO Flexi\", \"DFO Hangyaku\", \"DFO Ckazka\", \"DFO Ritalin\", \"DFO Wolga\", sans-serif",
+          "base": 14,
+          "delta": 0
+        },
+        {
+          "sel": "#calibration-titles h1",
+          "size": 30,
+          "family": "\"DFO Greengoth\", \"DFO Gabin\", \"DFO Flexi\", \"DFO Hangyaku\", \"DFO Ckazka\", \"DFO Ritalin\", \"DFO Wolga\", sans-serif",
+          "base": 28,
+          "delta": 2
+        },
+        {
+          "sel": "#nested-title",
+          "size": 30,
+          "family": "\"DFO Greengoth\", \"DFO Gabin\", \"DFO Flexi\", \"DFO Hangyaku\", \"DFO Ckazka\", \"DFO Ritalin\", \"DFO Wolga\", sans-serif",
+          "base": 28,
+          "delta": 2
+        },
+        {
+          "sel": "#calibration-titles .acctrenown",
+          "size": 15.2,
+          "family": "\"DFO Greengoth\", \"DFO Gabin\", \"DFO Flexi\", \"DFO Hangyaku\", \"DFO Ckazka\", \"DFO Ritalin\", \"DFO Wolga\", sans-serif",
+          "base": 13.2,
+          "delta": 2
+        }
+      ],
+      "cardTitle": {
+        "text": "Many spells",
+        "size": "22px"
+      },
+      "badgeCases": 60,
+      "quantitySizes": [
+        "12px"
+      ],
+      "canvasBookCases": 36,
+      "classicBookCases": 20,
+      "errors": []
+    },
+    "books": {
+      "classicSizes": [
+        {
+          "name": "FONT0000",
+          "height": 13,
+          "bookHeight": 15,
+          "scale": 2.8524981368714113,
+          "measured": 199.82484567901236,
+          "drawn": 570,
+          "batches": 1,
+          "nativeBitmapUnused": true
+        },
+        {
+          "name": "FONT0001",
+          "height": 14,
+          "bookHeight": 19,
+          "scale": 1.6437020711344874,
+          "measured": 346.77817227947185,
+          "drawn": 569.9999999999999,
+          "batches": 1,
+          "nativeBitmapUnused": true
+        },
+        {
+          "name": "FONT0002",
+          "height": 5,
+          "bookHeight": 7,
+          "scale": 3,
+          "measured": 124.6851667717322,
+          "drawn": 374.05550031519664,
+          "batches": 1,
+          "nativeBitmapUnused": true
+        },
+        {
+          "name": "FONT0003",
+          "height": 7,
+          "bookHeight": 9,
+          "scale": 3,
+          "measured": 174.7197106204816,
+          "drawn": 524.1591318614447,
+          "batches": 1,
+          "nativeBitmapUnused": true
+        },
+        {
+          "name": "FONT0004",
+          "height": 8,
+          "bookHeight": 8,
+          "scale": 3,
+          "measured": 123.21604938271604,
+          "drawn": 369.64814814814804,
+          "batches": 1,
+          "nativeBitmapUnused": true
+        }
+      ],
+      "window": {
+        "bodySize": 35,
+        "spreads": 6,
+        "fonts": [
+          "600 49px \"DFO Hangyaku\", \"DFO Gabin\", \"DFO Flexi\", \"DFO Greengoth\", \"DFO Ckazka\", \"DFO Ritalin\", \"DFO Wolga\", sans-serif",
+          "35px \"DFO Hangyaku\", \"DFO Gabin\", \"DFO Flexi\", \"DFO Greengoth\", \"DFO Ckazka\", \"DFO Ritalin\", \"DFO Wolga\", sans-serif",
+          "32px \"DFO Hangyaku\", \"DFO Gabin\", \"DFO Flexi\", \"DFO Greengoth\", \"DFO Ckazka\", \"DFO Ritalin\", \"DFO Wolga\", sans-serif"
+        ],
+        "paints": 41,
+        "facesBuilt": 6,
+        "facesAfterResize": 12
+      },
+      "stable": true,
+      "idempotent": true
+    },
+    "cards": {
+      "states": 13760,
+      "stateFailures": [],
+      "templates": 483,
+      "groups": [
+        "Armor",
+        "Books",
+        "CreatureIngredients1",
+        "CreatureIngredients2",
+        "CreatureIngredients3",
+        "Currency",
+        "Deeds",
+        "Drugs",
+        "Furniture",
+        "Gems",
+        "Jewellery",
+        "Maps",
+        "MensClothing",
+        "MetalIngredients",
+        "MiscItems",
+        "MiscellaneousIngredients1",
+        "MiscellaneousIngredients2",
+        "Paintings",
+        "PlantIngredients1",
+        "PlantIngredients2",
+        "QuestItems",
+        "ReligiousItems",
+        "Transportation",
+        "UselessItems1",
+        "UselessItems2",
+        "Weapons",
+        "WomensClothing"
+      ],
+      "viewportCases": 132,
+      "scales": 48,
+      "errors": [],
+      "tradeRows": 30,
+      "tradeErrors": [],
+      "unknownPowersRemainHidden": true,
+      "nativeHoverAndSelectedTitle": "22px verified",
+      "nativeBlocksPreserved": true
+    },
+    "fonts": {
+      "registrations": {
+        "DFO Gabin": 1,
+        "DFO Greengoth": 1,
+        "DFO Flexi": 1,
+        "DFO Hangyaku": 1,
+        "DFO Ckazka": 1,
+        "DFO Ritalin": 1,
+        "DFO Wolga": 1
+      },
+      "repeatedFontAssignments": 0,
+      "errors": [],
+      "external": [],
+      "policyErrors": [],
+      "renderersAfterGC": 0,
+      "worldObjectsAfterGC": 0
+    },
+    "performance": {
+      "map100000Ms": 9.100000001490116,
+      "book10000CharsMs": 18.700000002980232,
+      "bookRows": 455,
+      "preserved": true,
+      "scope": "Local CPU measurement, not live-game FPS"
+    }
+  },
+  "limits": [
+    "Published game modules with fixture entities; no live multiplayer/FPS claim.",
+    "Windows executable cross-compiled; no new Wine GUI run (environment DLL issue).",
+    "No release/tag published."
+  ]
+}

@@ -24,16 +24,17 @@ function canvasBook(text){
  // web-font seam would otherwise paginate the whole book a second time.
  const paint=need(text,/([\w$]+) as paintRow/)[1];
  const ink=need(text,/([\w$]+) as rowInk/)[1];
+ const body=need(text,/([\w$]+) as bodySize/)[1];
  return text.replace(family,'(globalThis.__dfoFonts?.stacks.book??'+family+')')
   .replace(/(let [\w$]+=)globalThis\.document\?\.fonts;/,'$1globalThis.__dfoFonts?.enabled?null:globalThis.document?.fonts;')
-  +`\n;{const p=${paint};${paint}=function(ctx,face,text,x,y,opts={}){if(!globalThis.__dfoFonts?.enabled)return p(ctx,face,text,x,y,opts);return globalThis.__dfoFonts.calibration.paint(ctx,face,text,x,y,{...opts,color:opts.color??${ink}(null)})||p(ctx,face,text,x,y,opts)}}\n`;
+  +`\n;{const b=${body},p=${paint};${body}=function(...args){const px=b(...args);return globalThis.__dfoFonts?.enabled?(globalThis.__dfoFonts.bookSize?.(px)??px):px};${paint}=function(ctx,face,text,x,y,opts={}){if(!globalThis.__dfoFonts?.enabled)return p(ctx,face,text,x,y,opts);return globalThis.__dfoFonts.calibration.paint(ctx,face,text,x,y,{...opts,color:opts.color??${ink}(null)})||p(ctx,face,text,x,y,opts)}}\n`;
 }
 function transformFonts(rel,text,log){
  const stripped=stripFaces(text);if(stripped.count){text=stripped.text;log.push(['fonts.resources',stripped.count]);}
  if(/Worker-[^/]+\.js$/.test(rel)){
   if(text.includes('/*fonts.worker*/'))return text;
   log.push(['fonts.worker',1]);
-  return `import '../dfo-mod/dfo_font_data.js?dfo=1.21.1';import '../dfo-mod/dfo_fonts.js?dfo=1.21.1';\nconst __dfoFontMessages=[];let __dfoFontReplay=false;const __dfoFontGate=e=>{if(!__dfoFontReplay){e.stopImmediatePropagation();__dfoFontMessages.push(e)}};globalThis.addEventListener('message',__dfoFontGate,true);await globalThis.__dfoFontTools.installWorker(globalThis,new URL('../dfo-mod/',import.meta.url).href).ready;\n`+text+`\n{const ch=new MessageChannel();ch.port1.onmessage=()=>{const e=__dfoFontMessages.shift();if(!e){globalThis.removeEventListener('message',__dfoFontGate,true);ch.port1.close();ch.port2.close();return}__dfoFontReplay=true;try{globalThis.dispatchEvent(new MessageEvent('message',{data:e.data,ports:e.ports,origin:e.origin,lastEventId:e.lastEventId}))}finally{__dfoFontReplay=false;ch.port2.postMessage(0)}};ch.port2.postMessage(0)}/*fonts.worker*/\n`;
+  return `import '../dfo-mod/dfo_font_data.js?dfo=1.21.2';import '../dfo-mod/dfo_fonts.js?dfo=1.21.2';\nconst __dfoFontMessages=[];let __dfoFontReplay=false;const __dfoFontGate=e=>{if(!__dfoFontReplay){e.stopImmediatePropagation();__dfoFontMessages.push(e)}};globalThis.addEventListener('message',__dfoFontGate,true);await globalThis.__dfoFontTools.installWorker(globalThis,new URL('../dfo-mod/',import.meta.url).href).ready;\n`+text+`\n{const ch=new MessageChannel();ch.port1.onmessage=()=>{const e=__dfoFontMessages.shift();if(!e){globalThis.removeEventListener('message',__dfoFontGate,true);ch.port1.close();ch.port2.close();return}__dfoFontReplay=true;try{globalThis.dispatchEvent(new MessageEvent('message',{data:e.data,ports:e.ports,origin:e.origin,lastEventId:e.lastEventId}))}finally{__dfoFontReplay=false;ch.port2.postMessage(0)}};ch.port2.postMessage(0)}/*fonts.worker*/\n`;
  }
  const jobs=[];
  if(/^assets\/notify-[^/]+\.js$/.test(rel)&&text.includes('this.fixedWidth='))jobs.push(['fonts.fnt',text=>text.replace(/load\(([\w$]+)\)\{(?=let [\w$]+=new DataView\(\1\.buffer,\1\.byteOffset,\1\.byteLength\);this\.fixedWidth=)/,'load($1){$1=globalThis.__dfoFonts?.fntBytes($1)??$1;')]);

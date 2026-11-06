@@ -20,10 +20,10 @@ async function main(){let browser;await new Promise(r=>server.listen(0,'127.0.0.
  await page.goto(url+'/?ru&online');await page.waitForFunction(()=>window.ready&&window.nativeFontTest);
  await page.evaluate(async f=>{await import('/assets/'+f.world);await import('/assets/'+f.dial);window.calibBook=await import('/assets/'+f.book);await import('/assets/'+f.classic)}, {world,dial,book,classic});
  await page.evaluate(()=>{const s=document.createElement('style');s.textContent=__uiAudit.chatStyle;document.head.append(s)});
- const report={sizes:[],dial:[],effects:[],inventory:[],map:[],books:[]};
+ const report={sizes:[],dial:[],effects:[],inventory:[],badges:[],map:[],books:[]};
  // Check actual authored sizes, including descendants that inherit the value.
  report.sizes=await page.evaluate(()=>{const out=[];for(const sel of ['.pack-id .act','.pack-who']){const n=document.querySelector(sel);out.push({sel,size:getComputedStyle(n).fontSize})}const style=document.createElement('style');style.textContent='.calib-samples{position:fixed;left:0;top:0}';document.head.append(style);const sample=document.createElement('div');sample.className='calib-samples';sample.innerHTML='<div class="dfchat-line"><span>Сообщение игрока</span></div><div class="notice notice-toast"><div class="notice-row">Системное сообщение</div></div>';document.body.append(sample);out.push(...[...sample.querySelectorAll('.dfchat-line,.notice-row')].map(n=>({sel:n.className,size:getComputedStyle(n).fontSize})));sample.remove();return out});
- assert.equal(report.sizes.find(x=>x.sel==='dfchat-line').size,'11px');assert.equal(report.sizes.find(x=>x.sel==='notice-row').size,'12px');
+ assert.equal(report.sizes.find(x=>x.sel==='dfchat-line').size,'12px');assert.equal(report.sizes.find(x=>x.sel==='notice-row').size,'13px');
  report.titles=await page.evaluate(()=>{
   const panel=document.createElement('section');panel.id='calibration-titles';panel.className='card';panel.innerHTML='<h1>Заголовок <span id="nested-title">вложенный</span></h1><h3><span class="acctrenown">Имя и слава</span></h3>';document.body.append(panel);
   const selectors=['.pack-id h2','.pack-who','.pack-dock .itemname>span','.pack-main .wornname','#calibration-titles h1','#nested-title','#calibration-titles .acctrenown'];
@@ -32,11 +32,26 @@ async function main(){let browser;await new Promise(r=>server.listen(0,'127.0.0.
  });
  assert.ok(report.titles.some(x=>x.sel.includes('wornname')),'Real equipped slot is present');
  for(const t of report.titles){assert.match(t.family,/DFO Greengoth/);assert.ok(Math.abs(t.delta-(t.sel.includes('wornname')?0:2))<.05,JSON.stringify(t))}
+ await page.evaluate(()=>probe.show('spells'));
+ await page.locator('.dfo-item-title h3').waitFor();
+ report.cardTitle=await page.locator('.dfo-item-title h3').evaluate(n=>({text:n.textContent,size:getComputedStyle(n).fontSize}));
+ assert.equal(report.cardTitle.size,'22px','Only the unified item card gets another +2');
+ await page.evaluate(()=>probe.hide());
  if(process.env.DFO_SCREENSHOT_DIR)fs.mkdirSync(process.env.DFO_SCREENSHOT_DIR,{recursive:true});
  for(const viewport of [{width:1920,height:1080},{width:1366,height:768},{width:1280,height:720},{width:1024,height:768},{width:860,height:640}]){
   await page.setViewportSize(viewport);
   const inv=await page.evaluate(()=>{const tabs=[...document.querySelectorAll('.packtab')];for(const n of tabs){const count=n.querySelector('.count');if(count)count.textContent='9999'}const ingredients=tabs.find(n=>/Ингредиенты|Ingredients/i.test(n.textContent));const label=document.querySelector('.shelflabel');if(label)label.textContent='Кристаллы';return{window:document.querySelector('.pack-win').getBoundingClientRect().toJSON(),ingredients:ingredients?{client:ingredients.clientWidth,scroll:ingredients.scrollWidth,text:ingredients.textContent}:null,labels:[...document.querySelectorAll('.shelflabel')].map(n=>({text:n.textContent,client:n.clientWidth,scroll:n.scrollWidth,overflow:getComputedStyle(n).overflow}))}});
   report.inventory.push({viewport,...inv});assert.ok(inv.window.left>=0&&inv.window.right<=viewport.width);if(viewport.width>=1200&&inv.ingredients)assert.ok(inv.ingredients.scroll<=inv.ingredients.client+1,JSON.stringify(inv));assert.ok(inv.labels.length);for(const l of inv.labels)assert.equal(l.overflow,'visible');
+  const badges=await page.evaluate(()=>{
+   const node=document.querySelector('.pack-dock .itemrow>.count');if(!node)throw Error('Need a real inventory stack badge');
+   const row=node.closest('.itemrow'),text=node.textContent,oldClass=row.className,locked=row.getAttribute('data-locked'),result=[];
+   try{for(const useLock of [false,true])for(const qty of [1,12,999,1506,9999,99999]){
+    row.classList.add('hasbar');if(useLock)row.setAttribute('data-locked','');else row.removeAttribute('data-locked');node.textContent=String(qty);
+    const r=row.getBoundingClientRect(),b=node.getBoundingClientRect(),s=getComputedStyle(node);
+    result.push({qty,locked:useLock,font:s.fontFamily,size:s.fontSize,width:b.width,height:b.height,inside:b.left>=r.left&&b.right<=r.right&&b.top>=r.top&&b.bottom<=r.bottom});
+   }}finally{node.textContent=text;row.className=oldClass;if(locked===null)row.removeAttribute('data-locked');else row.setAttribute('data-locked',locked)}return result;
+  });
+  for(const b of badges){assert.equal(b.size,'12px');assert.match(b.font,/DFO Flexi/);assert.ok(b.inside,JSON.stringify({viewport,...b}))}report.badges.push({viewport,cases:badges});
   if(process.env.DFO_SCREENSHOT_DIR&&viewport.width===1920)await page.screenshot({path:path.join(process.env.DFO_SCREENSHOT_DIR,'calibration-inventory.png')});
   const value=await page.evaluate(()=>{const host=document.createElement('div');document.body.append(host);let chosen=null;const view=__uiAudit.dial(host,{entries:['n','e','s','w'].map((dir,i)=>({dir,id:dir,label:['Инвентарь','Карта мира','Журнал заданий','Персонаж'][i],open:()=>chosen=dir})),onClose:()=>{}});const geometry=()=>[...host.querySelectorAll('.dfo-dial-ray,.px-arm')].map(n=>({cls:n.className,...n.getBoundingClientRect().toJSON()}));const first=geometry();host.querySelector('.px-e').lastChild.textContent='Инвентарь с другим названием';const next=geometry();window.calibDial={view,host,chosen:()=>chosen};return{first,next}});
   report.dial.push({viewport,...value});for(let i=0;i<value.first.length;i++){const a=value.first[i],b=value.next[i];assert.equal(a.x,b.x);assert.equal(a.y,b.y);assert.equal(a.width,b.width);assert.equal(a.height,b.height)}

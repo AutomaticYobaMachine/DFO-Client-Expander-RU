@@ -10,8 +10,10 @@ function sizes(source){
  return shield.replace(/(?<![^{}])([^{}]*)\{([^{}]*)\}/g,(all,selector,body)=>{
   if(!/\bfont-size\s*:/.test(body))return all;
   const s=selector.replace(/\/\*[\s\S]*?\*\//g,'');
-  if(/(?:\bh[1-6]\b|title|heading|wordmark|emblem|sigil|setbox|set-|rarity|\.card\b|\.itemname\b|\.wornname\b|\.inv-menu-head\b|\.px-(?:knot|gem|arm|term|c)\b|\.tview|\.hst-|\.shelflabel)/i.test(s))return all;
-  return selector+'{'+body.replace(/(font-size\s*:\s*(?:calc\(\s*)?)(\d+(?:\.\d+)?)px/g,(_,p,n)=>p+Math.max(1,+n-2)+'px')+'}';
+  if(/(?:\bh[1-6]\b|title|heading|wordmark|emblem|sigil|setbox|set-|rarity|\.card\b|\.itemname\b|\.wornname\b|\.inv-menu-head\b|\.rowcount\b|\.worncount\b|\.hud-qcount\b|\.hb-count\b|\.itemrow\b[^,{]*\.count\b|\.px-(?:knot|gem|arm|term|c)\b|\.tview|\.hst-|\.shelflabel)/i.test(s))return all;
+  // 1.21.2 restores one pixel of the former -2 correction. Zero remains
+  // zero for intentionally hidden labels; icon quantities are excluded.
+  return selector+'{'+body.replace(/(font-size\s*:\s*(?:calc\(\s*)?)(\d+(?:\.\d+)?)px/g,(_,p,n)=>p+(+n===0?0:Math.max(1,+n-1))+'px')+'}';
  }).replace(/__DFO_SIZE_EXPR_(\d+)__/g,(_,n)=>expressions[n]);
 }
 function titleSizes(source){

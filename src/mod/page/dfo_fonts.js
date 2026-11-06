@@ -10,8 +10,9 @@
   const ownFamily=/\bDFO (Gabin|Greengoth|Flexi|Hangyaku|Ckazka|Ritalin|Wolga)\b/;
   const roles={Gabin:'body',Greengoth:'title',Flexi:'number',Hangyaku:'book',Ckazka:'sigil',Ritalin:'set',Wolga:'power'};
   const fontMappings=new Map();
+  const bookSize=px=>Math.max(1,Math.round(px*1.35));
   const seed=[...Array.from({length:95},(_,i)=>32+i),...Array.from({length:64},(_,i)=>1040+i),1025,1105,8211,8212,8230,8470,8594,177,215,8734,...Array.from({length:96},(_,i)=>160+i)];
-  function css(base,revision='1.21.1'){
+  function css(base,revision='1.21.2'){
     const faces=Object.entries(files).map(([name,file])=>`@font-face{font-family:'DFO ${name}';src:url(${JSON.stringify(base+file+'?dfo='+encodeURIComponent(revision))}) format('${file.endsWith('.otf')?'opentype':'truetype'}');font-style:normal;font-weight:400;font-display:swap;}`).join('\n');
     return faces+`\n/* DFO community fonts */
 @layer dfo-community-fonts {
@@ -45,6 +46,7 @@
  :root body .pack-shell .shelfgrp {min-width:min-content!important;}
  :root body .pack-shell .wornshelf {flex-wrap:wrap!important;}
  :root body .pack-shell .packtab .count {flex-shrink:0!important;min-width:4ch!important;text-align:right!important;}
+ :root body :is(.itemrow .count,.itemrow .rowcount,.worncount,.hud-qcount,.hb-count) {font-family:${stacks.number}!important;font-size:12px!important;font-weight:400!important;line-height:1.1!important;letter-spacing:0!important;font-variant-numeric:tabular-nums;--dfo-title-step:0px!important;text-shadow:1px 0 #000,-1px 0 #000,0 1px #000,0 -1px #000,0 0 3px #000!important;}
  @media(min-width:1200px){
   :root body .pack-shell:not(.paired)>.pack-win {width:min(1160px,95vw)!important;}
   :root body .pack-shell:not(.paired) .pack {grid-template-columns:minmax(0,1fr) minmax(420px,500px)!important;}
@@ -180,7 +182,7 @@
     const fontSet=win.document?.fonts||win.fonts,Native=win.FontFace;
     const load=fontSet.load.bind(fontSet),check=fontSet.check.bind(fontSet),add=fontSet.add.bind(fontSet);
     const canonical=family=>Object.keys(files).find(name=>String(family).replace(/["']/g,'').toLowerCase()==='dfo '+name.toLowerCase());
-    const ownUrl=name=>`url(${JSON.stringify(base+files[name]+'?dfo=1.21.1')})`;
+    const ownUrl=name=>`url(${JSON.stringify(base+files[name]+'?dfo=1.21.2')})`;
     win.FontFace=new Proxy(Native,{construct(Type,args,New){
       const name=canonical(args[0])||'Gabin';
       stats.faceRedirects=(stats.faceRedirects||0)+1;
@@ -244,7 +246,7 @@
   function install(win){
     if(win.__dfoFonts||win.__DFO_MOD_CFG__?.fonts?.enabled===false)return;
     const doc=win.document,base=new URL('.',doc.currentScript?.src||new URL('dfo-mod/dfo_fonts.js',doc.baseURI)).href;
-    const style=doc.createElement('style');style.id='dfo-community-fonts';style.textContent=css(base,win.__DFO_MOD_CFG__?.fonts?.revision||'1.21.1');doc.head.append(style);
+    const style=doc.createElement('style');style.id='dfo-community-fonts';style.textContent=css(base,win.__DFO_MOD_CFG__?.fonts?.revision||'1.21.2');doc.head.append(style);
     const stats={canvasChanges:0,classicDraws:0,classicBatches:0,glyphsDrawn:0,faces:0,failures:[]};
     const native={},renderers=new WeakMap(),fnts=new WeakMap(),firstFaces=new Map(),bookFonts=new WeakMap(),fontOwners=new WeakMap(),titleHeights=new WeakMap();let enabled=false,serial=0;
     const translate=text=>typeof win.__translate==='function'?win.__translate(text):text;
@@ -280,14 +282,14 @@
       const result=[];for(const char of text){const code=char.codePointAt(0);if(!face.glyphs.has(code))face.add(code);result.push(face.glyphs.get(code)||face.glyphs.get(63));}return result;
     }
     win.__dfoFonts=Object.freeze({
-      ready,get enabled(){return enabled},stacks,calibration:uiCalibration(win),fntBytes:bitmaps.bytes,pixelLetters:bitmaps.letters,register(parts){if(typeof parts?.glyphFace==='function')native.glyphFace=parts.glyphFace;},
+      ready,get enabled(){return enabled},stacks,bookSize,calibration:uiCalibration(win),fntBytes:bitmaps.bytes,pixelLetters:bitmaps.letters,register(parts){if(typeof parts?.glyphFace==='function')native.glyphFace=parts.glyphFace;},
       bookFont(font){
-        if(!enabled||!classic(font?.fnt))return font;
+        if(!enabled||!classic(font?.fnt)||typeof native.glyphFace!=='function')return font;
         if(font.fnt.dfoFontRole==='book')return font;
         let book=bookFonts.get(font);if(book)return book;
         // A book's default font is also used by the rest of the UI. Give
         // the reader a stable view rather than changing that shared FNT.
-        const fnt=Object.assign(Object.create(Object.getPrototypeOf(font.fnt)),font.fnt,{dfoFontRole:'book',fixedHeight:titleHeights.get(font.fnt)??font.fnt.fixedHeight});
+        const fnt=Object.assign(Object.create(Object.getPrototypeOf(font.fnt)),font.fnt,{dfoFontRole:'book',fixedHeight:bookSize(titleHeights.get(font.fnt)??font.fnt.fixedHeight)});
         const owner=fontOwners.get(font)?.deref(),face=faceFor('book',owner);if(face)fnts.set(fnt,new WeakRef(face));
         book={...font,fnt};bookFonts.set(font,book);return book;
       },
@@ -329,5 +331,5 @@
       stats:()=>({...stats,failures:[...stats.failures],enabled,shorthandCacheSize:fontMappings.size}),
     });
   }
-  return {install,installWorker,css,mapFont,stacks,files,uiCalibration};
+  return {install,installWorker,css,mapFont,stacks,files,uiCalibration,bookSize};
 });

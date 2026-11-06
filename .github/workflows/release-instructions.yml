@@ -1,0 +1,113 @@
+name: Refresh release instructions
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Existing published release tag whose ZIP instructions need updating'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ inputs.tag }}
+  cancel-in-progress: false
+
+jobs:
+  instructions:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      RELEASE_TAG: ${{ inputs.tag }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - name: Check out current instructions
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          persist-credentials: false
+
+      - name: Validate version and instructions
+        run: |
+          python3 - <<'PY'
+          import json, os, pathlib, re
+          version = json.loads(pathlib.Path('src/mod/version.json').read_text())['version']
+          tag = os.environ['RELEASE_TAG']
+          if not re.fullmatch(r'v[0-9]+\.[0-9]+\.[0-9]+', tag) or tag != 'v' + version:
+              raise SystemExit('The release must match the checked-out instruction version')
+          if pathlib.Path('README.txt').read_text().splitlines()[0] != 'DFO-Client-Expander-RU ' + version:
+              raise SystemExit('The bundled instructions have the wrong version')
+          with open(os.environ['GITHUB_ENV'], 'a') as env:
+              env.write(f'RELEASE_VERSION={version}\n')
+          PY
+
+      - name: Download the existing published files
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view "$RELEASE_TAG" --json tagName,isDraft,isPrerelease > release.json
+          gh release download "$RELEASE_TAG" --dir release-input --pattern "DFO-Client-Expander-RU-$RELEASE_VERSION.*"
+
+      - name: Update only the instruction inside the ZIP
+        run: |
+          python3 - <<'PY'
+          import copy, hashlib, json, os, pathlib, zipfile
+          meta = json.loads(pathlib.Path('release.json').read_text())
+          assert meta['tagName'] == os.environ['RELEASE_TAG'] and not meta['isDraft'] and not meta['isPrerelease']
+          base = 'DFO-Client-Expander-RU-' + os.environ['RELEASE_VERSION']
+          srcdir, out = pathlib.Path('release-input'), pathlib.Path('release-output')
+          out.mkdir()
+          assert {p.name for p in srcdir.iterdir()} == {base + e for e in ('.exe', '.zip', '.exe.sha256', '.zip.sha256')}
+          for ext in ('.exe', '.zip'):
+              fields = (srcdir/(base+ext+'.sha256')).read_text().split()
+              assert fields == [hashlib.sha256((srcdir/(base+ext)).read_bytes()).hexdigest(), base+ext]
+          prefix = 'DFO-Client-Expander-RU/'
+          readme = prefix + 'README.txt'
+          expected = {prefix+'DFO-Client-Expander-RU.exe', readme, prefix+'licenses/DG_RU-LICENSE.txt',
+                      prefix+'licenses/Translation-sources.md', prefix+'licenses/Item-card-fonts.txt'}
+          instruction = pathlib.Path('README.txt').read_bytes()
+          with zipfile.ZipFile(srcdir/(base+'.zip')) as src:
+              assert src.testzip() is None
+              assert {i.filename for i in src.infolist() if not i.is_dir()} == expected
+              assert src.read(prefix+'DFO-Client-Expander-RU.exe') == (srcdir/(base+'.exe')).read_bytes()
+              with zipfile.ZipFile(out/(base+'.zip'), 'w', zipfile.ZIP_DEFLATED, compresslevel=9) as dst:
+                  for info in src.infolist():
+                      data = instruction if info.filename == readme else src.read(info.filename)
+                      dst.writestr(copy.copy(info), data, compress_type=info.compress_type, compresslevel=9)
+              with zipfile.ZipFile(out/(base+'.zip')) as dst:
+                  assert dst.testzip() is None and dst.read(readme) == instruction
+                  for info in src.infolist():
+                      if info.filename != readme:
+                          assert dst.read(info.filename) == src.read(info.filename)
+          digest = hashlib.sha256((out/(base+'.zip')).read_bytes()).hexdigest()
+          (out/(base+'.zip.sha256')).write_text(digest+'  '+base+'.zip\n', encoding='ascii')
+          print('Verified: only README.txt content changed; the published EXE and licenses are identical.')
+          PY
+
+      - name: Publish ZIP and its checksum
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release upload "$RELEASE_TAG" --clobber \
+            "release-output/DFO-Client-Expander-RU-$RELEASE_VERSION.zip" \
+            "release-output/DFO-Client-Expander-RU-$RELEASE_VERSION.zip.sha256"
+
+      - name: Verify uploaded instructions and executable
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release download "$RELEASE_TAG" --dir release-verify \
+            --pattern "DFO-Client-Expander-RU-$RELEASE_VERSION.zip" \
+            --pattern "DFO-Client-Expander-RU-$RELEASE_VERSION.zip.sha256" \
+            --pattern "DFO-Client-Expander-RU-$RELEASE_VERSION.exe.sha256"
+          (cd release-verify && sha256sum --check "DFO-Client-Expander-RU-$RELEASE_VERSION.zip.sha256")
+          python3 - <<'PY'
+          import os, pathlib, zipfile
+          base = 'DFO-Client-Expander-RU-' + os.environ['RELEASE_VERSION']
+          assert pathlib.Path('release-input',base+'.exe.sha256').read_bytes() == pathlib.Path('release-verify',base+'.exe.sha256').read_bytes()
+          with zipfile.ZipFile(pathlib.Path('release-verify',base+'.zip')) as z:
+              assert z.testzip() is None
+              assert z.read('DFO-Client-Expander-RU/README.txt') == pathlib.Path('README.txt').read_bytes()
+              assert z.read('DFO-Client-Expander-RU/DFO-Client-Expander-RU.exe') == pathlib.Path('release-input',base+'.exe').read_bytes()
+          PY

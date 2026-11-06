@@ -12,6 +12,7 @@ const { transformTags } = require('./loot-tags-transform.cjs');
 const { transformDungeons } = require('./dungeon-transform.cjs');
 const { transformItemCards } = require('./item-cards-transform.cjs');
 const { transformFonts, preparePage } = require('./fonts-transform.cjs');
+const { transformServices } = require('./service-windows-transform.cjs');
 
 /** Translate `v` in place when the RU runtime is loaded - a statement. */
 const TR = (v) => `if(typeof globalThis.__translate=="function"&&typeof ${v}=="string"&&${v})${v}=globalThis.__translate(${v});`;
@@ -444,6 +445,7 @@ function transformAsset(rel, text, ctx) {
   if (ctx.dungeons !== false) t = transformDungeons(rel, t, log);
   if (ctx.itemCards === true) t = transformItemCards(rel, t, log);
   if (ctx.fonts === true) t = transformFonts(rel, t, log);
+  if (ctx.ru || ctx.fonts) t = transformServices(rel, t, log);
   return { text: t, log };
 }
 
@@ -452,9 +454,10 @@ function injectPage(html, prefix, ctx) {
   if (html.includes('dfo-mod/dfo_marks.js')) return html;
   const tags = [];
   tags.push(`<script>window.__DFO_MOD_CFG__=${JSON.stringify(ctx.pageCfg ?? {})};</script>`);
-  if (ctx.fonts === true) tags.push(`<script src="${prefix}dfo-mod/dfo_font_data.js?dfo=1.22.0"></script>`,`<script src="${prefix}dfo-mod/dfo_fonts.js?dfo=1.22.0"></script>`);
+  if (ctx.fonts === true) tags.push(`<script src="${prefix}dfo-mod/dfo_font_data.js?dfo=1.23.0"></script>`,`<script src="${prefix}dfo-mod/dfo_fonts.js?dfo=1.23.0"></script>`);
   if (ctx.ru && !html.includes('ru_dict.js')) tags.push(`<script src="${prefix}dfo-mod/ru_dict.js"></script>`, `<script src="${prefix}dfo-mod/ru_i18n.js"></script>`);
   tags.push(`<script src="${prefix}dfo-mod/ru_locale.js"></script>`, `<script src="${prefix}dfo-mod/ru_items.js"></script>`);
+  if (ctx.ru || ctx.fonts) tags.push(`<script src="${prefix}dfo-mod/dfo_service_details.js"></script>`, `<script src="${prefix}dfo-mod/dfo_services.js"></script>`);
   if (ctx.itemCards === true) tags.push(`<script src="${prefix}dfo-mod/dfo_item_text_data.js"></script>`, `<script src="${prefix}dfo-mod/dfo_item_text.js"></script>`, `<script src="${prefix}dfo-mod/dfo_item_cards.js"></script>`);
   tags.push(`<script src="${prefix}dfo-mod/dfo_marks.js"></script>`, `<script src="${prefix}dfo-mod/dfo_town.js"></script>`);
   if (ctx.dungeons !== false) tags.push(...['dfo_dungeon_model.js', 'dfo_dungeons.js', 'dfo_dungeon_live_model.js', 'dfo_dungeon_graph.js', 'dfo_dungeon_nav_model.js', 'dfo_dungeon_nav.js', 'dfo_dungeon_live.js'].map(f => `<script src="${prefix}dfo-mod/${f}"></script>`));
@@ -478,6 +481,6 @@ const EXPECTED = Object.freeze({
 });
 
 function expectedHooks(ctx={}){
- return [...(ctx.fonts?EXPECTED.fonts:[]),...(ctx.itemCards?EXPECTED.itemCards:[]),...(ctx.marks?EXPECTED.marks:[]),...(ctx.nearbyLoot!==false?EXPECTED.nearbyLoot:[]),...(ctx.dungeons!==false?EXPECTED.dungeons:[]),...(ctx.ru?EXPECTED.ru.filter(id=>!(ctx.fonts&&id==='ru.font')):[])];
+ return [...((ctx.ru||ctx.fonts)?["services.ports","services.spellRegistry","services.enchantCatalog","services.picker","services.trade"]:[]),...(ctx.fonts?EXPECTED.fonts:[]),...(ctx.itemCards?EXPECTED.itemCards:[]),...(ctx.marks?EXPECTED.marks:[]),...(ctx.nearbyLoot!==false?EXPECTED.nearbyLoot:[]),...(ctx.dungeons!==false?EXPECTED.dungeons:[]),...(ctx.ru?EXPECTED.ru.filter(id=>!(ctx.fonts&&id==='ru.font')):[])];
 }
 module.exports = { EXPECTED, expectedHooks, transformAsset, injectPage, TRANSFORMS, MARK_GROUPS, CHARSET_OLD, CHARSET_NEW, QUEST_FILE, ruQuest };

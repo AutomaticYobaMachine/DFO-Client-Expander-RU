@@ -144,6 +144,33 @@ test('dungeon transform decorates travelView marks loop with dfoDungeon preserva
   assert.ok(out.includes('d.push({dfoDungeon:t.dfoDungeon,key:t.key,'));
 });
 
+test('the cached projection of 0.1.14574+: dungeon data and quiet labels go into the record builder and its updater', () => {
+  const { transformDungeons } = require('../src/mod/dungeon-transform.cjs');
+  const { transformAsset } = require('../src/mod/transforms.cjs');
+  // The release's own shape: one record per mark key, built by rl and refreshed in place by il.
+  const dummy = 'function rl(e,t){return{key:e.key,x:t?.x??0,y:t?.y??0,front:!!t?.front,label:e.label}}'
+    + 'function il(e,t,n){e.key=t.key,e.x=n?.x??0,e.y=n?.y??0,e.front=!!n?.front,e.label=t.label}'
+    + 'function ne(){let d=t=>e.project&&t?e.project(t):null,f=e.route?.()??[];K++;let p=[],g=0;for(let t of e.marks?.()??[]){let e=d(t.at),n=nl(t),r=G.get(t.key);'
+    + 'r?.frame===K?p.push(rl(t,e)):(r?.fields===n?il(r.record,t,e):G.set(t.key,r={fields:n,frame:0,record:rl(t,e)}),r.frame=K,g++,p.push(r.record))}e.hud.update({marks:p,routeDots:[]})}';
+  const log = [];
+  const out = transformDungeons('assets/travelView-test.js', dummy, log);
+  assert.deepEqual(log, [['dungeon.travelView', 1]]);
+  assert.ok(out.includes('function rl(e,t){return{dfoDungeon:e.dfoDungeon,key:e.key,'));
+  assert.ok(out.includes('function il(e,t,n){e.dfoDungeon=t.dfoDungeon,e.key=t.key,'));
+  // Every hook of the full chain finds its place, in any order, and each only once.
+  const all = transformAsset('assets/travelView-test.js', dummy, { fonts: true, marks: true, dungeons: true });
+  for (const id of ['dungeon.travelView', 'fonts.mapProject', 'town.markFilter']) assert.ok(all.log.some(([k, n]) => k === id && n === 1), id);
+  assert.ok(all.text.includes('return{...globalThis.__dfoFonts?.calibration.mark(e),dfoDungeon:e.dfoDungeon,key:e.key,'));
+  assert.ok(all.text.includes('Object.assign(e,{dfoSmall:!1,dfoQuiet:!1},globalThis.__dfoFonts?.calibration.mark(t)),e.dfoDungeon=t.dfoDungeon,e.key=t.key,'));
+  assert.ok(all.text.includes('(e.marks?.()??[])){let e=d(t.at),n=nl(t),'), 'the town filter keeps the declaration going');
+  // The record functions run: a reused record loses a stale dungeon and quiet flag.
+  const fn = new Function('globalThis', all.text.split('function ne(')[0] + ';return {rl,il};')({ __dfoFonts: { calibration: { mark: m => (m.far ? { dfoSmall: true, dfoQuiet: true } : {}) } } });
+  const record = fn.rl({ key: 'a', far: true, dfoDungeon: { s: 1 } }, { x: 1, y: 2, front: true });
+  assert.deepEqual([record.dfoQuiet, record.dfoDungeon], [true, { s: 1 }]);
+  fn.il(record, { key: 'a' }, { x: 3, y: 4, front: true });
+  assert.deepEqual([record.dfoQuiet, record.dfoSmall, record.dfoDungeon, record.x], [false, false, undefined, 3]);
+});
+
 test('lifetime reads the real ledger deadline; missing records stay unknown and permanent dungeons have no timer', native, async()=>{
   const {spawnDeath}=await load('src/world/spawnedDungeons.js'),{sharedClassicMinutes,wallMsForClassicMinutes}=await load('src/net/wire.js');
   const now=Date.UTC(2026,10,2,12),minutes=sharedClassicMinutes(now),rec={seen:minutes-60,cleared:minutes-20};

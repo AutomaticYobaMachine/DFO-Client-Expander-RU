@@ -136,8 +136,9 @@ const townFrame = (text, log) => sub(text,
 /** travelView: the marks the readout draws pass the page's filter first - with the town map open, the marks outside
  *  the town are left out (`__dfoMarkFilter`: the list in, the list to draw out). */
 const townMarks = (text, log) => sub(text,
-  new RegExp(`for\\(let (${ID}) of (${ID})\\.marks\\?\\.\\(\\)\\?\\?\\[\\]\\)\\{let (${ID})=(${ID})\\(\\1\\.at\\);`, 'g'),
-  (all, t, e, a, l) => `for(let ${t} of ((_a)=>{try{return globalThis.__dfoMarkFilter?.(_a)??_a}catch(_dfo){return _a}})(${e}.marks?.()??[])){let ${a}=${l}(${t}.at);`,
+  // The projection may end its statement (older releases) or go on declaring the record cache's own names (0.1.14574+).
+  new RegExp(`for\\(let (${ID}) of (${ID})\\.marks\\?\\.\\(\\)\\?\\?\\[\\]\\)\\{let (${ID})=(${ID})\\(\\1\\.at\\)([;,])`, 'g'),
+  (all, t, e, a, l, end) => `for(let ${t} of ((_a)=>{try{return globalThis.__dfoMarkFilter?.(_a)??_a}catch(_dfo){return _a}})(${e}.marks?.()??[])){let ${a}=${l}(${t}.at)${end}`,
   log, 'town.markFilter');
 /** travelView: the point the camera follows - the traveller's feet, or, while the detailed town map is open, the page's
  *  own focus over the town (`__dfoCamFeet`: a scene point, or nothing for the feet). The camera's height, tilt and

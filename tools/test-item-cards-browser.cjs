@@ -75,6 +75,12 @@ const server = http.createServer((req,res) => {
       const {enums,records}=JSON.parse(fs.readFileSync(path.join(root,'docs/item-field-catalog.json')));
       res.setHeader('Content-Type','application/json');return res.end(JSON.stringify({enums,records}));
     }
+    // With the community fonts on, the game never reads its own FNT: the hook answers every FONT####.FNT with the
+    // mod's (font-assets.cjs). The stand serves the same files, so it needs no ARENA2 fonts.
+    if(globalFonts&&/^\/arena2\/FONT\d{4}\.FNT$/i.test(url.pathname)){
+      const asset=require(path.join(modDir,'font-assets.cjs')).replacement(url.pathname.slice(1));
+      res.setHeader('Content-Type',asset.type);return res.end(asset.body);
+    }
     if(url.pathname.startsWith('/arena2/')&&process.env.DFO_ARENA2_DIR){
       const basename=url.pathname.slice('/arena2/'.length);
       if(!/^[A-Za-z0-9_.-]+$/.test(basename)){res.writeHead(400);return res.end();}

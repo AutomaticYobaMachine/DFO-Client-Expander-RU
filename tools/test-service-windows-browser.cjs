@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 "use strict";
-const { uiScripts } = require("./ui-text-stand.cjs");
+const { uiScripts, standLocale } = require("./ui-text-stand.cjs");
+// Russian: the translation on, as the windows were first audited; DFO_UI_LOCALE=en: no translation, the game's own words.
+const ru = standLocale() === "ru";
 // Exercise the published client renderers and production transforms. Only data
 // and the scene loop are fixtures; there is no second implementation of a window.
 const fs = require("node:fs"),
@@ -118,7 +120,7 @@ function expose(s, f) {
     "};"
   );
 }
-const html = `<!doctype html><html lang="ru"><head><meta charset="utf-8">${uiScripts()}<title>DFO service windows — actual client audit</title><style>html,body{margin:0;width:100%;height:100%;overflow:hidden;background:radial-gradient(ellipse at 45% 30%,#30332d,#101416 65%)}#scene{position:fixed;inset:0;width:100%;height:100%}</style><script>globalThis.__serviceModules=${JSON.stringify(mods)};globalThis.__DFO_MOD_CFG__={ru:{on:true},fonts:{enabled:true},itemCards:{enabled:true}};</script><script src="/dfo-mod/dfo_font_data.js"></script><script src="/dfo-mod/dfo_fonts.js"></script><script src="/dfo-mod/ru_dict.js"></script><script src="/dfo-mod/ru_i18n.js"></script><script src="/dfo-mod/ru_items.js"></script><script src="/dfo-mod/dfo_item_cards.js"></script><script src="/dfo-mod/dfo_service_details.js"></script><script src="/dfo-mod/dfo_services.js"></script></head><body><canvas id="scene" width="1920" height="1080"></canvas><div id="service-host"></div><script type="module" src="/service-fixture.js"></script></body></html>`;
+const html = `<!doctype html><html lang="${ru ? "ru" : "en"}"><head><meta charset="utf-8">${uiScripts()}<title>DFO service windows — actual client audit</title><style>html,body{margin:0;width:100%;height:100%;overflow:hidden;background:radial-gradient(ellipse at 45% 30%,#30332d,#101416 65%)}#scene{position:fixed;inset:0;width:100%;height:100%}</style><script>globalThis.__serviceModules=${JSON.stringify(mods)};globalThis.__DFO_MOD_CFG__={ru:{on:${ru}},fonts:{enabled:true},itemCards:{enabled:true}};</script><script src="/dfo-mod/dfo_font_data.js"></script><script src="/dfo-mod/dfo_fonts.js"></script>${ru ? '<script src="/dfo-mod/ru_dict.js"></script><script src="/dfo-mod/ru_i18n.js"></script>' : ""}<script src="/dfo-mod/ru_items.js"></script><script src="/dfo-mod/dfo_item_cards.js"></script><script src="/dfo-mod/dfo_service_details.js"></script><script src="/dfo-mod/dfo_services.js"></script></head><body><canvas id="scene" width="1920" height="1080"></canvas><div id="service-host"></div><script type="module" src="/service-fixture.js"></script></body></html>`;
 const fixture = fs.readFileSync(
   path.join(__dirname, "fixtures/service-windows.mjs"),
   "utf8",
@@ -170,7 +172,7 @@ const server = http.createServer((req, res) => {
         out = transformAsset("assets/" + f, raw, {
           fonts: true,
           itemCards: true,
-          ru: true,
+          ru,
           nearbyLoot: false,
           dungeons: false,
           marks: false,
@@ -268,7 +270,8 @@ async function main() {
     );
     console.log("Saved", dir);
     assert.deepEqual(report.errors, []);
-    assert.deepEqual(report.warnings, []);
+    // Without ARENA2 the game itself warns that its icons are missing; nothing else may warn.
+    assert.deepEqual(report.warnings.filter((w) => process.env.DFO_ARENA2_DIR || !/ARENA2/.test(w)), []);
     writeGallery(dir, report);
   } finally {
     if (browser) await browser.close();

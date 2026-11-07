@@ -1,5 +1,7 @@
 'use strict';
-const { uiScripts } = require('./ui-text-stand.cjs');
+const { uiScripts, say } = require('./ui-text-stand.cjs');
+// A preset's file keeps its Cyrillic name only where the browser has a UTF-8 locale; a bare container has none.
+if (!/UTF-?8/i.test(process.env.LC_ALL || process.env.LANG || '')) process.env.LANG = 'C.UTF-8';
 // Optional integration check against a locally built upstream checkout (npm ci there supplies Playwright).
 // node tools/test-nearby-loot-browser.cjs /path/to/daggerfall-js-source
 const fs = require('node:fs'), path = require('node:path'), http = require('node:http');
@@ -45,7 +47,7 @@ const server = http.createServer(async (req, res) => {
       const chunks=[]; for await(const c of req) chunks.push(c);
       if (req.method === 'POST' && url.pathname.endsWith('loot-presets')) presetPosts++;
       if (req.method === 'POST' && ((failNextSettings && url.pathname.endsWith('loot-settings')) || (failNextPreset && url.pathname.endsWith('loot-presets')))) {
-        failNextSettings = failNextPreset = false; res.statusCode=500; res.setHeader('Content-Type','application/json'); return res.end(JSON.stringify({error:'Тест: ошибка записи кеша'}));
+        failNextSettings = failNextPreset = false; res.statusCode=500; res.setHeader('Content-Type','application/json'); return res.end(JSON.stringify({error:'Test: cache write failed'}));
       }
       const response=await handle(new Request('dagger://game'+url.pathname,{method:req.method,...(req.method==='POST'?{body:Buffer.concat(chunks)}:{})}));
       res.statusCode=response.status;response.headers.forEach((v,k)=>res.setHeader(k,v));return res.end(Buffer.from(await response.arrayBuffer()));
@@ -75,7 +77,7 @@ const server = http.createServer(async (req, res) => {
     await page.keyboard.press('j');
     await page.waitForSelector('.loot-win');
     assert.equal(await page.locator('#enhanced-inventory').count(),1);
-    assert.match(await page.locator('.loot-win').innerText(),/Лут рядом/i);
+    assert.ok((await page.locator('.loot-win').innerText()).toLowerCase().includes(say('loot.nearbyTitle').split(' · ')[0].toLowerCase()));
     assert.equal(await page.evaluate(()=>fixture.mounts),1);
     await page.locator('.loot-win .itemrow').first().hover();
     await page.locator('.inv-tip .dfo-item-card').waitFor();
@@ -118,7 +120,7 @@ const server = http.createServer(async (req, res) => {
     assert.equal(await page.evaluate(()=>fixture.mounts),1);
     // Native filtered Take all settles both containers exactly once.
     await page.locator('.loot-win input.storesearch').fill('Arrow');
-    await page.locator('.loot-win').getByRole('button',{name:'Забрать все',exact:true}).click();
+    await page.locator('.loot-win').getByRole('button',{name:say('loot.takeAll'),exact:true}).click();
     await page.locator('#enhanced-inventory').waitFor({state:'hidden'});
     assert.deepEqual(await page.evaluate(()=>fixture.a.map(x=>x.name)),['Dagger']);
     assert.equal(await page.evaluate(()=>fixture.entity.items.find(x=>x.templateIndex===131).stackCount),10);
@@ -142,26 +144,26 @@ const server = http.createServer(async (req, res) => {
     assert.ok(catalogIds.some(id=>id.startsWith('type:*:')),'custom template definitions without groups are included');
     for(const expected of ['group:PlantIngredients1','kind:Arrows','rarity:artifact','rarity:aetheric','rarity:gilded','material:Daedric','type:Armor:102','affix:damage','affix:stat:strength','affix:skill:34']) assert.ok(catalogIds.includes(expected),expected);
     // New controls use the same overlay and actual disk-backed settings endpoint.
-    assert.equal(await page.locator('.loot-win').getByRole('button',{name:'Лутфильтр',exact:true}).count(),1);
-    await page.locator('.loot-win').getByRole('button',{name:'Лутфильтр',exact:true}).click();
-    let filter=page.getByRole('dialog',{name:'Лутфильтр',exact:true});
+    assert.equal(await page.locator('.loot-win').getByRole('button',{name:say('loot.filter'),exact:true}).count(),1);
+    await page.locator('.loot-win').getByRole('button',{name:say('loot.filter'),exact:true}).click();
+    let filter=page.getByRole('dialog',{name:say('loot.filter'),exact:true});
     assert.equal(await filter.count(),1);
-    const black=filter.getByRole('button',{name:'Чёрный список',exact:true}),white=filter.getByRole('button',{name:'Белый список',exact:true});
+    const black=filter.getByRole('button',{name:say('loot.mode.blackList'),exact:true}),white=filter.getByRole('button',{name:say('loot.mode.whiteList'),exact:true});
     assert.equal(await black.getAttribute('aria-pressed'),'true');
     await white.click();assert.equal(await white.getAttribute('aria-pressed'),'true');assert.equal(await black.getAttribute('aria-pressed'),'false');
     await page.waitForFunction(()=>getComputedStyle([...document.querySelectorAll('.dfo-loot-modes button')].find(n=>n.getAttribute('aria-pressed')==='true')).backgroundColor==='rgb(216, 179, 79)');
     await page.evaluate(()=>__dfoLootSettings.flush());
     failNextSettings=true; await black.click();
-    await page.waitForFunction(()=>document.querySelector('.dfo-loot-dialog [role="status"]').textContent.includes('ошибка записи'));
+    await page.waitForFunction(()=>document.querySelector('.dfo-loot-dialog [role="status"]').textContent.includes('cache write failed'));
     assert.equal(await white.getAttribute('aria-pressed'),'true','failed mode changes restore the saved button state');
     assert.equal(await black.getAttribute('aria-pressed'),'false');
     await black.click();
     await page.evaluate(()=>__dfoLootSettings.flush());
     failNextSettings=true; await filter.locator('input[data-tag="group:Armor"]').evaluate(n=>n.click());
-    await page.waitForFunction(()=>document.querySelector('.dfo-loot-dialog [role="status"]').textContent.includes('ошибка записи'));
+    await page.waitForFunction(()=>document.querySelector('.dfo-loot-dialog [role="status"]').textContent.includes('cache write failed'));
     assert.equal(await filter.locator('input[data-tag="group:Armor"]').isChecked(),false,'a failed checkbox edit is visibly rolled back');
     await filter.locator('input[data-tag="type:Weapons:131"]').check();
-    await filter.getByRole('combobox',{name:'Группа тегов'}).click();await page.keyboard.press('Escape');
+    await filter.getByRole('combobox',{name:say('loot.tags.group')}).click();await page.keyboard.press('Escape');
     assert.equal(await filter.count(),1,'Escape dismisses an open native select without closing its dialog');
     assert.equal(await filter.locator('.dfo-loot-tags').evaluate(n=>getComputedStyle(n).gridTemplateColumns.split(' ').length),2);
     assert.ok(await page.evaluate(()=>__dfoLootRules.catalog(__dfoLootTools).length)>300,'catalog is game-wide, not just nearby drops');
@@ -169,7 +171,7 @@ const server = http.createServer(async (req, res) => {
     await page.setViewportSize({width:720,height:600});
     assert.equal(await frame.evaluate(n=>{const r=n.getBoundingClientRect();return r.left>=0&&r.right<=innerWidth&&r.top>=0&&r.bottom<=innerHeight}),true,'fixed loot frame fits a small screen');
     assert.equal(await filter.evaluate(n=>{const r=n.getBoundingClientRect();return r.left>=0&&r.right<=innerWidth&&r.top>=0&&r.bottom<=innerHeight}),true,'filter stays within a small viewport');
-    assert.equal(await filter.getByRole('button',{name:'Закрыть',exact:true}).evaluate(n=>{const r=n.getBoundingClientRect();return r.top>=0&&r.bottom<=innerHeight}),true,'filter footer remains reachable');
+    assert.equal(await filter.getByRole('button',{name:say('loot.close'),exact:true}).evaluate(n=>{const r=n.getBoundingClientRect();return r.top>=0&&r.bottom<=innerHeight}),true,'filter footer remains reachable');
     assert.equal(await filter.locator('.wb').evaluate(n=>n.scrollWidth<=n.clientWidth),true,'filter body must not overflow horizontally');
     await filter.locator('.dfo-loot-tags').evaluate(n=>{n.scrollTop=n.scrollHeight});
     await filter.locator('.dfo-loot-tag').last().click();
@@ -178,12 +180,12 @@ const server = http.createServer(async (req, res) => {
     await page.evaluate(()=>__dfoLootSettings.flush());
     await page.setViewportSize({width:1400,height:900});
     assert.deepEqual(await page.evaluate(()=>fixture.a.length),1201,'changing a display filter moved no loot');
-    await filter.getByRole('button',{name:'Сохранить',exact:true}).click();
-    let nameDialog=page.getByRole('dialog',{name:'Имя сохранённого фильтра',exact:true});
+    await filter.getByRole('button',{name:say('loot.save'),exact:true}).click();
+    let nameDialog=page.getByRole('dialog',{name:say('loot.preset.nameTitle'),exact:true});
     await nameDialog.getByRole('textbox').fill('Лут J');
     await page.evaluate(()=>__dfoLootSettings.flush());
-    failNextPreset=true;await nameDialog.getByRole('button',{name:'Сохранить',exact:true}).click();
-    await page.waitForFunction(()=>document.querySelectorAll('.dfo-loot-dialog')[1]?.querySelector('[role="status"]').textContent.includes('ошибка записи'));
+    failNextPreset=true;await nameDialog.getByRole('button',{name:say('loot.save'),exact:true}).click();
+    await page.waitForFunction(()=>document.querySelectorAll('.dfo-loot-dialog')[1]?.querySelector('[role="status"]').textContent.includes('cache write failed'));
     assert.equal(await nameDialog.getByRole('textbox').inputValue(),'Лут J');
     assert.equal(await page.evaluate(()=>__dfoLootSettings.get().presets.length),0,'failed saves do not fabricate a preset');
     const downloadWait=page.waitForEvent('download');
@@ -197,59 +199,59 @@ const server = http.createServer(async (req, res) => {
     assert.equal(persisted.loot.presets[0].name,'Лут J');
     const presetFile=path.join(userData,'dfo-mod-loot-presets',persisted.loot.presets[0].id+'.json');
     assert.equal(JSON.parse(fs.readFileSync(presetFile,'utf8')).format,'dfo-loot-filter');
-    await filter.getByRole('button',{name:'Сохранить',exact:true}).click();
-    nameDialog=page.getByRole('dialog',{name:'Имя сохранённого фильтра',exact:true});await nameDialog.getByRole('textbox').fill('Лут J');
-    await nameDialog.getByRole('button',{name:'Сохранить',exact:true}).click();
-    await page.waitForFunction(()=>document.querySelectorAll('.dfo-loot-dialog')[1]?.querySelector('[role="status"]').textContent.includes('уже существует'));
-    assert.equal(await page.evaluate(()=>__dfoLootSettings.get().presets.length),1);await nameDialog.getByRole('button',{name:'Отмена',exact:true}).click();
-    await filter.getByRole('button',{name:'Сохранить',exact:true}).click();
-    nameDialog=page.getByRole('dialog',{name:'Имя сохранённого фильтра',exact:true});
+    await filter.getByRole('button',{name:say('loot.save'),exact:true}).click();
+    nameDialog=page.getByRole('dialog',{name:say('loot.preset.nameTitle'),exact:true});await nameDialog.getByRole('textbox').fill('Лут J');
+    await nameDialog.getByRole('button',{name:say('loot.save'),exact:true}).click();
+    await page.waitForFunction(t=>document.querySelectorAll('.dfo-loot-dialog')[1]?.querySelector('[role="status"]').textContent.includes(t),say('store.nameTaken'));
+    assert.equal(await page.evaluate(()=>__dfoLootSettings.get().presets.length),1);await nameDialog.getByRole('button',{name:say('loot.cancel'),exact:true}).click();
+    await filter.getByRole('button',{name:say('loot.save'),exact:true}).click();
+    nameDialog=page.getByRole('dialog',{name:say('loot.preset.nameTitle'),exact:true});
     await nameDialog.getByRole('textbox').fill('Отмена ');await page.keyboard.press('j');assert.equal(await nameDialog.getByRole('textbox').inputValue(),'Отмена j');await page.keyboard.press('Escape');
     await nameDialog.waitFor({state:'hidden'});assert.equal(await filter.count(),1);assert.equal(await page.evaluate(()=>fixture.mounts),2);
     await white.click();
-    await filter.getByRole('button',{name:'Загрузить',exact:true}).click();
-    let loadDialog=page.getByRole('dialog',{name:'Загрузить фильтр',exact:true});
+    await filter.getByRole('button',{name:say('loot.load'),exact:true}).click();
+    let loadDialog=page.getByRole('dialog',{name:say('loot.preset.loadTitle'),exact:true});
     await loadDialog.getByRole('option',{name:/Лут J/}).click();
-    await loadDialog.getByRole('button',{name:'Отмена',exact:true}).click();
-    assert.equal(await filter.getByRole('button',{name:'Белый список',exact:true}).getAttribute('aria-pressed'),'true','cancel does not apply the selected preset');
-    await filter.getByRole('button',{name:'Загрузить',exact:true}).click();
-    loadDialog=page.getByRole('dialog',{name:'Загрузить фильтр',exact:true});
+    await loadDialog.getByRole('button',{name:say('loot.cancel'),exact:true}).click();
+    assert.equal(await filter.getByRole('button',{name:say('loot.mode.whiteList'),exact:true}).getAttribute('aria-pressed'),'true','cancel does not apply the selected preset');
+    await filter.getByRole('button',{name:say('loot.load'),exact:true}).click();
+    loadDialog=page.getByRole('dialog',{name:say('loot.preset.loadTitle'),exact:true});
     await loadDialog.getByRole('option',{name:/Лут J/}).click();
-    await loadDialog.getByRole('button',{name:'Загрузить',exact:true}).click();
+    await loadDialog.getByRole('button',{name:say('loot.load'),exact:true}).click();
     await loadDialog.waitFor({state:'hidden'});
-    assert.equal(await filter.getByRole('button',{name:'Чёрный список',exact:true}).getAttribute('aria-pressed'),'true');
+    assert.equal(await filter.getByRole('button',{name:say('loot.mode.blackList'),exact:true}).getAttribute('aria-pressed'),'true');
     // A refresh from another game window must synchronize the parent even on Cancel.
     const store=require('../src/mod/loot-store.cjs').createLootStore(userData),current=store.state();
     store.saveSettings({...current,filter:{mode:'white',tags:['rarity:rare']}});
-    await filter.getByRole('button',{name:'Загрузить',exact:true}).click();
-    loadDialog=page.getByRole('dialog',{name:'Загрузить фильтр',exact:true});await loadDialog.getByRole('option',{name:/Лут J/}).waitFor();
-    await loadDialog.getByRole('button',{name:'Отмена',exact:true}).click();
+    await filter.getByRole('button',{name:say('loot.load'),exact:true}).click();
+    loadDialog=page.getByRole('dialog',{name:say('loot.preset.loadTitle'),exact:true});await loadDialog.getByRole('option',{name:/Лут J/}).waitFor();
+    await loadDialog.getByRole('button',{name:say('loot.cancel'),exact:true}).click();
     assert.equal(await white.getAttribute('aria-pressed'),'true');assert.equal(await filter.locator('input[data-tag="rarity:rare"]').isChecked(),true);
     assert.equal(await filter.locator('input[data-tag="type:Weapons:131"]').isChecked(),false);
-    await filter.getByRole('button',{name:'Загрузить',exact:true}).click();loadDialog=page.getByRole('dialog',{name:'Загрузить фильтр',exact:true});
-    await loadDialog.getByRole('option',{name:/Лут J/}).click();await loadDialog.getByRole('button',{name:'Загрузить',exact:true}).click();await loadDialog.waitFor({state:'hidden'});
-    await filter.getByRole('button',{name:'Закрыть',exact:true}).click();
+    await filter.getByRole('button',{name:say('loot.load'),exact:true}).click();loadDialog=page.getByRole('dialog',{name:say('loot.preset.loadTitle'),exact:true});
+    await loadDialog.getByRole('option',{name:/Лут J/}).click();await loadDialog.getByRole('button',{name:say('loot.load'),exact:true}).click();await loadDialog.waitFor({state:'hidden'});
+    await filter.getByRole('button',{name:say('loot.close'),exact:true}).click();
     await page.keyboard.press('Escape');await page.locator('#enhanced-inventory').waitFor({state:'hidden'});
     await page.reload();await page.waitForFunction(()=>window.ready);
     await page.keyboard.press('j');await page.waitForSelector('.loot-win');
     assert.equal(await page.locator('.loot-win .itemrow').count(),2,'saved filter hides only Arrow after a reload');
     assert.equal(await page.evaluate(()=>fixture.b.length),2,'hidden loot remains at its source');
-    await page.locator('.loot-win').getByRole('button',{name:'Автолут',exact:true}).click();
-    const auto=page.getByRole('dialog',{name:'Автолут по кнопке лута',exact:true});
+    await page.locator('.loot-win').getByRole('button',{name:say('loot.auto'),exact:true}).click();
+    const auto=page.getByRole('dialog',{name:say('loot.auto.title'),exact:true});
     failNextSettings=true;await auto.locator('input[data-autoloot-enabled]').evaluate(n=>n.click());
-    await page.waitForFunction(()=>document.querySelector('.dfo-loot-dialog [role="status"]').textContent.includes('ошибка записи'));
+    await page.waitForFunction(()=>document.querySelector('.dfo-loot-dialog [role="status"]').textContent.includes('cache write failed'));
     assert.equal(await auto.locator('input[data-autoloot-enabled]').isChecked(),false);
     await auto.locator('input[data-autoloot-enabled]').check();
-    await auto.getByRole('searchbox',{name:'Поиск конкретного предмета'}).fill('Arrow');
+    await auto.getByRole('searchbox',{name:say('loot.auto.search')}).fill('Arrow');
     await page.evaluate(()=>__dfoLootSettings.flush());failNextSettings=true;
     await auto.locator('input[data-item-key="type:Weapons:131"]').evaluate(n=>n.click());
-    await page.waitForFunction(()=>document.querySelector('.dfo-loot-dialog [role="status"]').textContent.includes('ошибка записи'));
+    await page.waitForFunction(()=>document.querySelector('.dfo-loot-dialog [role="status"]').textContent.includes('cache write failed'));
     assert.equal(await auto.locator('input[data-item-key="type:Weapons:131"]').isChecked(),false);
-    assert.match(await auto.locator('p.dfo-loot-note').last().innerText(),/Правил: 0/);
+    assert.match(await auto.locator('p.dfo-loot-note').last().innerText(),new RegExp('^'+say('loot.auto.info',{n:0,catalog:'X'}).split('X')[0].replace(/[.*+?^${}()|[\]\\]/g,'\\$&')));
     await auto.locator('input[data-item-key="type:Weapons:131"]').check();
-    assert.match(await auto.locator('p.dfo-loot-note').last().innerText(),/Правил: 1/);
+    assert.match(await auto.locator('p.dfo-loot-note').last().innerText(),new RegExp('^'+say('loot.auto.info',{n:1,catalog:'X'}).split('X')[0].replace(/[.*+?^${}()|[\]\\]/g,'\\$&')));
     if(process.env.DFO_SCREENSHOT_DIR)await page.screenshot({path:path.join(process.env.DFO_SCREENSHOT_DIR,'auto-loot.png')});
-    await auto.getByRole('button',{name:'Закрыть',exact:true}).click();
+    await auto.getByRole('button',{name:say('loot.close'),exact:true}).click();
     await page.evaluate(()=>__dfoLootSettings.flush());
     assert.equal(await page.evaluate(()=>fixture.entity.items.length),0,'configuring auto-loot alone never picks up items');
     await page.keyboard.press('Escape');await page.locator('#enhanced-inventory').waitFor({state:'hidden'});
@@ -283,12 +285,12 @@ const server = http.createServer(async (req, res) => {
     // Collect all uses current rows and real carry plans, and closes only after success.
     await page.evaluate(()=>__dfoLootSettings.update({filter:{mode:'black',tags:[]},autoLoot:{enabled:false}}));
     await page.reload();await page.waitForFunction(()=>window.ready);await page.keyboard.press('j');await page.waitForSelector('.loot-win');
-    await page.locator('.loot-win').getByRole('button',{name:'Забрать все',exact:true}).click();
+    await page.locator('.loot-win').getByRole('button',{name:say('loot.takeAll'),exact:true}).click();
     await page.locator('#enhanced-inventory').waitFor({state:'hidden'});
     assert.deepEqual(await page.evaluate(()=>[fixture.a.length,fixture.b.length,fixture.entity.items.length]),[0,0,3]);
     await page.reload();await page.waitForFunction(()=>window.ready);await page.evaluate(()=>fixture.entity.goldPieces=1000000);
     await page.keyboard.press('j');await page.waitForSelector('.loot-win');
-    await page.locator('.loot-win').getByRole('button',{name:'Забрать все',exact:true}).click();
+    await page.locator('.loot-win').getByRole('button',{name:say('loot.takeAll'),exact:true}).click();
     await page.waitForFunction(()=>/cannot carry|нести|перегруж/i.test(document.body.textContent));
     await page.waitForFunction(()=>{const n=document.querySelector('.notice.notice-in');if(!n)return false;const r=n.getBoundingClientRect();return r.left>=0&&r.right<=innerWidth+1&&r.top>=0&&r.bottom<=innerHeight+1;});
     assert.equal(await page.locator('#enhanced-inventory').count(),1);assert.equal(await page.locator('.loot-win .itemrow').count(),2);
@@ -304,11 +306,11 @@ const server = http.createServer(async (req, res) => {
       assert.equal(await page.evaluate(()=>fixture.mounts),1);
       await page.keyboard.press(code);assert.equal(await page.evaluate(()=>fixture.mounts),1);
       if(code==='NumpadEnter') {
-        await page.locator('.loot-win').getByRole('button',{name:'Лутфильтр',exact:true}).focus();
+        await page.locator('.loot-win').getByRole('button',{name:say('loot.filter'),exact:true}).focus();
         await page.keyboard.press('NumpadEnter');
-        await page.getByRole('dialog',{name:'Лутфильтр',exact:true}).waitFor();
+        await page.getByRole('dialog',{name:say('loot.filter'),exact:true}).waitFor();
         await page.keyboard.press('Escape');
-        await page.getByRole('dialog',{name:'Лутфильтр',exact:true}).waitFor({state:'hidden'});
+        await page.getByRole('dialog',{name:say('loot.filter'),exact:true}).waitFor({state:'hidden'});
       }
       await page.keyboard.press('Escape');await page.locator('#enhanced-inventory').waitFor({state:'hidden'});
     }

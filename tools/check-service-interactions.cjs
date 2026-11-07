@@ -1,5 +1,9 @@
 "use strict";
 const assert = require("node:assert/strict");
+const { standLocale, say } = require("./ui-text-stand.cjs");
+// The windows' words: the translation's with the Russian pack, the game's own with the English one (no translation).
+const ru = standLocale() === "ru";
+const L = (russian, english) => (ru ? russian : english);
 const selectors =
   ".port-win,.trade-win,.broker-win,.notice-win,.sb-shell>.px-win,.pick-win";
 async function settle(page) {
@@ -117,12 +121,12 @@ async function interactions(page) {
   );
   await page
     .locator(".port-spin")
-    .filter({ hasText: "База: мин." })
+    .filter({ hasText: L("База: мин.", "Base min") })
     .locator(".port-spinfield")
     .fill("12");
   await page
     .locator(".port-spin")
-    .filter({ hasText: "База: мин." })
+    .filter({ hasText: L("База: мин.", "Base min") })
     .locator(".port-spinfield")
     .press("Enter");
   await settle(page);
@@ -139,7 +143,7 @@ async function interactions(page) {
     await page.locator(".dfo-service-description").innerText(),
     /28–44/,
   );
-  await page.getByRole("button", { name: "Готово", exact: true }).click();
+  await page.getByRole("button", { name: L("Готово", "Done"), exact: true }).click();
   await settle(page);
   assert.equal(await page.evaluate(() => !!auditWindow.editor), false);
   assert.equal(await page.locator(".port-host").count(), 1);
@@ -154,7 +158,7 @@ async function interactions(page) {
   await show("spellmaker-editor-absorb");
   const chance = page
     .locator(".port-group.port-spins")
-    .filter({ hasText: "Вероятность" })
+    .filter({ hasText: L("Вероятность", "Chance") })
     .locator(".port-spinfield")
     .first();
   await chance.fill("999");
@@ -177,7 +181,7 @@ async function interactions(page) {
     JSON.stringify(auditWindow.slots),
   );
   const first = await page.locator(".dfo-service-help").innerText();
-  assert.match(first,/Обычный · Истинный/i,'True is an effect variant, not the boolean Yes');
+  assert.match(first,L(/Обычный · Истинный/i,/Normal · True/),'True is an effect variant, not the boolean Yes');
   await page.locator(".pick-row").nth(1).hover();
   assert.notEqual(await page.locator(".dfo-service-help").innerText(), first);
   assert.equal(
@@ -206,7 +210,7 @@ async function interactions(page) {
   await show("spellmaker-variant");
   // Health is already present in this spell; the native duplicate guard must
   // remain effective. Select a different actual subtype for the add flow.
-  await page.locator(".pick-row").filter({ hasText: "Мана" }).click();
+  await page.locator(".pick-row").filter({ hasText: L("Мана", /Spell Points|Magicka|Mana/) }).click();
   await settle(page);
   assert.ok(
     await page.evaluate(() => !!auditWindow.editor),
@@ -223,9 +227,9 @@ async function interactions(page) {
   await show('spellmaker-picker');
   await page.evaluate(()=>auditWindow._pickGroup('Invisibility'));await settle(page);
   assert.equal(await page.evaluate(()=>auditWindow.picker.items.includes('True')),true);
-  await page.locator('.pick-row').filter({hasText:'Истинный'}).click();await settle(page);
+  await page.locator('.pick-row').filter({hasText:L('Истинный','True')}).click();await settle(page);
   assert.equal(await page.evaluate(()=>auditWindow.editor.deps.effect.key),'13,1');
-  pass('Russian Normal/True labels keep the canonical effect keys and choose true invisibility');
+  pass('Normal/True labels keep the canonical effect keys and choose true invisibility');
 
   await show("enchant-parameter");
   const itemBefore = await page.evaluate(() =>
@@ -233,7 +237,7 @@ async function interactions(page) {
   );
   await page
     .locator(".pick-row")
-    .filter({ hasText: "Критический удар" })
+    .filter({ hasText: L("Критический удар", "Critical Strike") })
     .click();
   await settle(page);
   assert.equal(
@@ -253,10 +257,14 @@ async function interactions(page) {
   );
 
   await show("enchant-spell");
-  assert.match(await page.locator(".dfo-service-help").innerText(), /M =/);
+  // The spell's own figures come from SPELLS.STD (ARENA2); without it the panel says the data is not loaded yet.
+  if (process.env.DFO_ARENA2_DIR)
+    assert.match(await page.locator(".dfo-service-help").innerText(), /M =/);
+  else
+    assert.ok((await page.locator(".dfo-service-help").innerText()).includes(say("svc.pick.spellLoading")));
   const panelCount = await page.locator(".dfo-service-help").count();
   assert.equal(panelCount, 1);
-  await page.getByRole("button", { name: /Отмена/ }).click();
+  await page.getByRole("button", { name: L(/Отмена/, /Cancel/) }).click();
   await settle(page);
   assert.equal(await page.locator(".dfo-service-help").count(), 0);
   pass(
@@ -266,7 +274,7 @@ async function interactions(page) {
   await show("bank-deposit");
   const field = page.locator(".port-field[data-entry]");
   assert.equal(await field.count(), 1);
-  await page.getByRole("button", { name: "Отмена", exact: true }).click();
+  await page.getByRole("button", { name: L("Отмена", "Cancel"), exact: true }).click();
   await settle(page);
   assert.equal(await field.count(), 0);
   assert.equal(await page.locator(".port-host").count(), 1);
@@ -279,36 +287,40 @@ async function interactions(page) {
   );
 
   await show("board-orders");
-  assert.match(await page.locator(".notice-win").innerText(), /25 серебра/);
+  assert.match(await page.locator(".notice-win").innerText(), L(/25 серебра/, /25 silver/i));
   const search = page.locator('.notice-win input[type="search"]');
   if (await search.count()) {
-    await search.fill("несуществующий заказ");
+    await search.fill("no-such-order-xyz");
     await search.evaluate((n) => n.blur());
-    await page.waitForFunction(() =>
-      /Нет подходящих/.test(
-        document.querySelector(".notice-win")?.innerText || "",
-      ),
+    await page.waitForFunction(
+      (re) =>
+        new RegExp(re).test(
+          document.querySelector(".notice-win")?.innerText || "",
+        ),
+      L("Нет подходящих", "No work matches"),
     );
     await search.fill("");
     await search.evaluate((n) => n.blur());
   }
-  pass("Town-order rewards and filter controls render in Russian");
+  pass("Town-order rewards and filter controls render in the install's language");
 
   for (const k of ["trade-buy", "trade-sell"]) {
     await show(k);
-    const tab = page.locator(".packtab").filter({ hasText: "Ингредиенты" });
+    const tab = page.locator(".packtab").filter({ hasText: L("Ингредиенты", "Ingredients") });
     await tab.click();
     await settle(page);
     await page
       .locator(".packtab")
-      .filter({ hasText: "Оружие и доспехи" })
+      .filter({ hasText: L("Оружие и доспехи", "Weapons & Armor") })
       .click();
     await settle(page);
     assert.equal(await page.locator(".trade-win").count(), 1);
-    assert.doesNotMatch(
-      await page.locator(".trade-win").innerText(),
-      /Язык орков|Язык даэдра|silver/i,
-    );
+    // The translation must name the metals, not the languages of the same words.
+    if (ru)
+      assert.doesNotMatch(
+        await page.locator(".trade-win").innerText(),
+        /Язык орков|Язык даэдра|silver/i,
+      );
     await page.locator(".itemrow").first().click();
     await settle(page);
     assert.equal(
@@ -322,10 +334,10 @@ async function interactions(page) {
   await show("spells");
   await page
     .locator(".sb-row")
-    .filter({ hasText: "Поглощение заклинаний" })
+    .filter({ hasText: "Поглощение заклинаний" }) // the fixture's own spell name, in both languages
     .click();
   await settle(page);
-  assert.match(await page.locator(".px-qdetail").innerText(), /Поглощение/);
+  assert.match(await page.locator(".px-qdetail").innerText(), /Поглощение заклинаний/i);
   pass("Spell selection switches the native detail pane");
   await page.evaluate(() => servicesAudit.stop());
   await settle(page);

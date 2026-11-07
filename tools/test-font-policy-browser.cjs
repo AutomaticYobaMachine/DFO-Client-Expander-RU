@@ -21,7 +21,10 @@ async function main(){
    const foreign=new frame.contentWindow.FontFace('Foreign Old Face',await fetch('/dfo-mod/item-font-text.ttf?dfo=1.21.0').then(r=>r.arrayBuffer()));await foreign.load();document.fonts.add(foreign);frame.remove();
    const families=[...document.fonts].map(f=>f.family),fnts=[];
    for(let i=0;i<5;i++){
+    // Stale glyphs as an old IndexedDB copy would hold them: the mod's own FNT (what the hook serves) with every
+    // glyph byte inverted. Loading must give the community glyphs back, whatever bytes come in.
     const raw=new Uint8Array(await fetch('/arena2/FONT000'+i+'.FNT').then(r=>r.arrayBuffer()));
+    for(let k=4+240*4;k<raw.length;k++)raw[k]^=0xff;
     const fnt=new nativeFontTest.FntFile().load(raw),view=new DataView(raw.buffer);let changed=false;
     for(let j=0;j<240&&!changed;j++){const offset=view.getUint16(4+j*4,true);changed=fnt.glyphs[j].data.some((b,n)=>b!==raw[offset+n])}
     fnts.push({name:'FONT000'+i,height:fnt.fixedHeight,changed});

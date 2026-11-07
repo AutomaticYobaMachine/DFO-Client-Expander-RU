@@ -341,6 +341,8 @@
     );
   }
   function variantName(e) {
+    // The game's own words for the two variants; Russian only where the translation is on.
+    if (!ru()) return e.subgroup || e.name;
     return e.subgroup === "True"
       ? "Истинный"
       : e.subgroup === "Normal"

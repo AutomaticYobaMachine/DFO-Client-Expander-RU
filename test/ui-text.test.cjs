@@ -108,3 +108,33 @@ test('no Russian string in the installer\'s Go code', () => {
     for (const m of code.matchAll(/"(?:[^"\\\n]|\\.)*"|`[^`]*`/g)) assert.doesNotMatch(m[0], CYR, `${file}: ${m[0].slice(0, 60)} - put it into src/gui/locale/<en|ru>/ui/installer.csv`);
   }
 });
+
+test('a store error reaches the page as words and key, and the page says it in its own pack', async () => {
+  const os = require('node:os');
+  const { wrap } = require('../src/mod/hook.cjs');
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'dfo-ui-store-'));
+  try {
+    const handle = wrap(async () => new Response('not found', { status: 404 }), { app: { getPath: () => dir } });
+    const post = body => handle(new Request('dagger://game/dfo-mod/loot-presets', { method: 'POST', body: JSON.stringify(body) }));
+    const empty = await post({ name: '', filter: {} });
+    assert.ok(empty.status >= 400, String(empty.status));
+    const data = await empty.json();
+    // The source tree has no built Russian dictionary: the hook speaks English, the key lets a Russian page say it in Russian.
+    assert.match(data.code, /^store\./);
+    assert.deepEqual(data, { error: text.uiText('en').t(data.code), code: data.code });
+    assert.equal(text.uiText('ru').t(data.code), text.uiPack('ru').strings[data.code]);
+    const bad = await handle(new Request('dagger://game/dfo-mod/loot-presets', { method: 'POST', body: '{broken' }));
+    assert.equal((await bad.json()).code, 'store.badJson');
+  } finally { fs.rmSync(dir, { recursive: true, force: true }); }
+});
+
+test('the page runtime parses each string once and answers the same words', () => {
+  const ui = runtime.make({ locale: 'ru', strings: { a: 'Готово', b: '{n} {n:вещь|вещи|вещей} у {who}', c: 'без {места' } });
+  for (let i = 0; i < 3; i++) {
+    assert.equal(ui.t('a'), 'Готово');
+    assert.equal(ui.t('b', { n: 2, who: 'вас' }), '2 вещи у вас');
+    assert.equal(ui.t('b', { n: 5 }), '5 вещей у {who}');
+    assert.equal(ui.t('c'), 'без {места', 'a brace that opens no place stays text');
+  }
+  assert.equal(runtime.format('{n:a|b}', { n: 1 }, 'en'), 'a');
+});

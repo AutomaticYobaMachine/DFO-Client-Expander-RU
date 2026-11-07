@@ -1,0 +1,51 @@
+key,text,note
+loot.saveFailed,Не удалось сохранить настройки.,src/mod/page/dfo_loot_ui.js
+loot.settingsChanged,Настройки изменились. Откройте окно заново.,src/mod/page/dfo_loot_ui.js
+loot.closeWindow,Закрыть окно «{title}»,src/mod/page/dfo_loot_ui.js
+loot.tags.saved,Сохранённые,src/mod/page/dfo_loot_ui.js
+loot.tags.unavailable,Недоступный тег: {id},src/mod/page/dfo_loot_ui.js
+loot.tags.legend,Теги предметов,src/mod/page/dfo_loot_ui.js
+loot.tags.group,Группа тегов,src/mod/page/dfo_loot_ui.js
+loot.tags.all,Все теги,src/mod/page/dfo_loot_ui.js
+loot.tags.find,Найти тег,src/mod/page/dfo_loot_ui.js
+loot.tags.search,Поиск тегов,src/mod/page/dfo_loot_ui.js
+loot.tags.grid,Теги в две колонки,src/mod/page/dfo_loot_ui.js
+loot.tags.count,Выбрано: {n}. Совпадение хотя бы одного тега. Выберите нужные теги в колонках.,src/mod/page/dfo_loot_ui.js
+loot.preset.nameTitle,Имя сохранённого фильтра,src/mod/page/dfo_loot_ui.js
+loot.preset.nameLabel,Название: ,src/mod/page/dfo_loot_ui.js
+loot.save,Сохранить,src/mod/page/dfo_loot_ui.js
+loot.cancel,Отмена,src/mod/page/dfo_loot_ui.js
+loot.preset.saved,Пресет «{name}» сохранён в файл и кеш.,src/mod/page/dfo_loot_ui.js
+loot.preset.savedNoExport,Пресет «{name}» сохранён в кеш и файл клиента; браузерный экспорт не удался.,src/mod/page/dfo_loot_ui.js
+loot.preset.loadTitle,Загрузить фильтр,src/mod/page/dfo_loot_ui.js
+loot.preset.list,Сохранённые фильтры,src/mod/page/dfo_loot_ui.js
+loot.load,Загрузить,src/mod/page/dfo_loot_ui.js
+loot.preset.loaded,Загружен фильтр «{name}».,src/mod/page/dfo_loot_ui.js
+loot.preset.row,{name} · {mode} · тегов: {n},src/mod/page/dfo_loot_ui.js
+loot.preset.none,Сохранённых фильтров пока нет.,src/mod/page/dfo_loot_ui.js
+loot.filter,Лутфильтр,src/mod/page/dfo_loot_ui.js
+loot.mode.whiteList,Белый список,src/mod/page/dfo_loot_ui.js
+loot.mode.blackList,Чёрный список,src/mod/page/dfo_loot_ui.js
+loot.mode.note,"Белый список показывает совпавшее. Чёрный список скрывает совпавшее. Без отмеченных тегов белый список пуст, чёрный показывает всё.",src/mod/page/dfo_loot_ui.js
+loot.close,Закрыть,src/mod/page/dfo_loot_ui.js
+loot.auto.title,Автолут по кнопке лута,src/mod/page/dfo_loot_ui.js
+loot.auto.note,Подбирает выбранное до открытия списка. Лутфильтр и поиск окна на автолут не влияют. Без правил ничего не подбирается.,src/mod/page/dfo_loot_ui.js
+loot.auto.enabled,Автолут включён,src/mod/page/dfo_loot_ui.js
+loot.auto.items,Конкретные предметы,src/mod/page/dfo_loot_ui.js
+loot.auto.find,Найти предмет,src/mod/page/dfo_loot_ui.js
+loot.auto.search,Поиск конкретного предмета,src/mod/page/dfo_loot_ui.js
+loot.auto.nearby,Рядом: {name},src/mod/page/dfo_loot_ui.js
+loot.auto.anyKind,Любая разновидность: {name},src/mod/page/dfo_loot_ui.js
+loot.auto.savedRule,Сохранённое правило: {name},src/mod/page/dfo_loot_ui.js
+loot.auto.info,Правил: {n}. Выбранные теги ИЛИ любой выбранный предмет. Каталог: {catalog}.,src/mod/page/dfo_loot_ui.js
+loot.more,Показать ещё,src/mod/page/dfo_loot_ui.js
+loot.auto,Автолут,src/mod/page/dfo_loot_ui.js
+loot.takeAll,Забрать все,src/mod/page/dfo_loot_ui.js
+loot.takeFailed,Часть лута не удалось подобрать: предмет недоступен или не помещается в инвентарь.,src/mod/page/dfo_loot_ui.js
+loot.nearbyTitle,Лут рядом · 15 м,src/mod/page/dfo_loot.js
+loot.auto.taken,Автолут: подобрано стопок — {n}.,src/mod/page/dfo_loot.js
+loot.settingsLoadFailed,Не удалось загрузить настройки лута. Повторите нажатие J.,src/mod/page/dfo_loot.js
+loot.mode.white,белый,src/mod/page/dfo_loot_ui.js
+loot.mode.black,чёрный,src/mod/page/dfo_loot_ui.js
+loot.auto.missing,предмет временно отсутствует,src/mod/page/dfo_loot_ui.js
+loot.gone,Лут уже недоступен или превышен допустимый вес.,src/mod/nearby-loot-transform.cjs

@@ -52,7 +52,8 @@ def wait(fn, timeout=30):
 def main():
     temp = Path(tempfile.mkdtemp(prefix='dfo-installer-ui-'))
     display = os.environ.get('DFO_TEST_DISPLAY', ':92')
-    env = dict(os.environ, DISPLAY=display, WINEDEBUG='-all')
+    # A Russian Windows: the window starts in Russian and offers the translation checked (--lang ru pins the words).
+    env = dict(os.environ, DISPLAY=display, WINEDEBUG='-all', LANG='ru_RU.UTF-8', LC_ALL='ru_RU.UTF-8')
     env.setdefault('WINEPREFIX', str(temp / 'wine-profile'))
     screen = app = None
     log = (temp / 'process.log').open('wb')
@@ -115,7 +116,7 @@ def main():
         shutil.copyfile(INSTALLER, executable)
 
         def launch(*flags):
-            return subprocess.Popen([WINE, winpath(executable), '--no-self-update', *flags, '--game', winpath(game/'DFO Online.exe')], env=env, stdout=log, stderr=log)
+            return subprocess.Popen([WINE, winpath(executable), '--no-self-update', '--lang', 'ru', *flags, '--game', winpath(game/'DFO Online.exe')], env=env, stdout=log, stderr=log)
 
         app = launch("--auto-install")
         s = wait(lambda: (v if (v := state()) and v['by_id'][108]['Enabled'] and v['by_id'][108]['Visible'] and v['by_id'][120]['Enabled'] and v['by_id'][121]['Enabled'] and v['by_id'][117]['Title']==winpath(game/'DFO Online.exe') else None))
@@ -123,6 +124,12 @@ def main():
         assert all(s['by_id'][i]['Checked'] == 1 for i in [103,104,105,106,107,122])
         assert all(len(s['by_id'][1000+i]['Title'])>100 for i in [103,104,105,106,122])
         assert not any(c['Title']=='GitHub' for c in s['Controls'])
+        # The RU/EN switch names the other language and re-words the open window both ways.
+        assert s['by_id'][126]['Title']=='English' and s['by_id'][110]['Title']=='Компоненты'
+        state('click',126);wait(lambda:state()['by_id'][110]['Title']=='Components')
+        s=state();assert s['by_id'][126]['Title']=='Русский' and s['by_id'][103]['Title']=='Russian translation' and s['by_id'][107]['Title']=='Only visited'
+        state('click',126);wait(lambda:state()['by_id'][110]['Title']=='Компоненты')
+        assert state()['by_id'][103]['Title']=='Русификация'
         pane=s['by_id'][118]['Rect']
         for i in [103,104,105,106]:
             assert s['by_id'][i]['Rect']['Top']>=pane['Top'] and s['by_id'][1000+i]['Rect']['Bottom']<=pane['Bottom'], 'all four features and descriptions should fit the initial test screen'

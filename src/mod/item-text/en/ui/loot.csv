@@ -1,0 +1,51 @@
+key,text,note
+loot.saveFailed,Could not save the settings.,src/mod/page/dfo_loot_ui.js
+loot.settingsChanged,The settings have changed. Open the window again.,src/mod/page/dfo_loot_ui.js
+loot.closeWindow,Close the “{title}” window,src/mod/page/dfo_loot_ui.js
+loot.tags.saved,Saved,src/mod/page/dfo_loot_ui.js
+loot.tags.unavailable,Unavailable tag: {id},src/mod/page/dfo_loot_ui.js
+loot.tags.legend,Item tags,src/mod/page/dfo_loot_ui.js
+loot.tags.group,Tag group,src/mod/page/dfo_loot_ui.js
+loot.tags.all,All tags,src/mod/page/dfo_loot_ui.js
+loot.tags.find,Find a tag,src/mod/page/dfo_loot_ui.js
+loot.tags.search,Tag search,src/mod/page/dfo_loot_ui.js
+loot.tags.grid,Tags in two columns,src/mod/page/dfo_loot_ui.js
+loot.tags.count,Selected: {n}. Any one tag matches. Pick the tags you need in the columns.,src/mod/page/dfo_loot_ui.js
+loot.preset.nameTitle,Saved filter name,src/mod/page/dfo_loot_ui.js
+loot.preset.nameLabel,Name: ,src/mod/page/dfo_loot_ui.js
+loot.save,Save,src/mod/page/dfo_loot_ui.js
+loot.cancel,Cancel,src/mod/page/dfo_loot_ui.js
+loot.preset.saved,Preset “{name}” saved to the file and the cache.,src/mod/page/dfo_loot_ui.js
+loot.preset.savedNoExport,Preset “{name}” saved to the cache and the client file; the browser export failed.,src/mod/page/dfo_loot_ui.js
+loot.preset.loadTitle,Load a filter,src/mod/page/dfo_loot_ui.js
+loot.preset.list,Saved filters,src/mod/page/dfo_loot_ui.js
+loot.load,Load,src/mod/page/dfo_loot_ui.js
+loot.preset.loaded,Filter “{name}” loaded.,src/mod/page/dfo_loot_ui.js
+loot.preset.row,{name} · {mode} · tags: {n},src/mod/page/dfo_loot_ui.js
+loot.preset.none,No saved filters yet.,src/mod/page/dfo_loot_ui.js
+loot.filter,Loot filter,src/mod/page/dfo_loot_ui.js
+loot.mode.whiteList,Whitelist,src/mod/page/dfo_loot_ui.js
+loot.mode.blackList,Blacklist,src/mod/page/dfo_loot_ui.js
+loot.mode.note,The whitelist shows what matches. The blacklist hides what matches. With no tags ticked the whitelist is empty and the blacklist shows everything.,src/mod/page/dfo_loot_ui.js
+loot.close,Close,src/mod/page/dfo_loot_ui.js
+loot.auto.title,Autoloot on the loot key,src/mod/page/dfo_loot_ui.js
+loot.auto.note,Picks up what you chose before the list opens. The loot filter and the window search do not affect autoloot. With no rules nothing is picked up.,src/mod/page/dfo_loot_ui.js
+loot.auto.enabled,Autoloot on,src/mod/page/dfo_loot_ui.js
+loot.auto.items,Specific items,src/mod/page/dfo_loot_ui.js
+loot.auto.find,Find an item,src/mod/page/dfo_loot_ui.js
+loot.auto.search,Specific item search,src/mod/page/dfo_loot_ui.js
+loot.auto.nearby,Nearby: {name},src/mod/page/dfo_loot_ui.js
+loot.auto.anyKind,Any kind: {name},src/mod/page/dfo_loot_ui.js
+loot.auto.savedRule,Saved rule: {name},src/mod/page/dfo_loot_ui.js
+loot.auto.info,Rules: {n}. The chosen tags OR any chosen item. Catalog: {catalog}.,src/mod/page/dfo_loot_ui.js
+loot.more,Show more,src/mod/page/dfo_loot_ui.js
+loot.auto,Autoloot,src/mod/page/dfo_loot_ui.js
+loot.takeAll,Take all,src/mod/page/dfo_loot_ui.js
+loot.takeFailed,Some loot could not be picked up: the item is out of reach or does not fit in the inventory.,src/mod/page/dfo_loot_ui.js
+loot.nearbyTitle,Loot nearby · 15 m,src/mod/page/dfo_loot.js
+loot.auto.taken,Autoloot: {n} {n:stack|stacks} picked up.,src/mod/page/dfo_loot.js
+loot.settingsLoadFailed,Could not load the loot settings. Press J again.,src/mod/page/dfo_loot.js
+loot.mode.white,white,src/mod/page/dfo_loot_ui.js
+loot.mode.black,black,src/mod/page/dfo_loot_ui.js
+loot.auto.missing,the item is not here right now,src/mod/page/dfo_loot_ui.js
+loot.gone,Loot is no longer available or the weight limit is exceeded.,src/mod/nearby-loot-transform.cjs

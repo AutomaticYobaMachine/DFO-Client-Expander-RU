@@ -1,0 +1,236 @@
+key,text,note
+town.status.noRegistry,реестр домов игры недоступен,src/mod/page/dfo_town.js
+town.bar.influence,Влияние гильдий,src/mod/page/dfo_town.js
+town.bar.doors,Входы и владельцы,src/mod/page/dfo_town.js
+town.bar.marks,Метки заведений,src/mod/page/dfo_town.js
+town.button,Подробная карта города,src/mod/page/dfo_town.js
+town.bar.info,ℹ Инфо о городе,src/mod/page/dfo_town.js
+town.bar.data,⟳ Данные города,src/mod/page/dfo_town.js
+town.bar.exit,✕ Выйти (Esc),src/mod/page/dfo_town.js
+town.key.hideAll,Скрыть окраску,src/mod/page/dfo_town.js
+town.key.showAll,Показать окраску,src/mod/page/dfo_town.js
+town.key.title,Легенда,src/mod/page/dfo_town.js
+town.ago.now,только что,src/mod/page/dfo_town.js
+town.ago.minutes,{m} мин назад,src/mod/page/dfo_town.js
+town.ago.hours,{h} ч назад,src/mod/page/dfo_town.js
+town.ago.days,{d} дн назад,src/mod/page/dfo_town.js
+town.holder.none,без гильдии,src/mod/page/dfo_town.js
+town.holder.unknown,неизвестна,src/mod/page/dfo_town.js
+town.info.town,Город,src/mod/page/dfo_town.js
+town.info.region,Регион,src/mod/page/dfo_town.js
+town.info.cell,Клетка карты,src/mod/page/dfo_town.js
+town.info.size,Размер,src/mod/page/dfo_town.js
+town.info.sizeValue,"{w}×{h} кварталов ({cells}), ~{km} км²",src/mod/page/dfo_town.js
+town.info.buildings,Зданий всего,src/mod/page/dfo_town.js
+town.info.housing,Жилой фонд,src/mod/page/dfo_town.js
+town.info.housingValue,"{n} {n:дом|дома|домов}: занято {owned} ({pct}), свободно {free}",src/mod/page/dfo_town.js
+town.info.halls,Залы гильдий игроков,src/mod/page/dfo_town.js
+town.info.accounts,Жители (аккаунты),src/mod/page/dfo_town.js
+town.info.guilds,Гильдии игроков с владениями,src/mod/page/dfo_town.js
+town.info.venues,Магазины / таверны / организации,src/mod/page/dfo_town.js
+town.info.venuesOther, (+ банков и библиотек: {n}),src/mod/page/dfo_town.js
+town.seat,Престол,src/mod/page/dfo_town.js
+town.info.noSeat,нет / не занят,src/mod/page/dfo_town.js
+town.info.economy,Экономика,src/mod/page/dfo_town.js
+town.info.economyValue,{band} ({p} из 100),src/mod/page/dfo_town.js
+town.info.online,Игроков в городе сейчас,src/mod/page/dfo_town.js
+town.info.ownerData,Данные о владельцах,src/mod/page/dfo_town.js
+town.no,нет,src/mod/page/dfo_town.js
+town.yes,да,src/mod/page/dfo_town.js
+town.yesCount,да ({n}),src/mod/page/dfo_town.js
+town.guilds.own,Вы и ваша гильдия{tag},src/mod/page/dfo_town.js
+town.guilds.unknown,Гильдия неизвестна,src/mod/page/dfo_town.js
+town.guilds.none,Без гильдии,src/mod/page/dfo_town.js
+town.guild,Гильдия,src/mod/page/dfo_town.js
+town.guilds.holdings,Владений,src/mod/page/dfo_town.js
+town.guilds.share,Доля,src/mod/page/dfo_town.js
+town.guilds.accounts,Аккаунтов,src/mod/page/dfo_town.js
+town.guilds.hall,Зал,src/mod/page/dfo_town.js
+town.people.mine,ваш аккаунт,src/mod/page/dfo_town.js
+town.people.unseen,не встречали онлайн,src/mod/page/dfo_town.js
+town.people.account,Аккаунт,src/mod/page/dfo_town.js
+town.people.homes,Домов,src/mod/page/dfo_town.js
+town.people.source,Откуда известно,src/mod/page/dfo_town.js
+town.people.onlineNow,Сейчас в городе онлайн: {n},src/mod/page/dfo_town.js
+town.people.party,ваша группа,src/mod/page/dfo_town.js
+town.people.hostile,враждебный,src/mod/page/dfo_town.js
+town.people.player,Игрок,src/mod/page/dfo_town.js
+town.people.nobody,Никого из других игроков в черте города не видно.,src/mod/page/dfo_town.js
+town.estate.forSale,Дома на продажу (вывеска),src/mod/page/dfo_town.js
+town.estate.dwellings,Жилые дома,src/mod/page/dfo_town.js
+town.estate.total,Всего жилого фонда,src/mod/page/dfo_town.js
+town.estate.taken,Занято,src/mod/page/dfo_town.js
+town.estate.free,Свободно,src/mod/page/dfo_town.js
+town.estate.painted,Перекрашены владельцами,src/mod/page/dfo_town.js
+town.estate.deeds,Дары короны (дома рыцарей),src/mod/page/dfo_town.js
+town.entry,Кто может войти,src/mod/page/dfo_town.js
+town.estate.rooms,Комнаты в аренду: {n},src/mod/page/dfo_town.js
+town.rentFrom,от {f} зол./день,src/mod/page/dfo_town.js
+town.owner,Владелец,src/mod/page/dfo_town.js
+town.estate.roomsFree,Свободно комнат,src/mod/page/dfo_town.js
+town.price,Цена,src/mod/page/dfo_town.js
+town.estate.sales,Продаются владельцами: {n},src/mod/page/dfo_town.js
+town.estate.votes,Оценки соседей (голоса за дом),src/mod/page/dfo_town.js
+town.estate.vote,Оценка,src/mod/page/dfo_town.js
+town.count.shops,Магазины: {n},src/mod/page/dfo_town.js
+town.type,Тип,src/mod/page/dfo_town.js
+town.name,Название,src/mod/page/dfo_town.js
+town.quality,Качество,src/mod/page/dfo_town.js
+town.pays,Скупка общая,src/mod/page/dfo_town.js
+town.paysMe,Лично мне,src/mod/page/dfo_town.js
+town.count.taverns,Таверны: {n},src/mod/page/dfo_town.js
+town.building.tavern,Таверна,src/mod/page/dfo_town.js
+town.count.orgs,Организации: {n},src/mod/page/dfo_town.js
+town.count.other,Банки и библиотеки: {n},src/mod/page/dfo_town.js
+town.economy.index,×{x} ({pct} нормы),src/mod/page/dfo_town.js
+town.economy.prosperity,Процветание,src/mod/page/dfo_town.js
+town.economy.prosperityValue,{p} из 100 — {band},src/mod/page/dfo_town.js
+town.economy.region,Индекс цен региона,src/mod/page/dfo_town.js
+town.economy.askAll,Лавки просят (для всех),src/mod/page/dfo_town.js
+town.economy.payAll,Лавки платят (для всех),src/mod/page/dfo_town.js
+town.economy.askMe,Лавки просят (с вашей гильдией),src/mod/page/dfo_town.js
+town.economy.payMe,Лавки платят (с вашей гильдией),src/mod/page/dfo_town.js
+town.economy.exchange,Портовая биржа,src/mod/page/dfo_town.js
+town.economy.exchangeValue,"продаёт ×{ask}, покупает ×{pay}",src/mod/page/dfo_town.js
+town.economy.noPort,нет (не порт),src/mod/page/dfo_town.js
+town.economy.best,Где выгоднее всего продавать,src/mod/page/dfo_town.js
+town.economy.everyone,Общая,src/mod/page/dfo_town.js
+town.economy.game,Как видит город игра,src/mod/page/dfo_town.js
+town.seat.empty,Престол «{name}» никем не занят.,src/mod/page/dfo_town.js
+town.seat.none,"У города нет престола, и он не входит во владения хартии — гильдии им не правят.",src/mod/page/dfo_town.js
+town.seat.holder,Держит,src/mod/page/dfo_town.js
+town.seat.since,С недели,src/mod/page/dfo_town.js
+town.seat.standing,Настроение города (Standing),src/mod/page/dfo_town.js
+town.seat.standingValue,{n} из 100,src/mod/page/dfo_town.js
+town.seat.edict,Указ,src/mod/page/dfo_town.js
+town.seat.tithe,Десятина,src/mod/page/dfo_town.js
+town.seat.battle,Битва на этой неделе,src/mod/page/dfo_town.js
+town.info.title,{name} — сведения о городе,src/mod/page/dfo_town.js
+town.plot,Участок,src/mod/page/dfo_town.js
+town.plotValue,"≈{area} м², соседних участков: {n}",src/mod/page/dfo_town.js
+town.home.free,никто — дом свободен,src/mod/page/dfo_town.js
+town.nearGuilds,Соседи-гильдии,src/mod/page/dfo_town.js
+town.hall.title,Зал гильдии: {name},src/mod/page/dfo_town.js
+town.hall.yours,Ваша,src/mod/page/dfo_town.js
+town.home.title,Дом: {name},src/mod/page/dfo_town.js
+town.home.account,Аккаунт владельца,src/mod/page/dfo_town.js
+town.home.holdings,Владений в городе на аккаунте,src/mod/page/dfo_town.js
+town.home.guild,Гильдия владельца,src/mod/page/dfo_town.js
+town.home.yourGuild,ваша гильдия,src/mod/page/dfo_town.js
+town.home.unseen,аккаунт не встречали онлайн,src/mod/page/dfo_town.js
+town.home.rooms,Комнаты в аренду,src/mod/page/dfo_town.js
+town.home.sale,Продаётся владельцем,src/mod/page/dfo_town.js
+town.home.vote,Оценка соседей,src/mod/page/dfo_town.js
+town.home.painted,Перекрашен владельцем,src/mod/page/dfo_town.js
+town.home.deed,Дар короны,src/mod/page/dfo_town.js
+town.home.type,Тип здания,src/mod/page/dfo_town.js
+town.qualityValue,{q} из 20 — {word},src/mod/page/dfo_town.js
+town.venue.paysMe,Скупка лично мне,src/mod/page/dfo_town.js
+town.venue.buys,Что скупает,src/mod/page/dfo_town.js
+town.venue.buying,Скупка,src/mod/page/dfo_town.js
+town.venue.buysNothing,ничего не скупает,src/mod/page/dfo_town.js
+town.venue.near,Влияние вокруг,src/mod/page/dfo_town.js
+town.unheld,не занят,src/mod/page/dfo_town.js
+town.typeN,тип {n},src/mod/page/dfo_town.js
+town.data.never,ещё не было,src/mod/page/dfo_town.js
+town.data.last,Последнее обновление: {when},src/mod/page/dfo_town.js
+town.data.none,Данные ещё не обновлялись,src/mod/page/dfo_town.js
+town.data.owners,Владельцы недвижимости,src/mod/page/dfo_town.js
+town.data.who,Список игроков онлайн,src/mod/page/dfo_town.js
+town.data.arms,Названия гильдий,src/mod/page/dfo_town.js
+town.data.snapshot,"Слепок города (здания, двери)",src/mod/page/dfo_town.js
+town.data.doors,Дверей известно,src/mod/page/dfo_town.js
+town.data.doorsValue,{n} из {all},src/mod/page/dfo_town.js
+town.data.asking,Идёт запрос к серверу…,src/mod/page/dfo_town.js
+town.data.refresh,Обновить базу,src/mod/page/dfo_town.js
+town.data.regen,Перегенерировать город,src/mod/page/dfo_town.js
+town.data.title,{name} — данные,src/mod/page/dfo_town.js
+town.label.hall,Зал гильдии: {name}{tag},src/mod/page/dfo_town.js
+town.label.account,Аккаунт: {name},src/mod/page/dfo_town.js
+town.heldBy,Город под контролем {name},src/mod/page/dfo_town.js
+town.heldByTag,Город под контролем {name}{tag},src/mod/page/dfo_town.js
+town.key.seat,Престол: {name}{tag},src/mod/page/dfo_town.js
+town.key.unknown,Гильдия неизвестна: {n},src/mod/page/dfo_town.js
+town.key.none,Без гильдии: {n},src/mod/page/dfo_town.js
+town.key.free,Свободно: {n},src/mod/page/dfo_town.js
+town.key.venues,Заведения,src/mod/page/dfo_town.js
+town.key.venuesCount,"Таверны, магазины, организации: {n}",src/mod/page/dfo_town.js
+town.key.yours,Ваше: {n},src/mod/page/dfo_town.js
+town.key.single,Один дом на аккаунте: {n},src/mod/page/dfo_town.js
+town.key.estate,Недвижимость,src/mod/page/dfo_town.js
+town.none,нет,src/mod/page/dfo_town.js
+town.battle.revolt,восстание,src/mod/page/dfo_town.js
+town.battle.tourney,турнир,src/mod/page/dfo_town.js
+town.battle.siege,осада,src/mod/page/dfo_town.js
+town.battle.against,против {name},src/mod/page/dfo_town.js
+town.ownGuild,ваша гильдия,src/mod/page/dfo_town.js
+town.holder.own,вы / ваша гильдия,src/mod/page/dfo_town.js
+town.building.other,Здание,src/mod/page/dfo_town.js
+town.yours,ваш,src/mod/page/dfo_town.js
+town.gold,{n} зол.,src/mod/page/dfo_town.js
+town.forGold,за {n} зол.,src/mod/page/dfo_town.js
+town.label.holdings,({n} {n:владение|владения|владений} в городе на аккаунте),src/mod/page/dfo_town.js
+town.key.own,Вы: {n},src/mod/page/dfo_town.js
+town.key.ownGuild,Вы и ваша гильдия [{tag}]: {n},src/mod/page/dfo_town.js
+town.key.account,{name}: {n} {n:владение|владения|владений},src/mod/page/dfo_town.js
+town.tab.overview,Обзор,src/mod/page/dfo_town.js
+town.tab.guilds,Гильдии,src/mod/page/dfo_town.js
+town.tab.people,Жители,src/mod/page/dfo_town.js
+town.tab.estate,Недвижимость,src/mod/page/dfo_town.js
+town.tab.venues,Заведения,src/mod/page/dfo_town.js
+town.tab.economy,Экономика,src/mod/page/dfo_town.js
+town.tab.seat,Престол,src/mod/page/dfo_town.js
+town.building.alchemist,Алхимик,src/mod/page/dfo_town.js
+town.building.houseForSale,Дом на продажу,src/mod/page/dfo_town.js
+town.building.armorer,Бронник,src/mod/page/dfo_town.js
+town.building.bank,Банк,src/mod/page/dfo_town.js
+town.building.townHall,Городское здание,src/mod/page/dfo_town.js
+town.building.bookseller,Книжная лавка,src/mod/page/dfo_town.js
+town.building.clothier,Портной,src/mod/page/dfo_town.js
+town.building.furnitureStore,Мебельщик,src/mod/page/dfo_town.js
+town.building.gemStore,Ювелир,src/mod/page/dfo_town.js
+town.building.generalStore,Общий магазин,src/mod/page/dfo_town.js
+town.building.library,Библиотека,src/mod/page/dfo_town.js
+town.building.guildHall,Гильдия / орден,src/mod/page/dfo_town.js
+town.building.pawnShop,Ломбард,src/mod/page/dfo_town.js
+town.building.weaponSmith,Оружейник,src/mod/page/dfo_town.js
+town.building.temple,Храм,src/mod/page/dfo_town.js
+town.building.palace,Дворец,src/mod/page/dfo_town.js
+town.building.house,Дом,src/mod/page/dfo_town.js
+town.building.ship,Корабль,src/mod/page/dfo_town.js
+town.buys.alchemist,"самоцветы, ингредиенты (растения, части тварей, металлы, прочие)",src/mod/page/dfo_town.js
+town.buys.armorer,"доспехи, оружие",src/mod/page/dfo_town.js
+town.buys.bookseller,книги,src/mod/page/dfo_town.js
+town.buys.clothier,мужская и женская одежда,src/mod/page/dfo_town.js
+town.buys.furnitureStore,мебель,src/mod/page/dfo_town.js
+town.buys.gemStore,"самоцветы, украшения",src/mod/page/dfo_town.js
+town.buys.generalStore,"книги, одежда, украшения, оружие, безделушки",src/mod/page/dfo_town.js
+town.buys.pawnShop,"доспехи, книги, одежда, самоцветы, украшения, религиозные предметы, оружие, безделушки, картины",src/mod/page/dfo_town.js
+town.buys.weaponSmith,"доспехи, оружие",src/mod/page/dfo_town.js
+town.entry.private,только владелец,src/mod/page/dfo_town.js
+town.entry.party,группа владельца,src/mod/page/dfo_town.js
+town.entry.public,все,src/mod/page/dfo_town.js
+town.entry.guild,гильдия владельца,src/mod/page/dfo_town.js
+town.band.Booming,процветает,src/mod/page/dfo_town.js
+town.band.Thriving,богатеет,src/mod/page/dfo_town.js
+town.band.Steady,держится,src/mod/page/dfo_town.js
+town.band.Struggling,бедствует,src/mod/page/dfo_town.js
+town.band.Destitute,разорена,src/mod/page/dfo_town.js
+town.edict.market-day,рыночный день,src/mod/page/dfo_town.js
+town.edict.festival,праздник,src/mod/page/dfo_town.js
+town.edict.levy,поборы,src/mod/page/dfo_town.js
+town.edict.curfew,комендантский час,src/mod/page/dfo_town.js
+town.edict.open-gates,открытые ворота,src/mod/page/dfo_town.js
+town.edict.conscription,набор в войско,src/mod/page/dfo_town.js
+town.edict.tithe,десятина,src/mod/page/dfo_town.js
+town.tier.palace,дворец,src/mod/page/dfo_town.js
+town.tier.crown,корона,src/mod/page/dfo_town.js
+town.source.hub,список онлайна,src/mod/page/dfo_town.js
+town.source.tag,видели в игре,src/mod/page/dfo_town.js
+town.source.ow,видели на карте,src/mod/page/dfo_town.js
+town.source.roster,состав вашей гильдии,src/mod/page/dfo_town.js
+town.quality.luxurious,роскошная,src/mod/page/dfo_town.js
+town.quality.rich,богатая,src/mod/page/dfo_town.js
+town.quality.common,обычная,src/mod/page/dfo_town.js
+town.quality.modest,скромная,src/mod/page/dfo_town.js
+town.quality.shabby,захудалая,src/mod/page/dfo_town.js

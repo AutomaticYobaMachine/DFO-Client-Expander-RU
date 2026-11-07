@@ -66,9 +66,36 @@ function hud(text) {
   return out;
 }
 
+/** The projected marks the readout draws. Older releases build each record inline in the marks loop; from 0.1.14574 the
+ *  loop keeps one record per mark key, made by a builder (`return{key:e.key,x:t?.x??0,...}`) and refreshed in place by an
+ *  updater (`e.key=t.key,e.x=n?.x??0,...`) - our fields go into both, so a reused record never keeps a stale value.
+ *  The mod's own insertions (the dungeon's and the calibration's) may already stand before the native first field. */
+const OURS_BUILD = '(?:dfoDungeon:[\\w$]+\\.dfoDungeon,|\\.\\.\\.globalThis\\.__dfoFonts\\?\\.calibration\\.mark\\([\\w$]+\\),)*';
+const OURS_UPDATE = '(?:[\\w$]+\\.dfoDungeon=[\\w$]+\\.dfoDungeon,|Object\\.assign\\([\\w$]+,\\{dfoSmall:!1,dfoQuiet:!1\\},globalThis\\.__dfoFonts\\?\\.calibration\\.mark\\([\\w$]+\\)\\),)*';
+function projectedRecords(text) {
+  const one = re => { const all = [...text.matchAll(new RegExp(re, 'g'))]; if (all.length !== 1) throw new Error(`projected mark record: ${all.length} matches`); return all[0]; };
+  const build = one(`function (${ID})\\((${ID}),(${ID})\\)\\{return\\{(${OURS_BUILD})key:\\2\\.key,x:\\3\\?\\.x\\?\\?0,y:\\3\\?\\.y\\?\\?0,`);
+  const update = one(`function (${ID})\\((${ID}),(${ID}),(${ID})\\)\\{(${OURS_UPDATE})\\2\\.key=\\3\\.key,\\2\\.x=\\4\\?\\.x\\?\\?0,\\2\\.y=\\4\\?\\.y\\?\\?0,`);
+  // Both must be the loop's own: the record it pushes when it builds one, and the one it refreshes.
+  if (!text.includes(`${build[1]}(`) || !new RegExp(`${update[1].replace(/\$/g, '\\$')}\\([\\w$]+\\.record,`).test(text)) throw new Error('projected mark record: loop not found');
+  return { build: { at: build.index + build[0].indexOf('return{') + 'return{'.length, mark: build[2] },
+    update: { at: update.index + update[0].indexOf('{') + 1, record: update[2], mark: update[3] } };
+}
+/** Insert our fields into the projected record, in either shape: `inline(markVar)` before `key:` of the inline push,
+ *  or `build(markVar)` in the builder and `update(recordVar, markVar)` in the updater. */
+function projectMarks(text, inline, build, update) {
+  const old = rx(`\\{let (${ID})=(${ID})\\((${ID})\\.at\\);(${ID})\\.push\\(\\{(${OURS_BUILD})key:\\3\\.key,`).exec(text);
+  if (old) return text.replace(old[0], old[0].replace(/key:([\w$]+)\.key,$/, `${inline(old[3])}key:$1.key,`));
+  const r = projectedRecords(text);
+  // The later position first, so the earlier offset stays valid.
+  const edits = [[r.build.at, build(r.build.mark)], [r.update.at, update(r.update.record, r.update.mark)]].sort((a, b) => b[0] - a[0]);
+  for (const [at, insert] of edits) text = text.slice(0, at) + insert + text.slice(at);
+  return text;
+}
+
 function travelView(text) {
-  const m = need(text, rx(`\\{let (${ID})=(${ID})\\((${ID})\\.at\\);(${ID})\\.push\\(\\{key:\\3\\.key,`));
-  return text.replace(m[0], `{let ${m[1]}=${m[2]}(${m[3]}.at);${m[4]}.push({dfoDungeon:${m[3]}.dfoDungeon,key:${m[3]}.key,`);
+  return projectMarks(text, mark => `dfoDungeon:${mark}.dfoDungeon,`, mark => `dfoDungeon:${mark}.dfoDungeon,`,
+    (record, mark) => `${record}.dfoDungeon=${mark}.dfoDungeon,`);
 }
 
 function transformDungeons(rel, source, log) {
@@ -159,4 +186,4 @@ function transformDungeons(rel, source, log) {
   }
   return transformDungeonNav(rel, transformDungeonLive(rel, text, log), log);
 }
-module.exports = { transformDungeons };
+module.exports = { projectMarks, transformDungeons };

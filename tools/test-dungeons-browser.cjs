@@ -1,4 +1,5 @@
 'use strict';
+const { uiScripts } = require('./ui-text-stand.cjs');
 // Exercise the published Overworld HUD and its actual minified metadata with a small world host.
 const fs=require('node:fs'),path=require('node:path'),http=require('node:http'),os=require('node:os'),assert=require('node:assert/strict');
 const upstream=path.resolve(process.argv[2]||'/tmp/dfo-upstream'),dist=path.resolve(process.argv[3]||'/tmp/dfo-release-0.1.14512');
@@ -21,7 +22,7 @@ const viewFile=fs.readdirSync(path.join(dist,'assets')).find(f=>/^travelView-[^.
 const viewProcessed=transformAsset('assets/'+viewFile,fs.readFileSync(path.join(dist,'assets',viewFile),'utf8'),{ru:false,marks:true,nearbyLoot:true,dungeons:true});
 const viewFactory=findIn(declarations(viewProcessed.text),'pointerdown','pointerup','.onPick?.(','.actionsOf?.(');
 const viewModule=viewProcessed.text+`\nexport{${viewFactory.name} as fixtureView};`;
-const html=`<!doctype html><html><head><meta charset="utf-8"><style>body{margin:0;background:#17251f;color:#eee}canvas.game{position:fixed;inset:0;width:100vw;height:100vh}</style><script src="/dfo-mod/dfo_dungeon_model.js"></script><script src="/dfo-mod/dfo_dungeons.js"></script></head><body><canvas class="game"></canvas><script type="module">
+const html=`<!doctype html><html><head><meta charset="utf-8">${uiScripts()}<style>body{margin:0;background:#17251f;color:#eee}canvas.game{position:fixed;inset:0;width:100vw;height:100vh}</style><script src="/dfo-mod/dfo_dungeon_model.js"></script><script src="/dfo-mod/dfo_dungeons.js"></script></head><body><canvas class="game"></canvas><script type="module">
 import {fixtureCreate,fixtureShow,fixtureUpdate,fixturePick} from '/assets/${world}';
 import {fixtureView} from '/assets/${viewFile}';
 const nativeMarkFactory=Function('s',${JSON.stringify(markFactory)});

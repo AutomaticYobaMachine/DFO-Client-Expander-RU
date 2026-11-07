@@ -1,0 +1,35 @@
+key,text,note
+cards.variant.Fur,Fur,RRI variant word
+cards.variant.Mail,Mail,RRI variant word
+cards.variant.Brigandine,Brigandine,RRI variant word
+cards.metal.Iron,Iron,material row
+cards.metal.Steel,Steel,material row
+cards.metal.Silver,Silver,material row
+cards.metal.Elven,Elven metal,material row
+cards.metal.Dwarven,Dwarven metal,material row
+cards.metal.Mithril,Mithril,material row
+cards.metal.Adamantium,Adamantium,material row
+cards.metal.Orcish,Orcish metal,material row
+cards.metal.Ebony,Ebony,material row
+cards.metal.Daedric,Daedric metal,material row
+cards.material,Material,label in the name block
+cards.material.cloth,Cloth,hand wraps
+cards.material.fur,Fur,RRI fur
+cards.material.noData,No data,the item has no material field
+cards.material.unknownMetal,Metal not recorded,classic chain: its metal is not recorded
+cards.material.unspecified,Not specified,the game does not show the material
+cards.group.strike,Cast on hit,effects group
+cards.group.use,When used,effects group
+cards.group.held,While worn,effects group
+cards.group.bonuses,Bonuses,effects group
+cards.group.properties,Passive properties,effects group
+cards.group.power,Legendary property,effects group
+cards.armorType,Armor type,the native Type row
+cards.construction,Construction,RRI construction row
+cards.quantity,Quantity,stack size row
+cards.perKg,Price / kg,row label
+cards.perKgValue,~{value} gold,row value; {value} formatted
+cards.general,General,left column heading
+cards.price.unknown,Value unknown,price aria-label
+cards.price.approximate,Approximate value: {value} gold,price aria-label
+cards.price.exact,Value: {value} gold,price aria-label

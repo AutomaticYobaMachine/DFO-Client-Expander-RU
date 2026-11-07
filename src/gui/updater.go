@@ -33,7 +33,7 @@ func compareVersions(a, b string) (int, error) {
 		var out [3]uint64
 		m := releaseVersion.FindStringSubmatch(s)
 		if m == nil {
-			return out, fmt.Errorf("неизвестный формат версии %q", s)
+			return out, fmt.Errorf("%s %q", T("installer.err.versionFormat"), s)
 		}
 		for i := range out {
 			n, err := strconv.ParseUint(m[i+1], 10, 32)
@@ -92,12 +92,12 @@ func newReleaseUpdater(current string, client *http.Client, probe func(context.C
 	copy := *client
 	copy.CheckRedirect = func(req *http.Request, via []*http.Request) error {
 		if len(via) >= 5 {
-			return errors.New("слишком много перенаправлений")
+			return errors.New(T("installer.err.redirects"))
 		}
 		u := req.URL
 		allowed := u.Host == "github.com" || u.Host == "api.github.com" || u.Host == "release-assets.githubusercontent.com" || u.Host == "objects.githubusercontent.com"
 		if u.Scheme != "https" || u.User != nil || !allowed {
-			return errors.New("недопустимый адрес перенаправления обновления")
+			return errors.New(T("installer.err.redirectTarget"))
 		}
 		return nil
 	}
@@ -120,7 +120,7 @@ func (u *releaseUpdater) get(ctx context.Context, address string) (*http.Respons
 	}
 	if res.StatusCode != http.StatusOK {
 		res.Body.Close()
-		return nil, fmt.Errorf("GitHub вернул HTTP %d", res.StatusCode)
+		return nil, fmt.Errorf("%s", T("installer.err.github", "status", res.StatusCode))
 	}
 	return res, nil
 }
@@ -133,7 +133,7 @@ func (u *releaseUpdater) latest(ctx context.Context) (*updateRelease, error) {
 	defer res.Body.Close()
 	data, err := io.ReadAll(io.LimitReader(res.Body, (2<<20)+1))
 	if err != nil || len(data) > 2<<20 {
-		return nil, errors.New("не удалось прочитать описание релиза")
+		return nil, errors.New(T("installer.err.releaseRead"))
 	}
 	var release struct {
 		Tag        string        `json:"tag_name"`
@@ -156,7 +156,7 @@ func (u *releaseUpdater) latest(ctx context.Context) (*updateRelease, error) {
 	}
 	version := strings.TrimPrefix(release.Tag, "v")
 	if release.Tag != "v"+version {
-		return nil, errors.New("неверный тег релиза")
+		return nil, errors.New(T("installer.err.releaseTag"))
 	}
 	name := appName + "-" + version + ".exe"
 	found := map[string]updateAsset{}
@@ -165,20 +165,20 @@ func (u *releaseUpdater) latest(ctx context.Context) (*updateRelease, error) {
 			continue
 		}
 		if _, exists := found[asset.Name]; exists {
-			return nil, errors.New("повторяющийся файл релиза")
+			return nil, errors.New(T("installer.err.releaseDuplicate"))
 		}
 		if asset.URL != updateDownload+release.Tag+"/"+asset.Name {
-			return nil, errors.New("файл обновления находится вне репозитория программы")
+			return nil, errors.New(T("installer.err.releaseForeign"))
 		}
 		if asset.Size <= 0 || asset.Size > maxUpdateSize {
-			return nil, errors.New("некорректный размер обновления")
+			return nil, errors.New(T("installer.err.updateSize"))
 		}
 		found[asset.Name] = asset
 	}
 	exe, ok := found[name]
 	sum, haveSum := found[name+".sha256"]
 	if !ok || !haveSum || sum.Size > 4096 {
-		return nil, errors.New("в релизе нет EXE или его контрольной суммы")
+		return nil, errors.New(T("installer.err.releaseIncomplete"))
 	}
 	return &updateRelease{Version: version, Executable: exe, Checksum: sum}, nil
 }
@@ -198,10 +198,10 @@ func fileSHA256(path string) (string, error) {
 
 func (u *releaseUpdater) download(ctx context.Context, release *updateRelease, root string, progress func(int)) (_ *downloadedUpdate, err error) {
 	if release == nil || !validUpdateURL(release.Executable.URL) || !validUpdateURL(release.Checksum.URL) {
-		return nil, errors.New("недопустимый источник обновления")
+		return nil, errors.New(T("installer.err.updateSource"))
 	}
 	if u.probe == nil {
-		return nil, errors.New("проверка программы обновления недоступна")
+		return nil, errors.New(T("installer.err.probeUnavailable"))
 	}
 	res, err := u.get(ctx, release.Checksum.URL)
 	if err != nil {
@@ -211,18 +211,18 @@ func (u *releaseUpdater) download(ctx context.Context, release *updateRelease, r
 	res.Body.Close()
 	fields := strings.Fields(string(data))
 	if readErr != nil || len(data) > 4096 || len(fields) != 2 || strings.TrimPrefix(fields[1], "*") != release.Executable.Name {
-		return nil, errors.New("неверный файл контрольной суммы")
+		return nil, errors.New(T("installer.err.checksumFile"))
 	}
 	digest, err := hex.DecodeString(fields[0])
 	if err != nil || len(digest) != sha256.Size {
-		return nil, errors.New("неверная контрольная сумма")
+		return nil, errors.New(T("installer.err.checksum"))
 	}
 	expected := hex.EncodeToString(digest)
 	if release.Executable.Digest != "" && release.Executable.Digest != "sha256:"+expected {
-		return nil, errors.New("контрольная сумма метаданных не совпадает с файлом")
+		return nil, errors.New(T("installer.err.checksumMismatch"))
 	}
 	if !filepath.IsAbs(root) {
-		return nil, errors.New("недоступен каталог обновлений пользователя")
+		return nil, errors.New(T("installer.err.updateDir"))
 	}
 	if err = os.MkdirAll(root, 0700); err != nil {
 		return nil, err
@@ -246,7 +246,7 @@ func (u *releaseUpdater) download(ctx context.Context, release *updateRelease, r
 	}
 	defer res.Body.Close()
 	if res.ContentLength >= 0 && res.ContentLength != release.Executable.Size {
-		return nil, errors.New("размер загрузки отличается от релиза")
+		return nil, errors.New(T("installer.err.downloadSize"))
 	}
 	path := filepath.Join(dir, "update.exe")
 	f, err := os.OpenFile(path, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0600)
@@ -292,14 +292,14 @@ func (u *releaseUpdater) download(ctx context.Context, release *updateRelease, r
 		return nil, err
 	}
 	if n != release.Executable.Size || hex.EncodeToString(h.Sum(nil)) != expected {
-		return nil, errors.New("загрузка повреждена: размер или SHA-256 не совпадает")
+		return nil, errors.New(T("installer.err.downloadBroken"))
 	}
 	info, err := u.probe(ctx, path)
 	if err != nil {
-		return nil, fmt.Errorf("проверка запуска новой программы: %w", err)
+		return nil, fmt.Errorf("%s: %w", T("installer.err.probe"), err)
 	}
 	if info.Product != appName || info.Version != release.Version || info.Protocol != updateProtocol {
-		return nil, errors.New("скачанный EXE не соответствует версии или формату обновления")
+		return nil, errors.New(T("installer.err.downloadVersion"))
 	}
 	ok = true
 	return &downloadedUpdate{Dir: dir, EXE: path, Version: release.Version, SHA256: expected}, nil
@@ -338,7 +338,7 @@ func readUpdateJSON(path string, value any) error {
 	}
 	var extra any
 	if d.Decode(&extra) != io.EOF {
-		return errors.New("лишние данные в файле обновления")
+		return errors.New(T("installer.err.updateExtra"))
 	}
 	return nil
 }
@@ -351,6 +351,7 @@ type updateResume struct {
 	DungeonKey string          `json:"dungeonKey"`
 	Dirty      bool            `json:"dirty"`
 	Background bool            `json:"background"`
+	Lang       string          `json:"lang,omitempty"` // the window's language, kept across the restart
 }
 type updatePlan struct {
 	UserApproved bool         `json:"userApproved"`
@@ -379,31 +380,31 @@ func loadUpdatePlan(path, root string) (*updatePlan, error) {
 	}
 	rel, err := filepath.Rel(root, abs)
 	if err != nil || !filepath.IsAbs(root) || rel == ".." || strings.HasPrefix(rel, ".."+string(os.PathSeparator)) || filepath.IsAbs(rel) || filepath.Base(abs) != "plan.json" || !strings.HasPrefix(filepath.Base(filepath.Dir(abs)), "update-") {
-		return nil, errors.New("план обновления находится вне кеша программы")
+		return nil, errors.New(T("installer.err.planOutside"))
 	}
 	var p updatePlan
 	if err = readUpdateJSON(abs, &p); err != nil {
 		return nil, err
 	}
 	if !p.UserApproved || p.Product != appName || p.Protocol != updateProtocol || p.ParentPID <= 0 || !filepath.IsAbs(p.Target) || !strings.EqualFold(filepath.Ext(p.Target), ".exe") || p.Download != filepath.Join(filepath.Dir(abs), "update.exe") {
-		return nil, errors.New("неверный план обновления")
+		return nil, errors.New(T("installer.err.plan"))
 	}
 	if p.Resume.LogDir != "" && !filepath.IsAbs(p.Resume.LogDir) {
-		return nil, errors.New("неверный путь журнала обновления")
+		return nil, errors.New(T("installer.err.planLog"))
 	}
 	comparison, err := compareVersions(p.Version, p.FromVersion)
 	if err != nil || comparison <= 0 {
-		return nil, errors.New("обновление не новее текущей версии")
+		return nil, errors.New(T("installer.err.notNewer"))
 	}
 	for _, digest := range []string{p.SHA256, p.OldSHA256} {
 		b, e := hex.DecodeString(digest)
 		if e != nil || len(b) != sha256.Size {
-			return nil, errors.New("неверный отпечаток программы")
+			return nil, errors.New(T("installer.err.fingerprint"))
 		}
 	}
 	for _, pair := range [][2]string{{p.Incoming, ".dfo-update-"}, {p.Backup, ".dfo-backup-"}} {
 		if pair[0] != "" && (filepath.Dir(pair[0]) != filepath.Dir(p.Target) || !strings.HasPrefix(filepath.Base(pair[0]), pair[1])) {
-			return nil, errors.New("неверный путь временной копии")
+			return nil, errors.New(T("installer.err.tempPath"))
 		}
 	}
 	return &p, nil
@@ -414,11 +415,11 @@ func loadUpdatePlan(path, root string) (*updatePlan, error) {
 func prepareUpdateTarget(p *updatePlan) (err error) {
 	old, err := fileSHA256(p.Target)
 	if err != nil || old != p.OldSHA256 {
-		return errors.New("текущий EXE уже изменился; повторите проверку обновлений")
+		return errors.New(T("installer.err.exeChanged"))
 	}
 	actual, err := fileSHA256(p.Download)
 	if err != nil || actual != p.SHA256 {
-		return errors.New("файл обновления изменился после проверки")
+		return errors.New(T("installer.err.updateChanged"))
 	}
 	f, err := os.CreateTemp(filepath.Dir(p.Target), ".dfo-update-*.exe")
 	if err != nil {
@@ -450,7 +451,7 @@ func prepareUpdateTarget(p *updatePlan) (err error) {
 	}
 	actual, err = fileSHA256(p.Incoming)
 	if err != nil || actual != p.SHA256 {
-		return errors.New("копия обновления повреждена")
+		return errors.New(T("installer.err.copyBroken"))
 	}
 	backup, err := os.CreateTemp(filepath.Dir(p.Target), ".dfo-backup-*.previous")
 	if err != nil {

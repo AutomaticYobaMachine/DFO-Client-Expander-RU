@@ -100,7 +100,7 @@ func (j *sessionJournal) append(s string) {
 			j.err = err
 			j.file.Close()
 			j.file = nil
-			j.text.WriteString("ОШИБКА записи полного журнала: " + logText(err.Error()) + "\r\n")
+			j.text.WriteString(T("installer.journal.writeError", "error", logText(err.Error())) + "\r\n")
 		}
 	}
 }
@@ -114,7 +114,7 @@ func (j *sessionJournal) snapshot(limit int) string {
 		for len(s) > 0 && !utf8.RuneStart(s[0]) {
 			s = s[1:]
 		}
-		s = "… Предыдущие строки сохранены в полном журнале.\r\n" + s
+		s = T("installer.journal.earlier") + "\r\n" + s
 	}
 	return s
 }
@@ -154,14 +154,14 @@ func (j *sessionJournal) close() {
 func runLoggedCommand(c *exec.Cmd, line func(string)) error {
 	r, w, err := os.Pipe()
 	if err != nil {
-		return fmt.Errorf("канал вывода патчера: %w", err)
+		return fmt.Errorf("%s: %w", T("installer.err.patcherPipe"), err)
 	}
 	c.Stdout, c.Stderr = w, w
 	err = c.Start()
 	w.Close()
 	if err != nil {
 		r.Close()
-		return fmt.Errorf("запуск патчера: %w", err)
+		return fmt.Errorf("%s: %w", T("installer.err.patcherStart"), err)
 	}
 	reader := bufio.NewReader(r)
 	var readErr error

@@ -1,4 +1,5 @@
 'use strict';
+const {projectMarks}=require('./dungeon-transform.cjs');
 const need=(s,re)=>{const m=re.exec(s);if(!m)throw Error('Unsupported UI calibration: '+re.source.slice(0,90));return m};
 // Change authored px sizes once, before CSS reaches the browser. No walk of
 // computed styles, inherited subtraction or per-frame measurement of the HUD.
@@ -45,10 +46,12 @@ function world(text){
  return text.replace(m[0],m[0].replace('{','{globalThis.__dfoFonts?.calibration.host('+m[2]+');'));
 }
 function project(text){
- const m=need(text,/\{let ([\w$]+)=([\w$]+)\(([\w$]+)\.at\);([\w$]+)\.push\(\{(?:dfoDungeon:[\w$]+\.dfoDungeon,)?key:\3\.key,/);
  // The loop binding is const upstream; add fields to the projected record,
- // never replace the world entity or alter its native filter/pick flags.
- return text.replace(m[0],m[0].replace('key:',`...globalThis.__dfoFonts?.calibration.mark(${m[3]}),key:`));
+ // never replace the world entity or alter its native filter/pick flags. A record the
+ // readout keeps between frames (0.1.14574+) is re-measured on every refresh: the
+ // player moves, so its distance and quiet flag change while its fields do not.
+ return projectMarks(text,mark=>`...globalThis.__dfoFonts?.calibration.mark(${mark}),`,mark=>`...globalThis.__dfoFonts?.calibration.mark(${mark}),`,
+  (record,mark)=>`Object.assign(${record},{dfoSmall:!1,dfoQuiet:!1},globalThis.__dfoFonts?.calibration.mark(${mark})),`);
 }
 function hud(text){
  const draw=need(text,/function ([\w$]+)\(([\w$]+),([\w$]+),([\w$]+),([\w$]+),([\w$]+)=null\)\{let ([\w$]+)=[\w$]+\.canvas;/);

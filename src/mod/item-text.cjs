@@ -283,13 +283,67 @@ function bundle(locale, root = ROOT) {
   return `globalThis.__dfoItemTextPack=${json};\n`;
 }
 
+// ─── the mod's own interface strings ─────────────────────────────────────────────────────────────────────────────
+// <locale>/ui/*.csv   key,text,note - every string the mod itself shows (cards, loot, dungeons, marks, town map,
+// service windows, the patcher's and the hook's messages). Found by listing the folder, so the description tables'
+// generated index.json stays theirs. English carries every key; another locale must say the same keys with the same
+// places ({name}, {n:one|other} - see page/dfo_ui_text.js) and its own number of word forms.
+const UI_KEY = /^[a-z][A-Za-z0-9]*(?:\.[A-Za-z0-9-]+)+$/;
+const uiRuntime = () => require('./page/dfo_ui_text.js');
+const uiFiles = dir => { try { return fs.readdirSync(path.join(dir, 'ui')).filter(f => f.endsWith('.csv')).sort().map(f => `ui/${f}`); } catch { return []; } };
+/** One locale's interface strings, validated: { locale, strings: { key: text } }. Throws on a malformed row. */
+function loadUi(dir) {
+  const locale = path.basename(dir), forms = uiRuntime().FORMS[locale] ?? 2, strings = {};
+  for (const rel of uiFiles(dir)) {
+    const { header, rows } = readTable(path.join(dir, rel));
+    for (const column of ['key', 'text']) if (!header.includes(column)) throw new Error(`${dir}/${rel}: no ${column} column`);
+    rows.forEach((row, n) => {
+      const where = `${locale}/${rel}:${n + 2}`;
+      if (!UI_KEY.test(row.key)) throw new Error(`${where}: bad key ${JSON.stringify(row.key)}`);
+      if (Object.hasOwn(strings, row.key)) throw new Error(`${where}: key ${row.key} repeated`);
+      if (!row.text) throw new Error(`${where}: empty text`);
+      if (/[\r\n]/.test(row.text)) throw new Error(`${where}: a line break goes in as \\n`);
+      for (const [name, count] of Object.entries(uiRuntime().places(row.text))) {
+        if (count && count !== forms) throw new Error(`${where}: {${name.slice(0, -1)}:...} needs ${forms} word forms`);
+      }
+      strings[row.key] = row.text.replace(/\\n/g, '\n');
+    });
+  }
+  return { locale, strings };
+}
+/** The strings a page or the patcher speaks: English under the locale's own, so nothing is ever left keyless. */
+function uiPack(locale, root = ROOT) {
+  const en = loadUi(path.join(root, LOCALES.en));
+  if (locale === LOCALES.en) return en;
+  const own = loadUi(path.join(root, locale));
+  return { locale: own.locale, strings: { ...en.strings, ...own.strings } };
+}
+/** The page's script: the chosen locale's interface strings as data. A broken table gives English, never a throw. */
+function uiBundle(locale, root = ROOT) {
+  let pack;
+  try { pack = uiPack(locale, root); }
+  catch (error) {
+    try { pack = uiPack(LOCALES.en, root); } catch { pack = { locale: LOCALES.en, strings: {} }; }
+    pack.error = String(error?.message || error);
+  }
+  const json = JSON.stringify(pack).replace(/[\u2028\u2029]/g, c => '\\u' + c.charCodeAt(0).toString(16));
+  return `globalThis.__dfoUiPack=${json};\n`;
+}
+/** Node's accessor (the hook's report, the patcher's messages): t(key, params) in the chosen locale. */
+function uiText(locale, root = ROOT) {
+  let pack;
+  try { pack = uiPack(locale, root); } catch { try { pack = uiPack(LOCALES.en, root); } catch { pack = { locale: LOCALES.en, strings: {} }; } }
+  return uiRuntime().make(pack);
+}
+
 /** Every file a locale needs, relative to the item-text folder: what the patcher puts into the game's archive. */
 function localeFiles(locale, root = ROOT) {
   const index = JSON.parse(fs.readFileSync(path.join(root, locale, 'index.json'), 'utf8'));
-  return ['index.json', ...['bases', 'properties', 'gear', 'metals', 'clothing', 'colors', 'combos', 'legendaries', 'tiers', 'sets'].flatMap(k => index[k] ?? [])]
-    .map(rel => `${locale}/${rel}`);
+  return ['index.json', ...['bases', 'properties', 'gear', 'metals', 'clothing', 'colors', 'combos', 'legendaries', 'tiers', 'sets'].flatMap(k => index[k] ?? []),
+    ...uiFiles(path.join(root, locale))].map(rel => `${locale}/${rel}`);
 }
 /** What an install carries: the shared rules and hints and the files of each locale it speaks. */
 const installFiles = (locales, root = ROOT) => ['rules.json', 'hints.json', ...locales.flatMap(locale => localeFiles(locale, root))];
 
-module.exports = { ROOT, LOCALES, parseCsv, readTable, loadLocale, loadRules, loadHints, chooseLocale, bundle, localeFiles, installFiles };
+module.exports = { ROOT, LOCALES, parseCsv, readTable, loadLocale, loadRules, loadHints, chooseLocale, bundle, localeFiles, installFiles,
+  loadUi, uiPack, uiBundle, uiText, uiFiles };

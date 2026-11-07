@@ -24,11 +24,11 @@ cp src/mod/font-assets.cjs "$PAYLOAD/mod/"
 cp src/mod/page/dfo_fonts.js src/mod/page/dfo_font_data.js "$PAYLOAD/mod/page/"
 cp src/mod/page/dfo_item_cards.js "$PAYLOAD/mod/page/"
 cp src/mod/item-text.cjs "$PAYLOAD/mod/"
-cp src/mod/page/dfo_item_text.js "$PAYLOAD/mod/page/"
+cp src/mod/page/dfo_item_text.js src/mod/page/dfo_ui_text.js "$PAYLOAD/mod/page/"
 cp -r src/mod/item-text "$PAYLOAD/mod/"
 cp src/mod/fonts/* "$PAYLOAD/mod/fonts/"
 cp -r data/ru data/ru-pack data/ru_shell.json "$PAYLOAD/data/"
-cp README.txt "$PAYLOAD/"
+cp README.txt README-EN.txt "$PAYLOAD/"
 python3 - <<'PY'
 from pathlib import Path
 from zipfile import ZipFile,ZIP_DEFLATED,ZipInfo
@@ -41,7 +41,7 @@ with ZipFile('src/gui/payload_windows.zip','w',compression=ZIP_DEFLATED,compress
             z.writestr(info,f.read_bytes())
 PY
 python3 tools/windows-resources.py
-cp README.txt "$OUT/"
+cp README.txt README-EN.txt "$OUT/"
 cp data/ru-pack/LICENSE "$OUT/licenses/DG_RU-LICENSE.txt"
 cp data/ru-src/en/README.md "$OUT/licenses/Translation-sources.md"
 cp src/mod/fonts/FONT-NOTICES.txt "$OUT/licenses/Item-card-fonts.txt"

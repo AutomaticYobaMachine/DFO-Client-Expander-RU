@@ -5,6 +5,8 @@ const fs = require("node:fs"),
   path = require("node:path"),
   vm = require("node:vm");
 const details = require("../src/mod/page/dfo_service_details.js");
+// The explanations read the install's words; these checks run on the Russian pack (the English one has its own test).
+globalThis.__dfoUi = require("../src/mod/item-text.cjs").uiText("ru");
 const {
   transformServices,
 } = require("../src/mod/service-windows-transform.cjs");

@@ -1,0 +1,105 @@
+key,text,note
+live.enemy,Enemy {id},src/mod/page/dfo_dungeon_live_model.js
+live.trait.elite,Elite,src/mod/page/dfo_dungeon_live_model.js
+live.trait.dungeonBoost,Dungeon boost,src/mod/page/dfo_dungeon_live_model.js
+live.trait.topBoost,Top boost,src/mod/page/dfo_dungeon_live_model.js
+live.trait.named,Named,src/mod/page/dfo_dungeon_live_model.js
+live.trait.revenant,Revenant,src/mod/page/dfo_dungeon_live_model.js
+live.trait.quest,Quest,src/mod/page/dfo_dungeon_live_model.js
+live.trait.surrendered,Surrendered,src/mod/page/dfo_dungeon_live_model.js
+live.players.solo,Single player.,src/mod/page/dfo_dungeon_live_model.js
+live.players.connecting,Waiting for the connection to the dungeon room.,src/mod/page/dfo_dungeon_live_model.js
+live.players.pending,The member list has not arrived yet.,src/mod/page/dfo_dungeon_live_model.js
+live.players.room,Including you; members of this network room.,src/mod/page/dfo_dungeon_live_model.js
+live.players.partial,Members known to the client. The list may be incomplete.,src/mod/page/dfo_dungeon_live_model.js
+live.quest,Quest,src/mod/page/dfo_dungeon_live_model.js
+live.dungeon,Dungeon,src/mod/page/dfo_dungeon_live_model.js
+live.tab.summary,Summary,src/mod/page/dfo_dungeon_live.js
+live.tab.enemies,Enemies,src/mod/page/dfo_dungeon_live.js
+live.tab.loot,Loot,src/mod/page/dfo_dungeon_live.js
+live.tab.prep,Preparation,src/mod/page/dfo_dungeon_live.js
+live.quest.gone,The quest is no longer active in this dungeon.,src/mod/page/dfo_dungeon_live.js
+live.journal.failed,Could not open the journal. Finish the other action and try again.,src/mod/page/dfo_dungeon_live.js
+live.nav.title,Dungeon navigation,src/mod/page/dfo_dungeon_live.js
+live.nav.help,Choose a target — the window closes and a glowing line on the floor shows the way. Doors are opened by hand.,src/mod/page/dfo_dungeon_live.js
+live.nav.questLabel,Quest: ,src/mod/page/dfo_dungeon_live.js
+live.nav.questSelect,Quest to navigate to,src/mod/page/dfo_dungeon_live.js
+live.nav.questDefault,Tracked or nearest active target,src/mod/page/dfo_dungeon_live.js
+live.nav.toExit,To the exit,src/mod/page/dfo_dungeon_live.js
+live.nav.noExit,No exit was found in this location.,src/mod/page/dfo_dungeon_live.js
+live.nav.toAurum,To the Aurum chest,src/mod/page/dfo_dungeon_live.js
+live.nav.noAurum,The chest is unavailable or already open.,src/mod/page/dfo_dungeon_live.js
+live.nav.toElite,To the nearest elite,src/mod/page/dfo_dungeon_live.js
+live.nav.noElite,No elite enemies are alive.,src/mod/page/dfo_dungeon_live.js
+live.nav.toQuest,To the quest target,src/mod/page/dfo_dungeon_live.js
+live.nav.noQuest,No quest targets are available.,src/mod/page/dfo_dungeon_live.js
+live.nav.preparing,Navigation is still getting ready.,src/mod/page/dfo_dungeon_live.js
+live.nav.clear,Clear the route,src/mod/page/dfo_dungeon_live.js
+live.summary.enemiesLeft,Enemies left,src/mod/page/dfo_dungeon_live.js
+live.summary.elitesLeft,Of them elite,src/mod/page/dfo_dungeon_live.js
+live.summary.players,Players in the dungeon,src/mod/page/dfo_dungeon_live.js
+live.summary.syncing,Some enemies are still syncing. This is the roster the client knows.,src/mod/page/dfo_dungeon_live.js
+live.regen.noClock,Respawn: the server time is not known yet.,src/mod/page/dfo_dungeon_live.js
+live.regen.solo,Respawn: in single player nothing restores on its own.,src/mod/page/dfo_dungeon_live.js
+live.regen.none,Respawn: no known running countdown. The usual interval is {n} min.,src/mod/page/dfo_dungeon_live.js
+live.regen.next,Next respawn in {n} min.{due},src/mod/page/dfo_dungeon_live.js
+live.regen.note,"Enemies and emptied sources each come back on their own timer; this is the nearest known one, not a reset of the whole dungeon.",src/mod/page/dfo_dungeon_live.js
+live.aurum.taken,Aurum: claimed by your account this week.,src/mod/page/dfo_dungeon_live.js
+live.aurum.online,Aurum: the chest is available online.,src/mod/page/dfo_dungeon_live.js
+live.aurum.none,Aurum: this kind of location has no chest.,src/mod/page/dfo_dungeon_live.js
+live.aurum.state,Aurum: {amount}. {state},src/mod/page/dfo_dungeon_live.js
+live.quests.title,Quests in this dungeon,src/mod/page/dfo_dungeon_live.js
+live.quests.none,No known active quests here.,src/mod/page/dfo_dungeon_live.js
+live.enemies.note,Living enemies of the current scene. Individual elites and the whole dungeon's boost are shown separately.,src/mod/page/dfo_dungeon_live.js
+live.enemies.pending,The roster has not arrived yet.,src/mod/page/dfo_dungeon_live.js
+live.enemies.none,No living enemies are left.,src/mod/page/dfo_dungeon_live.js
+live.col.enemy,Enemy,src/mod/page/dfo_dungeon_live.js
+live.col.left,Left,src/mod/page/dfo_dungeon_live.js
+live.col.level,Level,src/mod/page/dfo_dungeon_live.js
+live.col.traits,Traits,src/mod/page/dfo_dungeon_live.js
+live.col.health,Health,src/mod/page/dfo_dungeon_live.js
+live.trait.ordinary,Ordinary,src/mod/page/dfo_dungeon_live.js
+live.loot.title,What to go after for loot,src/mod/page/dfo_dungeon_live.js
+live.loot.special,The standard forecast is not available for this special location. The summary and the enemy list follow the current scene.,src/mod/page/dfo_dungeon_live.js
+live.loot.rank,Loot rank: {rank}. Character's Luck: {luck}.,src/mod/page/dfo_dungeon_live.js
+live.loot.minRarity,Minimum rarity,src/mod/page/dfo_dungeon_live.js
+live.loot.chance,Chance for a suitable item,src/mod/page/dfo_dungeon_live.js
+live.loot.atLeastMagic,At least magic,src/mod/page/dfo_dungeon_live.js
+live.loot.atLeastRare,At least rare,src/mod/page/dfo_dungeon_live.js
+live.loot.atLeastLegendary,At least legendary,src/mod/page/dfo_dungeon_live.js
+live.loot.unknown,The rarity chances are not known to the client yet.,src/mod/page/dfo_dungeon_live.js
+live.loot.preferred,Preferred legendary items,src/mod/page/dfo_dungeon_live.js
+live.loot.note,"This is a forecast from the tables, not the contents of unopened chests. The items actually there are shown by “Loot nearby”.",src/mod/page/dfo_dungeon_live.js
+live.prep.title,Preparing for the enemies left,src/mod/page/dfo_dungeon_live.js
+live.prep.note,Go by the live list and the enemy traits on the “Enemies” tab.,src/mod/page/dfo_dungeon_live.js
+live.prep.weapon,Weapon in hand: {weapon}.,src/mod/page/dfo_dungeon_live.js
+live.prep.noWeapon,The weapon in hand is not known.,src/mod/page/dfo_dungeon_live.js
+live.prep.noData,Not enough data to judge the weapon.,src/mod/page/dfo_dungeon_live.js
+live.prep.blocked,Some expected enemies need a different weapon material: about {pct}% by the dungeon's table.,src/mod/page/dfo_dungeon_live.js
+live.prep.ok,The weapon material suits the expected kinds of enemies.,src/mod/page/dfo_dungeon_live.js
+live.prep.priorities,Priorities,src/mod/page/dfo_dungeon_live.js
+live.prep.elites,Elite enemies left: {n}. Check their traits on the “Enemies” tab before the fight.,src/mod/page/dfo_dungeon_live.js
+live.prep.noElites,No individual elite enemies are in the current list.,src/mod/page/dfo_dungeon_live.js
+live.prep.note2,Health in the table adds up over a group of identical enemies. The material forecast is about the spawn tables and may differ from the roster left.,src/mod/page/dfo_dungeon_live.js
+live.tabs,Sections of the current dungeon,src/mod/page/dfo_dungeon_live.js
+live.automap,Automap,src/mod/page/dfo_dungeon_live.js
+live.journal,Quest journal,src/mod/page/dfo_dungeon_live.js
+live.close,Close,src/mod/page/dfo_dungeon_live.js
+live.key.space,Space,src/mod/page/dfo_dungeon_live.js
+live.key.mouse,Mouse ,src/mod/page/dfo_dungeon_live.js
+live.launcher,Dungeon details · ,src/mod/page/dfo_dungeon_live.js
+live.hud,Dungeon counters,src/mod/page/dfo_dungeon_live.js
+live.hud.enemies,Living enemies,src/mod/page/dfo_dungeon_live.js
+live.hud.elites,Elite enemies,src/mod/page/dfo_dungeon_live.js
+live.hud.players,Players,src/mod/page/dfo_dungeon_live.js
+live.hud.unknown,Not known yet,src/mod/page/dfo_dungeon_live.js
+live.hud.partial,Known: {value}. The roster is still being confirmed.,src/mod/page/dfo_dungeon_live.js
+live.keyClash,The key is the same as “Loot nearby”. Assign different keys in the installer.,src/mod/page/dfo_dungeon_live.js
+live.quest.chosen,Chosen quest,src/mod/page/dfo_dungeon_live.js
+live.aurum.amountUnknown,amount unknown,src/mod/page/dfo_dungeon_live.js
+live.aurum.statePending,The chest's state has not arrived yet.,src/mod/page/dfo_dungeon_live.js
+live.aurum.stateNoMark,No local claim mark; the server confirms it when opened.,src/mod/page/dfo_dungeon_live.js
+live.regen.due, Waiting for the room to refresh.,src/mod/page/dfo_dungeon_live.js
+live.unknownM,unknown,src/mod/page/dfo_dungeon_live.js
+live.unknownF,unknown,src/mod/page/dfo_dungeon_live.js
+live.metres,{n} m,distance

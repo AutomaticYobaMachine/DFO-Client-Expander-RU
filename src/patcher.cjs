@@ -28,6 +28,11 @@ const args = process.argv.slice(2);
 const cmd = args.find((a) => !a.startsWith('--')) ?? 'install';
 const opt = (name) => { const i = args.indexOf(`--${name}`); return i >= 0 ? args[i + 1] : null; };
 const flag = (name) => args.includes(`--${name}`);
+// The patcher speaks the installer's language (--lang en|ru; Russian by default for Установить.cmd), from the mod's own
+// locale packs (mod/item-text/<en|ru>/ui/patcher.csv). A key without a word - a store's message among them - is said as it is.
+const LANG = ((l) => (l === 'en' || l === 'ru' ? l : 'ru'))(opt('lang') ?? process.env.DFO_LANG);
+let words = null;
+const T = (key, params) => { try { words ??= require(path.join(MOD, 'item-text.cjs')).uiText(LANG); return words.t(key, params); } catch { return key; } };
 
 const say = (s = '') => process.stdout.write(`${s}\n`);
 class Stop extends Error {}
@@ -39,7 +44,7 @@ function findAsar() {
   const exe = process.execPath;
   const c = [path.join(path.dirname(exe), 'resources', 'app.asar')];
   for (const p of c) if (fs.existsSync(p)) return p;
-  stop('Не найден resources\\app.asar рядом с игрой. Запустите установку из папки мода через Установить.cmd.');
+  stop(T('patcher.err.noAsar'));
 }
 function userDataDir() {
   const given = opt('user-data');
@@ -72,7 +77,7 @@ function ruBackup(asarPath) {
 function replaceFile(tmp, target) {
   for (let i = 0; ; i++) {
     try { fs.renameSync(tmp, target); return; } catch (e) {
-      if (i >= 8) { try { fs.unlinkSync(tmp); } catch { /* left for the next run */ } stop(`Не удалось заменить ${target} (файл занят другим процессом). Закройте игру и повторите.`); }
+      if (i >= 8) { try { fs.unlinkSync(tmp); } catch { /* left for the next run */ } stop(T('patcher.err.busyFile',{target:target})); }
       const until = Date.now() + 500; while (Date.now() < until) { /* wait for the lock to go */ }
     }
   }
@@ -133,24 +138,24 @@ function writeConfig(ud, withRu) {
     fs.renameSync(tmp, file);
   } catch (e) {
     try { fs.unlinkSync(tmp); } catch {}
-    stop(`Не удалось сохранить настройки и назначенные кнопки: ${e.message}`);
+    stop(T('patcher.err.saveSettings',{error:T(e.message)}));
   }
 
   return file;
 }
 
 function install() {
-  if (args.includes('--dungeon-key') && !validKey(opt('dungeon-key'))) stop('Некорректная кнопка сведений о данже. Назначьте клавишу заново в установщике.');
+  if (args.includes('--dungeon-key') && !validKey(opt('dungeon-key'))) stop(T('patcher.err.dungeonKey'));
   const lootKey = opt('loot-key');
-  if (args.includes('--loot-key') && (lootKey === null || !validKey(lootKey))) stop('Некорректная кнопка лута. Назначьте клавишу заново в установщике.');
+  if (args.includes('--loot-key') && (lootKey === null || !validKey(lootKey))) stop(T('patcher.err.lootKey'));
   const asarPath = findAsar();
   const ud = userDataDir();
-  say(`DFO-Client-Expander-RU ${VERSION} — установка`);
-  say('Автор: AutomaticYobaMachine. Создано специально для русского сообщества DFO Online.');
-  say(`Игра:   ${path.dirname(path.dirname(asarPath))}`);
-  if (gameRunning()) stop('DFO Online сейчас запущена. Закройте игру полностью и запустите установку снова.');
+  say(T('patcher.install.title',{version:VERSION}));
+  say(T('patcher.author'));
+  say(T('patcher.game',{path:path.dirname(path.dirname(asarPath))}));
+  if (gameRunning()) stop(T('patcher.err.runningInstall'));
   try { createLootStore(ud).read(); }
-  catch (e) { stop(`Не удалось прочитать кеш настроек; файлы клиента не изменены: ${e.message}`); }
+  catch (e) { stop(T('patcher.err.cacheRead',{error:e.message})); }
 
   let cur = openAsar(asarPath);
   const curFiles = listFiles(cur.header);
@@ -160,16 +165,16 @@ function install() {
   const ourBak = asarPath + BAK;
   let baseFile = asarPath;
   if (modded) {
-    if (!fs.existsSync(ourBak)) { cur.close(); stop(`app.asar уже изменён этим модом, но чистой копии (${path.basename(ourBak)}) нет. Переустановите игру и запустите установку снова.`); }
+    if (!fs.existsSync(ourBak)) { cur.close(); stop(T('patcher.err.noBackup',{file:path.basename(ourBak)})); }
     baseFile = ourBak;
-    say('Мод уже стоит - переустанавливаю поверх чистой копии.');
+    say(T('patcher.reinstall'));
   } else if (ruPatched) {
     const rb = ruBackup(asarPath);
     if (rb) {
       const ra = openAsar(rb); const rv = versionOf(ra); ra.close();
-      if (rv === curVersion) { baseFile = rb; say(`Найден старый русификатор DFO_RU - беру его чистую копию: ${path.basename(rb)}`); }
-      else say(`Внимание: копия DFO_RU (${rv}) от другой версии оболочки (${curVersion}) - ставлю поверх текущего файла.`);
-    } else say('Внимание: стоит старый русификатор DFO_RU без чистой копии - ставлю поверх него.');
+      if (rv === curVersion) { baseFile = rb; say(T('patcher.oldRu',{file:path.basename(rb)})); }
+      else say(T('patcher.oldRuOther',{copy:rv,current:curVersion}));
+    } else say(T('patcher.oldRuNoCopy'));
   }
   if (baseFile !== asarPath) { cur.close(); cur = openAsar(baseFile); }
   const base = cur;
@@ -177,7 +182,7 @@ function install() {
   if (!modded) {
     let keep = !fs.existsSync(ourBak);
     if (!keep) { const b = openAsar(ourBak); keep = versionOf(b) !== versionOf(base); b.close(); }
-    if (keep) { say('Сохраняю чистую копию app.asar...'); fs.copyFileSync(baseFile, `${ourBak}.tmp`); replaceFile(`${ourBak}.tmp`, ourBak); }
+    if (keep) { say(T('patcher.backup')); fs.copyFileSync(baseFile, `${ourBak}.tmp`); replaceFile(`${ourBak}.tmp`, ourBak); }
   }
 
   const put = new Map();
@@ -186,9 +191,9 @@ function install() {
 
   // main.cjs: the hook
   const main = text('main.cjs');
-  if (main == null) { base.close(); stop('В app.asar нет main.cjs - неизвестная версия оболочки.'); }
+  if (main == null) { base.close(); stop(T('patcher.err.noMain')); }
   let hooked = hookMain(main);
-  if (!hooked) { base.close(); stop('Не найдено место для перехватчика в main.cjs (protocol.handle(\'dagger\', ...)). Эта версия оболочки не поддерживается.'); }
+  if (!hooked) { base.close(); stop(T('patcher.err.noHookPlace')); }
   orig('main.cjs', Buffer.from(main));
 
   // the Russian localization - DFO_RU's tables
@@ -196,14 +201,14 @@ function install() {
   const withRu = !flag('no-ru') && fs.existsSync(path.join(ruDir, 'ru_master.json'));
   const report = [];
   if (withRu) {
-    say('Собираю русификатор (словарь, правила, квесты)...');
+    say(T('patcher.buildRu'));
     put.set('dfo-mod/page/ru_dict.js', Buffer.from(buildDict(ruDir)));
     put.set('dfo-mod/page/ru_i18n.js', Buffer.from(buildI18n(ruDir)));
     const quests = buildQuests(ruDir);
     put.set('dfo-mod/ru/quests.json', Buffer.from(JSON.stringify(quests)));
     if (fs.existsSync(path.join(ruDir, 'ql_ru.json'))) put.set('dfo-mod/ru/ql.json', fs.readFileSync(path.join(ruDir, 'ql_ru.json')));
     put.set('dfo-mod/ru/tiny5_cyrillic.woff2', fs.readFileSync(path.join(ruDir, 'tiny5_cyrillic.woff2')));
-    report.push(`квестов: ${Object.keys(quests).length}`);
+    report.push(T('patcher.report.quests',{n:Object.keys(quests).length}));
     const shell = JSON.parse(fs.readFileSync(path.join(DATA, 'ru_shell.json'), 'utf8'));
     for (const [rel, pairs] of Object.entries(shell)) {
       const src = rel === 'main.cjs' ? hooked : text(rel);
@@ -221,13 +226,13 @@ function install() {
       put.set('dfo-mod/ru-pack/index.json', fs.readFileSync(path.join(packDir, 'index.json')));
       for (const f of idx.files) put.set(`dfo-mod/ru-pack/${f}`, fs.readFileSync(path.join(packDir, ...f.split('/'))));
       for (const f of ['PACK.json', 'LICENSE']) if (fs.existsSync(path.join(packDir, f))) put.set(`dfo-mod/ru-pack/${f}`, fs.readFileSync(path.join(packDir, f)));
-      report.push(`пак: ${idx.files.length} файлов`);
+      report.push(T('patcher.report.pack',{n:idx.files.length}));
     }
   }
   put.set('main.cjs', Buffer.from(hooked));
 
   // the mod itself
-  for (const rel of ['hook.cjs', 'transforms.cjs', 'item-cards-transform.cjs', 'page/dfo_item_cards.js', 'item-text.cjs', 'page/dfo_item_text.js', 'nearby-loot-transform.cjs', 'loot-tags-transform.cjs', 'dungeon-transform.cjs', 'dungeon-live-transform.cjs', 'dungeon-nav-transform.cjs', 'page/dfo_dungeon_model.js', 'page/dfo_dungeons.js', 'page/dfo_dungeon_live_model.js', 'page/dfo_dungeon_live.js', 'page/dfo_dungeon_graph.js', 'page/dfo_dungeon_nav_model.js', 'page/dfo_dungeon_nav.js', 'loot-store.cjs', 'page/dfo_loot_rules.js', 'page/dfo_loot_ui.js', 'page/dfo_loot.js', 'version.json', 'page/dfo_marks.js', 'page/dfo_town.js', 'page/ru_locale.js', 'page/ru_items.js']) put.set(`dfo-mod/${rel}`, fs.readFileSync(path.join(MOD, ...rel.split('/'))));
+  for (const rel of ['hook.cjs', 'transforms.cjs', 'item-cards-transform.cjs', 'page/dfo_item_cards.js', 'item-text.cjs', 'page/dfo_item_text.js', 'page/dfo_ui_text.js', 'nearby-loot-transform.cjs', 'loot-tags-transform.cjs', 'dungeon-transform.cjs', 'dungeon-live-transform.cjs', 'dungeon-nav-transform.cjs', 'page/dfo_dungeon_model.js', 'page/dfo_dungeons.js', 'page/dfo_dungeon_live_model.js', 'page/dfo_dungeon_live.js', 'page/dfo_dungeon_graph.js', 'page/dfo_dungeon_nav_model.js', 'page/dfo_dungeon_nav.js', 'loot-store.cjs', 'page/dfo_loot_rules.js', 'page/dfo_loot_ui.js', 'page/dfo_loot.js', 'version.json', 'page/dfo_marks.js', 'page/dfo_town.js', 'page/ru_locale.js', 'page/ru_items.js']) put.set(`dfo-mod/${rel}`, fs.readFileSync(path.join(MOD, ...rel.split('/'))));
 
   // item descriptions: English always (the language without the translation), Russian only with the translation
   const { installFiles } = require(path.join(MOD, 'item-text.cjs'));
@@ -262,7 +267,7 @@ function install() {
     put.set(key,Buffer.from(stripFaces(String(source)).text+'\n'+launcherCss()));
   }
 
-  say('Пересобираю app.asar...');
+  say(T('patcher.repack'));
   const tmp = `${asarPath}.dfo-tmp`;
   let last = -1;
   writeAsar(base, tmp, { put,drop:fontDrop }, (d, n) => { const p = Math.floor((d / n) * 10); if (p !== last) { last = p; say(`  ${p * 10}%`); } });
@@ -278,30 +283,30 @@ function install() {
     const c = fs.readFileSync(shellCfg, 'utf8');
     if (/"updateCheck"\s*:\s*false/.test(c)) {
       fs.writeFileSync(shellCfg, c.replace(/"updateCheck"\s*:\s*false/, '"updateCheck": true'));
-      say('Автообновление игры снова включено (его выключал старый русификатор): мод переживает обновления сам.');
+      say(T('patcher.autoUpdate'));
     }
   }
   say('');
-  say(`Готово. Мод ${VERSION} установлен${withRu ? ' вместе с русификатором' : ''}.`);
-  if (report.length) say(`Русификатор: ${report.join('; ')}`);
-  say(`Настройки: ${cfgFile}`);
-  say(`Журнал хуков (после запуска игры): ${path.join(ud, 'dfo-mod.log')}`);
+  say(T(withRu ? 'patcher.done.installedRu' : 'patcher.done.installed', { version: VERSION }));
+  if (report.length) say(T('patcher.report',{report:report.join('; ')}));
+  say(T('patcher.settings',{file:cfgFile}));
+  say(T('patcher.hookLog',{file:path.join(ud, 'dfo-mod.log')}));
 }
 
 function uninstall() {
   const asarPath = findAsar();
-  say(`DFO-Client-Expander-RU ${VERSION} — удаление`);
-  if (gameRunning()) stop('DFO Online сейчас запущена. Закройте игру полностью и запустите удаление снова.');
+  say(T('patcher.uninstall.title',{version:VERSION}));
+  if (gameRunning()) stop(T('patcher.err.runningUninstall'));
   const ourBak = asarPath + BAK;
   const a = openAsar(asarPath);
   const files = listFiles(a.header);
-  if (!files.has('dfo-mod/hook.cjs')) { a.close(); say('Мод не установлен - app.asar и так чистый.'); return; }
+  if (!files.has('dfo-mod/hook.cjs')) { a.close(); say(T('patcher.notInstalled')); return; }
   if (fs.existsSync(ourBak)) {
     a.close();
     fs.copyFileSync(ourBak, `${asarPath}.dfo-tmp`);
     replaceFile(`${asarPath}.dfo-tmp`, asarPath);
     fs.unlinkSync(ourBak);
-    say('Готово: чистый app.asar возвращён на место.');
+    say(T('patcher.restored'));
     return;
   }
   // no clean copy: the originals the mod kept inside, put back, and the mod taken out
@@ -316,7 +321,7 @@ function uninstall() {
   writeAsar(a, `${asarPath}.dfo-tmp`, { put, drop });
   a.close();
   replaceFile(`${asarPath}.dfo-tmp`, asarPath);
-  say('Готово: исходные файлы оболочки возвращены, мод убран.');
+  say(T('patcher.restoredFiles'));
 }
 
 function status() {
@@ -351,21 +356,21 @@ function status() {
   }
 
   if (flag('json')) { say(JSON.stringify(st)); return; }
-  say(`app.asar: ${asarPath} (оболочка ${st.shell})`);
-  say(`Мод: ${st.installed ? `установлен ${st.modVersion ?? ''}` : 'не установлен'}${st.withRu ? ', с русификатором' : ''}`);
-  if (st.cachedLootKey) say(`Кнопка лута (в кеше): ${st.cachedLootKey}`);
-  say(`Чистая копия: ${st.cleanCopy ? 'есть' : 'нет'}`);
+  say(T('patcher.status.asar',{path:asarPath,shell:st.shell}));
+  say(T(`patcher.status.${st.installed ? 'installed' : 'notInstalled'}${st.withRu ? 'Ru' : ''}`, { version: st.modVersion ?? '' }));
+  if (st.cachedLootKey) say(T('patcher.status.lootKey',{key:st.cachedLootKey}));
+  say(T(st.cleanCopy ? 'patcher.status.cleanYes' : 'patcher.status.cleanNo'));
   const log = path.join(ud, 'dfo-mod.log');
-  if (fs.existsSync(log)) { say('Журнал последнего запуска:'); say(fs.readFileSync(log, 'utf8').split('\n').slice(0, 40).join('\n')); }
+  if (fs.existsSync(log)) { say(T('patcher.status.lastLog')); say(fs.readFileSync(log, 'utf8').split('\n').slice(0, 40).join('\n')); }
 }
 
 try {
   if (cmd === 'install') install();
   else if (cmd === 'uninstall') uninstall();
   else if (cmd === 'status') status();
-  else stop(`Неизвестная команда: ${cmd}`);
+  else stop(T('patcher.err.command',{cmd:cmd}));
 } catch (e) {
   say('');
-  say(e instanceof Stop ? `Ошибка: ${e.message}` : `Сбой: ${e?.stack ?? e}`);
+  say(e instanceof Stop ? T('patcher.error',{error:T(e.message)}) : T('patcher.crash',{error:e?.stack ?? e}));
   process.exitCode = 1;
 }

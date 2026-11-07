@@ -541,7 +541,7 @@ test('the page gets Russian only with the translation installed, and the scripts
     assert.equal(win.__dfoItemTextPack.locale, locale);
     assert.equal(Object.keys(win.__dfoItemTextPack.bases).length, 483);
     const index = JSON.parse(fs.readFileSync(path.join(text.ROOT, locale, 'index.json')));
-    const listed = ['bases', 'properties', 'gear', 'metals', 'clothing', 'colors', 'combos', 'legendaries', 'tiers', 'sets'].flatMap(k => index[k] ?? []);
+    const listed = [...['bases', 'properties', 'gear', 'metals', 'clothing', 'colors', 'combos', 'legendaries', 'tiers', 'sets'].flatMap(k => index[k] ?? []), ...text.uiFiles(path.join(text.ROOT, locale))];
     assert.deepEqual(text.localeFiles(locale).filter(f => f.endsWith('.csv')), listed.map(f => `${locale}/${f}`));
     for (const file of text.localeFiles(locale)) assert.ok(fs.existsSync(path.join(text.ROOT, file)), file);
     assert.deepEqual(win.__dfoItemTextPack.rules.queue.map(q => q.slot), [1, 2, 3, 4, 5, 6, 7, 8]);

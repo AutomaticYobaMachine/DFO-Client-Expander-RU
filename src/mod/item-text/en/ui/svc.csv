@@ -1,0 +1,203 @@
+key,text,note
+svc.mechanic.0,Paralyzes the target: it can neither move nor attack. Paralysis alone does not stop spellcasting; immunity to paralysis blocks the effect.,src/mod/page/dfo_service_details.js
+svc.mechanic.1,Each magic round lowers the target's {vital}. The magnitude is rolled anew every round; the first check happens as soon as the effect lands.,src/mod/page/dfo_service_details.js
+svc.mechanic.2,Creates a temporary item. It exists only as long as the effect lasts; it is not permanent loot.,src/mod/page/dfo_service_details.js
+svc.mechanic.3,"On a successful check, cures {cure}. Magnitude and duration are not used.",src/mod/page/dfo_service_details.js
+svc.mechanic.4,Lowers the target's {vital} once. The base magnitude is two independent integer rolls.,src/mod/page/dfo_service_details.js
+svc.mechanic.5,"On a successful check, destroys a suitable target. The target's protection and immunities still apply; it is not a guaranteed kill.",src/mod/page/dfo_service_details.js
+svc.mechanic.6,"On a successful check, {dispel}.",src/mod/page/dfo_service_details.js
+svc.mechanic.7,Lowers {attr} by M. The lost points come back with the matching cure; no duration timer is set here.,src/mod/page/dfo_service_details.js
+svc.mechanic.8,Grants resistance to the chosen element. The effect's chance takes part in the defense against that element; it is not a permanent percentage cut of all damage.,src/mod/page/dfo_service_details.js
+svc.mechanic.9,Raises {attr} by M for a while. The bonus is removed when the effect ends.,src/mod/page/dfo_service_details.js
+svc.mechanic.10,Restores {heal} by M without turning the restoration into a lasting bonus above the allowed maximum.,src/mod/page/dfo_service_details.js
+svc.mechanic.11,Transfers {transfer} between the target and the caster; the exact action depends on the chosen resource.,src/mod/page/dfo_service_details.js
+svc.mechanic.12,Places a soul trap on a suitable monster. The soul is captured when it dies if an empty soul gem is at hand; the death alone does not guarantee a capture.,src/mod/page/dfo_service_details.js
+svc.mechanic.13,Makes the character invisible. {conceal},src/mod/page/dfo_service_details.js
+svc.mechanic.14,Lets you rise and descend through the air while it lasts. No damage magnitude or separate chance is set.,src/mod/page/dfo_service_details.js
+svc.mechanic.15,Creates magical light around the character while it lasts.,src/mod/page/dfo_service_details.js
+svc.mechanic.16,"On a successful check, prepares a magical lock. It takes effect when you use a suitable door, not at the moment of casting.",src/mod/page/dfo_service_details.js
+svc.mechanic.17,"On a successful check, prepares a magical opening. You then have to use the door; the result also depends on the lock and the character's level.",src/mod/page/dfo_service_details.js
+svc.mechanic.18,Restores health every magic round. The magnitude is rolled anew on every tick; the first round runs at once.,src/mod/page/dfo_service_details.js
+svc.mechanic.19,Stops the target from casting spells while the silence lasts. Landing the effect and the target's resistance are checked separately.,src/mod/page/dfo_service_details.js
+svc.mechanic.20,Gives a chance to absorb a Destruction effect and get its cost back as mana. Needs free room in the mana pool; the restoration never exceeds the effect's calculated cost.,src/mod/page/dfo_service_details.js
+svc.mechanic.21,"Gives a chance to reflect an incoming spell. It is a reflection check, not an armor bonus or a damage cut by the stated percentage.",src/mod/page/dfo_service_details.js
+svc.mechanic.22,"Gives an extra resistance check against an incoming spell. The number is the chance of the check, not a guaranteed damage reduction.",src/mod/page/dfo_service_details.js
+svc.mechanic.23,"Camouflages the character, making them harder to notice. {conceal}",src/mod/page/dfo_service_details.js
+svc.mechanic.24,Hides the character in shadow. How well it works depends on the lighting. {conceal},src/mod/page/dfo_service_details.js
+svc.mechanic.25,Slows a fall and softens its consequences while the effect is active. It gives no footing in the air.,src/mod/page/dfo_service_details.js
+svc.mechanic.26,Removes an active paralysis and protects against new ones while it lasts.,src/mod/page/dfo_service_details.js
+svc.mechanic.27,Strengthens jumping: 0.6 is added to the take-off speed multiplier. Gives control in the air while it lasts; it is not +60% to the final jump height.,src/mod/page/dfo_service_details.js
+svc.mechanic.28,"Improves climbing while it lasts. It is a state of enhanced climbing, not a bonus of M to the skill.",src/mod/page/dfo_service_details.js
+svc.mechanic.29,Changes the character's form. The workshop does not offer this effect for spells of your own.,src/mod/page/dfo_service_details.js
+svc.mechanic.30,Lets you breathe under water while it lasts. It does not restore health or remove other sources of damage.,src/mod/page/dfo_service_details.js
+svc.mechanic.31,Lets you walk on the surface of water while it lasts.,src/mod/page/dfo_service_details.js
+svc.mechanic.33,"On a successful check, calms creatures of the chosen group. Creatures of other groups are unaffected; further aggression may break the peace.",src/mod/page/dfo_service_details.js
+svc.mechanic.34,Improves peaceful dealings with the target through a charm check. It does not control where the target goes.,src/mod/page/dfo_service_details.js
+svc.mechanic.35,Creates a shield that absorbs M. The shield ends when its pool or its duration runs out; M is not an armor bonus.,src/mod/page/dfo_service_details.js
+svc.mechanic.39,"Lets you detect {detect} while it lasts. What shows, how far and which objects are decided by the game's detector.",src/mod/page/dfo_service_details.js
+svc.mechanic.40,"On a successful check, identifies an item. It does not create a new item or change its hidden properties.",src/mod/page/dfo_service_details.js
+svc.mechanic.43,Sets an anchor or returns you to the anchor set earlier. The usual teleport bans and the presence of a return point apply.,src/mod/page/dfo_service_details.js
+svc.mechanic.44,Lets you understand languages and takes part in peaceful dealings with the matching creatures. Duration and chance are set separately.,src/mod/page/dfo_service_details.js
+svc.mechanic.45,Revives a fallen party member at their body with 30% of their maximum health. It is a ready-made spell; the workshop does not offer it.,src/mod/page/dfo_service_details.js
+svc.mechanic.46,"While the effect is active, the parts of the dungeon map you explore are shared with party members in the same dungeon. The map is not shared between different dungeons.",src/mod/page/dfo_service_details.js
+svc.drain.health,"Deals M damage to the target and restores M health to the caster, up to their maximum. The restoration is for the calculated amount, not for the enemy's remaining health.",src/mod/page/dfo_service_details.js
+svc.drain.stamina,Drains the target's stamina and restores the caster's stamina by M × 64 internal units. Each side stays within its own stamina range.,src/mod/page/dfo_service_details.js
+svc.note.round,1 magic round = 1 game minute. The first round runs when the effect lands; the world's speed sets how long that is in real time.,src/mod/page/dfo_service_details.js
+svc.stat.itemLife,Created item lasts,src/mod/page/dfo_service_details.js
+svc.formula.itemLife,"Item life = max(0, D − 1): the first round is spent before the item is chosen.",src/mod/page/dfo_service_details.js
+svc.stat.durationNone,Duration,src/mod/page/dfo_service_details.js
+svc.duration.door,Until you use a door,src/mod/page/dfo_service_details.js
+svc.duration.attr,Until the attribute is restored,src/mod/page/dfo_service_details.js
+svc.duration.instant,Instant,src/mod/page/dfo_service_details.js
+svc.stat.shield,Shield pool,src/mod/page/dfo_service_details.js
+svc.stat.restore,Base restoration,src/mod/page/dfo_service_details.js
+svc.stat.magnitude,Base magnitude,src/mod/page/dfo_service_details.js
+svc.formula.absorbCap,absorption is capped at 50%.,src/mod/page/dfo_service_details.js
+svc.formula.chanceCap,the chance is limited to 0–100%.,src/mod/page/dfo_service_details.js
+svc.note.notation,"⌊x⌋ rounds down; Rand[a; b] is a separate integer roll, bounds included.",src/mod/page/dfo_service_details.js
+svc.note.stamina64,The internal stamina pool changes by M × 64; M is given in the effect's classic units.,src/mod/page/dfo_service_details.js
+svc.note.absorbLevel,"Absorption uses the level of the effect's RECIPIENT when the hit comes in, not the caster's stored level. The Destruction school and free mana are checked.",src/mod/page/dfo_service_details.js
+svc.note.soulTrap,The trap's chance is checked when the monster dies. Placing the trap does not use up this check; the trap does not work on people or ordinary NPCs.,src/mod/page/dfo_service_details.js
+svc.note.dispelMagic,"A whole bundle of the character's active spells is chosen, an equipped item's enchantments included. Cancelling the choice does not return the spent mana.",src/mod/page/dfo_service_details.js
+svc.note.banish,The chance is checked separately for each suitable creature nearby. A banished enemy vanishes without loot and does not count as a kill for a quest.,src/mod/page/dfo_service_details.js
+svc.note.resist,"C is the chance to fully turn aside the chosen element before the usual saving throw. Cast on yourself, there is no separate roll of C.",src/mod/page/dfo_service_details.js
+svc.note.calm,A single pacification lasts until the player attacks. The workshop sets no duration for this effect.,src/mod/page/dfo_service_details.js
+svc.note.cureOrder,"If an ordinary disease comes together with a vampirism or lycanthropy infection, the ordinary diseases are cured first. With no ordinary diseases, the cure may remove the infection.",src/mod/page/dfo_service_details.js
+svc.note.base,"Base numbers are shown. Cast on someone else, the target's resistance changes M; school skills above 100 and active boosts can change the result.",src/mod/page/dfo_service_details.js
+svc.enchant.AbsorbsSpells,Absorbs Spells,src/mod/page/dfo_service_details.js
+svc.enchant.BadReactionsFrom,Bad Reactions From,src/mod/page/dfo_service_details.js
+svc.enchant.BadRepWith,Bad Rep With,src/mod/page/dfo_service_details.js
+svc.enchant.CastWhenHeld,Cast When Held,src/mod/page/dfo_service_details.js
+svc.enchant.CastWhenStrikes,Cast When Strikes,src/mod/page/dfo_service_details.js
+svc.enchant.CastWhenUsed,Cast When Used,src/mod/page/dfo_service_details.js
+svc.enchant.ExtraSpellPts,Extra Spell Points,src/mod/page/dfo_service_details.js
+svc.enchant.ExtraWeight,Extra Weight,src/mod/page/dfo_service_details.js
+svc.enchant.FeatherWeight,Feather Weight,src/mod/page/dfo_service_details.js
+svc.enchant.GoodRepWith,Good Rep With,src/mod/page/dfo_service_details.js
+svc.enchant.HealthLeech,Health Leech,src/mod/page/dfo_service_details.js
+svc.enchant.ImprovesTalents,Improves Talents,src/mod/page/dfo_service_details.js
+svc.enchant.IncreasedWeightAllowance,Increased Weight Allowance,src/mod/page/dfo_service_details.js
+svc.enchant.ItemDeteriorates,Item Deteriorates,src/mod/page/dfo_service_details.js
+svc.enchant.LowDamageVs,Low Damage Vs,src/mod/page/dfo_service_details.js
+svc.enchant.PotentVs,Potent Vs,src/mod/page/dfo_service_details.js
+svc.enchant.RegensHealth,Regens Health,src/mod/page/dfo_service_details.js
+svc.enchant.RepairsObjects,Repairs Objects,src/mod/page/dfo_service_details.js
+svc.enchant.SoulBound,Soul Bound,src/mod/page/dfo_service_details.js
+svc.enchant.StrengthensArmor,Strengthens Armor,src/mod/page/dfo_service_details.js
+svc.enchant.UserTakesDamage,User Takes Damage,src/mod/page/dfo_service_details.js
+svc.enchant.VampiricEffect,Vampiric Effect,src/mod/page/dfo_service_details.js
+svc.enchant.WeakensArmor,Weakens Armor,src/mod/page/dfo_service_details.js
+svc.enchant.EnhancesSkill,Enhances Skill,src/mod/page/dfo_service_details.js
+svc.ench.AbsorbsSpells.summary,"While worn, gives a 50% chance to absorb a Destruction effect. Absorption returns the effect's calculated cost as mana, only if there is room for it.",src/mod/page/dfo_service_details.js
+svc.ench.AbsorbsSpells.formula,"Mana after = min(maximum mana, current mana + cost of the absorbed effect).",src/mod/page/dfo_service_details.js
+svc.ench.EnhancesSkill.summary,"While worn, raises the chosen skill by 15 points. Bonuses of this kind stack.",src/mod/page/dfo_service_details.js
+svc.ench.EnhancesSkill.formula,Skill = base value + 15 × active enchantments for this skill + other modifiers.,src/mod/page/dfo_service_details.js
+svc.ench.ExtraSpellPts.summary,"Raises maximum mana by 75 while the chosen condition holds: a season, a moon phase or a suitable creature within 18 m.",src/mod/page/dfo_service_details.js
+svc.ench.ExtraSpellPts.formula,Maximum mana = usual maximum + 75 for each active enchantment.,src/mod/page/dfo_service_details.js
+svc.ench.ExtraSpellPts.note,"It is a bonus to the maximum, not an instant restoration of 75 mana.",src/mod/page/dfo_service_details.js
+svc.ench.FeatherWeight.summary,"Sets the weight of a single item to 0.25 kg. It is a fixed weight, not a 25% weight cut.",src/mod/page/dfo_service_details.js
+svc.stat.itemWeight,Weight of one item,src/mod/page/dfo_service_details.js
+svc.value.featherWeight,0.25 kg,src/mod/page/dfo_service_details.js
+svc.ench.ExtraWeight.summary,"When enchanted, makes the item four times heavier.",src/mod/page/dfo_service_details.js
+svc.ench.ExtraWeight.formula,New weight = old weight × 4.,src/mod/page/dfo_service_details.js
+svc.ench.IncreasedWeightAllowance.summary,"While worn, raises carrying capacity by 25% or 50%, depending on the chosen variant.",src/mod/page/dfo_service_details.js
+svc.ench.IncreasedWeightAllowance.one,"While worn, raises carrying capacity by {pct}%.",src/mod/page/dfo_service_details.js
+svc.ench.IncreasedWeightAllowance.formula,Carrying capacity = base × (1 + the largest bonus of this kind).,src/mod/page/dfo_service_details.js
+svc.ench.IncreasedWeightAllowance.note,Several such bonuses do not add up: the largest one is used.,src/mod/page/dfo_service_details.js
+svc.ench.StrengthensArmor.summary,"While worn, improves armor by 5 on the character sheet; the combat armor value drops by 5. Identical sources do not stack.",src/mod/page/dfo_service_details.js
+svc.stat.armorBonus,Armor bonus,src/mod/page/dfo_service_details.js
+svc.ench.WeakensArmor.summary,In the current client this property gives a negative enchantment cost but does not lower combat protection: the positive penalty of +5 does not pass the native minimum rule.,src/mod/page/dfo_service_details.js
+svc.ench.WeakensArmor.formula,"Combat modifier = min(0, +5) = 0.",src/mod/page/dfo_service_details.js
+svc.ench.rep.summary,"While the item is active, your reputation with the chosen group changes by {v}. It is a modifier, not 10 more every round.",src/mod/page/dfo_service_details.js
+svc.ench.damageVs.summary,"On hitting a creature of the chosen group, adds {v} to the damage. These are absolute points, not percentages.",src/mod/page/dfo_service_details.js
+svc.ench.BadReactionsFrom.summary,"If a creature of the chosen group is within 8 m, the wearer's chance to hit drops by 5 points. A separate armor channel of −5 applies at the same time; its repeats do not stack.",src/mod/page/dfo_service_details.js
+svc.ench.BadReactionsFrom.note,To-hit penalties from several sources add up. The armor channel is not the same as Strengthens Armor.,src/mod/page/dfo_service_details.js
+svc.ench.RegensHealth.summary,"While worn, restores a base 1 health every 4 magic rounds: always, in sunlight or in darkness — by the chosen variant.",src/mod/page/dfo_service_details.js
+svc.ench.RegensHealth.formula,"Health after = min(maximum health, health + 1).",src/mod/page/dfo_service_details.js
+svc.ench.RegensHealth.note,World limits on restoration may change the healing you get.,src/mod/page/dfo_service_details.js
+svc.ench.RepairsObjects.summary,"Every 4 magic rounds, repairs one suitable damaged item. Equipped gear comes first, then a wearing equipped item, then the backpack.",src/mod/page/dfo_service_details.js
+svc.ench.RepairsObjects.formula,"Repair of an ordinary item = max(1, round(maximum condition / 50)); a magic item or artifact — 1 point.",src/mod/page/dfo_service_details.js
+svc.ench.RepairsObjects.note,The result never exceeds the maximum condition. Unrepairable items are skipped; repairing magic items depends on the allowed mode.,src/mod/page/dfo_service_details.js
+svc.ench.ItemDeteriorates.summary,"While worn, loses 1 point of condition every 4 magic rounds under the chosen condition: always, in sunlight or in holy places.",src/mod/page/dfo_service_details.js
+svc.stat.wear,Wear,src/mod/page/dfo_service_details.js
+svc.value.wear,−1 / 4 rounds,src/mod/page/dfo_service_details.js
+svc.ench.UserTakesDamage.summary,Deals 1 damage to the wearer every 4 magic rounds while they are in sunlight or in a holy place — by the variant.,src/mod/page/dfo_service_details.js
+svc.ench.VampiricEffect.hit,"On a hit, restores the wearer's health by the hit's damage, up to the maximum. Does not trigger on a protected target.",src/mod/page/dfo_service_details.js
+svc.ench.VampiricEffect.drain,"Every 4 magic rounds, takes 1 health from each suitable enemy within 2.25 m and restores 1 to the wearer for each.",src/mod/page/dfo_service_details.js
+svc.ench.VampiricEffect.both,"Two variants: draining enemies within 2.25 m every 4 rounds, or healing by the damage dealt on a hit.",src/mod/page/dfo_service_details.js
+svc.ench.HealthLeech.use,"When used, takes 16 health from the wearer; on a hit, 8. The time of last use is updated.",src/mod/page/dfo_service_details.js
+svc.ench.HealthLeech.idle,"If the item has not been used for longer than {span}, takes 1 health every 4 magic rounds. Using it or striking with it restarts the count.",src/mod/page/dfo_service_details.js
+svc.ench.HealthLeech.both,"Variants: health loss on use or hit, or 1 every 4 rounds if the item has not been used for a day or a week.",src/mod/page/dfo_service_details.js
+svc.ench.SoulBound.summary,"Uses up a filled soul gem with the chosen soul and raises the available enchantment budget by its value. If the item breaks, the bound creature may be released.",src/mod/page/dfo_service_details.js
+svc.ench.SoulBound.note,Some souls add related properties automatically; they appear in the final list and are removed together with their parent soul.,src/mod/page/dfo_service_details.js
+svc.ench.CastWhenUsed.summary,Casts the chosen ready-made spell when the item is used; costs 10 points of its condition. Target and settings come from the spell itself.,src/mod/page/dfo_service_details.js
+svc.ench.CastWhenUsed.note,A self-targeted spell applies at once; a directed one is first readied for release.,src/mod/page/dfo_service_details.js
+svc.ench.CastWhenStrikes.summary,"On a successful hit that deals damage, applies the chosen ready-made spell to the target and costs 10 points of condition. Does not trigger on a protected target.",src/mod/page/dfo_service_details.js
+svc.ench.CastWhenHeld.summary,"When equipped, applies the chosen ready-made spell. Its settings come from the game's catalog, not from the workshop's number fields.",src/mod/page/dfo_service_details.js
+svc.ench.CastWhenHeld.formula,"Wear in normal play: −1 condition once every 36 magic rounds; while resting, once every 60.",src/mod/page/dfo_service_details.js
+svc.ench.CastWhenHeld.note,"On first equipping: wear = min(the spell's native mana cost, current condition − 1), not below 0. Re-equipping within 6 game hours is free; legendary items do not pay for equipping. Taking it off ends the bound effects.",src/mod/page/dfo_service_details.js
+svc.ench.ImprovesTalents.hearing,Improves Acute Hearing: the enemy audibility multiplier for the talent's owner changes from 1.25 to 1.5.,src/mod/page/dfo_service_details.js
+svc.ench.ImprovesTalents.athleticism,Improves Athleticism only with the matching career trait: another +0.1 to the jump multiplier and stamina use ×0.8 instead of ×0.9. The trait itself gives +0.1 to jumping. Without it the item gives no bonus.,src/mod/page/dfo_service_details.js
+svc.ench.ImprovesTalents.adrenaline,Improves Adrenaline Rush with the matching trait: combat modifier +12 instead of +8.,src/mod/page/dfo_service_details.js
+svc.ench.ImprovesTalents.any,"Improves the chosen talent: Acute Hearing, Athleticism or Adrenaline Rush. The effect depends on the character's matching ability.",src/mod/page/dfo_service_details.js
+svc.stat.freesBudget,Frees budget,src/mod/page/dfo_service_details.js
+svc.stat.enchantCost,Enchantment cost,src/mod/page/dfo_service_details.js
+svc.note.negativeCost,A negative cost lowers the point total; a side effect is not a separate gold payment.,src/mod/page/dfo_service_details.js
+svc.note.positiveCost,A positive cost is added to the point total. The workshop works out the gold from the chosen item and skills.,src/mod/page/dfo_service_details.js
+svc.stat.variant,Chosen variant,src/mod/page/dfo_service_details.js
+svc.attr.0,Strength,src/mod/page/dfo_service_details.js
+svc.attr.1,Intelligence,src/mod/page/dfo_service_details.js
+svc.attr.2,Willpower,src/mod/page/dfo_service_details.js
+svc.attr.3,Agility,src/mod/page/dfo_service_details.js
+svc.attr.4,Endurance,src/mod/page/dfo_service_details.js
+svc.attr.5,Personality,src/mod/page/dfo_service_details.js
+svc.attr.6,Speed,src/mod/page/dfo_service_details.js
+svc.attr.7,Luck,src/mod/page/dfo_service_details.js
+svc.attr.other,an attribute,src/mod/page/dfo_service_details.js
+svc.attr.any,an attribute,src/mod/page/dfo_service_details.js
+svc.vital.0,health,src/mod/page/dfo_service_details.js
+svc.vital.1,stamina,src/mod/page/dfo_service_details.js
+svc.vital.2,mana,src/mod/page/dfo_service_details.js
+svc.vital.other,resource,src/mod/page/dfo_service_details.js
+svc.cure.0,diseases,src/mod/page/dfo_service_details.js
+svc.cure.1,poisons,src/mod/page/dfo_service_details.js
+svc.cure.2,paralysis,src/mod/page/dfo_service_details.js
+svc.cure.other,the matching condition,src/mod/page/dfo_service_details.js
+svc.heal.attr,damaged {attr},src/mod/page/dfo_service_details.js
+svc.heal.attrAny,a damaged attribute,src/mod/page/dfo_service_details.js
+svc.heal.health,health,src/mod/page/dfo_service_details.js
+svc.heal.stamina,stamina,src/mod/page/dfo_service_details.js
+svc.transfer.attr,{attr},src/mod/page/dfo_service_details.js
+svc.transfer.attrAny,an attribute,src/mod/page/dfo_service_details.js
+svc.dispel.0,dispels magical effects,src/mod/page/dfo_service_details.js
+svc.dispel.1,banishes suitable undead,src/mod/page/dfo_service_details.js
+svc.dispel.2,banishes a suitable daedra,src/mod/page/dfo_service_details.js
+svc.dispel.other,dispels magic or banishes creatures of the chosen group,src/mod/page/dfo_service_details.js
+svc.detect.0,magical objects,src/mod/page/dfo_service_details.js
+svc.detect.1,enemies,src/mod/page/dfo_service_details.js
+svc.detect.2,treasure,src/mod/page/dfo_service_details.js
+svc.detect.other,the chosen objects,src/mod/page/dfo_service_details.js
+svc.conceal.both,The normal variant breaks on a hostile action; the true one stays.,src/mod/page/dfo_service_details.js
+svc.conceal.normal,The normal variant breaks on a hostile action.,src/mod/page/dfo_service_details.js
+svc.conceal.true,The true variant is not removed by an ordinary hostile action.,src/mod/page/dfo_service_details.js
+svc.drain.attr,Lowers {attr} of the target by M and heals damage to the same attribute in the caster. It does not raise a healthy attribute above its base value.,src/mod/page/dfo_service_details.js
+svc.stat.duration,Base duration,src/mod/page/dfo_service_details.js
+svc.value.rounds,{n} {n:round|rounds},src/mod/page/dfo_service_details.js
+svc.value.gameMinutes,{n} game min.,src/mod/page/dfo_service_details.js
+svc.rand,Rand,src/mod/page/dfo_service_details.js
+svc.stat.absorbAt,Absorption at recipient level {level},src/mod/page/dfo_service_details.js
+svc.stat.chanceAt,Base chance at level {level},src/mod/page/dfo_service_details.js
+svc.span.day,1 game day,src/mod/page/dfo_service_details.js
+svc.span.week,7 game days,src/mod/page/dfo_service_details.js
+svc.value.points,{n} pts,src/mod/page/dfo_service_details.js
+svc.editorTitle,Effect · level {level},src/mod/page/dfo_service_details.js
+svc.costRange,Variant cost: {range} enchantment pts.,src/mod/page/dfo_service_details.js
+svc.formulas,Calculation from the settings,src/mod/page/dfo_services.js
+svc.pick.enchant,Choose an enchantment,src/mod/page/dfo_services.js
+svc.pick.spellEffect,Choose a spell effect,src/mod/page/dfo_services.js
+svc.pick.effect,Choose an effect,src/mod/page/dfo_services.js
+svc.variants,Variants,src/mod/page/dfo_services.js
+svc.pick.note,"Choose a group, then a particular variant. Numbers are set in the next window; they are not set here yet.",src/mod/page/dfo_services.js
+svc.pick.describe,Effect description,src/mod/page/dfo_services.js
+svc.pick.startSettings,The new effect's starting settings are shown. You can change them in the next window.,src/mod/page/dfo_services.js
+svc.pick.spellLoading,The chosen spell's numbers will appear once the client loads its data.,src/mod/page/dfo_services.js

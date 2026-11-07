@@ -1,0 +1,27 @@
+key,text,note
+report.title,"DFO Mod {version} - Overworld marks, {when}",src/mod/hook.cjs
+report.sources,"game sources: town buildings {a}, towns by pixel {b}, town book {c}, discovered buildings {d}",src/mod/hook.cjs
+report.yes,yes,src/mod/hook.cjs
+report.NO,NO,src/mod/hook.cjs
+report.formula,"the game's buying formula: shop index {a}, CalculateCost {b}, haggling {c}, player skills {d}",src/mod/hook.cjs
+report.percent,"percentages: the share of the base value the shop pays; ""base"" - the same for everyone (no guild, Mercantile 0, Personality 50), ""mine"" - with your skills and guild",src/mod/hook.cjs
+report.settings,"settings: visited only {visited}, radius {radius} m, labels {labels} m, at most {max}",src/mod/hook.cjs
+report.made,marks sent to the screen: {n},src/mod/hook.cjs
+report.error,ERROR: {error},src/mod/hook.cjs
+report.noTowns,no towns within the radius.,src/mod/hook.cjs
+report.town,Town: {town}   book: {book}   way: {path}   to the center: {m} m,src/mod/hook.cjs
+report.discovered,  discovered buildings in the book: {n} (taverns/shops/organizations among them: {ours}),src/mod/hook.cjs
+report.candidates,"  candidates: {n}, marked: {marked}, beyond the radius: {beyond}, no ground under them: {noGround}",src/mod/hook.cjs
+report.price,"   quality {q}, buys at {base}% base{mine}",src/mod/hook.cjs
+report.mark,    {group} (type {type}): {name} - {m} m{price},src/mod/hook.cjs
+report.markShort,    {group} (type {type}): {name} - {m} m,src/mod/hook.cjs
+report.unplaced,  discovered but not found in the town's layout: {list},src/mod/hook.cjs
+store.method,The method is not supported.,src/mod/hook.cjs
+store.tooLarge,The preset is too large.,src/mod/hook.cjs
+store.badJson,Malformed JSON.,src/mod/hook.cjs
+store.badSettings,Malformed settings.,src/mod/hook.cjs
+report.no,no,src/mod/hook.cjs
+report.priceMine,", mine {pct}%",src/mod/hook.cjs
+report.group.t,tavern,marks report
+report.group.s,shop,marks report
+report.group.o,organization,marks report

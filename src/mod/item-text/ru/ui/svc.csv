@@ -1,0 +1,203 @@
+key,text,note
+svc.mechanic.0,Парализует цель: она не может двигаться и атаковать. Сам по себе паралич не запрещает произносить заклинания; иммунитет к параличу блокирует действие.,src/mod/page/dfo_service_details.js
+svc.mechanic.1,Каждый магический раунд уменьшает запас {vital}. Величина бросается заново каждый раунд; первая проверка происходит сразу при наложении.,src/mod/page/dfo_service_details.js
+svc.mechanic.2,Создаёт временный предмет. Его существование ограничено длительностью эффекта; это не постоянная добыча.,src/mod/page/dfo_service_details.js
+svc.mechanic.3,При успешной проверке снимает {cure}. Величина и длительность не используются.,src/mod/page/dfo_service_details.js
+svc.mechanic.4,Однократно уменьшает запас {vital}. Базовая величина задаётся двумя независимыми целочисленными бросками.,src/mod/page/dfo_service_details.js
+svc.mechanic.5,При успешной проверке уничтожает подходящую цель. Защита и иммунитеты цели остаются в силе; это не гарантированное убийство.,src/mod/page/dfo_service_details.js
+svc.mechanic.6,При успешной проверке {dispel}.,src/mod/page/dfo_service_details.js
+svc.mechanic.7,Снижает значение {attr} на величину M. Потерянную характеристику восстанавливают соответствующим лечением; таймер длительности здесь не задаётся.,src/mod/page/dfo_service_details.js
+svc.mechanic.8,Даёт сопротивление выбранной стихии. Шанс эффекта участвует в защите от соответствующего воздействия; это не постоянное процентное уменьшение любого урона.,src/mod/page/dfo_service_details.js
+svc.mechanic.9,Временно повышает значение {attr} на M. При окончании эффекта прибавка снимается.,src/mod/page/dfo_service_details.js
+svc.mechanic.10,"Восстанавливает {heal} на величину M, не превращая восстановление в постоянную прибавку сверх допустимого максимума.",src/mod/page/dfo_service_details.js
+svc.mechanic.11,Применяет к цели и заклинателю передачу {transfer}; точное действие зависит от выбранного ресурса.,src/mod/page/dfo_service_details.js
+svc.mechanic.12,"Накладывает ловушку душ на подходящего монстра. Душа захватывается при его гибели, если есть доступный пустой камень; смерть монстра сама по себе не гарантирует захват.",src/mod/page/dfo_service_details.js
+svc.mechanic.13,Делает персонажа невидимым. {conceal},src/mod/page/dfo_service_details.js
+svc.mechanic.14,Позволяет подниматься и спускаться в воздухе на время действия. Величина урона и отдельная вероятность не задаются.,src/mod/page/dfo_service_details.js
+svc.mechanic.15,Создаёт магическое освещение вокруг персонажа на время действия.,src/mod/page/dfo_service_details.js
+svc.mechanic.16,"При успешной проверке подготавливает магическое запирание. Эффект срабатывает при взаимодействии с подходящей дверью, а не в момент произнесения.",src/mod/page/dfo_service_details.js
+svc.mechanic.17,При успешной проверке подготавливает магическое открытие. Затем нужно взаимодействовать с дверью; результат также зависит от замка и уровня персонажа.,src/mod/page/dfo_service_details.js
+svc.mechanic.18,Восстанавливает здоровье каждый магический раунд. Величина бросается заново на каждом срабатывании; первый раунд выполняется сразу.,src/mod/page/dfo_service_details.js
+svc.mechanic.19,"Запрещает цели произносить заклинания, пока действует молчание. Успех наложения и сопротивление цели проверяются отдельно.",src/mod/page/dfo_service_details.js
+svc.mechanic.20,Даёт шанс поглотить эффект школы Разрушения и вернуть его стоимость в ману. Нужен свободный объём в запасе маны; восстановление не превышает рассчитанную стоимость эффекта.,src/mod/page/dfo_service_details.js
+svc.mechanic.21,"Даёт шанс отразить входящее заклинание. Это проверка отражения, а не прибавка к броне или уменьшение урона на указанное число процентов.",src/mod/page/dfo_service_details.js
+svc.mechanic.22,"Даёт дополнительную проверку сопротивления входящему заклинанию. Указанное число — вероятность проверки, а не гарантированное снижение урона.",src/mod/page/dfo_service_details.js
+svc.mechanic.23,"Маскирует персонажа, затрудняя обнаружение. {conceal}",src/mod/page/dfo_service_details.js
+svc.mechanic.24,Скрывает персонажа в тени. Действие зависит от освещения. {conceal},src/mod/page/dfo_service_details.js
+svc.mechanic.25,"Замедляет падение и снижает связанные с ним последствия, пока эффект активен. Не создаёт опору в воздухе.",src/mod/page/dfo_service_details.js
+svc.mechanic.26,Снимает действующий паралич и защищает от новых параличей на время действия.,src/mod/page/dfo_service_details.js
+svc.mechanic.27,"Усиливает прыжок: к множителю скорости отрыва добавляется 0,6. Даёт управление в воздухе на время действия; это не +60% к итоговой высоте прыжка.",src/mod/page/dfo_service_details.js
+svc.mechanic.28,"Улучшает возможности скалолазания на время действия. Это состояние усиленного лазания, а не прибавка величины M к навыку.",src/mod/page/dfo_service_details.js
+svc.mechanic.29,Меняет форму персонажа. Этот эффект не предлагается для самостоятельного создания в мастерской.,src/mod/page/dfo_service_details.js
+svc.mechanic.30,Позволяет дышать под водой на время действия. Не восстанавливает здоровье и не снимает прочие источники урона.,src/mod/page/dfo_service_details.js
+svc.mechanic.31,Позволяет перемещаться по поверхности воды на время действия.,src/mod/page/dfo_service_details.js
+svc.mechanic.33,При успешной проверке успокаивает существ выбранной группы. На существа другой группы не действует; дальнейшая агрессия может нарушить мир.,src/mod/page/dfo_service_details.js
+svc.mechanic.34,Улучшает возможность мирного взаимодействия с целью через проверку очарования. Это не прямой контроль её передвижения.,src/mod/page/dfo_service_details.js
+svc.mechanic.35,Создаёт щит с запасом поглощения M. Щит заканчивается при исчерпании запаса либо длительности; число M не является бонусом брони.,src/mod/page/dfo_service_details.js
+svc.mechanic.39,"Позволяет обнаруживать {detect} на время действия. Видимость, дальность и доступные объекты определяет игровой детектор.",src/mod/page/dfo_service_details.js
+svc.mechanic.40,При успешной проверке опознаёт предмет. Это не создание нового предмета и не изменение его скрытых свойств.,src/mod/page/dfo_service_details.js
+svc.mechanic.43,Ставит якорь либо возвращает к ранее поставленному якорю. Учитываются штатные запреты телепортации и наличие точки возврата.,src/mod/page/dfo_service_details.js
+svc.mechanic.44,Позволяет понимать языки и участвует в проверках мирного взаимодействия с соответствующими существами. Длительность и вероятность задаются отдельно.,src/mod/page/dfo_service_details.js
+svc.mechanic.45,Воскрешает павшего участника группы у его тела с 30% максимального здоровья. Это готовое заклинание; мастерская не предлагает его создание.,src/mod/page/dfo_service_details.js
+svc.mechanic.46,"Пока эффект активен, разведанные вами участки карты данжа передаются участникам группы в том же данже. Между разными данжами карта не передаётся.",src/mod/page/dfo_service_details.js
+svc.drain.health,"Наносит цели M урона и восстанавливает заклинателю M здоровья, не выше его максимума. Восстановление вызывается на рассчитанную величину, а не на остаток здоровья врага.",src/mod/page/dfo_service_details.js
+svc.drain.stamina,Уменьшает запас сил цели и восстанавливает запас сил заклинателя на M × 64 внутренних единиц. Каждая сторона ограничена своим диапазоном запаса сил.,src/mod/page/dfo_service_details.js
+svc.note.round,1 магический раунд = 1 игровая минута. Первый раунд выполняется при наложении; скорость мира влияет на реальное время.,src/mod/page/dfo_service_details.js
+svc.stat.itemLife,Срок созданной вещи,src/mod/page/dfo_service_details.js
+svc.formula.itemLife,"Срок вещи = max(0, D − 1): начальный раунд уже израсходован до выбора предмета.",src/mod/page/dfo_service_details.js
+svc.stat.durationNone,Длительность,src/mod/page/dfo_service_details.js
+svc.duration.door,До взаимодействия с дверью,src/mod/page/dfo_service_details.js
+svc.duration.attr,До восстановления характеристики,src/mod/page/dfo_service_details.js
+svc.duration.instant,Мгновенное действие,src/mod/page/dfo_service_details.js
+svc.stat.shield,Запас щита,src/mod/page/dfo_service_details.js
+svc.stat.restore,Базовое восстановление,src/mod/page/dfo_service_details.js
+svc.stat.magnitude,Базовая величина,src/mod/page/dfo_service_details.js
+svc.formula.absorbCap,предел поглощения — 50%.,src/mod/page/dfo_service_details.js
+svc.formula.chanceCap,вероятность ограничена 0–100%.,src/mod/page/dfo_service_details.js
+svc.note.notation,"⌊x⌋ — округление вниз; Случ[a; b] — отдельный целочисленный бросок, включая границы.",src/mod/page/dfo_service_details.js
+svc.note.stamina64,Внутренний запас сил изменяется на M × 64; величина M задана в классических единицах эффекта.,src/mod/page/dfo_service_details.js
+svc.note.absorbLevel,"Для поглощения используется уровень ПОЛУЧАТЕЛЯ эффекта при входящем ударе, а не сохранённый уровень заклинателя. Проверяются школа Разрушения и свободная мана.",src/mod/page/dfo_service_details.js
+svc.note.soulTrap,Шанс ловушки проверяется при гибели монстра. Само наложение ловушки не расходует эту проверку; на людей и обычных NPC ловушка не действует.,src/mod/page/dfo_service_details.js
+svc.note.dispelMagic,"Выбирается целая связка действующих чар персонажа, включая чары надетой вещи. Отмена выбора не возвращает потраченную ману.",src/mod/page/dfo_service_details.js
+svc.note.banish,Шанс проверяется отдельно для каждого подходящего существа рядом. Изгнанный враг исчезает без добычи и без зачёта убийства для задания.,src/mod/page/dfo_service_details.js
+svc.note.resist,C — шанс полностью отклонить воздействие выбранной стихии до обычного спасброска. При наложении на себя отдельного броска C нет.,src/mod/page/dfo_service_details.js
+svc.note.calm,Однократное успокоение сохраняется до нападения игрока. Длительность в мастерской для этого эффекта не задаётся.,src/mod/page/dfo_service_details.js
+svc.note.cureOrder,"Если вместе с инфекцией вампиризма или ликантропии есть обычная болезнь, сначала снимаются обычные болезни. При отсутствии обычных болезней лечение может снять инфекцию.",src/mod/page/dfo_service_details.js
+svc.note.base,Показаны базовые числа. При применении не на себя сопротивление цели изменяет M; навыки школы свыше 100 и действующие усиления могут изменить итог.,src/mod/page/dfo_service_details.js
+svc.enchant.AbsorbsSpells,Поглощение заклинаний,src/mod/page/dfo_service_details.js
+svc.enchant.BadReactionsFrom,Неприязнь существ,src/mod/page/dfo_service_details.js
+svc.enchant.BadRepWith,Плохая репутация,src/mod/page/dfo_service_details.js
+svc.enchant.CastWhenHeld,Заклинание при ношении,src/mod/page/dfo_service_details.js
+svc.enchant.CastWhenStrikes,Заклинание при попадании,src/mod/page/dfo_service_details.js
+svc.enchant.CastWhenUsed,Заклинание при использовании,src/mod/page/dfo_service_details.js
+svc.enchant.ExtraSpellPts,Дополнительная мана,src/mod/page/dfo_service_details.js
+svc.enchant.ExtraWeight,Увеличенный вес,src/mod/page/dfo_service_details.js
+svc.enchant.FeatherWeight,Невесомость,src/mod/page/dfo_service_details.js
+svc.enchant.GoodRepWith,Хорошая репутация,src/mod/page/dfo_service_details.js
+svc.enchant.HealthLeech,Потеря здоровья,src/mod/page/dfo_service_details.js
+svc.enchant.ImprovesTalents,Улучшение талантов,src/mod/page/dfo_service_details.js
+svc.enchant.IncreasedWeightAllowance,Грузоподъёмность,src/mod/page/dfo_service_details.js
+svc.enchant.ItemDeteriorates,Изнашивание предмета,src/mod/page/dfo_service_details.js
+svc.enchant.LowDamageVs,Слабость против существ,src/mod/page/dfo_service_details.js
+svc.enchant.PotentVs,Сила против существ,src/mod/page/dfo_service_details.js
+svc.enchant.RegensHealth,Регенерация здоровья,src/mod/page/dfo_service_details.js
+svc.enchant.RepairsObjects,Ремонт предметов,src/mod/page/dfo_service_details.js
+svc.enchant.SoulBound,Связанная душа,src/mod/page/dfo_service_details.js
+svc.enchant.StrengthensArmor,Усиление брони,src/mod/page/dfo_service_details.js
+svc.enchant.UserTakesDamage,Урон владельцу,src/mod/page/dfo_service_details.js
+svc.enchant.VampiricEffect,Вампиризм,src/mod/page/dfo_service_details.js
+svc.enchant.WeakensArmor,Ослабление брони,src/mod/page/dfo_service_details.js
+svc.enchant.EnhancesSkill,Усиление навыка,src/mod/page/dfo_service_details.js
+svc.ench.AbsorbsSpells.summary,"При ношении даёт 50% шанс поглотить эффект школы Разрушения. Поглощение возвращает рассчитанную стоимость эффекта в ману, только если для неё есть место.",src/mod/page/dfo_service_details.js
+svc.ench.AbsorbsSpells.formula,"Мана после = min(максимум маны, текущая мана + стоимость поглощённого эффекта).",src/mod/page/dfo_service_details.js
+svc.ench.EnhancesSkill.summary,При ношении повышает выбранный навык на 15 пунктов. Прибавки этого типа складываются.,src/mod/page/dfo_service_details.js
+svc.ench.EnhancesSkill.formula,Навык = базовое значение + 15 × число действующих зачарований для этого навыка + прочие модификаторы.,src/mod/page/dfo_service_details.js
+svc.ench.ExtraSpellPts.summary,"Увеличивает максимум маны на 75, пока выполняется выбранное условие: сезон, фаза луны или наличие подходящего существа в радиусе 18 м.",src/mod/page/dfo_service_details.js
+svc.ench.ExtraSpellPts.formula,Максимум маны = обычный максимум + 75 за каждое действующее зачарование.,src/mod/page/dfo_service_details.js
+svc.ench.ExtraSpellPts.note,"Это прибавка к максимуму, а не мгновенное восстановление 75 маны.",src/mod/page/dfo_service_details.js
+svc.ench.FeatherWeight.summary,"Устанавливает вес одной вещи равным 0,25 кг. Это фиксированный вес, а не снижение веса на 25%.",src/mod/page/dfo_service_details.js
+svc.stat.itemWeight,Вес одной вещи,src/mod/page/dfo_service_details.js
+svc.value.featherWeight,"0,25 кг",src/mod/page/dfo_service_details.js
+svc.ench.ExtraWeight.summary,При зачаровании увеличивает вес предмета в 4 раза.,src/mod/page/dfo_service_details.js
+svc.ench.ExtraWeight.formula,Новый вес = прежний вес × 4.,src/mod/page/dfo_service_details.js
+svc.ench.IncreasedWeightAllowance.summary,"При ношении увеличивает грузоподъёмность на 25% или 50%, по выбранному варианту.",src/mod/page/dfo_service_details.js
+svc.ench.IncreasedWeightAllowance.one,При ношении увеличивает грузоподъёмность на {pct}%.,src/mod/page/dfo_service_details.js
+svc.ench.IncreasedWeightAllowance.formula,Грузоподъёмность = базовая × (1 + наибольший бонус этого типа).,src/mod/page/dfo_service_details.js
+svc.ench.IncreasedWeightAllowance.note,Несколько таких бонусов не суммируются: используется наибольший.,src/mod/page/dfo_service_details.js
+svc.ench.StrengthensArmor.summary,При ношении улучшает броню на 5 в отображении персонажа; боевое значение брони уменьшается на 5. Одинаковые источники не складываются.,src/mod/page/dfo_service_details.js
+svc.stat.armorBonus,Бонус брони,src/mod/page/dfo_service_details.js
+svc.ench.WeakensArmor.summary,"В текущем клиенте это свойство даёт отрицательную стоимость зачарования, но не снижает боевую защиту: положительный штраф +5 не проходит штатное правило минимума.",src/mod/page/dfo_service_details.js
+svc.ench.WeakensArmor.formula,"Боевой модификатор = min(0, +5) = 0.",src/mod/page/dfo_service_details.js
+svc.ench.rep.summary,"Пока предмет действует, репутация у выбранной группы изменяется на {v}. Это модификатор, а не накопление по 10 каждый раунд.",src/mod/page/dfo_service_details.js
+svc.ench.damageVs.summary,"При попадании по существу выбранной группы прибавляет к урону {v}. Это абсолютные пункты, а не проценты.",src/mod/page/dfo_service_details.js
+svc.ench.BadReactionsFrom.summary,"Если существо выбранной группы находится в радиусе 8 м, шанс попадания владельца снижается на 5 пунктов. Одновременно применяется отдельный канал брони −5; его повторы не складываются.",src/mod/page/dfo_service_details.js
+svc.ench.BadReactionsFrom.note,Штраф к попаданию от нескольких источников складывается. Канал брони отличается от «Усиления брони».,src/mod/page/dfo_service_details.js
+svc.ench.RegensHealth.summary,"При ношении восстанавливает базово 1 здоровье каждые 4 магических раунда: всегда, на солнечном свету или в темноте — по выбранному варианту.",src/mod/page/dfo_service_details.js
+svc.ench.RegensHealth.formula,"Здоровье после = min(максимум здоровья, здоровье + 1).",src/mod/page/dfo_service_details.js
+svc.ench.RegensHealth.note,Мировые ограничения восстановления могут изменить получаемое лечение.,src/mod/page/dfo_service_details.js
+svc.ench.RepairsObjects.summary,"Каждые 4 магических раунда чинит один подходящий повреждённый предмет. Сначала выбирается надетая экипировка, затем изнашивающаяся надетая вещь, затем рюкзак.",src/mod/page/dfo_service_details.js
+svc.ench.RepairsObjects.formula,"Ремонт обычной вещи = max(1, round(максимальная прочность / 50)); магический предмет или артефакт — 1 единица.",src/mod/page/dfo_service_details.js
+svc.ench.RepairsObjects.note,Итог не превышает максимальную прочность. Неремонтируемые вещи пропускаются; ремонт магических вещей зависит от разрешённого режима.,src/mod/page/dfo_service_details.js
+svc.ench.ItemDeteriorates.summary,"При ношении теряет 1 единицу прочности каждые 4 магических раунда при выбранном условии: всегда, на солнечном свету или в святых местах.",src/mod/page/dfo_service_details.js
+svc.stat.wear,Износ,src/mod/page/dfo_service_details.js
+svc.value.wear,−1 / 4 раунда,src/mod/page/dfo_service_details.js
+svc.ench.UserTakesDamage.summary,"Наносит владельцу 1 урон каждые 4 магических раунда, если он находится на солнечном свету или в святом месте — по варианту.",src/mod/page/dfo_service_details.js
+svc.ench.VampiricEffect.hit,"При попадании восстанавливает владельцу здоровье на величину урона удара, не выше максимума. По защищённой цели не срабатывает.",src/mod/page/dfo_service_details.js
+svc.ench.VampiricEffect.drain,"Каждые 4 магических раунда отнимает 1 здоровье у каждого подходящего врага в радиусе 2,25 м и восстанавливает владельцу по 1 за каждого.",src/mod/page/dfo_service_details.js
+svc.ench.VampiricEffect.both,"Два варианта: высасывание у врагов в радиусе 2,25 м каждые 4 раунда либо лечение на величину урона при попадании.",src/mod/page/dfo_service_details.js
+svc.ench.HealthLeech.use,При использовании отнимает у владельца 16 здоровья; при ударе — 8. Время последнего использования обновляется.,src/mod/page/dfo_service_details.js
+svc.ench.HealthLeech.idle,"Если предмет не использовался дольше {span}, отнимает 1 здоровье каждые 4 магических раунда. Использование или удар обновляет отсчёт.",src/mod/page/dfo_service_details.js
+svc.ench.HealthLeech.both,"Варианты: потеря здоровья при использовании/ударе либо по 1 каждые 4 раунда, если вещью не пользовались сутки или неделю.",src/mod/page/dfo_service_details.js
+svc.ench.SoulBound.summary,Расходует заполненный камень с выбранной душой и увеличивает доступный бюджет зачарования на её стоимость. При поломке предмета связанное существо может быть выпущено.,src/mod/page/dfo_service_details.js
+svc.ench.SoulBound.note,Некоторые души автоматически добавляют сопутствующие свойства; они отображаются в итоговом списке и удаляются вместе с родительской душой.,src/mod/page/dfo_service_details.js
+svc.ench.CastWhenUsed.summary,Запускает выбранное готовое заклинание при использовании предмета; расходует 10 единиц его прочности. Цель и параметры берутся из самого заклинания.,src/mod/page/dfo_service_details.js
+svc.ench.CastWhenUsed.note,Самонаправленное заклинание применяется сразу; направленное сначала подготавливается к выпуску.,src/mod/page/dfo_service_details.js
+svc.ench.CastWhenStrikes.summary,При успешном ударе с ненулевым уроном применяет выбранное готовое заклинание к цели и расходует 10 единиц прочности. По защищённой цели не срабатывает.,src/mod/page/dfo_service_details.js
+svc.ench.CastWhenHeld.summary,"При надевании применяет выбранное готовое заклинание. Его параметры берутся из игрового каталога, а не из числовых полей мастерской.",src/mod/page/dfo_service_details.js
+svc.ench.CastWhenHeld.formula,Износ при обычной игре: −1 прочности раз в 36 магических раундов; при отдыхе — раз в 60.,src/mod/page/dfo_service_details.js
+svc.ench.CastWhenHeld.note,"При первом надевании: износ = min(штатная цена заклинания в мане, текущая прочность − 1), не ниже 0. Повторное надевание в течение 6 игровых часов бесплатно; легендарные вещи не оплачивают надевание. Снятие прекращает связанные эффекты.",src/mod/page/dfo_service_details.js
+svc.ench.ImprovesTalents.hearing,"Улучшает острый слух: множитель слышимости врагов для обладателя таланта меняется с 1,25 на 1,5.",src/mod/page/dfo_service_details.js
+svc.ench.ImprovesTalents.athleticism,"Улучшает атлетизм только при наличии соответствующей особенности карьеры: ещё +0,1 к множителю прыжка и расход запаса сил ×0,8 вместо ×0,9. Сама особенность даёт +0,1 к прыжку. Без неё предмет не даёт этот бонус.",src/mod/page/dfo_service_details.js
+svc.ench.ImprovesTalents.adrenaline,Улучшает прилив адреналина при наличии соответствующей особенности: боевой модификатор +12 вместо +8.,src/mod/page/dfo_service_details.js
+svc.ench.ImprovesTalents.any,"Улучшает выбранный талант: острый слух, атлетизм или прилив адреналина. Эффект зависит от соответствующей способности персонажа.",src/mod/page/dfo_service_details.js
+svc.stat.freesBudget,Освобождает бюджет,src/mod/page/dfo_service_details.js
+svc.stat.enchantCost,Стоимость зачарования,src/mod/page/dfo_service_details.js
+svc.note.negativeCost,Отрицательная стоимость уменьшает сумму очков; недостаток не является отдельной платой золотом.,src/mod/page/dfo_service_details.js
+svc.note.positiveCost,Положительная стоимость входит в общую сумму очков. Золото рассчитывает мастерская по выбранному предмету и навыкам.,src/mod/page/dfo_service_details.js
+svc.stat.variant,Выбранный вариант,src/mod/page/dfo_service_details.js
+svc.attr.0,силы,src/mod/page/dfo_service_details.js
+svc.attr.1,интеллекта,src/mod/page/dfo_service_details.js
+svc.attr.2,силы воли,src/mod/page/dfo_service_details.js
+svc.attr.3,ловкости,src/mod/page/dfo_service_details.js
+svc.attr.4,выносливости,src/mod/page/dfo_service_details.js
+svc.attr.5,обаяния,src/mod/page/dfo_service_details.js
+svc.attr.6,скорости,src/mod/page/dfo_service_details.js
+svc.attr.7,удачи,src/mod/page/dfo_service_details.js
+svc.attr.other,характеристики,src/mod/page/dfo_service_details.js
+svc.attr.any,характеристику,src/mod/page/dfo_service_details.js
+svc.vital.0,здоровья,src/mod/page/dfo_service_details.js
+svc.vital.1,сил,src/mod/page/dfo_service_details.js
+svc.vital.2,маны,src/mod/page/dfo_service_details.js
+svc.vital.other,ресурса,src/mod/page/dfo_service_details.js
+svc.cure.0,болезни,src/mod/page/dfo_service_details.js
+svc.cure.1,яды,src/mod/page/dfo_service_details.js
+svc.cure.2,паралич,src/mod/page/dfo_service_details.js
+svc.cure.other,соответствующее состояние,src/mod/page/dfo_service_details.js
+svc.heal.attr,повреждённое значение {attr},src/mod/page/dfo_service_details.js
+svc.heal.attrAny,повреждённое значение характеристики,src/mod/page/dfo_service_details.js
+svc.heal.health,здоровье,src/mod/page/dfo_service_details.js
+svc.heal.stamina,запас сил,src/mod/page/dfo_service_details.js
+svc.transfer.attr,значение {attr},src/mod/page/dfo_service_details.js
+svc.transfer.attrAny,значение характеристики,src/mod/page/dfo_service_details.js
+svc.dispel.0,рассеивает магические эффекты,src/mod/page/dfo_service_details.js
+svc.dispel.1,изгоняет подходящую нежить,src/mod/page/dfo_service_details.js
+svc.dispel.2,изгоняет подходящего даэдра,src/mod/page/dfo_service_details.js
+svc.dispel.other,рассеивает магию или изгоняет существ выбранной группы,src/mod/page/dfo_service_details.js
+svc.detect.0,магические объекты,src/mod/page/dfo_service_details.js
+svc.detect.1,врагов,src/mod/page/dfo_service_details.js
+svc.detect.2,сокровища,src/mod/page/dfo_service_details.js
+svc.detect.other,выбранные объекты,src/mod/page/dfo_service_details.js
+svc.conceal.both,Обычный вариант прерывается враждебным действием; истинный сохраняется.,src/mod/page/dfo_service_details.js
+svc.conceal.normal,Обычный вариант прерывается враждебным действием.,src/mod/page/dfo_service_details.js
+svc.conceal.true,Истинный вариант не снимается обычным враждебным действием.,src/mod/page/dfo_service_details.js
+svc.drain.attr,Снижает {attr} цели на M и лечит повреждение той же характеристики у заклинателя. Не повышает здоровую характеристику сверх базового значения.,src/mod/page/dfo_service_details.js
+svc.stat.duration,Базовая длительность,src/mod/page/dfo_service_details.js
+svc.value.rounds,{n} раунд.,src/mod/page/dfo_service_details.js
+svc.value.gameMinutes,{n} игр. мин.,src/mod/page/dfo_service_details.js
+svc.rand,Случ,src/mod/page/dfo_service_details.js
+svc.stat.absorbAt,Поглощение при уровне получателя {level},src/mod/page/dfo_service_details.js
+svc.stat.chanceAt,Базовый шанс при уровне {level},src/mod/page/dfo_service_details.js
+svc.span.day,1 игровых суток,src/mod/page/dfo_service_details.js
+svc.span.week,7 игровых суток,src/mod/page/dfo_service_details.js
+svc.value.points,{n} очк.,src/mod/page/dfo_service_details.js
+svc.editorTitle,Действие эффекта · уровень {level},src/mod/page/dfo_service_details.js
+svc.costRange,Стоимость вариантов: {range} очк. зачарования.,src/mod/page/dfo_service_details.js
+svc.formulas,Расчёт по параметрам,src/mod/page/dfo_services.js
+svc.pick.enchant,Выбор зачарования,src/mod/page/dfo_services.js
+svc.pick.spellEffect,Выбор эффекта заклинания,src/mod/page/dfo_services.js
+svc.pick.effect,Выбор эффекта,src/mod/page/dfo_services.js
+svc.variants,Варианты,src/mod/page/dfo_services.js
+svc.pick.note,"Выберите группу, затем конкретный вариант. Числовые параметры задаются в следующем окне; здесь они ещё не настроены.",src/mod/page/dfo_services.js
+svc.pick.describe,Описание эффекта,src/mod/page/dfo_services.js
+svc.pick.startSettings,Показаны начальные параметры нового эффекта. Их можно изменить в следующем окне.,src/mod/page/dfo_services.js
+svc.pick.spellLoading,Числовые параметры выбранного заклинания появятся после загрузки его данных клиентом.,src/mod/page/dfo_services.js

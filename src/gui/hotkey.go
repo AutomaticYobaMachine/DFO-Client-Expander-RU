@@ -30,15 +30,15 @@ func resolveDungeonKey(st *gameStatus) string {
 
 var simpleLootKey = regexp.MustCompile(`^(Key[A-Z]|Digit[0-9]|F([1-9]|1[0-9]|2[0-4])|Numpad[0-9]|Mouse[345])$`)
 var lootKeyNames = map[string]string{
-	"Space": "Пробел", "Tab": "Tab", "Enter": "Enter", "Backspace": "Backspace",
+	"Tab": "Tab", "Enter": "Enter", "Backspace": "Backspace",
 	"Insert": "Insert", "Delete": "Delete", "Home": "Home", "End": "End",
 	"PageUp": "Page Up", "PageDown": "Page Down", "ArrowUp": "↑", "ArrowDown": "↓",
 	"ArrowLeft": "←", "ArrowRight": "→", "CapsLock": "Caps Lock", "NumLock": "Num Lock",
 	"ScrollLock": "Scroll Lock", "Pause": "Pause", "PrintScreen": "Print Screen",
 	"Backquote": "`", "Minus": "−", "Equal": "=", "BracketLeft": "[", "BracketRight": "]",
 	"Backslash": "\\", "Semicolon": ";", "Quote": "'", "Comma": ",", "Period": ".", "Slash": "/",
-	"IntlBackslash": "\\ (ISO)", "ContextMenu": "Меню",
-	"NumpadEnter": "NumPad Enter", "NumpadAdd": "NumPad +", "NumpadSubtract": "NumPad −",
+	"IntlBackslash": "\\ (ISO)",
+	"NumpadEnter":   "NumPad Enter", "NumpadAdd": "NumPad +", "NumpadSubtract": "NumPad −",
 	"NumpadMultiply": "NumPad ×", "NumpadDivide": "NumPad /", "NumpadDecimal": "NumPad .",
 	"NumpadComma": "NumPad ,", "NumpadEqual": "NumPad =",
 }
@@ -77,30 +77,36 @@ func configuredLootKey(raw json.RawMessage) string {
 }
 
 func lootKeyLabel(code string) string {
+	switch code {
+	case "Space":
+		return T("installer.key.space")
+	case "ContextMenu":
+		return T("installer.key.menu")
+	}
 	if name, ok := lootKeyNames[code]; ok {
 		return name
 	}
 	if !simpleLootKey.MatchString(code) {
-		return "Другая клавиша"
+		return T("installer.key.other")
 	}
 	if strings.HasPrefix(code, "Numpad") {
 		return "NumPad " + strings.TrimPrefix(code, "Numpad")
 	}
 	if strings.HasPrefix(code, "Mouse") {
-		return "Мышь " + strings.TrimPrefix(code, "Mouse")
+		return T("installer.key.mouse", "n", strings.TrimPrefix(code, "Mouse"))
 	}
 	return strings.TrimPrefix(strings.TrimPrefix(code, "Key"), "Digit")
 }
 
 func lootBindingBadge(code string) string {
 	if !validLootKey(code) {
-		return "ВАША КЛАВИША · 15 МЕТРОВ"
+		return T("installer.badge.anyKey")
 	}
 	label := strings.ToUpper(lootKeyLabel(code))
 	if !strings.HasPrefix(code, "Mouse") {
-		label = "КЛАВИША " + label
+		label = T("installer.badge.key", "key", label)
 	}
-	return label + " · 15 МЕТРОВ"
+	return T("installer.badge.range", "label", label)
 }
 
 func lootKeyBadge(raw json.RawMessage) string { return lootBindingBadge(configuredLootKey(raw)) }

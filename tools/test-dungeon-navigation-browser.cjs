@@ -1,4 +1,5 @@
 'use strict';
+const { uiScripts } = require('./ui-text-stand.cjs');
 const fs=require('node:fs'),path=require('node:path'),http=require('node:http'),assert=require('node:assert/strict');
 const upstream=path.resolve(process.argv[2]||'/tmp/dfo-upstream'),dist=path.resolve(process.argv[3]||'/tmp/dfo-release-0.1.14520');
 const {chromium}=require(process.env.DFO_PLAYWRIGHT_MODULE||path.join(upstream,'node_modules/playwright')),{parse}=require(path.join(upstream,'node_modules/acorn'));
@@ -83,7 +84,7 @@ function fixture(Collider,mat4){
  function frame(){draw();requestAnimationFrame(frame);}requestAnimationFrame(frame);window.ready=true;
 }
 const scripts=['dfo_dungeon_model.js','dfo_dungeons.js','dfo_dungeon_live_model.js','dfo_dungeon_graph.js','dfo_dungeon_nav_model.js','dfo_dungeon_nav.js','dfo_dungeon_live.js'];
-const html='<!doctype html><html><head><meta charset="utf-8"><style>body{margin:0;background:#0d1118}canvas{position:fixed;inset:0;width:100vw;height:100vh}</style><script>if(new URLSearchParams(location.search).has("no-worker"))window.Worker=undefined;window.__DFO_MOD_CFG__={dungeons:{enabled:true,keyCode:"KeyK"},nearbyLoot:{enabled:false}};</script>'+scripts.map(f=>'<script src="/'+f+'"></script>').join('')+'</head><body><canvas width="960" height="640"></canvas><script type="module">import "/assets/'+world+'";import {FixtureCollider} from "/assets/'+colliderFile+'";import * as mat4 from "/fixture-mat4.js";('+fixture.toString()+')(FixtureCollider,mat4);</script></body></html>';
+const html='<!doctype html><html><head><meta charset="utf-8">'+uiScripts()+'<style>body{margin:0;background:#0d1118}canvas{position:fixed;inset:0;width:100vw;height:100vh}</style><script>if(new URLSearchParams(location.search).has("no-worker"))window.Worker=undefined;window.__DFO_MOD_CFG__={dungeons:{enabled:true,keyCode:"KeyK"},nearbyLoot:{enabled:false}};</script>'+scripts.map(f=>'<script src="/'+f+'"></script>').join('')+'</head><body><canvas width="960" height="640"></canvas><script type="module">import "/assets/'+world+'";import {FixtureCollider} from "/assets/'+colliderFile+'";import * as mat4 from "/fixture-mat4.js";('+fixture.toString()+')(FixtureCollider,mat4);</script></body></html>';
 const cache=new Map(),labs=new Map();let workerRequests=0,graphWorkers=0;
 const server=http.createServer((req,res)=>{try{
  const url=new URL(req.url,'http://localhost');

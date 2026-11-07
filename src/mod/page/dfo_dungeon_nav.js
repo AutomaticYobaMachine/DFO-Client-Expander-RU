@@ -1,8 +1,10 @@
 (function navigationPage(root) {
   'use strict';
+  // The mod's own words, in the install's language (page/dfo_ui_text.js; English without the translation).
+  const T = (key, params) => (root.__dfoUi ? root.__dfoUi.t(key, params) : key);
   const M = typeof module === 'object' && module.exports ? require('./dfo_dungeon_nav_model.js') : root.__dfoDungeonNavModel;
-  const labels = { exit:'Выход из данжа', aurum:'Сундук с аурумом', elite:'Ближайший элитный противник', quest:'Цель задания' };
-  const none = { exit:'Выход в этой локации не найден.', aurum:'Сундук с аурумом недоступен или уже открыт.', elite:'Живых элитных противников здесь нет.', quest:'Активных целей этого задания в данже нет.' };
+  const labels = { exit:T('nav.target.exit'), aurum:T('nav.target.aurum'), elite:T('nav.target.elite'), quest:T('nav.target.quest') };
+  const none = { exit:T('nav.none.exit'), aurum:T('nav.none.aurum'), elite:T('nav.none.elite'), quest:T('nav.none.quest') };
   const G = typeof module === 'object' && module.exports ? require('./dfo_dungeon_graph.js') : root.__dfoDungeonGraph;
   function createNavigation(deps) {
     let state={phase:'idle',kind:null,uid:null,name:'',distance:null,message:''};
@@ -51,22 +53,22 @@
         const stamp=revision(v),targets=candidates(v).map(t=>({...t,at:M.point(t.at)}));
         if(stamp!==graphRevision){retry=true;return;}
         if(!targets.length){route=null;showing=[];notify({phase:'unavailable',distance:null,message:none[wanted.kind]});return;}
-        notify({phase:'routing',message:'Прокладываю путь…',distance:null});
+        notify({phase:'routing',message:T('nav.routing'),distance:null});
         const pins=typeof v.nav.transitions==='function'?v.nav.transitions():v.nav.transitions||[];
         const result=await client.route(v.nav.feet,targets,M.portalTransitions(v.live.ctx.actions,pins,v.nav.portalSurfaces),{riding:M.riding(v.nav.feet,v.nav.collider,v.live.ctx.actions)});check(v,token);
         if(revision(v)!==stamp){retry=true;return;}
-        if(!result){route=null;showing=[];failedView=attemptKey(v);notify({phase:'unavailable',distance:null,message:'Путь в загруженной геометрии не найден.'});return;}
+        if(!result){route=null;showing=[];failedView=attemptKey(v);notify({phase:'unavailable',distance:null,message:T('nav.noPath')});return;}
         const latest=read(),fresh=candidates(latest).find(t=>t.key===result.target.key);
         if(!fresh||M.distance(fresh.at,result.target.at)>1.1){route=null;showing=[];retry=true;return;}
         route=result;failedView='';notify({phase:'following',name:fresh.name,message:'',distance:Math.ceil(result.distance)});
       }catch(e){
-        if(!e.cancelled&&token===seq){disposeClient();route=null;showing=[];failedView=attemptKey(v);notify({phase:'unavailable',distance:null,message:e.message||'Не удалось проложить путь.'});}
+        if(!e.cancelled&&token===seq){disposeClient();route=null;showing=[];failedView=attemptKey(v);notify({phase:'unavailable',distance:null,message:e.message||T('nav.failed')});}
       }finally{if(token===seq){calculating=false;lastAttempt=retry?-Infinity:now();}}
     }
     function request(v){
       const token=++seq;route=null;showing=[];failedView='';
       v={...v,nav:{...v.nav,feet:M.point(v.nav.feet)}};
-      notify({phase:client?'routing':'building',name:labels[wanted.kind],message:client?'Прокладываю путь…':'Подготавливаю профили данжа…',distance:null});
+      notify({phase:client?'routing':'building',name:labels[wanted.kind],message:client?T('nav.routing'):T('nav.building'),distance:null});
       void solve(v,token);
     }
     function start(kind,uid=null){
@@ -91,7 +93,7 @@
       showing=followed.points;
       const extra=route.transition?Math.max(0,route.distance-M.length(route.points)):0;
       if(followed.remaining < (route.transition?.contact ? .15 : 1.2) && followed.off < (route.transition?.contact ? .5 : 1.6) && (route.transition||M.goalReached(target,v.nav.feet,v.nav.collider))){
-        showing=[];notify({phase:route.transition?'transition':'arrived',name:target.name,distance:route.transition?Math.ceil(followed.remaining+extra):0,message:route.transition?'':'Цель рядом.'});return;
+        showing=[];notify({phase:route.transition?'transition':'arrived',name:target.name,distance:route.transition?Math.ceil(followed.remaining+extra):0,message:route.transition?'':T('nav.arrived')});return;
       }
       notify({phase:'following',name:target.name,distance:Math.ceil(followed.remaining+extra),message:''});
     }
@@ -130,7 +132,7 @@
   const timer=root.setInterval(()=>{
     controller.tick();const s=controller.state();if(s.phase==='idle'){hud.hidden=true;return;}const v=read(false);
     hud.hidden=!v||v.live.blocked()||root.__dfoDungeonLive?.isOpen();
-    if(!hud.hidden)hud.textContent=s.name+(s.distance==null?'':' · '+s.distance+' м')+(s.message?'\n'+s.message:'');
+    if(!hud.hidden)hud.textContent=s.name+(s.distance==null?'':' · '+T('live.metres',{n:s.distance}))+(s.message?'\n'+T(s.message):'');
   },250);
   root.__dfoDungeonNavigation={
     start:controller.start,stop:controller.stop,state:controller.state,availability:controller.availability,

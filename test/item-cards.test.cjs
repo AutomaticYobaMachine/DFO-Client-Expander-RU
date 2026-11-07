@@ -2,6 +2,8 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');
 const fs=require('node:fs'),path=require('node:path'),os=require('node:os');
 const {derive,effectGroup,effectParts,materialPalette}=require('../src/mod/page/dfo_item_cards.js');
+// These checks read the Russian install's words; the English ones are checked where the locales are compared.
+globalThis.__dfoUi=require('../src/mod/item-text.cjs').uiText('ru');
 const {transformItemCards}=require('../src/mod/item-cards-transform.cjs');
 const {transformAsset,injectIndex,EXPECTED}=require('../src/mod/transforms.cjs');
 const {wrap}=require('../src/mod/hook.cjs');

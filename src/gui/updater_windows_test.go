@@ -75,7 +75,7 @@ func TestNativeSelfUpdateStartup(t *testing.T) {
 		})}
 		return newReleaseUpdater(appVersion, client, probeUpdateInstaller)
 	}
-	os.Args = []string{os.Args[0], "--game", game}
+	os.Args = []string{os.Args[0], "--lang", "ru", "--game", game}
 	main()
 	wantHandoff := os.Getenv("DFO_TEST_EXPECT_HANDOFF") != "false"
 	if A.handedOff != wantHandoff {

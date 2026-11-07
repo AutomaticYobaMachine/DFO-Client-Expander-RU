@@ -19,7 +19,7 @@ async function main(){
    const rows=await fetch('/audit-catalog.json').then(r=>r.json()),groups=new Set(),skipped=[],failures=[];let checked=0;
    const customFixtures=rows.filter(row=>!auditNative.readers.template(row.index));
    if(customFixtures.length){if(!globalThis.__cardAuditRegister)throw new Error('Native custom-template fixture registration unavailable');__cardAuditRegister(customFixtures)}
-   const fmt=new Intl.NumberFormat('ru-RU',{maximumFractionDigits:2});
+   const fmt=new Intl.NumberFormat(window.__dfoUi?.tag??'en-US',{maximumFractionDigits:2});
    for(const row of rows){
     const template=auditNative.readers.template(row.index);
     if(!template){skipped.push(row.index);continue}

@@ -1,9 +1,11 @@
 (function (root) {
   'use strict';
+  // The mod's own words, in the install's language (page/dfo_ui_text.js; English without the translation).
+  const T = (key, params) => (root.__dfoUi ? root.__dfoUi.t(key, params) : key);
   if (root.__dfoDungeonLive || root.__DFO_MOD_CFG__?.dungeons?.enabled === false) return;
   const doc = root.document, M = root.__dfoDungeonLiveModel, cfg = root.__DFO_MOD_CFG__?.dungeons || {};
   const code = cfg.keyCode || 'KeyK', mouse = ({ Mouse3: 1, Mouse4: 3, Mouse5: 4 })[code];
-  const tabs = [['summary', 'Сводка'], ['enemies', 'Враги'], ['loot', 'Добыча'], ['prepare', 'Подготовка']];
+  const tabs = [['summary', T('live.tab.summary')], ['enemies', T('live.tab.enemies')], ['loot', T('live.tab.loot')], ['prepare', T('live.tab.prep')]];
   let current = null, held = false, mouseOwned = false, mouseHeld = false;
   const tr = s => { try { return root.__translate?.(s) || s; } catch { return s; } };
   const el = (tag, cls, text) => { const n = doc.createElement(tag);if (cls) n.className = cls;if (text != null) n.textContent = text;return n; };
@@ -49,81 +51,81 @@
   }
   function quest(uid) {
     const state = current, now = info();if (!state || now?.live.ctx !== state.ctx) { close();return; }
-    if (uid != null && !M.quests(now.live.questBridge, now.live.location, now.live.foes,now.live.ctx,now.world.modes?.()?.dfoDungeonQuestSources?.stands).some(q => q.uid === uid)) { state.status.textContent = 'Задание больше не активно в этом данже.';return; }
+    if (uid != null && !M.quests(now.live.questBridge, now.live.location, now.live.foes,now.live.ctx,now.world.modes?.()?.dfoDungeonQuestSources?.stands).some(q => q.uid === uid)) { state.status.textContent = T('live.quest.gone');return; }
     close();
-    if (!now.live.journal(uid)) { open();if (current) current.status.textContent = 'Не удалось открыть журнал. Завершите другое действие и повторите.'; }
+    if (!now.live.journal(uid)) { open();if (current) current.status.textContent = T('live.journal.failed'); }
   }
   function navigation(body, data) {
     const nav = root.__dfoDungeonNavigation, available = nav?.availability() || {}, state = nav?.state();
-    paragraph(body, 'Навигация по данжу', 'sec');
-    paragraph(body, 'Выберите цель — окно закроется, а светящаяся линия на полу покажет проход. Двери открываются вручную.', 'dfo-dungeon-note');
+    paragraph(body, T('live.nav.title'), 'sec');
+    paragraph(body, T('live.nav.help'), 'dfo-dungeon-note');
     if (data.quests.length) {
-      const label = el('label', '', 'Задание: '), select = el('select', 'dfo-nav-select');select.dataset.navControl = 'quest';select.setAttribute('aria-label', 'Задание для навигации');
+      const label = el('label', '', T('live.nav.questLabel')), select = el('select', 'dfo-nav-select');select.dataset.navControl = 'quest';select.setAttribute('aria-label', T('live.nav.questSelect'));
       const option = (uid, name) => { const o = el('option', '', name);o.value = uid;select.append(o); };
-      option('', 'Отслеживаемое или ближайшая активная цель');
+      option('', T('live.nav.questDefault'));
       for (const [i, q] of data.quests.entries()) option(q.uid, tr(q.name) + (data.quests.filter(x => x.name === q.name).length > 1 ? ' (' + (i + 1) + ')' : ''));
       if (current.navQuest && !data.quests.some(q => q.uid === current.navQuest)) current.navQuest = '';
       select.value = current.navQuest || '';select.onchange = e => { if (current) current.navQuest = e.currentTarget.value; };label.append(select);body.append(label);
     }
     const buttons = el('div', 'dfo-nav-actions');
-    for (const [kind, text, reason] of [['exit','К выходу','В этой локации не найден выход.'],['aurum','К сундуку с аурумом','Сундук недоступен или уже открыт.'],['elite','К ближайшему элитнику','Живых элитных противников нет.'],['quest','К цели задания','Доступных целей задания нет.']]) {
+    for (const [kind, text, reason] of [['exit',T('live.nav.toExit'),T('live.nav.noExit')],['aurum',T('live.nav.toAurum'),T('live.nav.noAurum')],['elite',T('live.nav.toElite'),T('live.nav.noElite')],['quest',T('live.nav.toQuest'),T('live.nav.noQuest')]]) {
       const b = button(text, () => { const uid = kind === 'quest' ? current?.navQuest || null : null;if (nav?.start(kind, uid)) close();else render(true); });
-      b.dataset.navControl = kind;b.disabled = !available.ready || !available[kind];b.title = !available.ready ? 'Навигация ещё подготавливается.' : available[kind] ? '' : reason;b.setAttribute('aria-pressed', String(state?.kind === kind && state.phase !== 'idle'));buttons.append(b);
+      b.dataset.navControl = kind;b.disabled = !available.ready || !available[kind];b.title = !available.ready ? T('live.nav.preparing') : available[kind] ? '' : reason;b.setAttribute('aria-pressed', String(state?.kind === kind && state.phase !== 'idle'));buttons.append(b);
     }
     body.append(buttons);
-    if (state?.phase !== 'idle' && state?.kind) paragraph(body, [tr(state.name), state.distance == null ? '' : state.distance + ' м', state.message].filter(Boolean).join(' · '), 'dfo-dungeon-note');
-    const stop = button('Убрать маршрут', () => { nav?.stop();render(true); });stop.className = 'dfo-nav-stop';stop.dataset.navControl = 'stop';stop.disabled = !state || state.phase === 'idle';body.append(stop);
+    if (state?.phase !== 'idle' && state?.kind) paragraph(body, [tr(state.name), state.distance == null ? '' : T('live.metres', { n: state.distance }), state.message ? T(state.message) : ''].filter(Boolean).join(' · '), 'dfo-dungeon-note');
+    const stop = button(T('live.nav.clear'), () => { nav?.stop();render(true); });stop.className = 'dfo-nav-stop';stop.dataset.navControl = 'stop';stop.disabled = !state || state.phase === 'idle';body.append(stop);
   }
   function contents(body, tab, data) {
     const forecast = data.forecast;
     if (tab === 'summary') {
       const stats = el('div', 'dfo-live-stats');
-      for (const [label, n] of [['Осталось врагов', data.enemies.count], ['Из них элитных', data.enemies.elites], ['Игроков в данже', data.players.count]]) {
+      for (const [label, n] of [[T('live.summary.enemiesLeft'), data.enemies.count], [T('live.summary.elitesLeft'), data.enemies.elites], [T('live.summary.players'), data.players.count]]) {
         const tile = el('div', 'dfo-live-stat');tile.append(el('strong', '', number(n)), el('span', '', label));stats.append(tile);
       }
       body.append(stats);paragraph(body, data.players.note, 'dfo-dungeon-note');
-      if (data.enemies.syncing) paragraph(body, 'Часть противников ещё синхронизируется. Это известный клиенту состав.', 'dfo-dungeon-note');
+      if (data.enemies.syncing) paragraph(body, T('live.summary.syncing'), 'dfo-dungeon-note');
       const r = data.regen;
-      paragraph(body, r.state === 'offline' ? data.online ? 'Реген: время сервера пока неизвестно.' : 'Реген: в одиночной игре автоматическое восстановление не идёт.'
-        : r.state === 'idle' ? `Реген: нет известного запущенного отсчёта. Обычный интервал — ${r.intervalMinutes} мин.`
-        : `До ближайшего регена: ${r.minutes} мин.${r.state === 'due' ? ' Ожидание обновления комнаты.' : ''}`);
-      paragraph(body, 'Враги и опустошённые источники восстанавливаются каждый по своему времени; это ближайший известный срок, а не сброс всего данжа.', 'dfo-dungeon-note');
+      paragraph(body, r.state === 'offline' ? data.online ? T('live.regen.noClock') : T('live.regen.solo')
+        : r.state === 'idle' ? T('live.regen.none',{n:r.intervalMinutes})
+        : T('live.regen.next',{n:r.minutes,due:r.state === 'due' ? T('live.regen.due') : ''}));
+      paragraph(body, T('live.regen.note'), 'dfo-dungeon-note');
       const a = data.aurum;
-      paragraph(body, a.state === 'taken' ? 'Аурум: получение отмечено для вашего аккаунта на этой неделе.'
-        : a.state === 'offline' ? 'Аурум: сундук доступен в онлайне.'
-        : a.state === 'absent' ? 'Аурум: в этом типе локации сундук не предусмотрен.'
-        : `Аурум: ${a.amount == null ? 'сумма неизвестна' : a.amount + ' Aurum'}. ${a.state === 'unknown' ? 'Состояние сундука ещё не получено.' : 'Нет местной отметки о получении; сервер подтвердит при открытии.'}`);
-      paragraph(body, 'Задания в этом данже', 'sec');
-      if (!data.quests.length) paragraph(body, 'Известных активных заданий здесь нет.');
+      paragraph(body, a.state === 'taken' ? T('live.aurum.taken')
+        : a.state === 'offline' ? T('live.aurum.online')
+        : a.state === 'absent' ? T('live.aurum.none')
+        : T('live.aurum.state',{amount:a.amount == null ? T('live.aurum.amountUnknown') : a.amount + ' Aurum',state:a.state === 'unknown' ? T('live.aurum.statePending') : T('live.aurum.stateNoMark')}));
+      paragraph(body, T('live.quests.title'), 'sec');
+      if (!data.quests.length) paragraph(body, T('live.quests.none'));
       for (const q of data.quests) {
         const link = button(tr(q.name), () => quest(q.uid));link.className = 'dfo-live-quest';link.dataset.quest = q.uid;body.append(link);
         for (const objective of q.objectives) paragraph(body, tr(objective), 'dfo-dungeon-note');
       }
       navigation(body, data);
     } else if (tab === 'enemies') {
-      paragraph(body, 'Живые противники текущей сцены. Индивидуальные элитники и усиление всего данжа указаны отдельно.', 'dfo-dungeon-note');
-      if (!data.enemies.rows.length) paragraph(body, data.enemies.count == null ? 'Состав ещё не получен.' : 'Живых противников не осталось.');
-      else table(body, ['Противник', 'Осталось', 'Уровень', 'Свойства', 'Здоровье'], data.enemies.rows.map(r => [tr(r.name), r.count,
+      paragraph(body, T('live.enemies.note'), 'dfo-dungeon-note');
+      if (!data.enemies.rows.length) paragraph(body, data.enemies.count == null ? T('live.enemies.pending') : T('live.enemies.none'));
+      else table(body, [T('live.col.enemy'), T('live.col.left'), T('live.col.level'), T('live.col.traits'), T('live.col.health')], data.enemies.rows.map(r => [tr(r.name), r.count,
         r.minLevel == null ? '—' : r.minLevel === r.maxLevel ? r.minLevel : `${r.minLevel}–${r.maxLevel}`,
-        r.mods.map(tr).join(', ') || 'Обычный', r.healthKnown ? `${Math.ceil(r.health)} / ${Math.ceil(r.maxHealth)}` : '—']));
+        r.mods.map(tr).join(', ') || T('live.trait.ordinary'), r.healthKnown ? `${Math.ceil(r.health)} / ${Math.ceil(r.maxHealth)}` : '—']));
     } else if (tab === 'loot') {
-      paragraph(body, 'На что идти за добычей', 'sec');
-      if (!forecast) { paragraph(body, 'Для этой особой локации стандартный прогноз недоступен. Сводка и список врагов работают по текущей сцене.');return; }
-      paragraph(body, `Ранг добычи: ${forecast.rank ?? 'неизвестен'}. Удача персонажа: ${forecast.luck ?? 'неизвестна'}.`);
-      if (forecast.chances) table(body, ['Минимальная редкость', 'Шанс подходящей вещи'], [['magic','Не ниже магической'],['rare','Не ниже редкой'],['legendary','Не ниже легендарной']].map(([k, label]) => [label, `${(forecast.chances[k] / 10).toLocaleString('ru-RU', { maximumFractionDigits: 2 })}%`]));
-      else paragraph(body, 'Шансы редкости клиенту пока неизвестны.');
-      if (forecast.signatures?.length) { paragraph(body, 'Предпочтительные легендарные вещи', 'sec');for (const item of forecast.signatures) paragraph(body, tr(item.name)); }
-      paragraph(body, 'Это прогноз по таблицам, а не содержимое неоткрытых сундуков. Фактически доступные предметы показывает «Лут рядом».', 'dfo-dungeon-note');
+      paragraph(body, T('live.loot.title'), 'sec');
+      if (!forecast) { paragraph(body, T('live.loot.special'));return; }
+      paragraph(body, T('live.loot.rank',{rank:forecast.rank ?? T('live.unknownM'),luck:forecast.luck ?? T('live.unknownF')}));
+      if (forecast.chances) table(body, [T('live.loot.minRarity'), T('live.loot.chance')], [['magic',T('live.loot.atLeastMagic')],['rare',T('live.loot.atLeastRare')],['legendary',T('live.loot.atLeastLegendary')]].map(([k, label]) => [label, `${(forecast.chances[k] / 10).toLocaleString('ru-RU', { maximumFractionDigits: 2 })}%`]));
+      else paragraph(body, T('live.loot.unknown'));
+      if (forecast.signatures?.length) { paragraph(body, T('live.loot.preferred'), 'sec');for (const item of forecast.signatures) paragraph(body, tr(item.name)); }
+      paragraph(body, T('live.loot.note'), 'dfo-dungeon-note');
     } else {
-      paragraph(body, 'Подготовка к оставшимся противникам', 'sec');
-      if (!forecast) { paragraph(body, 'Ориентируйтесь на живой список и свойства противников во вкладке «Враги».');return; }
-      paragraph(body, forecast.weaponName ? `Оружие в руках: ${tr(forecast.weaponName)}.` : 'Оружие в руках не определено.');
-      paragraph(body, !forecast.ready ? 'Недостаточно данных для оценки пригодности оружия.' : forecast.blocked > 0
-        ? `Часть ожидаемых противников требует другого материала оружия: примерно ${Math.round(forecast.blocked * 100)}% по таблице данжа.` : 'Материал оружия подходит ожидаемым видам противников.');
+      paragraph(body, T('live.prep.title'), 'sec');
+      if (!forecast) { paragraph(body, T('live.prep.note'));return; }
+      paragraph(body, forecast.weaponName ? T('live.prep.weapon',{weapon:tr(forecast.weaponName)}) : T('live.prep.noWeapon'));
+      paragraph(body, !forecast.ready ? T('live.prep.noData') : forecast.blocked > 0
+        ? T('live.prep.blocked',{pct:Math.round(forecast.blocked * 100)}) : T('live.prep.ok'));
       paragraph(body, forecast.life?.text || '', 'dfo-dungeon-note');
-      paragraph(body, 'Приоритеты', 'sec');
-      paragraph(body, data.enemies.elites ? `Осталось элитных противников: ${data.enemies.elites}. Проверьте их свойства во вкладке «Враги» перед боем.` : 'Индивидуальные элитные противники в текущем списке не обнаружены.');
-      paragraph(body, 'Здоровье в таблице суммируется по группе одинаковых противников. Прогноз материалов относится к таблицам появления и может отличаться от оставшегося состава.', 'dfo-dungeon-note');
+      paragraph(body, T('live.prep.priorities'), 'sec');
+      paragraph(body, data.enemies.elites ? T('live.prep.elites',{n:data.enemies.elites}) : T('live.prep.noElites'));
+      paragraph(body, T('live.prep.note2'), 'dfo-dungeon-note');
     }
   }
   function patchChildren(parent, source) {
@@ -166,16 +168,16 @@
     styles();const node = el('dialog', 'dfo-panel dfo-win dfo-dungeon-dialog dfo-dungeon-live'), prior = doc.activeElement;
     const wh = el('div', 'wh'), left = el('div', 'dfo-dungeon-header-left'), heading = el('div', 'dfo-dungeon-title'), subtitle = el('div', 'dfo-dungeon-subtitle'), rating = el('div', 'dfo-live-rating');
     heading.id = 'dfo-dungeon-live-title';node.setAttribute('aria-labelledby', heading.id);left.append(heading, subtitle, rating);wh.append(left);
-    const nav = el('div', 'tabs');nav.setAttribute('role', 'tablist');nav.setAttribute('aria-label', 'Разделы текущего данжа');
+    const nav = el('div', 'tabs');nav.setAttribute('role', 'tablist');nav.setAttribute('aria-label', T('live.tabs'));
     const body = el('div', 'wb');body.setAttribute('role', 'tabpanel');body.id = 'dfo-dungeon-live-content';
     const foot = el('div', 'acts'), status = el('span', 'dfo-dungeon-status'), actions = el('div', 'dfo-dungeon-footer-btns');status.setAttribute('role', 'status');foot.append(status, actions);
     const owner = { done: false, holdsScreen: true, isChoiceWindow: true, input() {}, click() {}, wheel() {}, hover() {}, tick() {}, draw() {}, close() { if (current?.owner === owner) close(); }, dispose() { this.close(); }, destroy() { this.close(); } };
     if (!now.live.mount(owner)) return false;
     current = { node, ctx: now.live.ctx, live: now.live, owner, prior, heading, subtitle, rating, body, status, tabs: new Map(), tab: 'summary', pressing: false };
     for (const [id, label] of tabs) { const b = button(label, () => { if (current) { current.tab = id;render(true); } });b.setAttribute('role', 'tab');b.setAttribute('aria-controls', body.id);b.id = 'dfo-live-tab-' + id;nav.append(b);current.tabs.set(id, b); }
-    const map = button('Автокарта', () => { const n = info();if (n?.live.ctx !== current?.ctx) { close();return; }close();n.world.modes?.()?.toggleAutomap?.(); });map.disabled = typeof now.world.modes?.()?.toggleAutomap !== 'function';actions.append(map);
-    const journal = button('Журнал заданий', () => quest(null));journal.disabled = !now.live.questBridge;
-    actions.append(journal, button('Закрыть', close));
+    const map = button(T('live.automap'), () => { const n = info();if (n?.live.ctx !== current?.ctx) { close();return; }close();n.world.modes?.()?.toggleAutomap?.(); });map.disabled = typeof now.world.modes?.()?.toggleAutomap !== 'function';actions.append(map);
+    const journal = button(T('live.journal'), () => quest(null));journal.disabled = !now.live.questBridge;
+    actions.append(journal, button(T('live.close'), close));
     node.append(wh, nav, body, foot);node.addEventListener('cancel', e => { e.preventDefault();close(); });
     for (const type of ['click', 'pointerdown', 'mousedown', 'mouseup', 'wheel']) node.addEventListener(type, e => e.stopPropagation());
     node.addEventListener('pointerdown', () => { if (current) current.pressing = true; });
@@ -183,11 +185,11 @@
     doc.body.append(node);launcher.hidden = true;root.dispatchEvent(new Event('blur'));render(true);node.showModal();actions.lastElementChild.focus();return true;
   }
   styles();
-  const label = ({ Space: 'Пробел', NumpadEnter: 'NumPad Enter' })[code] || code.replace(/^Key|^Digit/, '').replace(/^Numpad/, 'NumPad ').replace(/^Mouse/, 'Мышь ');
-  const launcher = button('Сведения о данже · ' + label, open);launcher.className = 'dfo-dungeon-launch';launcher.hidden = true;
+  const label = ({ Space: T('live.key.space'), NumpadEnter: 'NumPad Enter' })[code] || code.replace(/^Key|^Digit/, '').replace(/^Numpad/, 'NumPad ').replace(/^Mouse/, T('live.key.mouse'));
+  const launcher = button(T('live.launcher') + label, open);launcher.className = 'dfo-dungeon-launch';launcher.hidden = true;
   const hud = el('aside', 'dfo-dungeon-hud'), counterList = el('dl', 'dfo-dungeon-counters'), counterValues = new Map();
-  hud.hidden = true;hud.setAttribute('aria-label', 'Счётчики данжа');
-  for (const [id, text] of [['enemies', 'Живые враги'], ['elites', 'Элитные враги'], ['players', 'Игроки']]) {
+  hud.hidden = true;hud.setAttribute('aria-label', T('live.hud'));
+  for (const [id, text] of [['enemies', T('live.hud.enemies')], ['elites', T('live.hud.elites')], ['players', T('live.hud.players')]]) {
     const value = el('dd', '', '—');value.dataset.counter = id;counterValues.set(id, value);counterList.append(el('dt', '', text), value);
   }
   hud.append(counterList, launcher);
@@ -200,7 +202,7 @@
     if (data) for (const [id, value, partial] of [['enemies', data.enemies.count, data.enemies.syncing], ['elites', data.enemies.elites, data.enemies.syncing], ['players', data.players.count, !data.players.complete]]) {
       const node = counterValues.get(id), text = value == null ? '—' : String(value) + (partial ? '+' : '');
       if (node.textContent !== text) node.textContent = text;
-      const description = value == null ? 'Данные пока неизвестны' : partial ? `Известно: ${value}. Состав ещё уточняется.` : String(value);
+      const description = value == null ? T('live.hud.unknown') : partial ? T('live.hud.partial',{value:value}) : String(value);
       if (node.getAttribute('aria-label') !== description) node.setAttribute('aria-label', description);
     }
     launcher.hidden = !n || !!current || n.live.blocked();
@@ -209,7 +211,7 @@
   const editing = e => { const selector = 'input,textarea,select,[contenteditable]:not([contenteditable="false"]),[role="textbox"]';return !!(e.target?.closest?.(selector) || doc.activeElement?.closest?.(selector)); };
   const consume = e => { e.preventDefault();e.stopImmediatePropagation(); };
   const conflict = root.__DFO_MOD_CFG__?.nearbyLoot?.enabled !== false && (root.__DFO_MOD_CFG__?.nearbyLoot?.keyCode || 'KeyJ') === code;
-  if (conflict) launcher.title = 'Клавиша совпадает с «Лут рядом». Назначьте разные кнопки в установщике.';
+  if (conflict) launcher.title = T('live.keyClash');
   root.addEventListener('keydown', e => {
     if (current && (current.owner.done || current.live.owns?.(current.owner) === false)) close();
     if (current) {
@@ -247,7 +249,7 @@
       if (uid == null) return;
       root.requestAnimationFrame(() => {
         const node = [...doc.querySelectorAll('#enhanced-chronicle [data-dfo-quest]')].find(n => n.dataset.dfoQuest === String(uid));
-        if (!node) return;node.scrollIntoView({ block: 'start' });node.tabIndex = -1;node.focus({ preventScroll: true });node.setAttribute('aria-label', 'Выбранное задание');
+        if (!node) return;node.scrollIntoView({ block: 'start' });node.tabIndex = -1;node.focus({ preventScroll: true });node.setAttribute('aria-label', T('live.quest.chosen'));
       });
     } };
 })(globalThis);

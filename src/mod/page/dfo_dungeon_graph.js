@@ -1,5 +1,7 @@
 (function dungeonGraphModule(root) {
   'use strict';
+  // The mod's own words, in the install's language (page/dfo_ui_text.js; English without the translation).
+  const T = (key, params) => (root.__dfoUi ? root.__dfoUi.t(key, params) : key);
   // Player navigation only. No NavClient, NPC navmesh, world mutations or action dispatch.
   const BODY=Object.freeze({height:1.8,radius:.35,step:.505,slope:70,floorUp:.56,floorDown:1.24,probes:Object.freeze([.54,1.05,1.55,1.72]),centres:Object.freeze([.35,.9,1.45])});
   const VERSION = 1, CELL = 2, STEP = BODY.step, RADIUS = BODY.radius;
@@ -316,7 +318,7 @@
   }
   // Snapshot immutable static parts. Live action buckets do not invalidate the whole dungeon graph.
   async function snapshot(col,actions,checkpoint=async()=>{}){
-    if(!col?._buckets)throw new Error('Геометрия данжа недоступна.');
+    if(!col?._buckets)throw new Error(T('nav.graph.noGeometry'));
     const dynamic=new Set([...actions?.objects?.values?.()||[]].filter(o=>o.kind==='action'||o.kind==='door').map(o=>o.key));
     const parts=[],channels=[];let total=0;
     for(const [key,b]of col._buckets){
@@ -361,8 +363,8 @@
       }
       await checkpoint();
     }
-    if(!total)throw new Error('В данже нет загруженных поверхностей для маршрута.');
-    if(total>9000000)throw new Error('Геометрия данжа слишком велика для текущего построителя маршрутов.');
+    if(!total)throw new Error(T('nav.graph.noSurfaces'));
+    if(total>9000000)throw new Error(T('nav.graph.tooLarge'));
     return {parts,total,channels};
   }
   class Graph {
@@ -607,7 +609,7 @@
     let worker=null,graph=null,graphReady=null,seq=0,closed=false,inputCache=null,latestRoute=0;const pending=new Map();
     const fail=err=>{for(const p of pending.values())p.reject(err);pending.clear();worker?.terminate();worker=null;};
     if(WorkerCtor&&url)try{
-      worker=new WorkerCtor(url);worker.onmessage=e=>{const p=pending.get(e.data.id);if(!p)return;pending.delete(e.data.id);e.data.error?p.reject(Object.assign(new Error(e.data.error),{cancelled:!!e.data.cancelled})):p.resolve(e.data.result);};worker.onerror=()=>fail(new Error('Фоновый расчёт маршрута прерван.'));
+      worker=new WorkerCtor(url);worker.onmessage=e=>{const p=pending.get(e.data.id);if(!p)return;pending.delete(e.data.id);e.data.error?p.reject(Object.assign(new Error(e.data.error),{cancelled:!!e.data.cancelled})):p.resolve(e.data.result);};worker.onerror=()=>fail(new Error(T('nav.graph.cancelled')));
     }catch{}
     const send=(op,data)=>new Promise((resolve,reject)=>{const id=++seq;pending.set(id,{resolve,reject});worker.postMessage({id,op,...data});});
     return {
@@ -648,8 +650,8 @@
     const checkpoint=async()=>{if(performance.now()-(checkpoint.at||0)>8){await new Promise(r=>setTimeout(r,0));checkpoint.at=performance.now();}};
     root.onmessage=e=>{const m=e.data;if(m.op==='route')latest=m.id;queue=queue.then(async()=>{try{
       let result;if(m.op==='build'){graph=new Graph();await graph.build(m.input,checkpoint);result={nodes:graph.nodes.length};}
-      else if(m.op==='route'){if(!graph)throw new Error('Профили данжа ещё не готовы.');const pause=async()=>{if(latest!==m.id)throw Object.assign(new Error('cancelled'),{cancelled:true});await checkpoint();};await pause();result=await graph.route(m.from,m.targets,m.transitions,pause,m.options);}
-      else throw new Error('Неизвестный запрос навигации.');root.postMessage({id:m.id,result});
+      else if(m.op==='route'){if(!graph)throw new Error(T('nav.graph.notReady'));const pause=async()=>{if(latest!==m.id)throw Object.assign(new Error('cancelled'),{cancelled:true});await checkpoint();};await pause();result=await graph.route(m.from,m.targets,m.transitions,pause,m.options);}
+      else throw new Error(T('nav.graph.badRequest'));root.postMessage({id:m.id,result});
     }catch(err){root.postMessage({id:m.id,error:err.message,cancelled:!!err.cancelled});}});};
   }else root.__dfoDungeonGraph=api;
 })(globalThis);

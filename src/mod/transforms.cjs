@@ -30,7 +30,7 @@ function sub(text, re, fn, log, id) {
 
 // ─── MARKS ──────────────────────────────────────────────────────────────────────────────────────────────────────────
 /** The page runtime's filter groups and their words (TV_FILTER_TEXT); also the kind's second word (`dfo <group>`). */
-const MARK_GROUPS = Object.freeze([['taverns', 'Таверны'], ['shops', 'Магазины'], ['orgs', 'Организации']]);
+const MARK_GROUPS = Object.freeze([['taverns', 'Taverns'], ['shops', 'Shops'], ['orgs', 'Organizations']]);
 
 /** world chunk: the built town pixels, the world's state and its ground, from the yards' own wiring. */
 function marksWorld(text, log) {
@@ -78,7 +78,8 @@ function marksFilters(text, log) {
   let t = sub(text, /Object\.freeze\(\[(`towns`,`distant`[^\]]*)\]\)/g,
     (all, list) => (list.includes('`taverns`') ? all : `Object.freeze([${list},${MARK_GROUPS.map(([g]) => `\`${g}\``).join(',')}])`), log, 'marks.groups');
   t = sub(t, /Object\.freeze\(\{title:`Show`,towns:`Towns`/g,
-    () => `Object.freeze({title:\`Show\`,${MARK_GROUPS.map(([g, w]) => `${g}:\`${w}\``).join(',')},towns:\`Towns\``, log, 'marks.words');
+    // The page's strings (dfo_ui_text.js) load before the game's modules: the install's language, English without them.
+    () => `Object.freeze({title:\`Show\`,${MARK_GROUPS.map(([g, w]) => `${g}:(globalThis.__dfoUi?.t(\`marks.group.${g}\`)??\`${w}\`)`).join(',')},towns:\`Towns\``, log, 'marks.words');
   t = sub(t, new RegExp(`(function ${ID}\\((${ID})=\`\`\\)\\{let (${ID})=String\\(\\2\\)\\.split\\(\` \`\\),(${ID})=\\3\\[0\\];return )(\\3\\.includes\\(\`chase\`\\))`, 'g'),
     (all, head, e, words, first, chase) => `${head}${first}===\`dfo\`?${words}[1]??null:${chase}`, log, 'marks.group');
   return t;
@@ -136,8 +137,9 @@ const townFrame = (text, log) => sub(text,
 /** travelView: the marks the readout draws pass the page's filter first - with the town map open, the marks outside
  *  the town are left out (`__dfoMarkFilter`: the list in, the list to draw out). */
 const townMarks = (text, log) => sub(text,
-  new RegExp(`for\\(let (${ID}) of (${ID})\\.marks\\?\\.\\(\\)\\?\\?\\[\\]\\)\\{let (${ID})=(${ID})\\(\\1\\.at\\);`, 'g'),
-  (all, t, e, a, l) => `for(let ${t} of ((_a)=>{try{return globalThis.__dfoMarkFilter?.(_a)??_a}catch(_dfo){return _a}})(${e}.marks?.()??[])){let ${a}=${l}(${t}.at);`,
+  // The projection may end its statement (older releases) or go on declaring the record cache's own names (0.1.14574+).
+  new RegExp(`for\\(let (${ID}) of (${ID})\\.marks\\?\\.\\(\\)\\?\\?\\[\\]\\)\\{let (${ID})=(${ID})\\(\\1\\.at\\)([;,])`, 'g'),
+  (all, t, e, a, l, end) => `for(let ${t} of ((_a)=>{try{return globalThis.__dfoMarkFilter?.(_a)??_a}catch(_dfo){return _a}})(${e}.marks?.()??[])){let ${a}=${l}(${t}.at)${end}`,
   log, 'town.markFilter');
 /** travelView: the point the camera follows - the traveller's feet, or, while the detailed town map is open, the page's
  *  own focus over the town (`__dfoCamFeet`: a scene point, or nothing for the feet). The camera's height, tilt and
@@ -454,7 +456,9 @@ function injectPage(html, prefix, ctx) {
   if (html.includes('dfo-mod/dfo_marks.js')) return html;
   const tags = [];
   tags.push(`<script>window.__DFO_MOD_CFG__=${JSON.stringify(ctx.pageCfg ?? {})};</script>`);
-  if (ctx.fonts === true) tags.push(`<script src="${prefix}dfo-mod/dfo_font_data.js?dfo=1.24.0"></script>`,`<script src="${prefix}dfo-mod/dfo_fonts.js?dfo=1.24.0"></script>`);
+  // The mod's own strings first: every script after them speaks the install's language (English without the translation).
+  tags.push(`<script src="${prefix}dfo-mod/dfo_ui_text_data.js"></script>`, `<script src="${prefix}dfo-mod/dfo_ui_text.js"></script>`);
+  if (ctx.fonts === true) tags.push(`<script src="${prefix}dfo-mod/dfo_font_data.js?dfo=1.25.0"></script>`,`<script src="${prefix}dfo-mod/dfo_fonts.js?dfo=1.25.0"></script>`);
   if (ctx.ru && !html.includes('ru_dict.js')) tags.push(`<script src="${prefix}dfo-mod/ru_dict.js"></script>`, `<script src="${prefix}dfo-mod/ru_i18n.js"></script>`);
   tags.push(`<script src="${prefix}dfo-mod/ru_locale.js"></script>`, `<script src="${prefix}dfo-mod/ru_items.js"></script>`);
   if (ctx.ru || ctx.fonts) tags.push(`<script src="${prefix}dfo-mod/dfo_service_details.js"></script>`, `<script src="${prefix}dfo-mod/dfo_services.js"></script>`);

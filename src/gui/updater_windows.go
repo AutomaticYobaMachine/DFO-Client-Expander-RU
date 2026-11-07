@@ -48,7 +48,7 @@ type cappedUpdateOutput struct{ bytes.Buffer }
 
 func (b *cappedUpdateOutput) Write(p []byte) (int, error) {
 	if b.Len()+len(p) > 4096 {
-		return 0, errors.New("слишком большой ответ установщика")
+		return 0, errors.New(T("installer.err.probeLarge"))
 	}
 	return b.Buffer.Write(p)
 }
@@ -63,7 +63,7 @@ func probeUpdateInstaller(ctx context.Context, path string) (installerInfo, erro
 	valid := f.Machine == pe.IMAGE_FILE_MACHINE_AMD64 && ok && header.Subsystem == pe.IMAGE_SUBSYSTEM_WINDOWS_GUI
 	f.Close()
 	if !valid {
-		return info, errors.New("ожидался установщик Windows x64")
+		return info, errors.New(T("installer.err.probeArch"))
 	}
 	ctx, cancel := context.WithTimeout(ctx, 6*time.Second)
 	defer cancel()
@@ -105,7 +105,7 @@ func openUpdateParent(p *updatePlan) (uintptr, error) {
 	ok, _, err := updateQueryImage.Call(h, 0, uintptr(unsafe.Pointer(&name[0])), uintptr(unsafe.Pointer(&size)))
 	if ok == 0 || !sameUpdatePath(syscall.UTF16ToString(name[:size]), p.Target) {
 		updateCloseHandle.Call(h)
-		return 0, errors.New("родительский процесс не является обновляемым установщиком")
+		return 0, errors.New(T("installer.err.parent"))
 	}
 	return h, nil
 }
@@ -130,12 +130,12 @@ func runUpdateHelper(path string) (err error) {
 	defer journal.close()
 	defer func() {
 		if err != nil {
-			journal.append("Помощник обновления: " + err.Error())
+			journal.append(T("installer.log.helper", "error", err.Error()))
 		} else {
-			journal.append("Замена EXE подтверждена. Автоматическое применение к игре отключено.")
+			journal.append(T("installer.log.replaced"))
 		}
 	}()
-	journal.append(fmt.Sprintf("Помощник обновления PID=%d. План: %s", os.Getpid(), path))
+	journal.append(T("installer.log.helperStart", "pid", os.Getpid(), "plan", path))
 	path, _ = filepath.Abs(path)
 	p, err := loadUpdatePlan(path, updatesRoot())
 	if err != nil {
@@ -143,7 +143,7 @@ func runUpdateHelper(path string) (err error) {
 	}
 	if p.Resume.LogDir != "" {
 		if e := journal.move(p.Resume.LogDir); e != nil {
-			journal.append("Перенос журнала помощника: " + e.Error())
+			journal.append(T("installer.log.helperJournal", "error", e.Error()))
 		}
 	}
 	_ = journal.captureCrashes()
@@ -156,7 +156,7 @@ func runUpdateHelper(path string) (err error) {
 	}()
 	self, _ := os.Executable()
 	if p.Version != appVersion || !sameUpdatePath(self, p.Download) {
-		return errors.New("запущен другой файл обновления")
+		return errors.New(T("installer.err.otherFile"))
 	}
 	parent, err := openUpdateParent(p)
 	if err != nil {
@@ -169,7 +169,7 @@ func runUpdateHelper(path string) (err error) {
 	lockPath := filepath.Join(updatesRoot(), "lock-"+key)
 	lock, err := syscall.CreateFile(u16(lockPath), syscall.GENERIC_READ|syscall.GENERIC_WRITE, 0, nil, syscall.OPEN_ALWAYS, syscall.FILE_ATTRIBUTE_NORMAL, 0)
 	if err != nil {
-		return fmt.Errorf("другое обновление уже выполняется: %w", err)
+		return fmt.Errorf("%s: %w", T("installer.err.busy"), err)
 	}
 	defer syscall.CloseHandle(lock)
 	if err = prepareUpdateTarget(p); err != nil {
@@ -184,13 +184,13 @@ func runUpdateHelper(path string) (err error) {
 	}
 	state, _, waitErr := updateWaitProcess.Call(parent, 60000)
 	if state != 0 {
-		return fmt.Errorf("установщик не завершил работу: %v", waitErr)
+		return fmt.Errorf("%s: %v", T("installer.err.notExited"), waitErr)
 	}
 	// ReplaceFileW is atomic and keeps the previous file on the same volume.
 	for until := time.Now().Add(8 * time.Second); ; {
 		current, e := fileSHA256(p.Target)
 		if e != nil || current != p.OldSHA256 {
-			return restartFailedUpdate(p, path, errors.New("файл программы был изменён другим процессом"), false)
+			return restartFailedUpdate(p, path, errors.New(T("installer.err.exeTouched")), false)
 		}
 		err = replaceUpdateFile(p.Target, p.Incoming, p.Backup)
 		if err == nil {
@@ -213,7 +213,7 @@ func runUpdateHelper(path string) (err error) {
 		_ = c.Process.Kill()
 		_ = c.Wait()
 		if healthErr == nil {
-			healthErr = errors.New("новая программа не подтвердила запуск")
+			healthErr = errors.New(T("installer.err.noHealth"))
 		}
 		return restartFailedUpdate(p, path, healthErr, true)
 	}
@@ -230,22 +230,25 @@ func runUpdateHelper(path string) (err error) {
 func restartFailedUpdate(p *updatePlan, path string, cause error, replaced bool) error {
 	if replaced {
 		if err := restoreUpdateFile(p.Target, p.Backup); err != nil {
-			return fmt.Errorf("не удалось восстановить %s: %w (обновление: %v)", p.Target, err, cause)
+			return fmt.Errorf("%s: %w (%s: %v)", T("installer.err.restore", "path", p.Target), err, T("installer.err.restoreCause"), cause)
 		}
 	}
 	_ = writeUpdateJSON(filepath.Join(filepath.Dir(path), "result.json"), updateResult{State: "rolled-back", Error: cause.Error()})
 	c := updateWindowCommand(p.Target, resumeUpdateArgs(p, path)...)
 	if err := c.Start(); err != nil {
-		return fmt.Errorf("запустите прежний установщик вручную: %w", err)
+		return fmt.Errorf("%s: %w", T("installer.err.startOld"), err)
 	}
 	_ = c.Process.Release()
-	return fmt.Errorf("обновление отменено, восстановлена предыдущая версия: %w", cause)
+	return fmt.Errorf("%s: %w", T("installer.err.cancelled"), cause)
 }
 
 func resumeUpdateArgs(p *updatePlan, path string) []string {
 	args := []string{"--dfo-resume-update", path, "--no-self-update"}
 	if p.Resume.Game != "" {
 		args = append(args, "--game", p.Resume.Game)
+	}
+	if p.Resume.Lang == "ru" || p.Resume.Lang == "en" {
+		args = append(args, "--lang", p.Resume.Lang)
 	}
 	return args
 }
@@ -261,7 +264,7 @@ func loadResumeUpdate(path, self string) (*updatePlan, bool, error) {
 		return nil, false, err
 	}
 	if !sameUpdatePath(self, p.Target) {
-		return nil, false, errors.New("план предназначен для другого установщика")
+		return nil, false, errors.New(T("installer.err.planOther"))
 	}
 	var result updateResult
 	_ = readUpdateJSON(filepath.Join(filepath.Dir(path), "result.json"), &result)
@@ -272,7 +275,7 @@ func loadResumeUpdate(path, self string) (*updatePlan, bool, error) {
 	}
 	digest, err := fileSHA256(self)
 	if err != nil || digest != expected || version != appVersion {
-		return nil, false, errors.New("версия запущенной программы не соответствует обновлению")
+		return nil, false, errors.New(T("installer.err.runningVersion"))
 	}
 	return p, rolledBack, nil
 }

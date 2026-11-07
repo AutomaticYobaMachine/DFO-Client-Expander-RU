@@ -18,7 +18,7 @@ import (
 
 func (a *app) patcherCmd(ctx context.Context, exe string, args ...string) *exec.Cmd {
 	full := append([]string{filepath.Join(a.payloadDir, "patcher", "patcher.cjs")}, args...)
-	full = append(full, "--asar", filepath.Join(filepath.Dir(exe), "resources", "app.asar"))
+	full = append(full, "--asar", filepath.Join(filepath.Dir(exe), "resources", "app.asar"), "--lang", lang())
 	c := exec.CommandContext(ctx, exe, full...)
 	c.Dir = a.payloadDir
 	c.Env = append(os.Environ(), "ELECTRON_RUN_AS_NODE=1")
@@ -52,7 +52,7 @@ func (a *app) startSearch() {
 		if b, e := os.ReadFile(filepath.Join(a.prefsDir, "game-path.txt")); e == nil {
 			if exe := gameIn(filepath.Dir(strings.TrimSpace(string(b)))); exe != "" {
 				found = []string{exe}
-				how = "сохранённый путь"
+				how = T("installer.how.saved")
 			}
 		}
 		if len(found) == 0 && a.ctx.Err() == nil {
@@ -92,13 +92,14 @@ func (a *app) setGame(exe, how string) {
 	a.recordedKey, a.recordedMouse = 0, 0
 	a.querying = false
 	a.searchHow = how
-	a.note = ""
+	a.note = say{}
+	a.pathHint = ""
 	a.mu.Unlock()
 	caption(a.ctl[idPath], exe)
 	if e := os.MkdirAll(a.prefsDir, 0700); e == nil {
 		_ = os.WriteFile(filepath.Join(a.prefsDir, "game-path.txt"), []byte(exe), 0600)
 	}
-	a.appendLog("Клиент: " + exe + " (" + how + ")\r\n")
+	a.appendLog(T("installer.log.client", "exe", exe, "how", how) + "\r\n")
 	a.requestStatus(true)
 }
 
@@ -120,14 +121,14 @@ func (a *app) requestStatus(restoreChoices bool) {
 		defer a.wg.Done()
 		ctx, cancel := context.WithTimeout(a.ctx, 20*time.Second)
 		defer cancel()
-		a.appendLog("Проверка клиента: " + exe)
+		a.appendLog(T("installer.log.checking", "exe", exe))
 		out, err := a.patcherCmd(ctx, exe, "status", "--json").CombinedOutput()
 		if ctx.Err() != nil {
 			err = errors.Join(err, ctx.Err())
 		}
-		a.appendLog("Вывод проверки клиента:\r\n" + string(out))
+		a.appendLog(T("installer.log.checkOutput") + "\r\n" + string(out))
 		if err != nil {
-			a.appendLog("Результат проверки клиента: " + err.Error())
+			a.appendLog(T("installer.log.checkResult", "error", err.Error()))
 		}
 		var st *gameStatus
 		if err == nil {
@@ -140,7 +141,7 @@ func (a *app) requestStatus(restoreChoices bool) {
 			}
 		}
 		if st == nil && err == nil {
-			err = errors.New("патчер не вернул корректный JSON состояния")
+			err = errors.New(T("installer.err.statusJson"))
 		}
 		a.mu.Lock()
 		if token != a.generation || a.ctx.Err() != nil {
@@ -160,33 +161,33 @@ func (a *app) requestStatus(restoreChoices bool) {
 		}
 		a.restoreUpdateChoices(st, exe)
 		if st == nil {
-			a.note = "Не удалось проверить клиент. Нажмите «Проверить» или выберите игру заново."
+			a.note = sayKey("installer.note.checkFailed")
 			a.noteCol = colRed
 			a.page = idJournal
 		}
 		if st != nil && a.toggles[idLoot] && a.toggles[idDungeons] && a.lootKey == a.dungeonKey {
-			a.note = "Для лута и сведений о данже выбрана одна кнопка. Назначьте разные; до этого сводку можно открыть кнопкой в игре."
+			a.note = sayKey("installer.note.sameKeysFound")
 			a.noteCol = colRed
 		}
 		a.mu.Unlock()
 		if st == nil {
-			a.appendLog("Проверка клиента завершилась с ошибкой: " + err.Error())
+			a.appendLog(T("installer.log.checkFailed", "error", err.Error()))
 		} else {
 			if st.UserData != "" {
 				if e := a.logbook.move(st.UserData); e != nil {
-					a.appendLog("Не удалось перенести полный журнал в кеш игры: " + e.Error())
+					a.appendLog(T("installer.log.journalMove", "error", e.Error()))
 				} else {
 					_ = a.logbook.captureCrashes()
 				}
 			}
 			path, _ := a.logbook.location()
-			a.appendLog("Полный журнал: " + path)
+			a.appendLog(T("installer.log.journal", "path", path))
 			key := resolveLootKey(st)
-			source := "профиле"
+			source := "installer.log.lootKeyProfile"
 			if validLootKey(st.CachedLootKey) {
-				source = "кеше мода"
+				source = "installer.log.lootKeyCache"
 			}
-			a.appendLog("Кнопка лута в " + source + ": " + lootKeyLabel(key) + ". Профиль: " + st.UserData + "\r\n")
+			a.appendLog(T(source, "key", lootKeyLabel(key), "profile", st.UserData) + "\r\n")
 		}
 		a.logbook.sync()
 		pPostMessageW.Call(a.hwnd, wmStatus, 0, 0)
@@ -205,7 +206,7 @@ func (a *app) run(what string) {
 		return
 	}
 	if what == "install" && selectedCount(a.toggles) == 0 {
-		a.note = "Выберите хотя бы один компонент."
+		a.note = sayKey("installer.note.pickOne")
 		a.noteCol = colDim
 		a.mu.Unlock()
 		invalidate(a.hwnd)
@@ -216,25 +217,25 @@ func (a *app) run(what string) {
 		return
 	}
 	a.busy = true
-	a.updateText = ""
+	a.updateText = say{}
 	a.operation = what
 	a.progress = 0
-	a.note = ""
-	a.stage = "Подготовка файлов…"
+	a.note = say{}
+	a.stage = T("installer.stage.preparing")
 	exe := a.exe
 	keyOverride := a.lootKey
 	args := operationArgs(what, a.toggles, keyOverride, a.dungeonKey)
 	a.mu.Unlock()
 	a.syncControls()
 	invalidate(a.hwnd)
-	a.appendLog("\r\n" + time.Now().Format("02.01.2006 15:04:05") + " · " + map[string]string{"install": "Установка / обновление", "uninstall": "Удаление"}[what] + "\r\n")
+	a.appendLog("\r\n" + time.Now().Format("02.01.2006 15:04:05") + " · " + T("installer.log.op."+what) + "\r\n")
 	a.wg.Add(1)
 	go func() {
 		defer a.wg.Done()
 		// Closing the window is disabled while the archive is being replaced.
 		// A UI/status timeout must never kill an installation mid-write.
 		c := a.patcherCmd(context.Background(), exe, args...)
-		a.appendLog("Команда: " + c.String())
+		a.appendLog(T("installer.log.command", "cmd", c.String()))
 		err := runLoggedCommand(c, func(line string) {
 			a.appendLog(line)
 			if m := pctRe.FindStringSubmatch(line); m != nil {
@@ -252,10 +253,10 @@ func (a *app) run(what string) {
 			}
 		})
 		if err != nil {
-			a.appendLog("Операция завершилась с ошибкой: " + err.Error() + "\r\n")
+			a.appendLog(T("installer.log.opFailed", "error", err.Error()) + "\r\n")
 		}
 		if err == nil {
-			a.appendLog("Операция завершена успешно.")
+			a.appendLog(T("installer.log.opDone"))
 		}
 		a.logbook.sync()
 		a.mu.Lock()
@@ -267,15 +268,15 @@ func (a *app) run(what string) {
 				a.lootKeyDirty = false
 				a.dungeonKeyDirty = false
 				a.savedChoiceRevision = a.choiceRevision
-				a.note = "Готово. Выбранные функции включены. Запускайте игру как обычно."
+				a.note = sayKey("installer.note.installed")
 
 			} else {
-				a.note = "Расширение удалено. Исходный клиент восстановлен; ваши настройки сохранены."
+				a.note = sayKey("installer.note.removed")
 			}
 		} else {
 			a.progress = 0
 			a.noteCol = colRed
-			a.note = "Операция не завершена. Причина показана во вкладке «Журнал»."
+			a.note = sayKey("installer.note.failed")
 			a.page = idJournal
 		}
 		a.mu.Unlock()
@@ -287,17 +288,17 @@ func (a *app) run(what string) {
 func (a *app) browse() {
 	defer a.updateModal()()
 	file := make([]uint16, 32768)
-	filter := dialogFilter("Клиент DFO Online", "DFO Online.exe;Daggerfall Online.exe;DaggerfallOnline.exe", "Программы (*.exe)", "*.exe")
-	ofn := openFileName{hwndOwner: a.hwnd, lpstrFilter: &filter[0], nFilterIndex: 1, lpstrFile: &file[0], nMaxFile: uint32(len(file)), lpstrTitle: u16("Выберите DFO Online.exe в папке установленной игры"), flags: 0x1000 | 0x0800 | 0x80000 | 0x0008}
+	filter := dialogFilter(T("installer.filter.client"), "DFO Online.exe;Daggerfall Online.exe;DaggerfallOnline.exe", T("installer.filter.programs"), "*.exe")
+	ofn := openFileName{hwndOwner: a.hwnd, lpstrFilter: &filter[0], nFilterIndex: 1, lpstrFile: &file[0], nMaxFile: uint32(len(file)), lpstrTitle: u16(T("installer.dialog.pickGame")), flags: 0x1000 | 0x0800 | 0x80000 | 0x0008}
 	ofn.lStructSize = uint32(unsafe.Sizeof(ofn))
 	if r, _, _ := pGetOpenFileNameW.Call(uintptr(unsafe.Pointer(&ofn))); r == 0 {
 		return
 	}
 	p := syscall.UTF16ToString(file)
 	if exe := gameIn(filepath.Dir(p)); exe != "" {
-		a.setGame(exe, "выбрано вручную")
+		a.setGame(exe, T("installer.how.manual"))
 	} else {
-		a.message("Выберите установленный клиент DFO Online. Рядом с программой должна находиться папка resources с файлом app.asar.", 0x30)
+		a.message(T("installer.msg.notClient"), 0x30)
 	}
 }
 
@@ -307,16 +308,21 @@ func (a *app) message(s string, kind uintptr) uintptr {
 	return r
 }
 func (a *app) openGuide() {
-	p := filepath.Join(a.payloadDir, "README.txt")
+	name := guideName(lang())
+	p := filepath.Join(a.payloadDir, name)
+	if _, e := os.Stat(p); e != nil {
+		name = "README.txt"
+		p = filepath.Join(a.payloadDir, name)
+	}
 	if data, e := os.ReadFile(p); e == nil && os.MkdirAll(a.prefsDir, 0700) == nil {
-		dest := filepath.Join(a.prefsDir, "README.txt")
+		dest := filepath.Join(a.prefsDir, name)
 		if os.WriteFile(dest, data, 0600) == nil {
 			p = dest
 		}
 	}
 	r, _, _ := pShellExecuteW.Call(a.hwnd, uintptr(unsafe.Pointer(u16("open"))), uintptr(unsafe.Pointer(u16(p))), 0, 0, 1)
 	if r <= 32 {
-		a.message("Не удалось открыть инструкцию. Она также есть в ZIP и в репозитории проекта.", 0x30)
+		a.message(T("installer.msg.guideFailed"), 0x30)
 	}
 }
 func (a *app) openFile(name string) {
@@ -331,7 +337,7 @@ func (a *app) openFile(name string) {
 	}
 	p := filepath.Join(dir, name)
 	if _, err := os.Stat(p); err != nil {
-		a.message("Этот отчёт появится после первого запуска игры с расширением.", 0x40)
+		a.message(T("installer.msg.noReport"), 0x40)
 		return
 	}
 	pShellExecuteW.Call(a.hwnd, uintptr(unsafe.Pointer(u16("open"))), uintptr(unsafe.Pointer(u16(p))), 0, 0, 1)
@@ -340,15 +346,15 @@ func (a *app) saveLog() {
 	defer a.updateModal()()
 	file := make([]uint16, 32768)
 	copy(file, syscall.StringToUTF16(appName+"-install.log"))
-	filter := dialogFilter("Журнал (*.log)", "*.log", "Все файлы", "*.*")
-	ofn := openFileName{hwndOwner: a.hwnd, lpstrFilter: &filter[0], nFilterIndex: 1, lpstrFile: &file[0], nMaxFile: uint32(len(file)), lpstrTitle: u16("Сохранить журнал установки"), lpstrDefExt: u16("log"), flags: 0x2 | 0x800 | 0x80000 | 0x8}
+	filter := dialogFilter(T("installer.filter.log"), "*.log", T("installer.filter.all"), "*.*")
+	ofn := openFileName{hwndOwner: a.hwnd, lpstrFilter: &filter[0], nFilterIndex: 1, lpstrFile: &file[0], nMaxFile: uint32(len(file)), lpstrTitle: u16(T("installer.dialog.saveLog")), lpstrDefExt: u16("log"), flags: 0x2 | 0x800 | 0x80000 | 0x8}
 	ofn.lStructSize = uint32(unsafe.Sizeof(ofn))
 	if r, _, _ := pGetSaveFileNameW.Call(uintptr(unsafe.Pointer(&ofn))); r == 0 {
 		return
 	}
 	s := a.logbook.snapshot(0)
 	if err := os.WriteFile(syscall.UTF16ToString(file), []byte(s), 0600); err != nil {
-		a.message("Не удалось сохранить журнал: "+err.Error(), 0x10)
+		a.message(T("installer.msg.saveLogFailed", "error", err.Error()), 0x10)
 	}
 }
 
@@ -356,11 +362,11 @@ func (a *app) openInstallerLog() {
 	a.logbook.sync()
 	path, err := a.logbook.location()
 	if path == "" || err != nil {
-		a.message(fmt.Sprintf("Не удалось записать полный журнал: %v. Нажмите «Сохранить журнал…» для экспорта.", err), 0x30)
+		a.message(T("installer.msg.journalUnavailable", "error", fmt.Sprint(err)), 0x30)
 		return
 	}
 	r, _, _ := pShellExecuteW.Call(a.hwnd, uintptr(unsafe.Pointer(u16("open"))), uintptr(unsafe.Pointer(u16(path))), 0, 0, 1)
 	if r <= 32 {
-		a.message("Не удалось открыть журнал. Файл: "+path, 0x30)
+		a.message(T("installer.msg.journalOpenFailed", "path", path), 0x30)
 	}
 }

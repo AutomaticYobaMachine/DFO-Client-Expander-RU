@@ -1,5 +1,7 @@
 (function (root) {
   'use strict';
+  // The mod's own words, in the install's language (page/dfo_ui_text.js; English without the translation).
+  const T = (key, params) => (root.__dfoUi ? root.__dfoUi.t(key, params) : key);
   const G=typeof module==='object'&&module.exports?require('./dfo_dungeon_graph.js'):root.__dfoDungeonGraph;
   const BODY=G.BODY;
   const point = p => p && p.length >= 3 && [p[0],p[1],p[2]].every(Number.isFinite) ? [p[0],p[1],p[2]] : null;
@@ -79,7 +81,7 @@
   }
   const ended = b => { const q=b?.targetQuest??b?.targetResource?.parentQuest;return !!(q?.questComplete||q?.questTombstoned||q?.shelvedAt!=null); };
   const liveFoe = f => !!f?.entity&&!f.dead&&!f.corpse&&!f._gone&&!f._absentHere&&!f._pupMismatch&&!f.removed;
-  const enemyName = (f,tools) => String(f.entity?.revenant?.name||f.entity?.champion?.name||f.entity?.properName||tools.enemyName?.(f.mobileType??f.src?.mobileType)||'Элитный противник');
+  const enemyName = (f,tools) => String(f.entity?.revenant?.name||f.entity?.champion?.name||f.entity?.properName||tools.enemyName?.(f.mobileType??f.src?.mobileType)||T('nav.model.elite'));
   const values = x => Array.isArray(x) ? x : typeof x?.values === 'function' ? [...x.values()] : [];
   const symbol = s => typeof s === 'string' ? s.replace(/^_+|_+$/g,'') : s?.name ?? symbol(s?.original ?? '');
   const questKeys = new WeakMap();let nextQuestKey=0;
@@ -140,7 +142,7 @@
       if(rec.open?.length===0)return;
       const id=rec.uid+'|'+key+'|'+token;if(seen.has(id))return;seen.add(id);
       if(item&&rec.pending.has(token))rec.hasPending=true;
-      candidates.push({key:'quest:'+rec.uid+':'+key+':'+token,kind:'quest',uid:rec.uid,name:String(name||res.displayName||'Цель задания'),at,...(item&&!key.startsWith('carrier:')?{reach:2.25}:{}),token,item,rec});
+      candidates.push({key:'quest:'+rec.uid+':'+key+':'+token,kind:'quest',uid:rec.uid,name:String(name||res.displayName||T('nav.target.quest')),at,...(item&&!key.startsWith('carrier:')?{reach:2.25}:{}),token,item,rec});
     }
     for(const [i,f] of (live.foes||[]).entries()) {
       if(!f?.entity||f.active===false||f._gone||f._absentHere||f._pupMismatch||f.removed)continue;
@@ -150,7 +152,7 @@
         const at=point(f.ai?.feet), doneCarrier=goal&&goal.res.itemQueue?.some(it=>{const g=itemGoal(it,goal.rec,true);return g&&goal.rec.wantedItems.has(g.key)&&goal.rec.owns(g.res);});
         if(!doneCarrier||goal.rec.needed.has(goal.key)||goal.rec.marks.has(goal.key))put(goal,at,'foe:'+id,goal?.res.displayName||tools.enemyName?.(f.mobileType));
         const items=new Set([...(Array.isArray(f.entity.items)?f.entity.items:[]),...(Array.isArray(goal?.res.itemQueue)?goal.res.itemQueue:[])]);
-        for(const it of items){const g=itemGoal(it,goal?.rec);if(g)put(g,at,'carrier:'+id,(g.res.displayName||it.name||'Предмет задания')+' — '+(tools.enemyName?.(f.mobileType)||'носитель'),true);}
+        for(const it of items){const g=itemGoal(it,goal?.rec);if(g)put(g,at,'carrier:'+id,(g.res.displayName||it.name||T('nav.model.questItem'))+' — '+(tools.enemyName?.(f.mobileType)||T('nav.model.carrier')),true);}
       } else if(f.dead&&f.corpse&&f._ownFrom==null&&!f.corpseDisabled) {
         const key=typeof ctx.corpseKeyOf==='function'?peek(()=>ctx.corpseKeyOf(f)):'corpse:'+i;if(!key)continue;
         const items=typeof ctx.lootContents==='function'?peek(()=>ctx.lootContents(key)):f.entity.items;
@@ -188,9 +190,9 @@
   }
   function targets(live, sources={}, tools={}, questIds=null, kind=null) {
     const out={exit:[],aurum:[],elite:[],quest:[]},ctx=live.ctx;
-    for(const [i,d]of(ctx.exitDoors||[]).entries()){const at=exitPoint(d);if(at)out.exit.push({key:'exit:'+i,kind:'exit',name:'Выход из данжа',at});}
+    for(const [i,d]of(ctx.exitDoors||[]).entries()){const at=exitPoint(d);if(at)out.exit.push({key:'exit:'+i,kind:'exit',name:T('nav.target.exit'),at});}
     const coffer=live.aurum,foot=point(coffer?.foot);
-    if(coffer&&!coffer.open&&foot)out.aurum.push({key:'aurum:'+coffer.id,kind:'aurum',name:'Сундук с аурумом',at:foot});
+    if(coffer&&!coffer.open&&foot)out.aurum.push({key:'aurum:'+coffer.id,kind:'aurum',name:T('nav.target.aurum'),at:foot});
     if(kind==null||kind==='elite')for(const[i,f]of(live.foes||[]).entries()){
       if(!liveFoe(f))continue;
       const at=point(f.ai?.feet);if(!at)continue;

@@ -16,7 +16,7 @@ const entry = fs.readdirSync(assets).find(file => /^enhancedInventory-.*\.js$/.t
 assert.ok(entry, 'Need the actual published game assets');
 const html = `<!doctype html><html><head><meta charset="utf-8"><style>
 html,body{margin:0;background:#172029;height:100%;overflow:hidden}#hover-target{position:fixed;right:20px;bottom:20px;width:90px;height:45px;z-index:2147483647}
-</style><script>window.__DFO_MOD_CFG__={fonts:{enabled:${globalFonts}},itemCards:{enabled:!location.search.includes('off')},ru:{on:new URLSearchParams(location.search).has('ru')}};</script>${globalFonts?'<script src="/dfo-mod/dfo_font_data.js"></script><script src="/dfo-mod/dfo_fonts.js"></script>':''}<script src="/dfo-mod/dfo_item_text_data.js"></script><script src="/dfo-mod/dfo_item_text.js"></script><script src="/dfo-mod/dfo_item_cards.js"></script>
+</style><script>window.__DFO_MOD_CFG__={fonts:{enabled:${globalFonts}},itemCards:{enabled:!location.search.includes('off')},ru:{on:new URLSearchParams(location.search).has('ru')}};</script><script src="/dfo-mod/dfo_ui_text_data.js"></script><script src="/dfo-mod/dfo_ui_text.js"></script>${globalFonts?'<script src="/dfo-mod/dfo_font_data.js"></script><script src="/dfo-mod/dfo_fonts.js"></script>':''}<script src="/dfo-mod/dfo_item_text_data.js"></script><script src="/dfo-mod/dfo_item_text.js"></script><script src="/dfo-mod/dfo_item_cards.js"></script>
 <script>
 if(window.__dfoItemCards){
  const api=window.__dfoItemCards;window.auditNative={readers:{},calls:{}};
@@ -94,6 +94,12 @@ const server = http.createServer((req,res) => {
       const itemText=require(path.join(modDir,'item-text.cjs'));res.setHeader('Content-Type','text/javascript');
       return res.end(itemText.bundle(String(req.headers.referer||'').includes('?ru')?'ru':'en',path.join(modDir,'item-text')));
     }
+    // The mod's own words in the page's language, as the hook serves them: English, Russian on the ?ru page.
+    if(url.pathname==='/dfo-mod/dfo_ui_text_data.js'){
+      const itemText=require(path.join(modDir,'item-text.cjs'));res.setHeader('Content-Type','text/javascript');
+      return res.end(itemText.uiBundle(String(req.headers.referer||'').includes('?ru')?'ru':'en',path.join(modDir,'item-text')));
+    }
+    if(url.pathname==='/dfo-mod/dfo_ui_text.js'){res.setHeader('Content-Type','text/javascript');return res.end(fs.readFileSync(path.join(modDir,'page/dfo_ui_text.js')));}
     if (url.pathname === '/dfo-mod/dfo_item_cards.js') {res.setHeader('Content-Type','text/javascript');return res.end(fs.readFileSync(path.join(modDir,'page/dfo_item_cards.js')));}
     if (/^\/dfo-mod\/(?:item-font-(?:text|title|numbers|sigil|set|legendary|description)|book-font-text)\.(?:ttf|otf)$/.test(url.pathname)) {
       res.setHeader('Content-Type',url.pathname.endsWith('.otf')?'font/otf':'font/ttf');if(url.searchParams.has('dfo'))res.setHeader('Cache-Control','public,max-age=31536000,immutable');return res.end(fs.readFileSync(path.join(modDir,'fonts',path.basename(url.pathname))));
@@ -196,16 +202,16 @@ async function main() {
       assert.equal(result.columns,2);assert.deepEqual(result.bad,[],id+' no scroll');
       assert.deepEqual(result.textOutside,[],id+' all text stays inside the card');
       assert.equal(await card.locator('.dfo-item-footer').count(),1);assert.equal(await card.locator('.lore,.description').count(),0);
-      if(id==='steel'){assert.match(result.left,/Материал\nСталь/);assert.match(result.left,/Тип брони\nPlate/);assert.equal(result.money,'~240');}
-      if(id==='chain')assert.match(result.left,/Металл не указан/);
-      if(id==='missing')assert.match(result.left,/Нет данных/);
-      if(id==='rare')assert.match(result.money,/^~1\s370$/);
-      if(id==='unknown'){assert.doesNotMatch(result.text,/99\s999/);assert.match(result.money,/^~40\s000$/);}
+      if(id==='steel'){assert.match(result.left,/Material\nSteel/);assert.match(result.left,/Armor type\nPlate/);assert.equal(result.money,'~240');}
+      if(id==='chain')assert.match(result.left,/Metal not recorded/);
+      if(id==='missing')assert.match(result.left,/No data/);
+      if(id==='rare')assert.match(result.money,/^~1,370$/,'English digits');
+      if(id==='unknown'){assert.doesNotMatch(result.text,/99[\s,]999/);assert.match(result.money,/^~40,000$/);}
       if(id==='stack')assert.equal(result.money,'~30');
-      if(id==='pellets'){assert.match(result.left,/Цена \/ кг\n~10 зол\./);assert.equal(result.money,'~30');}
+      if(id==='pellets'){assert.match(result.left,/Price \/ kg\n~10 gold/);assert.equal(result.money,'~30');}
       if(id==='base')assert.match(result.money,/\d/);
       if(id==='invalid')assert.equal(result.money,'—');
-      if(id==='credit')assert.match(result.money,/20\s000/);
+      if(id==='credit')assert.match(result.money,/20,000/);
       if(id==='coins')assert.equal(result.money,'27');
       if(!['credit','coins','invalid'].includes(id))assert.match(result.money,/^~[\d\s.,]+$/,'Estimated price is marked and rounded to tens');
       // The footer: the item's description on the left, the money number and coin on the right.
@@ -237,17 +243,17 @@ async function main() {
       if(id==='rare')assert.ok(colors.some(p=>p.kind==='dfo-effect-range'));
       if(['steel','rare','ruhn'].includes(id)){
         assert.equal(await card.locator('.dfo-item-head .dfo-item-material').count(),1,'Material belongs to the name block');
-        assert.equal(await card.locator('.dfo-item-stats dt').evaluateAll(rows=>rows.some(x=>x.textContent==='Материал')),false,'Material is not duplicated among general stats');
+        assert.equal(await card.locator('.dfo-item-stats dt').evaluateAll(rows=>rows.some(x=>x.textContent==='Material')),false,'Material is not duplicated among general stats');
       }
-      if(id==='mail'){assert.match(result.left,/Кольчужная/);assert.match(result.left,/Сталь/);}
-      if(id==='fur')assert.match(result.left,/Мех/);
+      if(id==='mail'){assert.match(result.left,/Mail/);assert.match(result.left,/Steel/);}
+      if(id==='fur')assert.match(result.left,/Fur/);
       if(['ruhn','wyrd'].includes(id)){assert.ok(result.blocks.some(x=>x[0].includes('sigilbox')),id+' native sigil');assert.ok(result.blocks.some(x=>x[0].includes('setbox')),id+' native set');}
       report.push({id,...result});
     }
     assert.deepEqual(await page.evaluate(()=>__dfoItemCards.stats().failures),0);
     // The same shared card is used for local, shop, remote/trade and chat links.
     for(const side of ['local','shop','remote']){
-      await page.evaluate(side=>probe.show('rare',side),side);await card.waitFor();assert.match(await card.locator('.dfo-item-price-value').innerText(),/^~1\s370$/);
+      await page.evaluate(side=>probe.show('rare',side),side);await card.waitFor();assert.match(await card.locator('.dfo-item-price-value').innerText(),/^~1,370$/);
       assert.equal(await card.locator('.dfo-item-title h3').evaluate(n=>getComputedStyle(n).fontSize),'22px','Item title size survives every hover context');
     }
     await page.evaluate(()=>probe.hide());await page.locator('#hover-target').hover();await card.waitFor();
@@ -282,7 +288,8 @@ async function main() {
     await ru.goto(`http://127.0.0.1:${server.address().port}/?ru`,{waitUntil:'domcontentloaded'});await ru.waitForFunction(()=>window.ready);
     for(const id of ['steel','rare','ruhn','wyrd','spells','credit']){
       await ru.evaluate(id=>probe.show(id),id);const c=ru.locator('.inv-tip .dfo-item-card');await c.waitFor();
-      if(id==='steel'){assert.equal(await c.locator('.dfo-item-primary').count(),1);assert.match(await c.locator('.dfo-item-stats').innerText(),/Тип брони/);}
+      if(id==='steel'){assert.equal(await c.locator('.dfo-item-primary').count(),1);assert.match(await c.locator('.dfo-item-stats').innerText(),/Тип брони/);assert.match(await c.locator('.dfo-item-head').innerText(),/Материал/);}
+      if(id==='rare')assert.match(await c.locator('.dfo-item-price-value').innerText(),/^~1\s370$/,'Russian digits on the Russian page');
       assert.equal(await c.locator(':is(.dfo-item-effects,.dfo-item-overflow) li').evaluateAll(list=>list.every(n=>getComputedStyle(n).display!=='none')),true);
     }
     // The translated page speaks Russian: the garment's colour agrees with it, the stolen mark stays red.

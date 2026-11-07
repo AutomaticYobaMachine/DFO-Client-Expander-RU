@@ -6,7 +6,9 @@
   if (!root.document || root.__dfoServices) return;
   const doc = root.document,
     details = () => root.__dfoServiceDetails,
-    ru = () => root.__DFO_MOD_CFG__?.ru?.on === true;
+    ru = () => root.__DFO_MOD_CFG__?.ru?.on === true,
+    // The mod's own words (src/mod/item-text/<en|ru>/ui/svc.csv); the native labels below are translated only with ru.
+    T = (key, params) => (root.__dfoUi ? root.__dfoUi.t(key, params) : key);
   const parents = new WeakMap(),
     children = new WeakMap(),
     pickViews = new WeakMap(),
@@ -140,7 +142,7 @@
         ? [
             {
               type: "group",
-              title: "Расчёт по параметрам",
+              title: T('svc.formulas'),
               cls: "dfo-service-formulas",
               blocks: [{ type: "text", rows: info.formula }],
             },
@@ -231,7 +233,6 @@
   }
   function view(kind, w, v) {
     const state = track(w, kind);
-    if (!ru()) return v;
     bind(w, kind, state);
     // A transaction's field must be reachable without scrolling through disabled
     // service buttons. Keep the native callbacks, value and key handling.
@@ -263,7 +264,7 @@
           {
             type: "group",
             cls: "dfo-service-description",
-            title: "Действие эффекта · уровень " + level,
+            title: T("svc.editorTitle", { level }),
             blocks: blocks(state.editorInfo),
           },
           ...supported,
@@ -271,10 +272,10 @@
         v.size = "wide dfo-effect-editor";
       }
     }
-    return localView(v);
+    return ru() ? localView(v) : v;
   }
   function picker(p, active) {
-    if (!ru() || !active?.shell || !details()) return;
+    if (!active?.shell || !details()) return;
     const ctx = children.get(p);
     if (!ctx) return;
     let state = pickViews.get(p);
@@ -286,14 +287,14 @@
       win.setAttribute(
         "aria-label",
         ctx.kind === "itemMaker"
-          ? "Выбор зачарования"
-          : "Выбор эффекта заклинания",
+          ? T('svc.pick.enchant')
+          : T('svc.pick.spellEffect'),
       );
       active.list.setAttribute("role", "listbox");
       const title = doc.createElement("h2");
       title.className = "dfo-service-picker-title";
       title.textContent =
-        ctx.kind === "itemMaker" ? "Выбор зачарования" : "Выбор эффекта";
+        ctx.kind === "itemMaker" ? T('svc.pick.enchant') : T('svc.pick.effect');
       const panel = doc.createElement("aside");
       panel.className = "dfo-service-help";
       panel.setAttribute("aria-live", "polite");
@@ -305,9 +306,9 @@
       active.rows.forEach((r, i) => {
         r.setAttribute("role", "option");
         const effect = ctx.rows[i]?.effect;
-        if (effect && /^(Normal|True)$/.test(effect.subgroup))
+        if (ru() && effect && /^(Normal|True)$/.test(effect.subgroup))
           r.querySelector(".pick-label").textContent = variantName(effect);
-        if (ctx.rows[i]?.type === "EnhancesSkill") {
+        if (ru() && ctx.rows[i]?.type === "EnhancesSkill") {
           const label = r.querySelector(".pick-label"),
             map = {
               Harpy: "Язык гарпий",
@@ -384,10 +385,10 @@
           first.type,
           row.effects.length > 1 ? -1 : first.subType,
         ),
-        stats: [["Варианты", row.effects.map(variantName).join(" · ")]],
+        stats: [[T('svc.variants'), row.effects.map(variantName).join(" · ")]],
         formula: [],
         notes: [
-          "Выберите группу, затем конкретный вариант. Числовые параметры задаются в следующем окне; здесь они ещё не настроены.",
+          T('svc.pick.note'),
         ],
       };
     }
@@ -402,7 +403,7 @@
     add(
       "h3",
       "dfo-service-help-title",
-      row.name ?? row.effect?.name ?? row.group ?? "Описание эффекта",
+      row.name ?? row.effect?.name ?? row.group ?? T('svc.pick.describe'),
     );
     add("p", "dfo-service-help-summary", info.summary);
     for (const [k, v] of info.stats ?? []) {
@@ -411,7 +412,7 @@
         value = doc.createElement("strong");
       label.textContent = k + ": ";
       value.textContent =
-        row.type === "EnhancesSkill"
+        ru() && row.type === "EnhancesSkill"
           ? ({
               Harpy: "Язык гарпий",
               Nymph: "Язык нимф",
@@ -426,15 +427,13 @@
       add(
         "p",
         "dfo-service-help-stat",
-        "Стоимость вариантов: " +
-          row.costRange.join(" … ") +
-          " очк. зачарования.",
+        T("svc.costRange", { range: row.costRange.join(" … ") }),
       );
     if (ctx.kind === "spellMaker" && row.effect)
       add(
         "p",
         "dfo-service-help-note",
-        "Показаны начальные параметры нового эффекта. Их можно изменить в следующем окне.",
+        T('svc.pick.startSettings'),
       );
     if (
       ctx.kind === "itemMaker" &&
@@ -463,7 +462,7 @@
         add(
           "p",
           "dfo-service-help-note",
-          "Числовые параметры выбранного заклинания появятся после загрузки его данных клиентом.",
+          T('svc.pick.spellLoading'),
         );
     }
   }

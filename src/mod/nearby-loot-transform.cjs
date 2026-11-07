@@ -97,6 +97,34 @@ function inventory(text) {
   return out + `\n;globalThis.__dfoLootTools={...globalThis.__dfoLootTools,planTake:${plan[1]},sort:${sort[1]},nameOf:${sort[2]}};\n`;
 }
 
+const escapeRx = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+// The floor's reward pool of the place the player stands in (world.js floorPool: the Sky-Ketch's hold, the Hour's -
+// the Rift's - a gate's court): its resting pieces, an item's one-item list, and the press that takes a piece.
+function spoils(text) {
+  const m = need(text, rx(`spoilTargets:\\(\\)=>(${ID})\\(\\)\\?\\.targets\\(\\)\\?\\?null`));
+  const pool = m[1], p = escapeRx(pool);
+  need(text, rx(`spoilContents:(${ID})=>${p}\\(\\)\\?\\.contentsOf\\(\\1\\)\\?\\?null`));
+  need(text, rx(`takeSpoil:(${ID})=>!!${p}\\(\\)\\?\\.pick\\(\\1\\)`));
+  const code = `globalThis.__dfoLootSpoils={targets:()=>${pool}()?.targets()??[],contents:_k=>${pool}()?.contentsOf(_k)??null,pick:_k=>!!${pool}()?.pick(_k)}`;
+  return text.replace(m[0], () => `spoilTargets:(${code},()=>${pool}()?.targets()??null)`);
+}
+
+// A searched chest's find, readable while its search cools - exactly when the press opens that list again instead of
+// rolling a new one (dungeonContext.js activateSearchable: `if (cooling && open) return api.takeLoot(\`srch:\${i}\`)`).
+function finds(text) {
+  const getter = 'sources:()=>globalThis.__dfoLoot.dungeonSources(api,';
+  const at = text.indexOf(getter);
+  if (at < 0) throw new Error('missing dungeon nearby getter');
+  const fn = need(text, rx(`function (${ID})\\((${ID}),(${ID})=\`grab\`\\)\\{let (${ID})=(${ID})\\[\\2\\];if\\(!\\4\\)return 0;`));
+  const body = text.slice(fn.index, fn.index + 1500), sb = escapeRx(fn[4]);
+  const key = need(body, rx(`let (${ID})=(${ID})\\((${ID})\\(\\),${sb}\\.key\\)`));
+  const cool = need(body, rx(`(${ID})=(${ID})\\(\\),(${ID})=(${ID})\\(${escapeRx(key[1])},\\1\\)>0;if\\(\\3&&(${ID})\\)return (${ID})\\.takeLoot\\(\`srch:\\$\\{${escapeRx(fn[2])}\\}\`\\)`));
+  const [list, searchKey, place, now, left] = [fn[5], key[2], key[3], cool[2], cool[4]];
+  const code = `finds:()=>${list}.map((_s,_i)=>_s&&_s.items.length>0&&${left}(${searchKey}(${place}(),_s.key),${now}())>0?{index:_i,items:_s.items,aabb:_s.aabb}:null).filter(Boolean),`;
+  return text.slice(0, at) + code + text.slice(at);
+}
+
 function arrows(text) {
   const at = text.indexOf('You collect the arrows.');
   const before = text.slice(Math.max(0, at - 200), at);
@@ -110,7 +138,11 @@ function transformNearby(rel, text, log) {
   if (/\/world-[^/]+\.js$/.test(rel)) actions.push(['loot.world', t => outdoor(t, 'world')]);
   if (/\/exterior-[^/]+\.js$/.test(rel)) actions.push(['loot.exterior', t => outdoor(t, 'exterior')]);
   if (text.includes('get questOverlay(){')) actions.push(['loot.modes', modes]);
-  if (text.includes('openLootList(') && text.includes('lootKey:') && text.includes('lootContents(') && text.includes('takeLoot(')) actions.push(['loot.dungeon', dungeon]);
+  if (text.includes('openLootList(') && text.includes('lootKey:') && text.includes('lootContents(') && text.includes('takeLoot(')) {
+    actions.push(['loot.dungeon', dungeon]);
+    if (text.includes('`srch:${')) actions.push(['loot.finds', finds]);
+  }
+  if (/\/world-[^/]+\.js$/.test(rel) && text.includes('spoilTargets:')) actions.push(['loot.spoils', spoils]);
   if (text.includes('`storesearch`') && text.includes('sortbtn')) actions.push(['loot.inventory', inventory]);
   if (/\/itemTransfer-[^/]+\.js$/.test(rel)) actions.push(['loot.transfer', t => {
     const m = need(t, rx(`function (${ID})\\((${ID}),\\{bag:(${ID})=\\[\\],entity:(${ID})=null,mode:`));

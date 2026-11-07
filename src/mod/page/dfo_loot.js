@@ -6,7 +6,8 @@
   const Rules = typeof module === 'object' && module.exports ? require('./dfo_loot_rules.js') : root.__dfoLootRules;
   const DEFAULT_SETTINGS = Rules.cleanSettings();
   const RADIUS = 15;
-  const allowed = (key) => /^(?:loot|corpse|foeCorpse|guardCorpse|droppedLoot):/.test(key);
+  // srch: a searched chest's find, open while its search cools; spoil: an instance's reward lying on the floor.
+  const allowed = (key) => /^(?:loot|corpse|foeCorpse|guardCorpse|droppedLoot|srch|spoil):/.test(key);
   // PlayerMotor.pos is Float32Array in the world, town and interior hosts.
   // Dungeon feet may be a plain array; both are coordinates, never game entities.
   const vector3 = v => (Array.isArray(v) || ArrayBuffer.isView(v)) && v.length === 3
@@ -17,84 +18,156 @@
     (target.aabb.min[2] + target.aabb.max[2]) / 2,
   ]);
   const MAX_VERTICAL = 2.25;
+  // Loot within this band of the bare ground lies on open terrain, which has no storeys.
+  const GROUND_BAND = 0.75;
+  // The ground right under the thing aimed at is its support, not an obstacle: a pile's stored foot may sit a little
+  // under the sampled terrain, and a body marker lands on the mesh the terrain sampler does not see.
+  const NEAR_TARGET = 0.75, NEAR_EYE = 0.3, TERRAIN_SLACK = 0.05;
+  const terrainOf = (collider) => {
+    const f = collider?.surfaceAt ?? collider?.heightAt;
+    return typeof f === 'function' ? f : null;
+  };
+  const groundAt = (terrain, collider, x, z) => {
+    try { const y = terrain.call(collider, x, z); return Number.isFinite(y) ? y : null; } catch { return null; }
+  };
+  // Where to look: a pile's/body's/piece's base, middle and top (any one seen is enough - a terrain bump or a low step
+  // may hide its foot while the thing itself is in plain view); a stuck shaft at the part standing out of what it struck.
+  function aimPoints(target, shape) {
+    if (vector3(shape?.dir)) {
+      const d = shape.dir, lift = Number.isFinite(shape.lift) ? shape.lift : 0;
+      return [0.12, 0.3].map(back => [target[0] - d[0] * back, target[1] + lift - d[1] * back, target[2] - d[2] * back]);
+    }
+    const h = Number.isFinite(shape?.height) && shape.height > 0.12 ? Math.min(shape.height, 2) : 0.6;
+    return [...new Set([0.06, Math.min(0.3, h / 2), h - 0.05])].map(up => [target[0], target[1] + up, target[2]]);
+  }
+  function sees(origin, end, base, collider, terrain, shape) {
+    const delta = end.map((v, j) => v - origin[j]), length = Math.hypot(...delta);
+    if (length < 0.0001) return true;
+    const direction = delta.map(v => v / length), filter = { bodies: true };
+    if (terrain) {
+      const samples = Math.max(1, Math.ceil(length / 0.5));
+      for (let i = 0; i <= samples; i++) {
+        const t = i / samples, x = origin[0] + delta[0] * t, z = origin[2] + delta[2] * t;
+        if (t * length < NEAR_EYE || Math.hypot(x - base[0], z - base[2]) < NEAR_TARGET) continue;
+        const y = groundAt(terrain, collider, x, z);
+        if (y != null && y > origin[1] + delta[1] * t + TERRAIN_SLACK) return false;
+      }
+    }
+    // A chest stands in the collider as its own mesh: a ray that meets it above its foot has reached it.
+    const box = shape?.solid && shape.box;
+    const own = d => !!box && [0, 1, 2].every(j => {
+      const p = origin[j] + direction[j] * d;
+      return p >= box.min[j] - 0.1 && p <= box.max[j] + 0.1;
+    }) && origin[1] + direction[1] * d > base[1] + 0.03;
+    const clear = d => d === Infinity || Number.isFinite(d) && (d >= length - 0.0001 || own(d));
+    // The ground is the sampler's, walked above. The game's surfaceHit stands for it only where there is none: its ground
+    // arm is the flat plane at the height under the EYE (collider.js), which any ray down a hillside meets long before
+    // the loot - every pile lower than the player's own ground read as hidden.
+    const hit = terrain ? null : collider.surfaceHit?.(origin, direction, length, filter);
+    const mesh = collider.raycast(origin, direction, length, filter);
+    return clear(mesh) && (hit == null || clear(hit.dist));
+  }
   // This is an interaction ray, not a route for the player's standing capsule.
   // A table/low plinth may block walking while its loot is visible from the eye.
-  // Keep a separate storey limit even in open stairwells, where sight alone is not enough.
-  function canReach(feet, target, collider, eye = null) {
-    if (!vector3(feet) || !vector3(target)
-      || distance(vector3(eye) ? eye : feet, target) > RADIUS || Math.abs(feet[1] - target[1]) > MAX_VERTICAL
-      || typeof collider?.raycast !== 'function') return false;
+  // Keep a separate storey limit even in open stairwells, where sight alone is not enough - except on open ground:
+  // loot lying on the terrain of a hillside or at a cliff's foot is limited by the sphere and the line of sight alone.
+  function canReach(feet, target, collider, eye = null, shape = null) {
+    if (!vector3(feet) || !vector3(target) || typeof collider?.raycast !== 'function') return false;
     if (eye != null && !vector3(eye)) return false;
+    if (distance(vector3(eye) ? eye : feet, target) > RADIUS) return false;
     try {
+      const terrain = terrainOf(collider);
+      const onGround = p => { const g = terrain ? groundAt(terrain, collider, p[0], p[2]) : null; return g != null && Math.abs(p[1] - g) <= GROUND_BAND; };
+      // Both ends on open ground: a hillside or a cliff's foot. A player on a bridge or a wall keeps the storey limit.
+      const vertical = onGround(feet) && onGround(target) ? RADIUS : MAX_VERTICAL;
+      const level = vector3(shape?.dir) && Number.isFinite(shape.lift) ? target[1] + shape.lift : target[1];
+      if (Math.abs(feet[1] - level) > vertical) return false;
       const origin = vector3(eye) ? Array.from(eye) : [feet[0], feet[1] + 1.6, feet[2]];
-      // Native target positions are at the base of the flat/body. Aim just above
-      // that support, never at the centre of a big AABB that may be inside a wall.
-      const end = [target[0], target[1] + 0.06, target[2]], delta = end.map((v, j) => v - origin[j]), length = Math.hypot(...delta);
-      if (length < 0.0001) return true;
-      const direction = delta.map(v => v / length), filter = { bodies: true };
-      const terrain = collider.surfaceAt ?? collider.heightAt;
-      if (typeof terrain === 'function') {
-        const samples = Math.max(1, Math.ceil(length / 0.5));
-        for (let i = 0; i <= samples; i++) {
-          const t = i / samples, x = origin[0] + delta[0] * t, z = origin[2] + delta[2] * t;
-          const y = terrain.call(collider, x, z);
-          if (Number.isFinite(y) && y > origin[1] + delta[1] * t + 0.015) return false;
-        }
-      }
-      // surfaceHit includes outdoor terrain, which raycast alone does not.
-      const hit = collider.surfaceHit?.(origin, direction, length, filter);
-      const mesh = collider.raycast(origin, direction, length, filter);
-      const clear = d => d === Infinity || Number.isFinite(d) && d >= length - 0.0001;
-      return clear(mesh) && (hit == null || clear(hit.dist));
+      for (const end of aimPoints(target, shape)) if (sees(origin, end, target, collider, terrain, shape)) return true;
+      return false;
     } catch { return false; } // Never fall back to distance-only access after a geometry failure.
   }
-  // Only drawn ground piles, never the hidden backing lists of searchables, coffers or furniture.
-  const groundPile = (p) => p && !p.dead && !p.inactive && p.drawn !== false && !p.owner && !p.wild && !p.wildBody;
+  // Ground piles the press offers: drawn ones, and the loose kinds another pass draws (a stuck shaft, Deep Waters'
+  // sunken caches) or a spawner tracks (a hideout's spill). Never a player's remains (wild bodies, the house's fallen)
+  // or the hidden backing lists of searchables, coffers or furniture.
+  const LOOSE_OWNERS = new Set(['stuckArrow', 'deepWaters', 'lw-hideout']);
+  const UNDRAWN_OWNERS = new Set(['stuckArrow', 'deepWaters']);
+  const groundPile = (p) => !!p && !p.dead && !p.inactive && !p.wild && !p.wildBody
+    && (p.owner == null || LOOSE_OWNERS.has(p.owner)) && (p.drawn !== false || UNDRAWN_OWNERS.has(p.owner));
+  // A stuck shaft is aimed at where it stands out of what it struck (arrowFlight.js: its pile's foot is 0.3 under it).
+  const pileShape = (p) => (p.owner === 'stuckArrow' && vector3(p.stuckDir) ? { dir: p.stuckDir, lift: 0.3 } : null);
 
+  // Physical Items stands each item as its own proxy: a shift-drop's, and every body's, thrown out round it - over a
+  // ledge, down a slope. The vanilla press takes an item where its proxy lies, so that is where it is reached too.
   function physicalPositions(drops) {
     const positions = new Map();
-    if (drops?._piles?.some(p => p.physical && groundPile(p)))
-      for (const p of drops.physical?.state?.() ?? []) if (p.kind === 'pile' && vector3(p.pos)) positions.set(p.item, p.pos);
+    for (const p of drops?.physical?.state?.() ?? []) if ((p.kind === 'pile' || p.kind === 'corpse') && vector3(p.pos)) positions.set(p.item, p.pos);
     return positions;
+  }
+  // An instance's reward on the floor (scenes/spoilsPool.js, the place's pool - the Sky-Ketch's hold, the Hour's, a
+  // gate's court): each resting item a source of one, taken by the pool's own press. Its gold goes to the purse when
+  // the court is left, and is no item to list.
+  function spoilSources() {
+    const pool = root.__dfoLootSpoils, out = [];
+    if (!pool) return out;
+    let targets = [];
+    try { targets = [...(pool.targets() ?? [])]; } catch { return out; }
+    for (const t of targets) {
+      if (typeof t?.key !== 'string' || !t.key.startsWith('spoil:') || !t.aabb) continue;
+      const key = t.key;
+      out.push({ key, pos: position(t), shape: { height: t.aabb.max[1] - t.aabb.min[1] },
+        items: () => { try { return pool.contents(key); } catch { return null; } }, press: () => !!pool.pick(key) });
+    }
+    return out;
   }
   // Physical-item targets are visual proxies. Use their actual position but keep
   // the numeric backing pile key and its native transaction, never pick the proxy twice.
   function dungeonSources(api, drops) {
-    const out = [], seen = new Set(), positions = physicalPositions(drops);
+    const out = [], seen = new Set(), positions = physicalPositions(drops), itemAt = item => positions.get(item) ?? null;
     const add = t => {
       if (!/^(loot|corpse|droppedLoot):/.test(t.key) || t.key.startsWith('droppedLoot:pi')) return;
-      if (t.key.startsWith('droppedLoot:') && !groundPile(drops.pileFor(t.key))) return;
+      const pile = t.key.startsWith('droppedLoot:') ? drops.pileFor(t.key) : null;
+      if (t.key.startsWith('droppedLoot:') && !groundPile(pile)) return;
       seen.add(t.key);
-      out.push({ ...t, items: () => api.lootContents(t.key), visit: fn => api.takeLoot(t.key, 'grab', [], fn) });
+      out.push({ ...t, shape: pile ? pileShape(pile) : null, itemAt, items: () => api.lootContents(t.key), visit: fn => api.takeLoot(t.key, 'grab', [], fn) });
     };
     for (const t of api.lootTargets()) add(t);
     for (const p of drops._piles ?? []) {
       const key = `droppedLoot:${p.id}`;
-      if (!p.physical || !groundPile(p) || !p.items?.length || seen.has(key)) continue;
-      out.push({ key, pos: positions.get(p.items[0]) ?? p.pos,
+      if (!groundPile(p) || !p.items?.length || seen.has(key)) continue;
+      out.push({ key, pos: positions.get(p.items[0]) ?? p.pos, shape: pileShape(p), itemAt,
         items: () => groundPile(p) ? p.items : null, visit: fn => api.takeLoot(key, 'grab', [], fn) });
     }
-    return out;
+    // A searched chest's find while its search cools: the press opens that very list again and rolls nothing
+    // (dungeonContext.js activateSearchable). A chest not yet searched, or cooled down, is never opened from here.
+    for (const f of api.finds?.() ?? []) {
+      const key = `srch:${f.index}`, box = f.aabb;
+      if (!box) continue;
+      out.push({ key, pos: [(box.min[0] + box.max[0]) / 2, box.min[1], (box.min[2] + box.max[2]) / 2],
+        shape: { height: box.max[1] - box.min[1], box, solid: true },
+        items: () => api.finds?.().find(x => x.index === f.index)?.items ?? null, visit: fn => api.takeLoot(key, 'grab', [], fn) });
+    }
+    return out.concat(spoilSources());
   }
 
   function sources(host) {
     if (host.sources) return host.sources();
     const out = [];
+    const drops = host.dropped?.();
+    const positions = physicalPositions(drops), itemAt = item => positions.get(item) ?? null;
     for (const pool of host.pools?.() ?? []) {
       if (!pool) continue;
       for (const t of pool.lootTargets()) out.push({
-        ...t, items: () => pool.hoverContents(t.key),
+        ...t, itemAt, items: () => pool.hoverContents(t.key),
         visit: (fn) => pool.takeLoot(t.key, host.say, (loot) => {
           loot.opened?.();
           try { return fn(loot.items()) !== false; } finally { loot.closed?.(); }
         }),
       });
     }
-    const drops = host.dropped?.();
-    const positions = physicalPositions(drops);
     for (const p of drops?._piles ?? []) {
       if (!groundPile(p)) continue;
-      out.push({ key: `droppedLoot:${p.id}`, pos: positions.get(p.items?.[0]) ?? p.pos, items: () => groundPile(p) ? p.items : null,
+      out.push({ key: `droppedLoot:${p.id}`, pos: positions.get(p.items?.[0]) ?? p.pos, shape: pileShape(p), items: () => groundPile(p) ? p.items : null,
         visit: (fn) => {
           const hadLoot = p.container && p.items.length > 0;
           try { const moved = fn(p.items); if (moved && hadLoot) host.pileTaken?.(p); return moved; }
@@ -102,7 +175,7 @@
         },
       });
     }
-    return out;
+    return out.concat(spoilSources());
   }
 
   // A network container may recompose its records as its native door opens. Match the entire record,
@@ -121,19 +194,33 @@
     let lastFilter, show = () => true;
     let closed = false, moving = false, sorted = false, lastRefusal = null;
     const accessCache = new Map();
-    const inRange = (s, fresh = false) => {
-      const feet = host.feet(), eye = host.eye?.(), pos = position(s), collider = host.collider?.(), now = Date.now();
-      const stamp = JSON.stringify([feet, eye, pos]), old = accessCache.get(s.key);
+    const reachAt = (id, pos, shape, fresh) => {
+      const feet = host.feet(), eye = host.eye?.(), collider = host.collider?.(), now = Date.now();
+      const stamp = JSON.stringify([feet, eye, pos]), old = accessCache.get(id);
       if (!fresh && old?.stamp === stamp && old.collider === collider && now - old.at < 150) return old.ok;
-      const ok = canReach(feet, pos, collider, eye);
-      accessCache.set(s.key, { stamp, collider, at: now, ok }); return ok;
+      const ok = canReach(feet, pos, collider, eye, shape);
+      accessCache.set(id, { stamp, collider, at: now, ok }); return ok;
     };
+    const inRange = (s, fresh = false) => reachAt(s.key, position(s), s.shape ?? null, fresh);
+    // An item is in reach where its source is, or where Physical Items threw its proxy - at a cliff's foot, say.
+    const proxyAt = (s, item) => { const at = item && s.itemAt?.(item); return vector3(at) ? at : null; };
+    const reachable = (s, item, fresh = false) => {
+      if (inRange(s, fresh)) return true;
+      const at = proxyAt(s, item);
+      return !!at && reachAt(`${s.key}|${at[0].toFixed(2)},${at[1].toFixed(2)},${at[2].toFixed(2)}`, at, null, fresh);
+    };
+    // A pressed source (a reward on the floor) is taken whole by its own door, as the press takes it; every other one
+    // through the game's planTake from its live list.
+    const planOf = (source, live) => (source.press ? { ok: true, amount: live.stackCount ?? 1 }
+      : tools().planTake(live, { bag: host.entity.items ?? [], entity: host.entity, mode: 'remove', getQuest: host.getQuest }));
     const refresh = () => {
       if (closed || moving) return;
       const next = new Map();
       for (const s of sources(host)) {
-        if (!allowed(s.key) || !inRange(s)) continue;
-        for (const it of s.items() ?? []) if (it && !next.has(it)) next.set(it, s);
+        if (!allowed(s.key)) continue;
+        const whole = inRange(s);
+        if (!whole && !s.itemAt) continue;
+        for (const it of s.items() ?? []) if (it && !next.has(it) && (whole || reachable(s, it))) next.set(it, s);
       }
       const filter = settings().filter;
       if (filter !== lastFilter) { lastFilter = filter; show = Rules.compileFilter(filter, tools()); sorted = false; }
@@ -160,14 +247,13 @@
         for (const it of wanted) {
           if (closed) break;
           const t = tools(), source = owners.get(it) || remembered.get(it), live = source && actualItem(source.items(), it);
-          if (!live || !t?.planTake) { failed++; continue; }
-          const planFor = item => t.planTake(item, { bag: host.entity.items ?? [], entity: host.entity, mode: 'remove', getQuest: host.getQuest });
-          const plan = planFor(live), before = live.stackCount ?? 1;
+          if (!live || (!source.press && !t?.planTake)) { failed++; continue; }
+          const plan = planOf(source, live), before = live.stackCount ?? 1;
           if (!plan.ok || plan.claimsChoice) { failed++; refusal ??= plan.refusal?.text; continue; }
           if (this.commit('take', it, plan.amount)) {
             taken++;
             if (plan.amount < before) { failed++; refusal ??= lastRefusal; }
-          } else { failed++; refusal ??= lastRefusal || planFor(live).refusal?.text; }
+          } else { failed++; refusal ??= lastRefusal || (source.press ? null : planOf(source, live).refusal?.text); }
         }
         return { taken, failed, refusal };
       },
@@ -178,8 +264,8 @@
           if (closed) break;
           const t = tools(), source = owners.get(it) || remembered.get(it);
           const live = source && actualItem(source.items(), it);
-          if (!live || !t?.planTake) { failed++; continue; }
-          const plan = t.planTake(live, { bag: host.entity.items ?? [], entity: host.entity, mode: 'remove', getQuest: host.getQuest });
+          if (!live || (!source.press && !t?.planTake)) { failed++; continue; }
+          const plan = planOf(source, live);
           if (plan.ok && this.commit('take', it, plan.amount)) taken++; else failed++;
         }
         return { taken, failed };
@@ -193,8 +279,13 @@
         if (closed || moving || dir !== 'take') return false;
         const previous = owners.get(item) || remembered.get(item), t = tools();
         const source = previous && sources(host).find(s => s.key === previous.key);
-        if (!source || !inRange(source, true) || !actualItem(source.items(), item)
-          || typeof t?.planTake !== 'function' || typeof t?.applyTransfer !== 'function') { refresh(); return false; }
+        if (!source || !actualItem(source.items(), item) || !reachable(source, item, true)) { refresh(); return false; }
+        if (source.press) {
+          // The pool's own press takes the whole piece into the pack (spoilsPool.js pick) - never a copy moved by us.
+          moving = true;
+          try { return !!source.press(item); } catch { return false; } finally { moving = false; refresh(); }
+        }
+        if (typeof t?.planTake !== 'function' || typeof t?.applyTransfer !== 'function') { refresh(); return false; }
         let moved = false;
         moving = true;
         const wasVisiting = root.__dfoLootVisiting;
@@ -202,7 +293,7 @@
         try {
           source.visit((actual) => {
             const live = actualItem(actual, item);
-            if (closed || !live || !inRange(source, true)) return false;
+            if (closed || !live || !(reachable(source, item, true) || reachable(source, live, true))) return false;
             const plan = t.planTake(live, { bag: host.entity.items ?? [], entity: host.entity, mode: 'remove', getQuest: host.getQuest });
             lastRefusal = plan.refusal?.text ?? null;
             if (!plan.ok || !Number.isFinite(amount) || amount <= 0 || amount > plan.amount) return false;
@@ -336,7 +427,7 @@
   }
 
   if (typeof module === 'object' && module.exports) {
-    module.exports = { RADIUS, MAX_VERTICAL, canReach, allowed, distance, position, groundPile, dungeonSources, sources, actualItem, createSession, controller, bindInput };
+    module.exports = { RADIUS, MAX_VERTICAL, canReach, allowed, distance, position, groundPile, pileShape, physicalPositions, spoilSources, dungeonSources, sources, actualItem, createSession, controller, bindInput };
     return;
   }
   if (root.__dfoLoot) return;

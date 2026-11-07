@@ -37,7 +37,7 @@ loot.auto.search,Specific item search,src/mod/page/dfo_loot_ui.js
 loot.auto.nearby,Nearby: {name},src/mod/page/dfo_loot_ui.js
 loot.auto.anyKind,Any kind: {name},src/mod/page/dfo_loot_ui.js
 loot.auto.savedRule,Saved rule: {name},src/mod/page/dfo_loot_ui.js
-loot.auto.info,Rules: {n}. The chosen tags OR any chosen item. Catalogue: {catalog}.,src/mod/page/dfo_loot_ui.js
+loot.auto.info,Rules: {n}. The chosen tags OR any chosen item. Catalog: {catalog}.,src/mod/page/dfo_loot_ui.js
 loot.more,Show more,src/mod/page/dfo_loot_ui.js
 loot.auto,Autoloot,src/mod/page/dfo_loot_ui.js
 loot.takeAll,Take all,src/mod/page/dfo_loot_ui.js

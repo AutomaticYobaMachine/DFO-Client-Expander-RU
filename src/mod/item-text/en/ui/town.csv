@@ -7,8 +7,8 @@ town.button,Detailed town map,src/mod/page/dfo_town.js
 town.bar.info,ℹ Town info,src/mod/page/dfo_town.js
 town.bar.data,⟳ Town data,src/mod/page/dfo_town.js
 town.bar.exit,✕ Exit (Esc),src/mod/page/dfo_town.js
-town.key.hideAll,Hide colours,src/mod/page/dfo_town.js
-town.key.showAll,Show colours,src/mod/page/dfo_town.js
+town.key.hideAll,Hide colors,src/mod/page/dfo_town.js
+town.key.showAll,Show colors,src/mod/page/dfo_town.js
 town.key.title,Legend,src/mod/page/dfo_town.js
 town.ago.now,just now,src/mod/page/dfo_town.js
 town.ago.minutes,{m} min ago,src/mod/page/dfo_town.js
@@ -27,7 +27,7 @@ town.info.housingValue,"{n} {n:home|homes}: {owned} taken ({pct}), {free} free",
 town.info.halls,Player guild halls,src/mod/page/dfo_town.js
 town.info.accounts,Residents (accounts),src/mod/page/dfo_town.js
 town.info.guilds,Player guilds holding property,src/mod/page/dfo_town.js
-town.info.venues,Shops / taverns / organisations,src/mod/page/dfo_town.js
+town.info.venues,Shops / taverns / organizations,src/mod/page/dfo_town.js
 town.info.venuesOther, (+ banks and libraries: {n}),src/mod/page/dfo_town.js
 town.seat,Seat,src/mod/page/dfo_town.js
 town.info.noSeat,none / unheld,src/mod/page/dfo_town.js
@@ -70,7 +70,7 @@ town.owner,Owner,src/mod/page/dfo_town.js
 town.estate.roomsFree,Rooms free,src/mod/page/dfo_town.js
 town.price,Price,src/mod/page/dfo_town.js
 town.estate.sales,For sale by owners: {n},src/mod/page/dfo_town.js
-town.estate.votes,Neighbours' ratings (votes for the house),src/mod/page/dfo_town.js
+town.estate.votes,Neighbors' ratings (votes for the house),src/mod/page/dfo_town.js
 town.estate.vote,Rating,src/mod/page/dfo_town.js
 town.count.shops,Shops: {n},src/mod/page/dfo_town.js
 town.type,Type,src/mod/page/dfo_town.js
@@ -80,7 +80,7 @@ town.pays,Pays (everyone),src/mod/page/dfo_town.js
 town.paysMe,To me,src/mod/page/dfo_town.js
 town.count.taverns,Taverns: {n},src/mod/page/dfo_town.js
 town.building.tavern,Tavern,src/mod/page/dfo_town.js
-town.count.orgs,Organisations: {n},src/mod/page/dfo_town.js
+town.count.orgs,Organizations: {n},src/mod/page/dfo_town.js
 town.count.other,Banks and libraries: {n},src/mod/page/dfo_town.js
 town.economy.index,×{x} ({pct} of normal),src/mod/page/dfo_town.js
 town.economy.prosperity,Prosperity,src/mod/page/dfo_town.js
@@ -107,9 +107,9 @@ town.seat.tithe,Tithe,src/mod/page/dfo_town.js
 town.seat.battle,Battle this week,src/mod/page/dfo_town.js
 town.info.title,{name} — town info,src/mod/page/dfo_town.js
 town.plot,Plot,src/mod/page/dfo_town.js
-town.plotValue,"≈{area} m², neighbouring plots: {n}",src/mod/page/dfo_town.js
+town.plotValue,"≈{area} m², neighboring plots: {n}",src/mod/page/dfo_town.js
 town.home.free,nobody — the house is free,src/mod/page/dfo_town.js
-town.nearGuilds,Neighbouring guilds,src/mod/page/dfo_town.js
+town.nearGuilds,Neighboring guilds,src/mod/page/dfo_town.js
 town.hall.title,Guild hall: {name},src/mod/page/dfo_town.js
 town.hall.yours,Yours,src/mod/page/dfo_town.js
 town.home.title,House: {name},src/mod/page/dfo_town.js
@@ -120,7 +120,7 @@ town.home.yourGuild,your guild,src/mod/page/dfo_town.js
 town.home.unseen,account never seen online,src/mod/page/dfo_town.js
 town.home.rooms,Rooms to rent,src/mod/page/dfo_town.js
 town.home.sale,For sale by owner,src/mod/page/dfo_town.js
-town.home.vote,Neighbours' rating,src/mod/page/dfo_town.js
+town.home.vote,Neighbors' rating,src/mod/page/dfo_town.js
 town.home.painted,Repainted by owner,src/mod/page/dfo_town.js
 town.home.deed,Crown gift,src/mod/page/dfo_town.js
 town.home.type,Building type,src/mod/page/dfo_town.js
@@ -154,7 +154,7 @@ town.key.unknown,Guild unknown: {n},src/mod/page/dfo_town.js
 town.key.none,No guild: {n},src/mod/page/dfo_town.js
 town.key.free,Free: {n},src/mod/page/dfo_town.js
 town.key.venues,Venues,src/mod/page/dfo_town.js
-town.key.venuesCount,"Taverns, shops, organisations: {n}",src/mod/page/dfo_town.js
+town.key.venuesCount,"Taverns, shops, organizations: {n}",src/mod/page/dfo_town.js
 town.key.yours,Yours: {n},src/mod/page/dfo_town.js
 town.key.single,One house per account: {n},src/mod/page/dfo_town.js
 town.key.estate,Property,src/mod/page/dfo_town.js

@@ -24,7 +24,7 @@ cards.group.held,While worn,effects group
 cards.group.bonuses,Bonuses,effects group
 cards.group.properties,Passive properties,effects group
 cards.group.power,Legendary property,effects group
-cards.armorType,Armour type,the native Type row
+cards.armorType,Armor type,the native Type row
 cards.construction,Construction,RRI construction row
 cards.quantity,Quantity,stack size row
 cards.perKg,Price / kg,row label

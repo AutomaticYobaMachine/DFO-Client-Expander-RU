@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 'use strict';
+const { standLocale, uiData, uiRuntime } = require('./ui-text-stand.cjs');
 // Real published UI modules + production transforms, not a second mock layout.
 const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
 process.env.DFO_GLOBAL_FONTS='1';
@@ -61,6 +62,7 @@ async function main(){let browser;await new Promise(r=>server.listen(0,'127.0.0.
  await page.setViewportSize({width:1920,height:1080});
  report.effects=await page.evaluate(()=>{const box=document.createElement('div');box.className='hud-stat';box.style.cssText='position:fixed;left:20px;top:20px;grid-template-rows:repeat(4,auto)';const texts=['Голод','Сопротивление магическим заклинаниям','Восстановление магии','Долговременное'];for(const text of texts){const row=document.createElement('div');row.className='hst-cell';row.innerHTML='<div class="hst-tile"></div><span class="hst-name"></span>';row.querySelector('span').textContent=text;box.append(row)}document.body.append(box);const rows=[...box.children].map(n=>{const a=n.firstChild.getBoundingClientRect(),b=n.lastChild.getBoundingClientRect(),s=getComputedStyle(n.lastChild);return{text:n.textContent,icon:a.toJSON(),label:b.toJSON(),size:s.fontSize,lineHeight:s.lineHeight,white:s.whiteSpace,word:s.wordBreak}});box.remove();return rows});
  for(const r of report.effects){assert.equal(r.size,'11px');assert.equal(r.white,'normal');assert.equal(r.word,'normal');assert.ok(Math.abs((r.icon.top+r.icon.bottom-r.label.top-r.label.bottom)/2)<1);assert.ok(r.label.height<=2*parseFloat(r.lineHeight)+1,JSON.stringify(r))}
+ await page.addScriptTag({content:uiData(standLocale())});await page.addScriptTag({content:uiRuntime()});
  for(const f of ['dfo_dungeon_model.js','dfo_dungeons.js'])await page.addScriptTag({content:fs.readFileSync(path.join(modDir,'page',f),'utf8')});
  // Count how many native label canvases are actually painted; a far marker
  // remains in the native hit list, while resource markers stay unclickable.

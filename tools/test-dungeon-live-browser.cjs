@@ -1,11 +1,12 @@
 'use strict';
+const { uiScripts } = require('./ui-text-stand.cjs');
 const fs = require('node:fs'), path = require('node:path'), http = require('node:http'), assert = require('node:assert/strict');
 const upstream = path.resolve(process.argv[2] || '/tmp/dfo-upstream'), dist = path.resolve(process.argv[3] || '/tmp/dfo-release-0.1.14520');
 const { chromium } = require(path.join(upstream, 'node_modules/playwright'));
 const { transformAsset } = require('../src/mod/transforms.cjs');
 const assets = path.join(dist, 'assets'), chronicle = fs.readdirSync(assets).find(f => /^enhancedChronicle-/.test(f));
 assert.ok(chronicle);
-const html = `<!doctype html><html><head><meta charset="utf-8"><style>body{margin:0;background:#10151c}canvas{position:fixed;inset:0;width:100vw;height:100vh}</style><script>const p=new URLSearchParams(location.search);window.__DFO_MOD_CFG__={dungeons:{enabled:!p.has('disabled'),keyCode:p.get('key')||'KeyK'},nearbyLoot:{enabled:false}};</script>
+const html = `<!doctype html><html><head><meta charset="utf-8">${uiScripts()}<style>body{margin:0;background:#10151c}canvas{position:fixed;inset:0;width:100vw;height:100vh}</style><script>const p=new URLSearchParams(location.search);window.__DFO_MOD_CFG__={dungeons:{enabled:!p.has('disabled'),keyCode:p.get('key')||'KeyK'},nearbyLoot:{enabled:false}};</script>
 ${['dfo_dungeon_model.js','dfo_dungeons.js','dfo_dungeon_live_model.js','dfo_dungeon_live.js'].map(f => '<script src="/'+f+'"></script>').join('')}
 </head><body><canvas></canvas><script type="module">
 import {mountEnhancedChronicle} from '/assets/${chronicle}';

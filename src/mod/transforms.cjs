@@ -30,7 +30,7 @@ function sub(text, re, fn, log, id) {
 
 // ─── MARKS ──────────────────────────────────────────────────────────────────────────────────────────────────────────
 /** The page runtime's filter groups and their words (TV_FILTER_TEXT); also the kind's second word (`dfo <group>`). */
-const MARK_GROUPS = Object.freeze([['taverns', 'Taverns'], ['shops', 'Shops'], ['orgs', 'Organisations']]);
+const MARK_GROUPS = Object.freeze([['taverns', 'Taverns'], ['shops', 'Shops'], ['orgs', 'Organizations']]);
 
 /** world chunk: the built town pixels, the world's state and its ground, from the yards' own wiring. */
 function marksWorld(text, log) {

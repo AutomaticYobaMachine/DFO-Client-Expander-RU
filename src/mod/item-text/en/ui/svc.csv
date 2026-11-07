@@ -1,5 +1,5 @@
 key,text,note
-svc.mechanic.0,Paralyses the target: it can neither move nor attack. Paralysis alone does not stop spellcasting; immunity to paralysis blocks the effect.,src/mod/page/dfo_service_details.js
+svc.mechanic.0,Paralyzes the target: it can neither move nor attack. Paralysis alone does not stop spellcasting; immunity to paralysis blocks the effect.,src/mod/page/dfo_service_details.js
 svc.mechanic.1,Each magic round lowers the target's {vital}. The magnitude is rolled anew every round; the first check happens as soon as the effect lands.,src/mod/page/dfo_service_details.js
 svc.mechanic.2,Creates a temporary item. It exists only as long as the effect lasts; it is not permanent loot.,src/mod/page/dfo_service_details.js
 svc.mechanic.3,"On a successful check, cures {cure}. Magnitude and duration are not used.",src/mod/page/dfo_service_details.js
@@ -7,7 +7,7 @@ svc.mechanic.4,Lowers the target's {vital} once. The base magnitude is two indep
 svc.mechanic.5,"On a successful check, destroys a suitable target. The target's protection and immunities still apply; it is not a guaranteed kill.",src/mod/page/dfo_service_details.js
 svc.mechanic.6,"On a successful check, {dispel}.",src/mod/page/dfo_service_details.js
 svc.mechanic.7,Lowers {attr} by M. The lost points come back with the matching cure; no duration timer is set here.,src/mod/page/dfo_service_details.js
-svc.mechanic.8,Grants resistance to the chosen element. The effect's chance takes part in the defence against that element; it is not a permanent percentage cut of all damage.,src/mod/page/dfo_service_details.js
+svc.mechanic.8,Grants resistance to the chosen element. The effect's chance takes part in the defense against that element; it is not a permanent percentage cut of all damage.,src/mod/page/dfo_service_details.js
 svc.mechanic.9,Raises {attr} by M for a while. The bonus is removed when the effect ends.,src/mod/page/dfo_service_details.js
 svc.mechanic.10,Restores {heal} by M without turning the restoration into a lasting bonus above the allowed maximum.,src/mod/page/dfo_service_details.js
 svc.mechanic.11,Transfers {transfer} between the target and the caster; the exact action depends on the chosen resource.,src/mod/page/dfo_service_details.js

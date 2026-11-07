@@ -3,8 +3,8 @@ marks.price.base,+{pct}% general,src/mod/page/dfo_marks.js
 marks.price.mine,+{pct}% for me,src/mod/page/dfo_marks.js
 marks.kind.0,Alchemist,a building named by its kind
 marks.type.0,Alchemist,the label's [bracket] word
-marks.kind.2,Armourer,a building named by its kind
-marks.type.2,Armourer,the label's [bracket] word
+marks.kind.2,Armorer,a building named by its kind
+marks.type.2,Armorer,the label's [bracket] word
 marks.kind.3,Bank,a building named by its kind
 marks.type.3,Bank,the label's [bracket] word
 marks.kind.5,Bookseller,a building named by its kind
@@ -31,4 +31,4 @@ marks.kind.15,Tavern,a building named by its kind
 marks.type.15,Tavern,the label's [bracket] word
 marks.group.taverns,Taverns,Overworld filter group
 marks.group.shops,Shops,Overworld filter group
-marks.group.orgs,Organisations,Overworld filter group
+marks.group.orgs,Organizations,Overworld filter group

@@ -1,6 +1,6 @@
 key,text,note
 lootRules.tag.weapons,Weapons,loot filter tag
-lootRules.tag.armor,Armour,loot filter tag
+lootRules.tag.armor,Armor,loot filter tag
 lootRules.tag.clothing,Clothing,loot filter tag
 lootRules.tag.potions,Potions,loot filter tag
 lootRules.tag.ingredients,Ingredients,loot filter tag
@@ -13,7 +13,7 @@ lootRules.tag.Valuables,Valuables,loot filter tag
 lootRules.tag.Misc,Miscellaneous,loot filter tag
 lootRules.tag.Weapons,Weapons,loot filter tag
 lootRules.tag.Arrows,Arrows,loot filter tag
-lootRules.tag.Armor,Armour,loot filter tag
+lootRules.tag.Armor,Armor,loot filter tag
 lootRules.tag.Clothing,Clothing,loot filter tag
 lootRules.tag.Ingredients,Ingredients,loot filter tag
 lootRules.tag.Gold,Gold,loot filter tag
@@ -90,7 +90,7 @@ lootRules.state.masterwork,Masterwork,loot filter tag
 lootRules.state.heirloom,Heirlooms,loot filter tag
 lootRules.state.poisoned,Poisoned,loot filter tag
 lootRules.affix.damage,Damage,loot filter tag
-lootRules.affix.armor,Armour,loot filter tag
+lootRules.affix.armor,Armor,loot filter tag
 lootRules.affix.weight,Carrying capacity,loot filter tag
 lootRules.affix.stat,Attribute,loot filter tag
 lootRules.affix.resist,Resistance,loot filter tag

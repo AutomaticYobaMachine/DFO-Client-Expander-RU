@@ -108,7 +108,7 @@ dungeon.weapon.needsBetter, — they need a better metal (see “Inhabitants”)
 dungeon.weapon.allHurt,The weapon in hand ({weapon}) hurts all expected enemies.,src/mod/page/dfo_dungeons.js
 dungeon.sec.loot,◆ LOOT — {score} OF 5,src/mod/page/dfo_dungeons.js
 dungeon.loot.off,The special loot system is off; the rarity forecast does not apply.,src/mod/page/dfo_dungeons.js
-dungeon.loot.chances,"Rank {rank} chests: each suitable item (weapon, armour, jewellery, clothing) is for you at least magic with a {magic} chance, rare {rare}, legendary {legendary}. These are nested thresholds, not a chance for the whole chest.",src/mod/page/dfo_dungeons.js
+dungeon.loot.chances,"Rank {rank} chests: each suitable item (weapon, armor, jewellery, clothing) is for you at least magic with a {magic} chance, rare {rare}, legendary {legendary}. These are nested thresholds, not a chance for the whole chest.",src/mod/page/dfo_dungeons.js
 dungeon.loot.chancesUnknown,The rarity chances for this character are not known yet.,src/mod/page/dfo_dungeons.js
 dungeon.loot.bosses,"Bosses (daedra and enemies of level 18+) are {pct} of enemies: their bodies drop from a richer table, without the “3 items from an ordinary enemy” limit.",src/mod/page/dfo_dungeons.js
 dungeon.loot.family,"Once a legendary roll has happened, items of the “{family}” family weigh five times more (item kinds are on the “Loot” tab).",src/mod/page/dfo_dungeons.js

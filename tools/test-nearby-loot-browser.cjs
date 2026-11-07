@@ -1,4 +1,5 @@
 'use strict';
+const { uiScripts } = require('./ui-text-stand.cjs');
 // Optional integration check against a locally built upstream checkout (npm ci there supplies Playwright).
 // node tools/test-nearby-loot-browser.cjs /path/to/daggerfall-js-source
 const fs = require('node:fs'), path = require('node:path'), http = require('node:http');
@@ -15,7 +16,7 @@ const entry = fs.readdirSync(path.join(dist, 'assets')).find(f => f.startsWith('
 assert(entry, 'Build upstream with Vite before running this check');
 const cache = new Map();
 let failNextSettings = false, failNextPreset = false, presetPosts = 0;
-const html = `<!doctype html><html><head><meta charset="utf-8"><script>window.__DFO_MOD_CFG__={nearbyLoot:{keyCode:new URLSearchParams(location.search).get('lootKey')||'KeyJ'}};</script><script src="/dfo_item_cards.js"></script><script src="/dfo_loot_rules.js"></script><script src="/dfo_loot_ui.js"></script><script src="/dfo_loot.js"></script></head><body><canvas></canvas><script type="module">
+const html = `<!doctype html><html><head><meta charset="utf-8">${uiScripts()}<script>window.__DFO_MOD_CFG__={nearbyLoot:{keyCode:new URLSearchParams(location.search).get('lootKey')||'KeyJ'}};</script><script src="/dfo_item_cards.js"></script><script src="/dfo_loot_rules.js"></script><script src="/dfo_loot_ui.js"></script><script src="/dfo_loot.js"></script></head><body><canvas></canvas><script type="module">
 import {mountEnhancedInventory} from '/assets/${entry}';
 const mk=(name,templateIndex,extra={})=>({name,templateIndex,group:'Weapons',stackCount:1,currentCondition:50,maxCondition:50,...extra});
 const rare=mk('Longsword',120,{rarity:'rare'}),plain=mk('Dagger',113),arrows=mk('Arrow',131,{stackCount:10});

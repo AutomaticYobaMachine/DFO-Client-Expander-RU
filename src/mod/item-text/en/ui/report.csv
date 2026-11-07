@@ -9,8 +9,8 @@ report.settings,"settings: visited only {visited}, radius {radius} m, labels {la
 report.made,marks sent to the screen: {n},src/mod/hook.cjs
 report.error,ERROR: {error},src/mod/hook.cjs
 report.noTowns,no towns within the radius.,src/mod/hook.cjs
-report.town,Town: {town}   book: {book}   way: {path}   to the centre: {m} m,src/mod/hook.cjs
-report.discovered,  discovered buildings in the book: {n} (taverns/shops/organisations among them: {ours}),src/mod/hook.cjs
+report.town,Town: {town}   book: {book}   way: {path}   to the center: {m} m,src/mod/hook.cjs
+report.discovered,  discovered buildings in the book: {n} (taverns/shops/organizations among them: {ours}),src/mod/hook.cjs
 report.candidates,"  candidates: {n}, marked: {marked}, beyond the radius: {beyond}, no ground under them: {noGround}",src/mod/hook.cjs
 report.price,"   quality {q}, buys at {base}% base{mine}",src/mod/hook.cjs
 report.mark,    {group} (type {type}): {name} - {m} m{price},src/mod/hook.cjs
@@ -24,4 +24,4 @@ report.no,no,src/mod/hook.cjs
 report.priceMine,", mine {pct}%",src/mod/hook.cjs
 report.group.t,tavern,marks report
 report.group.s,shop,marks report
-report.group.o,organisation,marks report
+report.group.o,organization,marks report

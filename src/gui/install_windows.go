@@ -308,9 +308,14 @@ func (a *app) message(s string, kind uintptr) uintptr {
 	return r
 }
 func (a *app) openGuide() {
-	p := filepath.Join(a.payloadDir, "README.txt")
+	name := guideName(lang())
+	p := filepath.Join(a.payloadDir, name)
+	if _, e := os.Stat(p); e != nil {
+		name = "README.txt"
+		p = filepath.Join(a.payloadDir, name)
+	}
 	if data, e := os.ReadFile(p); e == nil && os.MkdirAll(a.prefsDir, 0700) == nil {
-		dest := filepath.Join(a.prefsDir, "README.txt")
+		dest := filepath.Join(a.prefsDir, name)
 		if os.WriteFile(dest, data, 0600) == nil {
 			p = dest
 		}

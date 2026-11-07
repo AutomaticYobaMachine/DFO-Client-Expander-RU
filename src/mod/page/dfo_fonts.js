@@ -12,7 +12,7 @@
   const fontMappings=new Map();
   const bookSize=px=>Math.max(1,Math.round(px*1.35));
   const seed=[...Array.from({length:95},(_,i)=>32+i),...Array.from({length:64},(_,i)=>1040+i),1025,1105,8211,8212,8230,8470,8594,177,215,8734,...Array.from({length:96},(_,i)=>160+i)];
-  function css(base,revision='1.24.0'){
+  function css(base,revision='1.25.0'){
     const faces=Object.entries(files).map(([name,file])=>`@font-face{font-family:'DFO ${name}';src:url(${JSON.stringify(base+file+'?dfo='+encodeURIComponent(revision))}) format('${file.endsWith('.otf')?'opentype':'truetype'}');font-style:normal;font-weight:400;font-display:swap;}`).join('\n');
     return faces+`\n/* DFO community fonts */
 @layer dfo-community-fonts {
@@ -183,7 +183,7 @@
     const fontSet=win.document?.fonts||win.fonts,Native=win.FontFace;
     const load=fontSet.load.bind(fontSet),check=fontSet.check.bind(fontSet),add=fontSet.add.bind(fontSet);
     const canonical=family=>Object.keys(files).find(name=>String(family).replace(/["']/g,'').toLowerCase()==='dfo '+name.toLowerCase());
-    const ownUrl=name=>`url(${JSON.stringify(base+files[name]+'?dfo=1.24.0')})`;
+    const ownUrl=name=>`url(${JSON.stringify(base+files[name]+'?dfo=1.25.0')})`;
     win.FontFace=new Proxy(Native,{construct(Type,args,New){
       const name=canonical(args[0])||'Gabin';
       stats.faceRedirects=(stats.faceRedirects||0)+1;
@@ -247,7 +247,7 @@
   function install(win){
     if(win.__dfoFonts||win.__DFO_MOD_CFG__?.fonts?.enabled===false)return;
     const doc=win.document,base=new URL('.',doc.currentScript?.src||new URL('dfo-mod/dfo_fonts.js',doc.baseURI)).href;
-    const style=doc.createElement('style');style.id='dfo-community-fonts';style.textContent=css(base,win.__DFO_MOD_CFG__?.fonts?.revision||'1.24.0');doc.head.append(style);
+    const style=doc.createElement('style');style.id='dfo-community-fonts';style.textContent=css(base,win.__DFO_MOD_CFG__?.fonts?.revision||'1.25.0');doc.head.append(style);
     const stats={canvasChanges:0,classicDraws:0,classicBatches:0,glyphsDrawn:0,faces:0,failures:[]};
     const native={},renderers=new WeakMap(),fnts=new WeakMap(),firstFaces=new Map(),bookFonts=new WeakMap(),fontOwners=new WeakMap(),titleHeights=new WeakMap();let enabled=false,serial=0;
     const translate=text=>typeof win.__translate==='function'?win.__translate(text):text;

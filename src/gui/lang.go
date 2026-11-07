@@ -201,6 +201,14 @@ func (s say) String() string {
 }
 func (s say) empty() bool { return s.key == "" }
 
+// guideName: the guide the "Guide" button opens, in the window's language.
+func guideName(l string) string {
+	if l == "en" {
+		return "README-EN.txt"
+	}
+	return "README.txt"
+}
+
 // The language the window starts in: --lang, else the remembered switch, else the system's.
 func chooseLang(flag, prefsDir, system string) string {
 	if flag == "ru" || flag == "en" {

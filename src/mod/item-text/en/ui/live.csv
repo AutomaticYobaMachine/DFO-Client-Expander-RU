@@ -102,4 +102,4 @@ live.aurum.stateNoMark,No local claim mark; the server confirms it when opened.,
 live.regen.due, Waiting for the room to refresh.,src/mod/page/dfo_dungeon_live.js
 live.unknownM,unknown,src/mod/page/dfo_dungeon_live.js
 live.unknownF,unknown,src/mod/page/dfo_dungeon_live.js
-live.meters,{n} m,distance
+live.metres,{n} m,distance

@@ -195,15 +195,17 @@ function wrap(handleDagger, { app = null } = {}) {
     }
     if (rel === 'dfo-mod/loot-settings' || rel === 'dfo-mod/loot-presets' || rel === 'dfo-mod/dungeon-notes') {
       const json = (body, status = 200) => new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' } });
+      // An error carries its words in the install's language and its key, so the page says it in its own pack's words.
+      const fail = (key, status) => json({ error: T(key), ...(/^[a-z][A-Za-z0-9]*(?:\.[A-Za-z0-9-]+)+$/.test(key) ? { code: key } : {}) }, status);
       try {
         if (req.method === 'GET') return json(rel.endsWith('dungeon-notes') ? { notes: lootStore.dungeonNotes() } : lootStore.state());
-        if (req.method !== 'POST') return json({ error: T('store.method') }, 405);
+        if (req.method !== 'POST') return fail('store.method', 405);
         const body = await req.text();
-        if (Buffer.byteLength(body) > 2 * 1024 * 1024) return json({ error: T('store.tooLarge') }, 413);
-        let data; try { data = JSON.parse(body); } catch { return json({ error: T('store.badJson') }, 400); }
-        if (!data || typeof data !== 'object' || Array.isArray(data)) return json({ error: T('store.badSettings') }, 400);
+        if (Buffer.byteLength(body) > 2 * 1024 * 1024) return fail('store.tooLarge', 413);
+        let data; try { data = JSON.parse(body); } catch { return fail('store.badJson', 400); }
+        if (!data || typeof data !== 'object' || Array.isArray(data)) return fail('store.badSettings', 400);
         return json(rel.endsWith('dungeon-notes') ? lootStore.saveDungeonNote(data) : rel.endsWith('loot-presets') ? lootStore.savePreset(data) : lootStore.saveSettings(data));
-      } catch (e) { log(`${rel}: ${e?.message ?? e}`); return json({ error: T(e.message || 'loot.saveFailed') }, e.status || 500); }
+      } catch (e) { log(`${rel}: ${e?.message ?? e}`); return fail(e.message || 'loot.saveFailed', e.status || 500); }
     }
     const packFile = /^(?:play\/)?dfo-mod\/ru-pack\/((?:Text\/(?:(?:Quests|Books)\/)?)?[\w$.-]+\.(?:csv|txt|json))$/.exec(rel);
     if (packFile) {

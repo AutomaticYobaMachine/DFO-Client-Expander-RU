@@ -126,6 +126,8 @@ func restoreUpdateFile(target, backup string) error {
 }
 
 func runUpdateHelper(path string) (err error) {
+	// The helper writes the log in the window's language: the remembered switch, else Windows' own; the plan's if it has one.
+	setLang(chooseLang("", filepath.Join(os.Getenv("LOCALAPPDATA"), appName), systemLang()))
 	journal := newSessionJournal(filepath.Join(os.Getenv("APPDATA"), "DFO Online"), filepath.Join(os.Getenv("LOCALAPPDATA"), appName, "logs"))
 	defer journal.close()
 	defer func() {
@@ -141,6 +143,7 @@ func runUpdateHelper(path string) (err error) {
 	if err != nil {
 		return err
 	}
+	setLang(p.Resume.Lang)
 	if p.Resume.LogDir != "" {
 		if e := journal.move(p.Resume.LogDir); e != nil {
 			journal.append(T("installer.log.helperJournal", "error", e.Error()))

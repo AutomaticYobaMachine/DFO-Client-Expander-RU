@@ -1,5 +1,5 @@
 'use strict';
-const { uiScripts } = require('./ui-text-stand.cjs');
+const { uiScripts, say } = require('./ui-text-stand.cjs');
 const fs = require('node:fs'), path = require('node:path'), http = require('node:http'), assert = require('node:assert/strict');
 const upstream = path.resolve(process.argv[2] || '/tmp/dfo-upstream'), dist = path.resolve(process.argv[3] || '/tmp/dfo-release-0.1.14520');
 const { chromium } = require(path.join(upstream, 'node_modules/playwright'));
@@ -13,9 +13,9 @@ import {mountEnhancedChronicle} from '/assets/${chronicle}';
 const loc={name:'Castle of Many Shadows',hasDungeon:true,mapTableData:{mapId:12345,dungeonType:0},dungeon:{blocks:[{}],recordElement:{header:{locationId:9}}}},player={level:25,stats:{luck:50},skills:[]};
 const mk=(name,type=1,extra={})=>({mobileType:type,src:{mobileType:type},ai:{isHostile:true},entity:{name,level:12,health:15,maxHealth:20,...extra}});
 const foes=[mk('Rat'),mk('Rat'),mk('Rat',1,{eliteFoe:true,bossTraits:['Swift']}),mk('Vampire',28),{...mk('Dead'),dead:true},{...mk('Ally'),companion:1}];
-const quests=new Map([1,2].map(uid=>[uid,{uid,displayName:'Задание в крепости',questName:'Quest'+uid,resources:new Map([['place',{siteDetails:{siteType:2,mapId:12345}}]])}]));
+const quests=new Map([1,2].map(uid=>[uid,{uid,displayName:'The task in the fortress',questName:'Quest'+uid,resources:new Map([['place',{siteDetails:{siteType:2,mapId:12345}}]])}]));
 let questReads=0,regenReads=0;
-const questLog=()=>{questReads++;return{active:[...quests.values()].filter(q=>!q.questComplete).map(q=>({id:q.uid,name:q.displayName,questName:q.questName,messages:[[{formatting:'text',text:'Подробное описание задания номер '+q.uid}]]})),finished:[]}};
+const questLog=()=>{questReads++;return{active:[...quests.values()].filter(q=>!q.questComplete).map(q=>({id:q.uid,name:q.displayName,questName:q.questName,messages:[[{formatting:'text',text:'The detailed description of task number '+q.uid}]]})),finished:[]}};
 const session={room:'dungeon:m12345',status:'open',peers:new Map([['a',{}],['b',{}]]),_rooms:new Map([['dungeon:m12345',new Set(['a','b'])]])};
 let overlay=null, mountCount=0, questOwner=null, journalView=null, journalHost=null, mapCount=0, keys=0;
 const clock={now:10000000,interval:1200000,stamps:[9700000]};
@@ -76,20 +76,20 @@ const server = http.createServer((req, res) => {
   await page.keyboard.press('k');const dialog=page.locator('.dfo-dungeon-live');await dialog.waitFor();assert.equal(await page.evaluate(()=>fixture.mounts),1);
   assert.equal(await hud.isVisible(),true);assert.equal(await hud.locator('.dfo-dungeon-launch').isVisible(),false);
   assert.equal(await dialog.locator('.dfo-dungeon-title').innerText(),await page.evaluate(()=>fixture.mark.label),'full title is inherited from the Overworld mark');
-  assert.deepEqual(await dialog.locator('.dfo-live-stat strong').allTextContents(),['4','1','3']);assert.match(await dialog.innerText(),/15 мин/);assert.match(await dialog.innerText(),/7 Aurum/);assert.equal(await dialog.locator('[data-quest]').count(),2);
+  assert.deepEqual(await dialog.locator('.dfo-live-stat strong').allTextContents(),['4','1','3']);assert.ok((await dialog.innerText()).includes(say('live.regen.next',{n:15,due:''})),'regen countdown');assert.match(await dialog.innerText(),/7 Aurum/);assert.equal(await dialog.locator('[data-quest]').count(),2);
   const before=await page.evaluate(()=>fixture.keys);await page.keyboard.press('j');assert.equal(await page.evaluate(()=>fixture.keys),before,'dialog blocks gameplay keys');
   for(let i=0;i<8;i++)await page.keyboard.press('k');assert.equal(await dialog.count(),1);assert.equal(await page.evaluate(()=>fixture.mounts),1);
-  for(const name of ['Враги','Добыча','Подготовка','Сводка']){
+  for(const name of ['enemies','loot','prep','summary'].map(t=>say('live.tab.'+t))){
    await dialog.getByRole('tab',{name,exact:true}).click();const foot=await dialog.locator('.acts').boundingBox();assert.ok(foot.y+foot.height<=900);
-   for(const label of ['Автокарта','Журнал заданий','Закрыть'])assert.equal(await dialog.getByRole('button',{name:label,exact:true}).isVisible(),true);
-   assert.equal(await dialog.getByRole('button',{name:'Обновить',exact:true}).count(),0,'all tabs update automatically without a refresh button');
+   for(const label of ['live.automap','live.journal','live.close'].map(k=>say(k)))assert.equal(await dialog.getByRole('button',{name:label,exact:true}).isVisible(),true);
+   assert.equal(await dialog.getByRole('button',{name:/^(Обновить|Refresh)$/}).count(),0,'all tabs update automatically without a refresh button');
   }
   if(process.env.DFO_SCREENSHOT_DIR){fs.mkdirSync(process.env.DFO_SCREENSHOT_DIR,{recursive:true});await page.screenshot({path:path.join(process.env.DFO_SCREENSHOT_DIR,'live-summary.png')});}
-  await page.evaluate(()=>{fixture.foes[0].dead=true;fixture.live.aurum.open=true});await page.waitForFunction(()=>document.querySelector('.dfo-live-stat strong')?.textContent==='3');assert.match(await dialog.innerText(),/получение отмечено/);
+  await page.evaluate(()=>{fixture.foes[0].dead=true;fixture.live.aurum.open=true});await page.waitForFunction(()=>document.querySelector('.dfo-live-stat strong')?.textContent==='3');assert.ok((await dialog.innerText()).includes(say('live.aurum.taken')),'aurum taken');
   await page.evaluate(()=>{fixture.clock.now+=60000;fixture.session._rooms.get(fixture.session.room).add('new-player');fixture.quests.get(1).questComplete=true});
-  await page.waitForFunction(()=>document.querySelectorAll('.dfo-live-stat strong')[2]?.textContent==='4'&&document.querySelector('.dfo-dungeon-live .wb')?.textContent.includes('14 мин.')&&document.querySelectorAll('.dfo-dungeon-live [data-quest]').length===1);
+  await page.waitForFunction(t=>document.querySelectorAll('.dfo-live-stat strong')[2]?.textContent==='4'&&document.querySelector('.dfo-dungeon-live .wb')?.textContent.includes(t)&&document.querySelectorAll('.dfo-dungeon-live [data-quest]').length===1,say('live.regen.next',{n:14,due:''}));
   await page.evaluate(()=>{fixture.session._rooms.get(fixture.session.room).delete('new-player');fixture.quests.get(1).questComplete=false});
-  await dialog.getByRole('tab',{name:'Враги',exact:true}).click();assert.match(await dialog.innerText(),/Элитный, Swift/);assert.equal(await dialog.locator('tbody tr').count(),3);
+  await dialog.getByRole('tab',{name:say('live.tab.enemies'),exact:true}).click();assert.ok((await dialog.innerText()).includes(say('live.trait.elite')+', Swift'),'elite traits');assert.equal(await dialog.locator('tbody tr').count(),3);
   await page.evaluate(()=>{fixture.foes[2].entity.health=7;fixture.foes[2].entity.bossTraits=['Swift','Frenzied']});
   await page.waitForFunction(()=>{const row=[...document.querySelectorAll('.dfo-dungeon-live tbody tr')].find(n=>n.textContent.includes('Frenzied'));return row?.textContent.includes('7 / 20')});
   await page.evaluate(()=>{fixture.foes.push(fixture.mk('<img src=x onerror=window.injected=1>',5,{properName:'<img src=x onerror=window.injected=1>'}))});
@@ -97,13 +97,13 @@ const server = http.createServer((req, res) => {
   if(process.env.DFO_SCREENSHOT_DIR)await page.screenshot({path:path.join(process.env.DFO_SCREENSHOT_DIR,'live-enemies.png')});
   await page.setViewportSize({width:720,height:600});assert.equal(await dialog.evaluate(n=>{const r=n.getBoundingClientRect();return r.left>=0&&r.top>=0&&r.right<=innerWidth&&r.bottom<=innerHeight}),true);
   const footer=await dialog.locator('.acts').boundingBox();assert.ok(footer.y+footer.height<=600);await page.setViewportSize({width:1400,height:900});
-  await dialog.getByRole('tab',{name:'Сводка',exact:true}).click();await dialog.locator('[data-quest="2"]').click();await dialog.waitFor({state:'hidden'});
-  const selected=page.locator('#enhanced-chronicle [data-dfo-quest="2"]');await selected.waitFor();assert.equal(await page.locator('#enhanced-chronicle [data-dfo-quest]').count(),2);await page.waitForFunction(()=>document.activeElement?.dataset.dfoQuest==='2');assert.match(await selected.innerText(),/номер 2/);
+  await dialog.getByRole('tab',{name:say('live.tab.summary'),exact:true}).click();await dialog.locator('[data-quest="2"]').click();await dialog.waitFor({state:'hidden'});
+  const selected=page.locator('#enhanced-chronicle [data-dfo-quest="2"]');await selected.waitFor();assert.equal(await page.locator('#enhanced-chronicle [data-dfo-quest]').count(),2);await page.waitForFunction(()=>document.activeElement?.dataset.dfoQuest==='2');assert.match(await selected.innerText(),/number 2/);
   if(process.env.DFO_SCREENSHOT_DIR)await page.screenshot({path:path.join(process.env.DFO_SCREENSHOT_DIR,'live-quest.png')});
   await page.evaluate(()=>fixture.closeJournal());await page.keyboard.press('k');await dialog.waitFor();
   await page.evaluate(()=>fixture.session.status='connecting');await page.waitForFunction(()=>document.querySelectorAll('.dfo-live-stat strong')[2]?.textContent==='—');
   await page.evaluate(()=>fixture.session.status='open');await page.waitForFunction(()=>document.querySelectorAll('.dfo-live-stat strong')[2]?.textContent==='3');
-  await dialog.getByRole('button',{name:'Автокарта',exact:true}).click();await dialog.waitFor({state:'hidden'});assert.equal(await page.evaluate(()=>fixture.mapCount),1);
+  await dialog.getByRole('button',{name:say('live.automap'),exact:true}).click();await dialog.waitFor({state:'hidden'});assert.equal(await page.evaluate(()=>fixture.mapCount),1);
   await page.keyboard.press('k');await dialog.waitFor();await page.evaluate(()=>fixture.replaceOverlay({done:false,nativePopup:true}));await dialog.waitFor({state:'hidden'});
   assert.equal(await page.evaluate(()=>fixture.overlay.nativePopup),true,'teardown must not clear a newer native popup');await page.evaluate(()=>fixture.replaceOverlay(null));
   await page.keyboard.press('k');await dialog.waitFor();await page.evaluate(()=>fixture.modes.mode='exterior');await dialog.waitFor({state:'hidden'});await hud.waitFor({state:'hidden'});assert.equal(await page.evaluate(()=>fixture.overlay),null,'leaving releases the native overlay');
@@ -116,7 +116,7 @@ const server = http.createServer((req, res) => {
    const input=await page.evaluateHandle(()=>{const n=document.createElement('input');document.body.append(n);n.focus();return n});
    await press();assert.equal(await page.evaluate(()=>fixture.mounts),0,'shortcut must ignore the focused chat/search input');await input.evaluate(n=>n.remove());
    await page.evaluate(()=>{const url=location.href;history.replaceState(null,'',url+'&previous=1');history.pushState(null,'',url);history.pushState(null,'',url+'&next=1');history.back()});await page.waitForURL(address+'/?key='+key);
-   await press();await dialog.waitFor();await dialog.getByRole('tab',{name:'Сводка',exact:true}).focus();await press();assert.equal(await dialog.count(),1);await page.keyboard.press('Escape');await dialog.waitFor({state:'hidden'});await press();await dialog.waitFor();assert.equal(await page.evaluate(()=>fixture.mounts),2);assert.equal(page.url(),address+'/?key='+key,'side button must not navigate history');
+   await press();await dialog.waitFor();await dialog.getByRole('tab',{name:say('live.tab.summary'),exact:true}).focus();await press();assert.equal(await dialog.count(),1);await page.keyboard.press('Escape');await dialog.waitFor({state:'hidden'});await press();await dialog.waitFor();assert.equal(await page.evaluate(()=>fixture.mounts),2);assert.equal(page.url(),address+'/?key='+key,'side button must not navigate history');
   }
   await page.goto(address+'/?disabled=1');await page.waitForFunction(()=>window.ready);await page.evaluate(()=>fixture.modes.mode='dungeon');await page.keyboard.press('k');assert.equal(await page.locator('.dfo-dungeon-launch').count(),0);assert.equal(await hud.count(),0);
   assert.deepEqual(errors,[]);console.log('PASS: compact live dungeon HUD, click-through counters, closed-window cost, partial/reconnecting data, transition/scene/page lifecycle; live tabs, journal, footer, NumPad/mouse and no duplicates/page errors');

@@ -13,7 +13,7 @@
     async function json(url, body) {
       const res = await request(url, body === undefined ? { cache: 'no-store' } : { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
       const data = await res.json();
-      if (!res.ok) { const e = new Error(data.error || T('loot.saveFailed')); e.status = res.status; throw e; }
+      if (!res.ok) { const e = new Error(data.code && root.__dfoUi?.has(data.code) ? T(data.code) : data.error || T('loot.saveFailed')); e.status = res.status; throw e; }
       return data;
     }
     async function read() {

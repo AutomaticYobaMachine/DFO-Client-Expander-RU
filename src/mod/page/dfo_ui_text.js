@@ -26,18 +26,34 @@
   const PLACE = /\{([A-Za-z][A-Za-z0-9]*)(?::([^{}]*))?\}/g;
   const TAGS = Object.freeze({ en: 'en-US', ru: 'ru-RU' });
 
-  /** Fill a string's places: values as they are, number words by the locale's plural rule. A missing value keeps its
-   *  place visible rather than silently dropping words. */
-  function format(text, params, locale) {
-    return String(text).replace(PLACE, (all, name, forms) => {
-      const value = params && Object.prototype.hasOwnProperty.call(params, name) ? params[name] : undefined;
-      if (forms == null) return value == null ? all : String(value);
-      const list = forms.split('|'), n = Number(value);
-      if (!Number.isFinite(n)) return list[list.length - 1];
-      const rule = PLURAL[locale] || PLURAL.en;
-      return list[Math.min(rule(n), list.length - 1)];
-    });
+  /** A string's places parsed once: its fixed pieces and { name, forms, all } for each place. */
+  function compile(text) {
+    const parts = [];
+    let at = 0;
+    for (const m of String(text).matchAll(PLACE)) {
+      if (m.index > at) parts.push(text.slice(at, m.index));
+      parts.push({ name: m[1], forms: m[2] == null ? null : m[2].split('|'), all: m[0] });
+      at = m.index + m[0].length;
+    }
+    if (at < text.length) parts.push(text.slice(at));
+    return parts;
   }
+  /** Fill a parsed string: values as they are, number words by the locale's plural rule. A missing value keeps its
+   *  place visible rather than silently dropping words. */
+  function fill(parts, params, locale) {
+    let out = '';
+    for (const p of parts) {
+      if (typeof p === 'string') { out += p; continue; }
+      const value = params && Object.prototype.hasOwnProperty.call(params, p.name) ? params[p.name] : undefined;
+      if (p.forms == null) { out += value == null ? p.all : String(value); continue; }
+      const n = Number(value);
+      if (!Number.isFinite(n)) { out += p.forms[p.forms.length - 1]; continue; }
+      const rule = PLURAL[locale] || PLURAL.en;
+      out += p.forms[Math.min(rule(n), p.forms.length - 1)];
+    }
+    return out;
+  }
+  const format = (text, params, locale) => fill(compile(String(text)), params, locale);
   /** The places a string names, for the tables' checks: { name: number of word forms, or 0 for a value }. */
   function places(text) {
     const out = {};
@@ -48,7 +64,18 @@
     const strings = pack && typeof pack.strings === 'object' && pack.strings ? pack.strings : {};
     const locale = pack && typeof pack.locale === 'string' ? pack.locale : 'en';
     const numbers = new Map();
-    const t = (key, params) => (Object.prototype.hasOwnProperty.call(strings, key) ? format(strings[key], params, locale) : key);
+    // Each string parsed once, on first use: a plain one is answered as it is, one with places filled from its parts.
+    const parsed = new Map();
+    const t = (key, params) => {
+      let p = parsed.get(key);
+      if (p === undefined) {
+        if (!Object.prototype.hasOwnProperty.call(strings, key)) return key;
+        const text = String(strings[key]);
+        p = text.indexOf('{') < 0 ? text : compile(text);
+        parsed.set(key, p);
+      }
+      return typeof p === 'string' ? p : fill(p, params, locale);
+    };
     return Object.freeze({
       locale,
       tag: TAGS[locale] || TAGS.en,

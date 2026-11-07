@@ -9,13 +9,13 @@ DFO Online.
 
 ## Скачать готовую программу
 
-Готовый релиз **1.25.0**. Версии 1.22.0–1.24.0 предложат обновление диалогом «Да/Нет».
+Готовый релиз **1.25.1**. Версии 1.22.0–1.24.0 предложат обновление диалогом «Да/Нет».
 При переходе с более ранних версий скачайте и запустите новый EXE вручную.
 
-**[Скачать установщик EXE для Windows 10/11 x64](https://github.com/AutomaticYobaMachine/DFO-Client-Expander-RU/releases/download/v1.25.0/DFO-Client-Expander-RU-1.25.0.exe)**
+**[Скачать установщик EXE для Windows 10/11 x64](https://github.com/AutomaticYobaMachine/DFO-Client-Expander-RU/releases/download/v1.25.1/DFO-Client-Expander-RU-1.25.1.exe)**
 
-[ZIP с программой, инструкцией и лицензиями](https://github.com/AutomaticYobaMachine/DFO-Client-Expander-RU/releases/download/v1.25.0/DFO-Client-Expander-RU-1.25.0.zip)
-· [Страница релиза](https://github.com/AutomaticYobaMachine/DFO-Client-Expander-RU/releases/tag/v1.25.0)
+[ZIP с программой, инструкцией и лицензиями](https://github.com/AutomaticYobaMachine/DFO-Client-Expander-RU/releases/download/v1.25.1/DFO-Client-Expander-RU-1.25.1.zip)
+· [Страница релиза](https://github.com/AutomaticYobaMachine/DFO-Client-Expander-RU/releases/tag/v1.25.1)
 
 EXE уже содержит все компоненты. В ZIP находятся только EXE, инструкция и лицензии.
 
@@ -34,11 +34,11 @@ EXE уже содержит все компоненты. В ZIP находятс
 An unofficial extension of the **Daggerfall Online** client: item cards with
 descriptions, nearby loot with a loot filter, dungeon cards with a live summary
 and a route line, venue marks and a detailed town map, community fonts and an
-optional Russian translation. Since **1.25.0** everything the extension adds
+optional Russian translation. Since **1.25.1** everything the extension adds
 speaks English without the translation (and Russian with it); the installer
 opens in your Windows language and has an English/Русский switch.
 
-Download the **[Windows 10/11 x64 installer](https://github.com/AutomaticYobaMachine/DFO-Client-Expander-RU/releases/download/v1.25.0/DFO-Client-Expander-RU-1.25.0.exe)**,
+Download the **[Windows 10/11 x64 installer](https://github.com/AutomaticYobaMachine/DFO-Client-Expander-RU/releases/download/v1.25.1/DFO-Client-Expander-RU-1.25.1.exe)**,
 close the game, run it, tick the features you want and press **Install selected**.
 The English guide is README-EN.txt in the ZIP (the **Guide** button opens it).
 The rest of this page and docs/ are in Russian; the original game is
@@ -60,7 +60,7 @@ The rest of this page and docs/ are in Russian; the original game is
 
 ## Установщик и рабочая ветка
 
-В **1.25.0** всё, что добавляет расширение, говорит на двух языках: без русификации
+В **1.25.1** всё, что добавляет расширение, говорит на двух языках: без русификации
 собственные окна и подписи мода — английские, с русификацией — русские. Строки лежат
 в тех же пакетах локалей, что и описания предметов. Установщик открывается на языке
 Windows, переключатель English/Русский запоминает выбор; на нерусской Windows

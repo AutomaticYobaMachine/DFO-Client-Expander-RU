@@ -2,6 +2,8 @@
 const { test } = require('node:test'), assert = require('node:assert/strict');
 const fs = require('node:fs'), path = require('node:path'), vm = require('node:vm');
 const M = require('../src/mod/page/dfo_dungeon_live_model.js');
+// The model's words come from the install's pack; these checks read the Russian one (each test file runs alone in CI).
+globalThis.__dfoUi = require('../src/mod/item-text.cjs').uiText('ru');
 const { createLootStore } = require('../src/mod/loot-store.cjs');
 const foe = (type, extra = {}) => ({ mobileType: type, entity: { level: 12, health: 15, maxHealth: 20, ...extra }, src: {}, ai: { isHostile: true } });
 

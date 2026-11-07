@@ -179,7 +179,7 @@ function wrap(handleDagger, { app = null } = {}) {
         if(/\.html$/i.test(rel)||!rel){
           const res=await handleDagger(req);if(!res?.ok)return res;
           const {preparePage}=require('./fonts-transform.cjs');
-          const scripts='<script src="/dfo-mod/dfo_font_data.js?dfo=1.25.0"></script><script src="/dfo-mod/dfo_fonts.js?dfo=1.25.0"></script>';
+          const scripts='<script src="/dfo-mod/dfo_font_data.js?dfo=1.25.1"></script><script src="/dfo-mod/dfo_fonts.js?dfo=1.25.1"></script>';
           const html=await res.text();return new Response(preparePage(html.replace('</head>',scripts+'</head>')),{headers:res.headers,status:res.status});
         }
       }

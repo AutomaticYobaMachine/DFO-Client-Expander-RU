@@ -33,7 +33,8 @@ type app struct {
 	searchFound                                      []string
 	searchHow                                        string
 	searchReady                                      bool
-	note, stage, operation                           string
+	note                                             say
+	stage, operation                                 string
 	noteCol                                          uintptr
 	progress                                         int
 	page                                             int
@@ -50,7 +51,8 @@ type app struct {
 	updateChecking, updateDownloading, updateHandoff bool
 	handedOff, resumeCommitted, updateAccepted       bool
 	updatesDisabled                                  bool
-	updateText, resumePath                           string
+	updateText                                       say
+	resumePath, pathHint                             string
 	updateProgress                                   int
 	updateReady                                      *downloadedUpdate
 	updateAvailable                                  *updateRelease
@@ -80,42 +82,77 @@ func (a *app) child(parent uintptr, id int, kind, label string, style uintptr) u
 func (a *app) button(id int, label string) {
 	a.child(a.hwnd, id, "BUTTON", label, wsVisible|wsTabStop|bsOwnerDraw)
 }
+
+// The buttons' words: installer.button.<name>; the language switch names the language it switches to.
+var buttonKeys = map[int]string{idBrowse: "browse", idRefresh: "refresh", idComponents: "components", idJournal: "journal",
+	idSaveLog: "saveLog", idOpenLog: "openLog", idOpenReport: "openReport", idInstallerLog: "installerLog",
+	idCheckUpdates: "updates", idReadme: "readme", idUninstall: "uninstall", idInstall: "install", idLang: "lang"}
+
+func buttonLabel(id int) string { return T("installer.button." + buttonKeys[id]) }
+
+// retext gives every control its words again after the RU/EN switch; painted text is read anew on the next paint.
+func (a *app) retext() {
+	for id := range buttonKeys {
+		if id != idInstall { // syncControls words the install button by the client's state
+			caption(a.ctl[id], buttonLabel(id))
+		}
+	}
+	for _, f := range features {
+		caption(a.ctl[f.ID], f.Title())
+		caption(a.descriptions[f.ID], f.Description())
+	}
+	caption(a.ctl[idVisited], T("installer.visited"))
+	a.mu.Lock()
+	hint := a.pathHint
+	a.mu.Unlock()
+	if hint != "" {
+		caption(a.ctl[idPath], T(hint))
+	}
+	a.syncControls()
+	invalidate(a.pane)
+}
+
+// switchLang flips the window between Russian and English and remembers the choice for the next start.
+func (a *app) switchLang() {
+	l := otherLang(lang())
+	setLang(l)
+	if err := saveLang(a.prefsDir, l); err != nil {
+		a.appendLog(T("installer.log.langSave", "error", err.Error()))
+	}
+	a.retext()
+}
+
 func (a *app) createControls() {
-	a.child(a.hwnd, idPath, "EDIT", "Поиск установленной игры…", wsVisible|wsTabStop|esReadOnly|esAutoHScroll)
-	for _, v := range []struct {
-		id    int
-		label string
-	}{{idBrowse, "Выбрать игру…"}, {idRefresh, "Проверить"}, {idComponents, "Компоненты"}, {idJournal, "Журнал"}} {
-		a.button(v.id, v.label)
+	a.pathHint = "installer.path.searching"
+	a.child(a.hwnd, idPath, "EDIT", T(a.pathHint), wsVisible|wsTabStop|esReadOnly|esAutoHScroll)
+	for _, id := range []int{idBrowse, idRefresh, idComponents, idJournal, idLang} {
+		a.button(id, buttonLabel(id))
 	}
 	pane, _, _ := pCreateWindowExW.Call(wsExControlParent, uintptr(unsafe.Pointer(u16("DFOExpanderComponents"))), 0, wsChild|wsVisible|wsVScroll|wsClipChild, 0, 0, 10, 10, a.hwnd, idPane, 0, 0)
 	a.pane = pane
 	a.ctl[idPane] = pane
 	for _, f := range features {
-		h := a.child(pane, f.ID, "BUTTON", f.Title, wsVisible|wsTabStop|bsAutoCheckbox|bsMultiline|bsNotify)
+		h := a.child(pane, f.ID, "BUTTON", f.Title(), wsVisible|wsTabStop|bsAutoCheckbox|bsMultiline|bsNotify)
 		if pSetWindowTheme.Find() == nil {
 			pSetWindowTheme.Call(h, uintptr(unsafe.Pointer(u16(""))), uintptr(unsafe.Pointer(u16(""))))
 		}
-		a.descriptions[f.ID] = a.child(pane, 1000+f.ID, "STATIC", f.Description, wsVisible|0x80)
+		a.descriptions[f.ID] = a.child(pane, 1000+f.ID, "STATIC", f.Description(), wsVisible|0x80)
 		if f.ID == idMarks {
-			a.child(pane, idVisited, "BUTTON", "Только посещённые", wsVisible|wsTabStop|bsAutoCheckbox|bsNotify)
+			a.child(pane, idVisited, "BUTTON", T("installer.visited"), wsVisible|wsTabStop|bsAutoCheckbox|bsNotify)
 			if pSetWindowTheme.Find() == nil {
 				pSetWindowTheme.Call(a.ctl[idVisited], uintptr(unsafe.Pointer(u16(""))), uintptr(unsafe.Pointer(u16(""))))
 			}
 		}
 		if f.ID == idLoot {
-			a.child(pane, idLootKey, "BUTTON", "Клавиша: J", wsVisible|wsTabStop|bsOwnerDraw|bsNotify)
+			a.child(pane, idLootKey, "BUTTON", T("installer.key.label", "key", "J"), wsVisible|wsTabStop|bsOwnerDraw|bsNotify)
 		}
 		if f.ID == idDungeons {
-			a.child(pane, idDungeonKey, "BUTTON", "Клавиша: K", wsVisible|wsTabStop|bsOwnerDraw|bsNotify)
+			a.child(pane, idDungeonKey, "BUTTON", T("installer.key.label", "key", "K"), wsVisible|wsTabStop|bsOwnerDraw|bsNotify)
 		}
 	}
 	a.child(a.hwnd, idLog, "EDIT", "", wsVScroll|wsTabStop|esMultiline|esAutoVScroll|esReadOnly)
-	for _, v := range []struct {
-		id    int
-		label string
-	}{{idSaveLog, "Сохранить журнал…"}, {idOpenLog, "Журнал игры"}, {idOpenReport, "Отчёт меток"}, {idInstallerLog, "Полный журнал"}, {idCheckUpdates, "Обновления…"}, {idReadme, "Инструкция"}, {idUninstall, "Удалить расширение"}, {idInstall, "Установить выбранное"}} {
-		a.button(v.id, v.label)
+	for _, id := range []int{idSaveLog, idOpenLog, idOpenReport, idInstallerLog, idCheckUpdates, idReadme, idUninstall, idInstall} {
+		a.button(id, buttonLabel(id))
 	}
 	pSendMessageW.Call(a.ctl[idLog], emSetLimit, 1024*1024, 0)
 	a.applyFonts()
@@ -152,16 +189,16 @@ func (a *app) syncControls() {
 	enable(a.ctl[idVisited], !busy && choices[idMarks])
 	ready := !busy && !resumePending && !querying && st != nil && !st.Running && !recording
 	enable(a.ctl[idLootKey], !busy && !querying && st != nil && choices[idLoot])
-	keyLabel := "Клавиша: " + lootKeyLabel(key)
+	keyLabel := T("installer.key.label", "key", lootKeyLabel(key))
 	if recording && target == idLootKey {
-		keyLabel = "Нажмите клавишу…"
+		keyLabel = T("installer.key.press")
 	}
 	caption(a.ctl[idLootKey], keyLabel)
 	invalidate(a.ctl[idLootKey])
 	enable(a.ctl[idDungeonKey], !busy && !querying && st != nil && choices[idDungeons])
-	dungeonLabel := "Клавиша: " + lootKeyLabel(dungeonKey)
+	dungeonLabel := T("installer.key.label", "key", lootKeyLabel(dungeonKey))
 	if recording && target == idDungeonKey {
-		dungeonLabel = "Нажмите клавишу…"
+		dungeonLabel = T("installer.key.press")
 	}
 	caption(a.ctl[idDungeonKey], dungeonLabel)
 	invalidate(a.ctl[idDungeonKey])
@@ -170,20 +207,20 @@ func (a *app) syncControls() {
 	enable(a.ctl[idBrowse], !busy)
 	enable(a.ctl[idRefresh], !busy && !querying && !searching)
 	enable(a.ctl[idCheckUpdates], !busy && !checking && !updatePending && !resumePending && !updatesDisabled)
-	label := "Установить выбранное"
+	label := T("installer.button.install")
 	if st != nil && st.Installed {
-		label = "Обновить расширение"
+		label = T("installer.button.update")
 		if st.ModVersion != nil && *st.ModVersion == appVersion {
-			label = "Применить настройки"
+			label = T("installer.button.apply")
 		}
 	}
 	if busy {
 		if updating {
-			label = "Обновление программы…"
+			label = T("installer.busy.selfUpdate")
 		} else if operation == "uninstall" {
-			label = "Удаление…"
+			label = T("installer.busy.uninstall")
 		} else {
-			label = "Установка…"
+			label = T("installer.busy.install")
 		}
 	}
 	caption(a.ctl[idInstall], label)
@@ -225,6 +262,7 @@ func (a *app) layout() {
 	move(a.ctl[idComponents], rect{P(24), tabTop, P(180), tabTop + P(32)})
 	move(a.ctl[idJournal], rect{P(188), tabTop, P(294), tabTop + P(32)})
 	move(a.ctl[idCheckUpdates], rect{P(302), tabTop, P(460), tabTop + P(32)})
+	move(a.ctl[idLang], rect{r.right - P(222), P(24), r.right - P(128), P(52)})
 	bottom := r.bottom - P(foot) - P(10)
 	if bottom < P(paneTop+40) {
 		bottom = P(paneTop + 40)
@@ -260,7 +298,7 @@ func (a *app) layoutRows() {
 	for _, f := range features {
 		t := rect{0, 0, w - P(284), 0}
 		of, _, _ := pSelectObject.Call(hdc, a.font("body", 14, 400))
-		s := syscall.StringToUTF16(f.Description)
+		s := syscall.StringToUTF16(f.Description())
 		pDrawTextW.Call(hdc, uintptr(unsafe.Pointer(&s[0])), uintptr(len(s)-1), uintptr(unsafe.Pointer(&t)), dtWordBreak|dtCalcRect|dtNoPrefix)
 		pSelectObject.Call(hdc, of)
 		h := t.bottom + P(32)
@@ -363,35 +401,35 @@ func (a *app) paint(hdc uintptr, r rect) {
 		titleBottom = 48
 		authorTop = 49
 	}
-	text(hdc, appName, rect{P(42), P(17), r.right - P(142), P(titleBottom)}, a.font(fmt.Sprintf("title-%d", titleSize), titleSize, 700), colBone, dtSingleLine|dtVCenter|dtEndEllipsis)
+	text(hdc, appName, rect{P(42), P(17), r.right - P(232), P(titleBottom)}, a.font(fmt.Sprintf("title-%d", titleSize), titleSize, 700), colBone, dtSingleLine|dtVCenter|dtEndEllipsis)
 	roundBox(hdc, rect{r.right - P(120), P(24), r.right - P(24), P(52)}, P(10), colField, colEdge)
 	text(hdc, "v"+appVersion, rect{r.right - P(116), P(24), r.right - P(28), P(52)}, a.font("small", 12, 600), colBrass, dtCenter|dtVCenter|dtSingleLine)
-	text(hdc, "Автор: "+appAuthor, rect{P(42), P(authorTop), r.right - P(24), P(authorTop + 20)}, a.font("body", 14, 400), colBrass, dtSingleLine|dtVCenter)
+	text(hdc, T("installer.author", "name", appAuthor), rect{P(42), P(authorTop), r.right - P(24), P(authorTop + 20)}, a.font("body", 14, 400), colBrass, dtSingleLine|dtVCenter)
 	communityTop := int32(84)
 	if compact {
 		communityTop = 70
 	}
-	text(hdc, appCommunity, rect{P(42), P(communityTop), r.right - P(24), P(communityTop + 22)}, a.font("small", 12, 400), colDim, dtSingleLine|dtVCenter|dtEndEllipsis)
+	text(hdc, T("installer.community"), rect{P(42), P(communityTop), r.right - P(24), P(communityTop + 22)}, a.font("small", 12, 400), colDim, dtSingleLine|dtVCenter|dtEndEllipsis)
 	roundBox(hdc, rect{P(24), P(gameTop), r.right - P(24), P(gameTop + 100)}, P(14), colCard, colEdge)
-	text(hdc, "01  КЛИЕНТ DFO ONLINE", rect{P(40), P(gameTop + 10), P(480), P(gameTop + 30)}, a.font("label", 11, 600), colBrass, dtSingleLine|dtVCenter)
-	line, col := "Выберите игру, если она не найдена автоматически.", colDim
+	text(hdc, T("installer.game.head"), rect{P(40), P(gameTop + 10), P(480), P(gameTop + 30)}, a.font("label", 11, 600), colBrass, dtSingleLine|dtVCenter)
+	line, col := T("installer.game.pick"), colDim
 	if a.searching {
-		line = "Ищем клиент рядом с установщиком и в обычных папках…"
+		line = T("installer.game.searching")
 	} else if a.querying {
-		line = "Проверяем установленную версию и сохранённый выбор…"
+		line = T("installer.game.querying")
 	} else if st := a.status; st != nil {
-		line = "Расширение ещё не установлено"
+		line = T("installer.game.notInstalled")
 		if st.Installed {
-			line = "Установлено расширение"
+			line = T("installer.game.installed")
 			if st.ModVersion != nil {
 				line += " " + *st.ModVersion
 			}
 		}
 		if st.Running {
-			line += " · закройте игру и нажмите «Проверить»"
+			line += " · " + T("installer.game.running")
 			col = colRed
 		} else {
-			line += " · клиент готов"
+			line += " · " + T("installer.game.ready")
 		}
 	}
 	text(hdc, line, rect{P(40), P(gameTop + 66), r.right - P(190), P(gameTop + 90)}, a.font("small", 12, 400), col, dtSingleLine|dtVCenter|dtEndEllipsis)
@@ -405,29 +443,29 @@ func (a *app) paint(hdc uintptr, r rect) {
 	}
 	footer := r.bottom - P(foot)
 	fill(hdc, rect{P(24), footer, r.right - P(24), footer + P(1)}, colEdge)
-	note, ncol := a.note, a.noteCol
+	note, ncol := a.note.String(), a.noteCol
 	if a.capturingKey {
-		note = "Нажмите клавишу или кнопку мыши 3/4/5. Esc — отмена."
+		note = T("installer.note.capture")
 		ncol = colBrass
 	} else if a.busy {
 		if note == "" {
-			note = "Установка…"
+			note = T("installer.busy.install")
 			if a.operation == "uninstall" {
-				note = "Удаление…"
+				note = T("installer.busy.uninstall")
 			}
 		}
 		ncol = colBrass
 	} else if a.toggles[idLoot] && a.toggles[idDungeons] && a.lootKey == a.dungeonKey {
-		note = "Кнопки лута и сведений совпадают. Назначьте разные; сводка доступна кнопкой в игре."
+		note = T("installer.note.sameKeys")
 		ncol = colRed
-	} else if a.updateText != "" {
-		note = a.updateText
+	} else if !a.updateText.empty() {
+		note = a.updateText.String()
 		ncol = colDim
 	} else if note == "" {
-		note = "Выберите нужные функции. Резервная копия клиента создаётся автоматически."
+		note = T("installer.note.choose")
 		ncol = colDim
 		if selectedCount(a.toggles) == 0 {
-			note = "Выберите хотя бы одну функцию или удалите расширение целиком."
+			note = T("installer.note.chooseNone")
 		}
 	}
 	text(hdc, note, rect{P(24), footer + P(9), r.right - P(24), footer + P(33)}, a.font("body", 14, 400), ncol, dtSingleLine|dtVCenter|dtEndEllipsis)
@@ -478,12 +516,12 @@ func (a *app) paintRows(hdc uintptr, r rect) {
 		roundBox(hdc, row, P(12), colCard, edge)
 		field := rect{P(256), row.top + P(8), row.right - P(8), row.bottom - P(8)}
 		roundBox(hdc, field, P(8), colField, colField)
-		badge := f.Badge
+		badge := f.Badge()
 		if f.ID == idLoot {
 			badge = lootBindingBadge(a.lootKey)
 		}
 		if f.ID == idDungeons {
-			badge = "КЛАВИША " + lootKeyLabel(a.dungeonKey) + " · НАВИГАЦИЯ"
+			badge = T("installer.badge.dungeon", "key", lootKeyLabel(a.dungeonKey))
 		}
 		text(hdc, badge, rect{P(40), row.top + P(53), P(246), row.top + P(73)}, a.font("badge", 10, 600), colDim, dtSingleLine|dtVCenter|dtEndEllipsis)
 	}
@@ -736,6 +774,8 @@ func wndProc(hwnd uintptr, m uint32, wp, lp uintptr) uintptr {
 			a.openInstallerLog()
 		case idCheckUpdates:
 			a.startSelfUpdate()
+		case idLang:
+			a.switchLang()
 		case idReadme:
 			a.openGuide()
 		case 2:
@@ -773,18 +813,21 @@ func wndProc(hwnd uintptr, m uint32, wp, lp uintptr) uintptr {
 			if len(found) > 0 {
 				a.setGame(found[0], how)
 				if len(found) > 1 {
-					a.appendLog(fmt.Sprintf("Найдено копий: %d. Другую можно выбрать кнопкой «Выбрать игру…».\r\n", len(found)))
+					a.appendLog(T("installer.log.copies", "n", len(found)) + "\r\n")
 				}
 			} else {
 				a.mu.Lock()
 				have := a.exe != ""
 				if !have {
-					a.note = "Игра не найдена автоматически. Нажмите «Выбрать игру…»."
+					a.note = sayKey("installer.note.notFound")
 					a.noteCol = colDim
 				}
 				a.mu.Unlock()
 				if !have {
-					caption(a.ctl[idPath], "Укажите DFO Online.exe из папки игры")
+					a.mu.Lock()
+					a.pathHint = "installer.path.pick"
+					a.mu.Unlock()
+					caption(a.ctl[idPath], T("installer.path.pick"))
 				}
 			}
 		}
@@ -794,7 +837,7 @@ func wndProc(hwnd uintptr, m uint32, wp, lp uintptr) uintptr {
 		a.mu.Lock()
 		busy := a.busy || a.updateHandoff
 		if busy {
-			a.note = "Дождитесь завершения операции, чтобы сохранить файлы клиента."
+			a.note = sayKey("installer.note.waitClose")
 			a.noteCol = colBrass
 		}
 		a.mu.Unlock()
@@ -845,27 +888,34 @@ func main() {
 	a.modDir = filepath.Dir(self)
 	a.prefsDir = filepath.Join(os.Getenv("LOCALAPPDATA"), appName)
 	opts := parseStartup(os.Args[1:])
+	// The window's language: --lang, else the remembered switch, else Windows' own. The Russian translation is
+	// offered checked on a Russian Windows only; a saved choice of an install still wins (loadChoices).
+	system := systemLang()
+	setLang(chooseLang(opts.lang, a.prefsDir, system))
+	if system != "ru" {
+		a.toggles[idRu] = false
+	}
 	gameArg, resumeArg, noUpdate := opts.game, opts.resume, opts.noUpdate
 	a.updatesDisabled = noUpdate
 	a.logbook = newSessionJournal(filepath.Join(os.Getenv("APPDATA"), "DFO Online"), filepath.Join(a.prefsDir, "logs"))
 	defer a.logbook.close()
 	_ = a.logbook.captureCrashes()
-	a.appendLog(versionTitle() + "\r\nАвтор: " + appAuthor + "\r\n" + appCommunity)
-	a.appendLog(fmt.Sprintf("Запуск PID=%d, %s/%s. EXE: %s", os.Getpid(), runtime.GOOS, runtime.GOARCH, self))
+	a.appendLog(versionTitle() + "\r\n" + T("installer.author", "name", appAuthor) + "\r\n" + T("installer.community"))
+	a.appendLog(T("installer.log.start", "pid", os.Getpid(), "os", runtime.GOOS+"/"+runtime.GOARCH, "exe", self))
 	if path, err := a.logbook.location(); err != nil || path == "" {
-		a.appendLog(fmt.Sprintf("Полный журнал недоступен на диске: %v. Доступно ручное сохранение.", err))
+		a.appendLog(T("installer.log.journalOff", "error", fmt.Sprint(err)))
 	} else {
-		a.appendLog("Полный журнал: " + path)
+		a.appendLog(T("installer.log.journal", "path", path))
 	}
 	if opts.legacyAuto {
-		a.appendLog("Устаревший параметр автоматической установки проигнорирован. Изменение клиента возможно только по кнопке.")
+		a.appendLog(T("installer.log.legacyAuto"))
 	}
 	if resumeArg != "" {
 		plan, rolledBack, e := loadResumeUpdate(resumeArg, self)
 		if e == nil {
 			if plan.Resume.LogDir != "" {
 				if err := a.logbook.move(plan.Resume.LogDir); err != nil {
-					a.appendLog("Восстановление пути журнала: " + err.Error())
+					a.appendLog(T("installer.log.journalRestore", "error", err.Error()))
 				}
 				_ = a.logbook.captureCrashes()
 			}
@@ -886,24 +936,24 @@ func main() {
 			}
 			a.resumeRevision = a.choiceRevision
 			if rolledBack {
-				a.updateText = "Обновление не завершено. Запущена предыдущая рабочая версия."
+				a.updateText = sayKey("installer.update.rolledBack")
 				var result updateResult
 				if readUpdateJSON(filepath.Join(filepath.Dir(resumeArg), "result.json"), &result) == nil {
-					a.appendLog("Откат обновления: " + result.Error)
+					a.appendLog(T("installer.log.rollback", "error", result.Error))
 				}
 			}
 		} else {
-			a.appendLog("Восстановление после обновления: " + e.Error())
-			a.updateText = "Не удалось восстановить состояние обновления. Проверьте настройки перед установкой."
+			a.appendLog(T("installer.log.resume", "error", e.Error()))
+			a.updateText = sayKey("installer.update.resumeFailed")
 		}
 	}
 	var err error
 	a.payloadDir, err = unpackPayload()
 	if err != nil {
 		a.startupError = err
-		a.note = "Файлы установщика не подготовлены. Причина — в журнале; можно проверить обновления."
+		a.note = sayKey("installer.note.payloadFailed")
 		a.noteCol, a.page = colRed, idJournal
-		a.appendLog("Распаковка установщика: " + err.Error())
+		a.appendLog(T("installer.log.unpack", "error", err.Error()))
 	} else {
 		defer os.RemoveAll(a.payloadDir)
 	}
@@ -948,8 +998,8 @@ func main() {
 	}
 	hwnd, _, _ := pCreateWindowExW.Call(wsExControlParent, uintptr(unsafe.Pointer(u16("DFOClientExpanderInstaller"))), uintptr(unsafe.Pointer(u16(versionTitle()))), style, signed(work.left+(work.right-work.left-w)/2), signed(work.top+(work.bottom-work.top-h)/2), signed(w), signed(h), 0, 0, inst, 0)
 	if hwnd == 0 {
-		a.appendLog("Не удалось создать окно установщика.")
-		a.message("Не удалось открыть окно установщика. Полный журнал: "+func() string { p, _ := a.logbook.location(); return p }(), 0x10)
+		a.appendLog(T("installer.log.noWindow"))
+		a.message(T("installer.msg.noWindow", "path", func() string { p, _ := a.logbook.location(); return p }()), 0x10)
 		return
 	}
 	if pDwmSetWindowAttribute.Find() == nil {
@@ -966,14 +1016,14 @@ func main() {
 	if !background {
 		pSetFocus.Call(a.ctl[idRu])
 	}
-	a.appendLog("Окно готово. Инъекция выполняется только по кнопке.")
+	a.appendLog(T("installer.log.ready"))
 	if a.startupError != nil {
 		// Keep the diagnostics window usable even if payload extraction failed.
 	} else if gameArg != "" {
 		if exe := gameIn(filepath.Dir(gameArg)); exe != "" {
-			a.setGame(exe, "параметр запуска")
+			a.setGame(exe, T("installer.how.arg"))
 		} else {
-			a.message("В указанной папке не найден клиент DFO Online.", 0x30)
+			a.message(T("installer.msg.noClientThere"), 0x30)
 			a.startSearch()
 		}
 	} else {
@@ -1015,7 +1065,7 @@ func main() {
 		pDispatchMessageW.Call(uintptr(unsafe.Pointer(&mm)))
 	}
 	a.wg.Wait()
-	a.appendLog("Окно установщика закрыто.")
+	a.appendLog(T("installer.log.closed"))
 	if !a.handedOff && a.updateReady != nil {
 		_ = os.RemoveAll(a.updateReady.Dir)
 	}

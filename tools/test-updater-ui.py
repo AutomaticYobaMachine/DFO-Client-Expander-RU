@@ -21,7 +21,8 @@ spec.loader.exec_module(base)
 
 def main():
     temp = Path(tempfile.mkdtemp(prefix='dfo-updater-ui-'))
-    env = dict(os.environ, DISPLAY=os.environ.get('DFO_TEST_DISPLAY', ':93'), WINEDEBUG='-all')
+    # A Russian Windows, as the installer UI test: the restarted window keeps the language through the update plan.
+    env = dict(os.environ, DISPLAY=os.environ.get('DFO_TEST_DISPLAY', ':93'), WINEDEBUG='-all', LANG='ru_RU.UTF-8', LC_ALL='ru_RU.UTF-8')
     env.setdefault('WINEPREFIX', str(temp/'wine-profile'))
     log = (temp/'process.log').open('wb')
     screen = app = game_process = None

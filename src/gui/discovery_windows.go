@@ -124,19 +124,19 @@ func findGame(modDir string) ([]string, string) {
 	if b, err := os.ReadFile(filepath.Join(modDir, "game-path.txt")); err == nil {
 		p := strings.TrimSpace(string(b))
 		if exe := gameIn(filepath.Dir(p)); exe != "" {
-			return []string{exe}, "путь из прошлого раза"
+			return []string{exe}, T("installer.how.last")
 		}
 	}
 	if f := searchNear(modDir, 6*time.Second); len(f) > 0 {
-		return f, "рядом с установщиком"
+		return f, T("installer.how.near")
 	}
 	if f := searchRegistry(); len(f) > 0 {
-		return f, "по реестру установленных программ"
+		return f, T("installer.how.registry")
 	}
 	for _, d := range []string{filepath.Join(os.Getenv("LOCALAPPDATA"), "Programs", "DFO Online"), filepath.Join(os.Getenv("ProgramFiles"), "DFO Online"),
 		filepath.Join(os.Getenv("ProgramFiles(x86)"), "DFO Online"), `C:\games\DFO Online`, `D:\games\DFO Online`, `C:\games\Daggerfall Online\DFO Online`, `D:\games\Daggerfall Online\DFO Online`} {
 		if exe := gameIn(d); exe != "" {
-			return []string{exe}, "в обычной папке установки"
+			return []string{exe}, T("installer.how.usual")
 		}
 	}
 	return nil, ""

@@ -34,7 +34,7 @@ func unpackPayload() (string, error) {
 	for _, f := range z.File {
 		rel := filepath.FromSlash(f.Name)
 		if filepath.IsAbs(rel) || strings.Contains(rel, ":") || rel == ".." || strings.HasPrefix(filepath.Clean(rel), ".."+string(os.PathSeparator)) {
-			return "", fmt.Errorf("некорректный путь компонента")
+			return "", fmt.Errorf("%s", T("installer.err.payloadPath"))
 		}
 		p := filepath.Join(dir, rel)
 		if f.FileInfo().IsDir() {
@@ -44,7 +44,7 @@ func unpackPayload() (string, error) {
 			continue
 		}
 		if f.UncompressedSize64 > 64*1024*1024 {
-			return "", fmt.Errorf("некорректный размер компонента")
+			return "", fmt.Errorf("%s", T("installer.err.payloadSize"))
 		}
 		if err = os.MkdirAll(filepath.Dir(p), 0700); err != nil {
 			return "", err

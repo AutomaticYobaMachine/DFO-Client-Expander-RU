@@ -1,7 +1,7 @@
 package main
 
 type startupOptions struct {
-	game, resume         string
+	game, resume, lang   string
 	noUpdate, legacyAuto bool
 }
 
@@ -16,6 +16,11 @@ func parseStartup(args []string) startupOptions {
 				} else {
 					out.resume = args[i+1]
 				}
+				i++
+			}
+		case "--lang":
+			if i+1 < len(args) {
+				out.lang = args[i+1]
 				i++
 			}
 		case "--no-self-update":

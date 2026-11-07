@@ -8,10 +8,9 @@ import (
 )
 
 const (
-	appName      = "DFO-Client-Expander-RU"
-	appVersion   = "1.24.0"
-	appAuthor    = "AutomaticYobaMachine"
-	appCommunity = "Создано специально для русского сообщества DFO Online."
+	appName    = "DFO-Client-Expander-RU"
+	appVersion = "1.24.0"
+	appAuthor  = "AutomaticYobaMachine"
 )
 
 const (
@@ -40,20 +39,26 @@ const (
 	idFonts
 	idInstallerLog
 	idCheckUpdates
+	idLang
 )
 
 type feature struct {
-	ID                             int
-	Key, Title, Badge, Description string
+	ID  int
+	Key string
 }
 
+// A feature's words: installer.feature.<key>.title|badge|description in the window's language.
+func (f feature) Title() string       { return T("installer.feature." + f.Key + ".title") }
+func (f feature) Badge() string       { return T("installer.feature." + f.Key + ".badge") }
+func (f feature) Description() string { return T("installer.feature." + f.Key + ".description") }
+
 var features = []feature{
-	{idRu, "ru", "Русификация", "ИГРА НА РУССКОМ", "Перевод интерфейса, предметов, квестов и книг. Русские названия и описания помогают ориентироваться в игре; собственные имена мест сохраняются там, где это нужно для поиска на карте."},
-	{idMarks, "marks", "Метки и карта города", "ОРИЕНТИРОВАНИЕ", "Метки таверн, магазинов, гильдий и других заведений на Overworld. Подробная карта города помогает найти нужное место. «Только посещённые» скрывает здания, в которых вы ещё не были."},
-	{idLoot, "nearbyLoot", "Лут рядом", "КЛАВИША J · 15 МЕТРОВ", "Дроп противников и предметы на полу — в одном окне с фильтрами, пресетами, сортировкой и «Забрать все». Автолут настраивается отдельно. Стены и соседние этажи исключены; вещи подбираются из исходных куч и трупов."},
-	{idDungeons, "dungeons", "Сведения о данжах", "КАРТОЧКИ И СВОДКА ВНУТРИ", "Карточки данжей на Overworld. Справа сверху — живые счётчики врагов, элит и игроков. По K — подробная сводка: квесты, аурум, реген и линия маршрута к выходу, ауруму, элитнику или цели задания. Свою кнопку назначьте ниже."},
-	{idItemCards, "itemCards", "Карточки предметов", "МАТЕРИАЛ · ЦЕННОСТЬ · СРАВНЕНИЕ", "Единая карточка в два столбца: материал отдельно от типа брони, свойства и эффекты списком, родные сигилы, наборы и сравнение с надетым. Ценность учитывает сохранённые улучшения. Без описаний и внутренней прокрутки. Для расширенного интерфейса игры."},
-	{idFonts, "fonts", "Шрифты сообщества", "ЕДИНЫЙ СТИЛЬ ТЕКСТА", "Наши шрифты во всём игровом интерфейсе: меню, чат, журнал, книги, инвентарь, торговля и классические окна. Gabin для обычного текста, Greengoth для заголовков, Hangyaku для книг; специальные шрифты сигилов, наборов и легендарных свойств сохраняются. Работает отдельно от русификации и карточек предметов."},
+	{idRu, "ru"},
+	{idMarks, "marks"},
+	{idLoot, "nearbyLoot"},
+	{idDungeons, "dungeons"},
+	{idItemCards, "itemCards"},
+	{idFonts, "fonts"},
 }
 
 type gameStatus struct {
@@ -145,5 +150,5 @@ func dialogFilter(parts ...string) []uint16 {
 }
 func versionTitle() string { return appName + " · " + appVersion }
 func selectionLabel(choices map[int]bool) string {
-	return "Выбрано " + strconv.Itoa(selectedCount(choices)) + " из " + strconv.Itoa(len(features))
+	return T("installer.selected", "n", strconv.Itoa(selectedCount(choices)), "all", strconv.Itoa(len(features)))
 }

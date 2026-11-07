@@ -1,0 +1,46 @@
+key,text,note
+patcher.err.noAsar,Не найден resources\app.asar рядом с игрой. Запустите установку из папки мода через Установить.cmd.,src/patcher.cjs
+patcher.err.busyFile,Не удалось заменить {target} (файл занят другим процессом). Закройте игру и повторите.,src/patcher.cjs
+patcher.err.saveSettings,Не удалось сохранить настройки и назначенные кнопки: {error},src/patcher.cjs
+patcher.err.dungeonKey,Некорректная кнопка сведений о данже. Назначьте клавишу заново в установщике.,src/patcher.cjs
+patcher.err.lootKey,Некорректная кнопка лута. Назначьте клавишу заново в установщике.,src/patcher.cjs
+patcher.install.title,DFO-Client-Expander-RU {version} — установка,src/patcher.cjs
+patcher.author,Автор: AutomaticYobaMachine. Создано специально для русского сообщества DFO Online.,src/patcher.cjs
+patcher.game,Игра:   {path},src/patcher.cjs
+patcher.err.runningInstall,DFO Online сейчас запущена. Закройте игру полностью и запустите установку снова.,src/patcher.cjs
+patcher.err.cacheRead,Не удалось прочитать кеш настроек; файлы клиента не изменены: {error},src/patcher.cjs
+patcher.err.noBackup,"app.asar уже изменён этим модом, но чистой копии ({file}) нет. Переустановите игру и запустите установку снова.",src/patcher.cjs
+patcher.reinstall,Мод уже стоит - переустанавливаю поверх чистой копии.,src/patcher.cjs
+patcher.oldRu,Найден старый русификатор DFO_RU - беру его чистую копию: {file},src/patcher.cjs
+patcher.oldRuOther,Внимание: копия DFO_RU ({copy}) от другой версии оболочки ({current}) - ставлю поверх текущего файла.,src/patcher.cjs
+patcher.oldRuNoCopy,Внимание: стоит старый русификатор DFO_RU без чистой копии - ставлю поверх него.,src/patcher.cjs
+patcher.backup,Сохраняю чистую копию app.asar...,src/patcher.cjs
+patcher.err.noMain,В app.asar нет main.cjs - неизвестная версия оболочки.,src/patcher.cjs
+patcher.err.noHookPlace,"Не найдено место для перехватчика в main.cjs (protocol.handle('dagger', ...)). Эта версия оболочки не поддерживается.",src/patcher.cjs
+patcher.buildRu,"Собираю русификатор (словарь, правила, квесты)...",src/patcher.cjs
+patcher.report.quests,квестов: {n},src/patcher.cjs
+patcher.report.pack,пак: {n} {n:файл|файла|файлов},src/patcher.cjs
+patcher.repack,Пересобираю app.asar...,src/patcher.cjs
+patcher.autoUpdate,Автообновление игры снова включено (его выключал старый русификатор): мод переживает обновления сам.,src/patcher.cjs
+patcher.report,Русификатор: {report},src/patcher.cjs
+patcher.settings,Настройки: {file},src/patcher.cjs
+patcher.hookLog,Журнал хуков (после запуска игры): {file},src/patcher.cjs
+patcher.uninstall.title,DFO-Client-Expander-RU {version} — удаление,src/patcher.cjs
+patcher.err.runningUninstall,DFO Online сейчас запущена. Закройте игру полностью и запустите удаление снова.,src/patcher.cjs
+patcher.notInstalled,Мод не установлен - app.asar и так чистый.,src/patcher.cjs
+patcher.restored,Готово: чистый app.asar возвращён на место.,src/patcher.cjs
+patcher.restoredFiles,"Готово: исходные файлы оболочки возвращены, мод убран.",src/patcher.cjs
+patcher.status.asar,app.asar: {path} (оболочка {shell}),src/patcher.cjs
+patcher.status.lootKey,Кнопка лута (в кеше): {key},src/patcher.cjs
+patcher.status.lastLog,Журнал последнего запуска:,src/patcher.cjs
+patcher.err.command,Неизвестная команда: {cmd},src/patcher.cjs
+patcher.error,Ошибка: {error},src/patcher.cjs
+patcher.crash,Сбой: {error},src/patcher.cjs
+patcher.done.installed,Готово. Мод {version} установлен.,src/patcher.cjs
+patcher.done.installedRu,Готово. Мод {version} установлен вместе с русификатором.,src/patcher.cjs
+patcher.status.installed,Мод: установлен {version},src/patcher.cjs
+patcher.status.installedRu,"Мод: установлен {version}, с русификатором",src/patcher.cjs
+patcher.status.notInstalled,Мод: не установлен,src/patcher.cjs
+patcher.status.notInstalledRu,"Мод: не установлен, с русификатором",src/patcher.cjs
+patcher.status.cleanYes,Чистая копия: есть,src/patcher.cjs
+patcher.status.cleanNo,Чистая копия: нет,src/patcher.cjs

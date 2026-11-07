@@ -1,11 +1,19 @@
 // Read-only dungeon forecasts. Native game tables/formulas are supplied by the runtime bridge.
 (function (root) {
   'use strict';
-  const TYPES = ['Крипта', 'Орочья твердыня', 'Людская твердыня', 'Тюрьма', 'Осквернённый храм', 'Шахта', 'Природная пещера', 'Ковен', 'Логово вампиров', 'Лаборатория', 'Гнездо гарпий', 'Разрушенный замок', 'Паучье гнездо', 'Твердыня великанов', 'Логово дракона', 'Крепость варваров', 'Вулканические пещеры', 'Гнездо скорпионов', 'Кладбище'];
+  // The mod's own words, in the install's language (page/dfo_ui_text.js; English without the translation). The tables
+  // below keep their shape (arrays and maps other scripts index); each word is read in that language when asked for.
+  const T = (key, params) => (root.__dfoUi ? root.__dfoUi.t(key, params) : key);
+  const words = (prefix, ids, list) => {
+    const out = list ? new Array(ids.length) : {};
+    ids.forEach((id, i) => Object.defineProperty(out, list ? i : id, { enumerable: true, get: () => T(prefix + id.replace(':', '-')) }));
+    return Object.freeze(out);
+  };
+  const TYPES = words('dungeon.type.', ["crypt", "orcStronghold", "humanStronghold", "prison", "desecratedTemple", "mine", "naturalCave", "coven", "vampireHaunt", "laboratory", "harpyNest", "ruinedCastle", "spiderNest", "giantStronghold", "dragonsDen", "barbarianFortress", "volcanicCaves", "scorpionNest", "cemetery"], true);
   const SHARE = [0.88, 0.88, 0.22, 0.44, 1.0, 0.11, 0.11, 1.0, 1.0, 1.0, 0.44, 0.22, 0.22, 0.88, 1.0, 1.0, 1.0, 0.44, 0.22];
-  const FAMILY = { undead: 'нежить', daedra: 'даэдра и магические создания', dragon: 'драконы', beast: 'звери и природные создания', brute: 'орки и великаны', caster: 'маги', rogue: 'разбойники', warrior: 'воины' };
-  const METALS = ['Железо', 'Сталь', 'Серебро', 'Эльфийский', 'Двемерский', 'Мифрил', 'Адамантий', 'Эбонит', 'Орочий', 'Даэдрический'];
-  const MATERIALS = { 'metal:silver': 'серебро', 'metal:gold': 'золото', 'ore:dwarven': 'двемерская руда', 'metal:platinum': 'платина', 'ore:adamantium': 'адамантиевая руда', 'ore:moonstone': 'лунный камень' };
+  const FAMILY = words('dungeon.family.', ["undead", "daedra", "dragon", "beast", "brute", "caster", "rogue", "warrior"]);
+  const METALS = words('dungeon.metal.', ["iron", "steel", "silver", "elven", "dwarven", "mithril", "adamantium", "ebony", "orcish", "daedric"], true);
+  const MATERIALS = words('dungeon.material.', ["metal:silver", "metal:gold", "ore:dwarven", "metal:platinum", "ore:adamantium", "ore:moonstone"]);
   const COLORS = { threat: '#ff8880', loot: '#f1cd70', growth: '#95e79f', renown: '#ffffff', undead: '#c0e5ff', beast: '#69c9e5', daedra: '#ff8880', brute: '#b3dbab', other: '#e5d6b5' };
   const SKULL = '☠\uFE0E'; // Text presentation: emoji glyphs ignore the threat's red fill.
   const clamp = (x, lo = 0, hi = 1) => Math.min(hi, Math.max(lo, x));
@@ -13,7 +21,7 @@
   const finite = x => typeof x === 'number' && Number.isFinite(x);
   const weighted = (rows, fn) => rows.length ? rows.reduce((s, r) => s + r.probability * fn(r), 0) : null;
   const call = (fn, ...args) => { try { return typeof fn === 'function' ? fn(...args) : null; } catch { return null; } };
-  const number = (n, digits = 1) => finite(n) ? n.toLocaleString('ru-RU', { maximumFractionDigits: digits }) : 'неизвестно';
+  const number = (n, digits = 1) => finite(n) ? (root.__dfoUi ? root.__dfoUi.number(n, { maximumFractionDigits: digits }) : n.toLocaleString('en-US', { maximumFractionDigits: digits })) : T('dungeon.unknown');
 
   // Integrate every branch of the native selection law analytically. Never advance the
   // game's shared RNG, generate a dungeon or ask a mutable encounter selector to pick a table.
@@ -41,24 +49,24 @@
       && !loc.superTier && !loc.wildHall && !loc.madeLevel && !loc.arenaFloor && !loc.arenaUndercroft;
   }
   function formatRemaining(ms) {
-    if (!finite(ms) || ms <= 0) return 'срок истёк';
+    if (!finite(ms) || ms <= 0) return T('dungeon.expired');
     const totalMinutes = Math.max(1, Math.floor(ms / 60000));
     const hours = Math.floor(totalMinutes / 60);
     const minutes = totalMinutes % 60;
     const mm = minutes < 10 ? '0' + minutes : String(minutes);
-    return `${hours} ч. ${mm}м.`;
+    return T('dungeon.remaining',{h:hours,m:mm});
   }
 
   function lifetime(place, tools) {
     const loc = place.loc;
-    if (!loc.spawned) return { kind: 'permanent', text: 'постоянный данж' };
+    if (!loc.spawned) return { kind: 'permanent', text: T('dungeon.permanent') };
     const rec = call(tools.spawnRecord, place), at = rec && call(tools.spawnDeath, rec), wall = finite(at) ? call(tools.wallTime, at) : null;
-    if (!finite(wall)) return { kind: 'spawned', text: 'порождённый, таймер неизвестен', cleared: finite(rec?.cleared) };
+    if (!finite(wall)) return { kind: 'spawned', text: T('dungeon.spawnedUnknown'), cleared: finite(rec?.cleared) };
     const now = call(tools.now) ?? Date.now();
     const expired = wall <= now;
-    const remaining = expired ? 'срок истёк' : formatRemaining(wall - now);
-    const timerText = expired ? 'срок истёк' : `Исчезнет через: ${remaining}`;
-    return { kind: 'spawned', text: `порождённый, ${timerText}`, timerText, remaining, expires: wall, cleared: finite(rec?.cleared), expired };
+    const remaining = expired ? T('dungeon.expired') : formatRemaining(wall - now);
+    const timerText = expired ? T('dungeon.expired') : T('dungeon.vanishesIn',{time:remaining});
+    return { kind: 'spawned', text: T('dungeon.spawnedTimer',{timer:timerText}), timerText, remaining, expires: wall, cleared: finite(rec?.cleared), expired };
   }
 
   function forecast(place, player, tools = {}, note = null) {
@@ -76,7 +84,7 @@
       const basic = tools.basics?.[id], baseLevel = call(tools.enemyLevel, id, level) ?? basic?.level;
       const scale = lootOn ? call(tools.scaling, standing, share, call(tools.foeShare, baseLevel, (id & 128) !== 0), placeThreat, hero) : null;
       const minMetal = basic?.minMetalToHit ?? -1;
-      return { type: id, probability, name: call(tools.enemyName, id) || `Враг ${id}`, level: baseLevel,
+      return { type: id, probability, name: call(tools.enemyName, id) || T('dungeon.enemy',{id:id}), level: baseLevel,
         family: call(tools.foeFamily, id), minMetal, boss: basic?.affinity === 'Daedra' || baseLevel >= 18,
         hp: (scale?.healthMult ?? 1) * (elite ? 2 : 1), damage: (scale?.damageMult ?? 1) * (elite ? 2 : 1),
         challenge: baseLevel + (scale?.challengeLevels ?? 0), armor: basic?.armorValue,
@@ -104,15 +112,15 @@
     const aurumId = online ? call(tools.aurumKey, loc) : null, aurum = aurumId ? call(tools.aurumAmount, aurumId) : null;
     const family = call(tools.family, type), signatures = family ? call(tools.signatures, family) ?? [] : [];
     const eliteSlots = online || lootOn ? call(tools.eliteSlots, loc.dungeon?.recordElement?.header?.locationId ?? loc.name ?? '', elite) : 0;
-    const rawName = loc.name || 'Без названия';
+    const rawName = loc.name || T('dungeon.untitled');
     const cleanName = rawName.replace(/\s*\(-?\d+,\s*-?\d+\)$/, '').replace(/^Elite\s+/i, '');
-    const title = `[${TYPES[type]} - ${rank ?? '?'} ранг] ${size} ${cleanName}`;
+    const title = T('dungeon.title',{type:TYPES[type],rank:rank ?? '?',size:size,name:cleanName});
     return { title, name: cleanName, rawName, type, typeName: TYPES[type], rank, size, elite, online, level, bestSkill, luck, lootOn, alternate,
       life, rows, scores, boss, blocked, hp, damage, meanLevel, growthWeight, weaponMetal, weaponName: weapon?.name,
       ready, choices: tableList.length, family, signatures, chances, xp, renown, identity, veins, aurum, aurumId, share,
       aurumTaken: aurumId ? call(tools.aurumTaken, aurumId) : null, respawn: call(tools.respawn, { elite }), eliteSlots,
       color: dominant?.[1] >= 0.5 ? COLORS[dominant[0]] || COLORS.other : COLORS.other, note,
-      metadata: `${elite ? 'Элитный' : 'Обычный'} данж, ${life.text}` };
+      metadata: T('dungeon.metadata',{kind:T(elite ? 'dungeon.elite' : 'dungeon.ordinary'),life:life.text}) };
   }
 
   function cleanNote(value) {

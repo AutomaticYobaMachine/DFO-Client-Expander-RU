@@ -1,6 +1,8 @@
 // Nearby loot references original sources and uses the game's inventory door and transfers.
 (function (root) {
   'use strict';
+  // The mod's own words, in the install's language (page/dfo_ui_text.js; English without the translation).
+  const T = (key, params) => (root.__dfoUi ? root.__dfoUi.t(key, params) : key);
   const Rules = typeof module === 'object' && module.exports ? require('./dfo_loot_rules.js') : root.__dfoLootRules;
   const DEFAULT_SETTINGS = Rules.cleanSettings();
   const RADIUS = 15;
@@ -145,7 +147,7 @@
     };
     refresh();
     const loot = {
-      nearby: true, title: 'Лут рядом · 15 м',
+      nearby: true, title: T('loot.nearbyTitle'),
       items() {
         if (!moving) refresh();
         const t = tools();
@@ -239,7 +241,7 @@
         state.loot = loot; current = state;
         if (auto) {
           const result = loot.autoLoot(settings().autoLoot);
-          if (result.taken) host.say?.(`Автолут: подобрано стопок — ${result.taken}.`);
+          if (result.taken) host.say?.(T('loot.auto.taken',{n:result.taken}));
           if (result.taken && !loot.rawItems().length) { loot.closed(); return true; }
         }
         state.window = host.open(loot);
@@ -268,7 +270,7 @@
           if (!host || host.kind !== initial.kind || host.entity !== initial.entity || focused?.closest?.('input,textarea,select,[contenteditable]:not([contenteditable="false"]),[role="textbox"]')) return false;
           return run(host, true);
         } catch (e) {
-          initial.say?.('Не удалось загрузить настройки лута. Повторите нажатие J.');
+          initial.say?.(T('loot.settingsLoadFailed'));
           console.warn('[dfo-mod] loot settings:', e); return false;
         } finally { opening = false; }
       },

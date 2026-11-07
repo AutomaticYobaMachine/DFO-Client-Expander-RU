@@ -1,0 +1,35 @@
+key,text,note
+cards.variant.Fur,Мех,RRI variant word
+cards.variant.Mail,Кольчужная,RRI variant word
+cards.variant.Brigandine,Бригандина,RRI variant word
+cards.metal.Iron,Железо,material row
+cards.metal.Steel,Сталь,material row
+cards.metal.Silver,Серебро,material row
+cards.metal.Elven,Эльфийский металл,material row
+cards.metal.Dwarven,Двемерский металл,material row
+cards.metal.Mithril,Мифрил,material row
+cards.metal.Adamantium,Адамантит,material row
+cards.metal.Orcish,Орочий металл,material row
+cards.metal.Ebony,Эбонит,material row
+cards.metal.Daedric,Даэдрический металл,material row
+cards.material,Материал,label in the name block
+cards.material.cloth,Ткань,hand wraps
+cards.material.fur,Мех,RRI fur
+cards.material.noData,Нет данных,the item has no material field
+cards.material.unknownMetal,Металл не указан,classic chain: its metal is not recorded
+cards.material.unspecified,Не указан,the game does not show the material
+cards.group.strike,Накладывает при попадании,effects group
+cards.group.use,При использовании,effects group
+cards.group.held,При ношении,effects group
+cards.group.bonuses,Надбавки,effects group
+cards.group.properties,Пассивные свойства,effects group
+cards.group.power,Легендарное свойство,effects group
+cards.armorType,Тип брони,the native Type row
+cards.construction,Конструкция,RRI construction row
+cards.quantity,Количество,stack size row
+cards.perKg,Цена / кг,row label
+cards.perKgValue,~{value} зол.,row value; {value} formatted
+cards.general,Общие сведения,left column heading
+cards.price.unknown,Стоимость неизвестна,price aria-label
+cards.price.approximate,Примерная стоимость: {value} золота,price aria-label
+cards.price.exact,Стоимость: {value} золота,price aria-label

@@ -1,0 +1,251 @@
+key,text,note
+dungeon.type.crypt,Crypt,dungeon model table
+dungeon.type.orcStronghold,Orc stronghold,dungeon model table
+dungeon.type.humanStronghold,Human stronghold,dungeon model table
+dungeon.type.prison,Prison,dungeon model table
+dungeon.type.desecratedTemple,Desecrated temple,dungeon model table
+dungeon.type.mine,Mine,dungeon model table
+dungeon.type.naturalCave,Natural cave,dungeon model table
+dungeon.type.coven,Coven,dungeon model table
+dungeon.type.vampireHaunt,Vampire haunt,dungeon model table
+dungeon.type.laboratory,Laboratory,dungeon model table
+dungeon.type.harpyNest,Harpy nest,dungeon model table
+dungeon.type.ruinedCastle,Ruined castle,dungeon model table
+dungeon.type.spiderNest,Spider nest,dungeon model table
+dungeon.type.giantStronghold,Giant stronghold,dungeon model table
+dungeon.type.dragonsDen,Dragon's den,dungeon model table
+dungeon.type.barbarianFortress,Barbarian fortress,dungeon model table
+dungeon.type.volcanicCaves,Volcanic caves,dungeon model table
+dungeon.type.scorpionNest,Scorpion nest,dungeon model table
+dungeon.type.cemetery,Cemetery,dungeon model table
+dungeon.family.undead,undead,dungeon model table
+dungeon.family.daedra,daedra and magical creatures,dungeon model table
+dungeon.family.dragon,dragons,dungeon model table
+dungeon.family.beast,beasts and natural creatures,dungeon model table
+dungeon.family.brute,orcs and giants,dungeon model table
+dungeon.family.caster,mages,dungeon model table
+dungeon.family.rogue,rogues,dungeon model table
+dungeon.family.warrior,warriors,dungeon model table
+dungeon.metal.iron,Iron,dungeon model table
+dungeon.metal.steel,Steel,dungeon model table
+dungeon.metal.silver,Silver,dungeon model table
+dungeon.metal.elven,Elven,dungeon model table
+dungeon.metal.dwarven,Dwarven,dungeon model table
+dungeon.metal.mithril,Mithril,dungeon model table
+dungeon.metal.adamantium,Adamantium,dungeon model table
+dungeon.metal.ebony,Ebony,dungeon model table
+dungeon.metal.orcish,Orcish,dungeon model table
+dungeon.metal.daedric,Daedric,dungeon model table
+dungeon.material.metal-silver,silver,dungeon model table
+dungeon.material.metal-gold,gold,dungeon model table
+dungeon.material.ore-dwarven,dwarven ore,dungeon model table
+dungeon.material.metal-platinum,platinum,dungeon model table
+dungeon.material.ore-adamantium,adamantium ore,dungeon model table
+dungeon.material.ore-moonstone,moonstone,dungeon model table
+dungeon.unknown,unknown,src/mod/page/dfo_dungeons.js
+dungeon.expired,expired,src/mod/page/dfo_dungeons.js
+dungeon.remaining,{h} h {m} min,src/mod/page/dfo_dungeon_model.js
+dungeon.permanent,permanent dungeon,src/mod/page/dfo_dungeon_model.js
+dungeon.spawnedUnknown,"spawned, timer unknown",src/mod/page/dfo_dungeon_model.js
+dungeon.vanishesIn,Vanishes in: {time},src/mod/page/dfo_dungeon_model.js
+dungeon.spawnedTimer,"spawned, {timer}",src/mod/page/dfo_dungeon_model.js
+dungeon.enemy,Enemy {id},src/mod/page/dfo_dungeons.js
+dungeon.untitled,Untitled,src/mod/page/dfo_dungeon_model.js
+dungeon.title,[{type} - rank {rank}] {size} {name},src/mod/page/dfo_dungeon_model.js
+dungeon.metadata,"{kind} dungeon, {life}",src/mod/page/dfo_dungeon_model.js
+dungeon.elite,Elite,src/mod/page/dfo_dungeons.js
+dungeon.ordinary,Ordinary,src/mod/page/dfo_dungeons.js
+dungeon.tip.click,LMB — dungeon details,src/mod/page/dfo_dungeons.js
+dungeon.tip.personal,The ratings are personal to your character.,src/mod/page/dfo_dungeons.js
+dungeon.tip.travel,“Travel” is a separate button in the card.,src/mod/page/dfo_dungeons.js
+dungeon.guide.close,Close the mini guide,src/mod/page/dfo_dungeons.js
+dungeon.travel,→ Travel,src/mod/page/dfo_dungeons.js
+dungeon.card.close,Close the dungeon card,src/mod/page/dfo_dungeons.js
+dungeon.card.title,Dungeon details,src/mod/page/dfo_dungeons.js
+dungeon.guide.title,How to read the dungeon ratings,src/mod/page/dfo_dungeons.js
+dungeon.guide.intro,"These are the mod's personal indices, not a chance of victory or a promise of a specific drop. They are recomputed for the current character.",src/mod/page/dfo_dungeons.js
+dungeon.guide.threat,☠ Threat — 1 to 5,src/mod/page/dfo_dungeons.js
+dungeon.guide.threatText,"We compare the expected enemies' average level with your effective level, and count the share of bosses, the health and damage scaling and the share of enemies your weapon's base metal cannot hurt. Place, skill, level and Renown scaling are read from the game's formulas; an elite dungeon adds its own multipliers. Spells, tactics and player skill are not part of the index.",src/mod/page/dfo_dungeons.js
+dungeon.guide.threatFormula,The index before rounding: 1 + 1.1 × (average level / the larger of 5 and your level) + boss share + 0.55 × log₂(health × damage) + share of unsuitable metal. The result is rounded and kept within 1 to 5. Health and damage multipliers are relative to the base enemy kind.,src/mod/page/dfo_dungeons.js
+dungeon.guide.loot,◆ Loot — 1 to 5,src/mod/page/dfo_dungeons.js
+dungeon.guide.lootText,"Rates the quality of the sources: treasure rank, boss share and an elite dungeon. Index: 1 + 2.5 × rank / 18 + boss share + 0.5 for an elite dungeon, rounded and kept within 1–5. It is not items per hour: the number of spawn points and the clearing time are unknown from outside. The exact rarity thresholds for your level and Luck are on the “Loot” tab.",src/mod/page/dfo_dungeons.js
+dungeon.guide.growth,↑ Growth — 1 to 5,src/mod/page/dfo_dungeons.js
+dungeon.guide.growthText,"Below skill 100 the index is 5: the limit on learning from a weak opponent does not apply yet. Above 100 we take your highest combat/magic skill and the average training weight over the forecast enemies. The game compares (5 × challenge level + 30) with the skill: below 75% a combat skill does not train; from 75% to 100% the weight grows quadratically; beyond that it reaches 1.5. The mod's index: 1 + 4 × weight / 1.5, rounded within 1–5. Magic also trains outside combat, which this index does not rate.",src/mod/page/dfo_dungeons.js
+dungeon.guide.renown,★ Renown — 0.0 to 5.0,src/mod/page/dfo_dungeons.js
+dungeon.guide.renownText,"The average Renown experience per expected kill is divided by the largest reward for one kill at your current Renown and multiplied by 5. The experience and the cap come from the game; party bonuses and the service's limits may change the result. Offline, no Renown is earned. The raw XP is shown in the card.",src/mod/page/dfo_dungeons.js
+dungeon.guide.known,What is known before entering,src/mod/page/dfo_dungeons.js
+dungeon.guide.knownText,"The roster is a forecast from the table and your level, without building the dungeon. When the game's mode offers several tables, their even mix is used. Fixed and water enemies, the server's memory of the previous visitor and quest reinforcements may differ. Observations from visits are shown separately with their time; they do not guarantee the room's current state.",src/mod/page/dfo_dungeons.js
+dungeon.guide.unknownText,"The number of enemies and chests is unknown in advance without reading the game's blocks. From outside, the client does not know how many players are inside, what exactly the chests hold, the Aurum state or how far the veins are mined. No entry in the vanishing log does not prove that nobody went in.",src/mod/page/dfo_dungeons.js
+dungeon.close,Close,src/mod/page/dfo_dungeons.js
+dungeon.tab.rating,Rating,src/mod/page/dfo_dungeons.js
+dungeon.tab.inhabitants,Inhabitants,src/mod/page/dfo_dungeons.js
+dungeon.tab.loot,Loot,src/mod/page/dfo_dungeons.js
+dungeon.tab.growth,Power and growth,src/mod/page/dfo_dungeons.js
+dungeon.tab.details,Details,src/mod/page/dfo_dungeons.js
+dungeon.partialData,Some of the game's data is not available yet. Unknown ratings and chances are not replaced with rough numbers.,src/mod/page/dfo_dungeons.js
+dungeon.score.threat,THREAT,src/mod/page/dfo_dungeons.js
+dungeon.score.loot,LOOT,src/mod/page/dfo_dungeons.js
+dungeon.score.growth,GROWTH,src/mod/page/dfo_dungeons.js
+dungeon.score.renown,RENOWN,src/mod/page/dfo_dungeons.js
+dungeon.chip.blocked,YOUR WEAPON CAN'T HURT {pct} OF ENEMIES,src/mod/page/dfo_dungeons.js
+dungeon.chip.lootGreat,GREAT LOOT,src/mod/page/dfo_dungeons.js
+dungeon.chip.lootGood,GOOD LOOT,src/mod/page/dfo_dungeons.js
+dungeon.chip.bosses,BOSSES {pct},src/mod/page/dfo_dungeons.js
+dungeon.chip.legendaries,LEGENDARIES: {family},src/mod/page/dfo_dungeons.js
+dungeon.chip.vein,VEIN: {vein},src/mod/page/dfo_dungeons.js
+dungeon.chip.elites,ELITE ENEMIES,src/mod/page/dfo_dungeons.js
+dungeon.chip.expired,EXPIRED,src/mod/page/dfo_dungeons.js
+dungeon.chip.vanishes,VANISHES IN: {time},src/mod/page/dfo_dungeons.js
+dungeon.chip.cleared,CLEARED,src/mod/page/dfo_dungeons.js
+dungeon.sec.threat,☠ THREAT — {score} OF 5,src/mod/page/dfo_dungeons.js
+dungeon.mixedEnemies,mixed enemies,src/mod/page/dfo_dungeons.js
+dungeon.threat.summary,For a level {level} character the enemies here are level {mean} on average; mostly {family} {share}. Place and skill scaling makes strong enemies {hp} in health and {damage} in damage on average.,src/mod/page/dfo_dungeons.js
+dungeon.weapon.unknown,The weapon in hand is not known — check the metal on the “Inhabitants” tab.,src/mod/page/dfo_dungeons.js
+dungeon.weapon.tablePartial,The enemy table is not fully available yet; whether your weapon works is not known.,src/mod/page/dfo_dungeons.js
+dungeon.weapon.blocked,does no damage to {pct} of enemies,src/mod/page/dfo_dungeons.js
+dungeon.weapon.inHand,The weapon in hand ({weapon}) ,src/mod/page/dfo_dungeons.js
+dungeon.weapon.needsBetter, — they need a better metal (see “Inhabitants”).,src/mod/page/dfo_dungeons.js
+dungeon.weapon.allHurt,The weapon in hand ({weapon}) hurts all expected enemies.,src/mod/page/dfo_dungeons.js
+dungeon.sec.loot,◆ LOOT — {score} OF 5,src/mod/page/dfo_dungeons.js
+dungeon.loot.off,The special loot system is off; the rarity forecast does not apply.,src/mod/page/dfo_dungeons.js
+dungeon.loot.chances,"Rank {rank} chests: each suitable item (weapon, armour, jewellery, clothing) is for you at least magic with a {magic} chance, rare {rare}, legendary {legendary}. These are nested thresholds, not a chance for the whole chest.",src/mod/page/dfo_dungeons.js
+dungeon.loot.chancesUnknown,The rarity chances for this character are not known yet.,src/mod/page/dfo_dungeons.js
+dungeon.loot.bosses,"Bosses (daedra and enemies of level 18+) are {pct} of enemies: their bodies drop from a richer table, without the “3 items from an ordinary enemy” limit.",src/mod/page/dfo_dungeons.js
+dungeon.loot.family,"Once a legendary roll has happened, items of the “{family}” family weigh five times more (item kinds are on the “Loot” tab).",src/mod/page/dfo_dungeons.js
+dungeon.sec.growth,↑ GROWTH — {score} OF 5,src/mod/page/dfo_dungeons.js
+dungeon.growth.noData,There is not enough data for a personal skill growth rating yet.,src/mod/page/dfo_dungeons.js
+dungeon.growth.below100,Your skills are below 100 — they grow from any enemy; the rating shows how much fighting there is here (size {size}).,src/mod/page/dfo_dungeons.js
+dungeon.growth.above100,Your best combat/magic skill: {skill}; average training weight: {weight} of 1.5. The rating reflects the share of enemies that train a skill above 100 in this dungeon.,src/mod/page/dfo_dungeons.js
+dungeon.sec.renown,★ RENOWN — {score} OF 5,src/mod/page/dfo_dungeons.js
+dungeon.renown.offline,"Offline, no Renown is earned.",src/mod/page/dfo_dungeons.js
+dungeon.renown.unknown,The average Renown reward is not known yet.,src/mod/page/dfo_dungeons.js
+dungeon.renown.average,On average ≈{xp} Renown XP per kill before the party bonus and the service's limits.,src/mod/page/dfo_dungeons.js
+dungeon.personalNote,"The ratings are personal: your level, skills, Luck, Renown and the weapon in hand all count.",src/mod/page/dfo_dungeons.js
+dungeon.roster.forecast,"Forecast for level {level}; {choice} pick. {tables} The shares are for random land spawn points, not for all of the dungeon's enemies.",src/mod/page/dfo_dungeons.js
+dungeon.col.enemy,Enemy,src/mod/page/dfo_dungeons.js
+dungeon.col.share,Share,src/mod/page/dfo_dungeons.js
+dungeon.col.level,Level,src/mod/page/dfo_dungeons.js
+dungeon.col.hpDamage,HP / Damage,src/mod/page/dfo_dungeons.js
+dungeon.col.challenge,Challenge,src/mod/page/dfo_dungeons.js
+dungeon.col.metal,Metal,src/mod/page/dfo_dungeons.js
+dungeon.anyMetal,any,src/mod/page/dfo_dungeons.js
+dungeon.metalOrBetter,{metal} or better,src/mod/page/dfo_dungeons.js
+dungeon.roster.bossNote,"A boss for the loot rating is a daedra by affinity or an enemy of level 18+. It is not necessarily a separate named boss. Fixed, water and quest enemies are not included.",src/mod/page/dfo_dungeons.js
+dungeon.roster.eliteNote,"In an elite dungeon there are ×3 ordinary enemies, with ×2 base health and damage. Special elite enemies are a separate mechanism; the exact number of suitable points is unknown without the block layout.",src/mod/page/dfo_dungeons.js
+dungeon.roster.eliteSlots,"The elite enemy plan for this place's ID: up to {n}. It is the game's own deterministic budget, not proof of presence: suitable enemies are needed, and a room the server saved may differ. Special elite traits are not part of the overall threat index.",src/mod/page/dfo_dungeons.js
+dungeon.col.parameter,Parameter,src/mod/page/dfo_dungeons.js
+dungeon.col.value,Value,src/mod/page/dfo_dungeons.js
+dungeon.loot.rank,Treasure rank,src/mod/page/dfo_dungeons.js
+dungeon.loot.luck,Character's Luck,src/mod/page/dfo_dungeons.js
+dungeon.loot.eliteQuality,Elite dungeon quality multiplier,src/mod/page/dfo_dungeons.js
+dungeon.loot.bossShare,Boss share,src/mod/page/dfo_dungeons.js
+dungeon.loot.raritySystem,Rarity system,src/mod/page/dfo_dungeons.js
+dungeon.on,on,src/mod/page/dfo_dungeons.js
+dungeon.off,off,src/mod/page/dfo_dungeons.js
+dungeon.loot.threshold,Threshold for a suitable chest item,src/mod/page/dfo_dungeons.js
+dungeon.col.chance,Chance,src/mod/page/dfo_dungeons.js
+dungeon.loot.atLeastMagic,At least magic,src/mod/page/dfo_dungeons.js
+dungeon.loot.atLeastRare,At least rare,src/mod/page/dfo_dungeons.js
+dungeon.loot.atLeastLegendary,At least legendary,src/mod/page/dfo_dungeons.js
+dungeon.loot.thresholdNote,"These are nested thresholds for an item eligible for rarity, not independent events and not a chance for the whole chest. Level, Luck and the available search boosts are read from the current game. The number of items and points is unknown from outside.",src/mod/page/dfo_dungeons.js
+dungeon.loot.preferred,Preferred legendary items,src/mod/page/dfo_dungeons.js
+dungeon.loot.preferredText,"The “{family}” family: once a legendary roll has happened, its items weigh five times more. The rank does not guarantee a legendary item.",src/mod/page/dfo_dungeons.js
+dungeon.loot.noFamily,This type has no preferred family.,src/mod/page/dfo_dungeons.js
+dungeon.col.item,Item,src/mod/page/dfo_dungeons.js
+dungeon.loot.sourcesNote,"Bodies use the enemy's own level and family; a boss has a richer source. Chests use the dungeon type. Champions, quests and special enemies may have their own rules.",src/mod/page/dfo_dungeons.js
+dungeon.growth.scaling,Monster scaling and the place share,src/mod/page/dfo_dungeons.js
+dungeon.growth.forecast,Personal forecast by the game's formulas,src/mod/page/dfo_dungeons.js
+dungeon.growth.meanLevel,Average enemy level,src/mod/page/dfo_dungeons.js
+dungeon.growth.meanHp,Average health scaling,src/mod/page/dfo_dungeons.js
+dungeon.growth.meanDamage,Average damage scaling,src/mod/page/dfo_dungeons.js
+dungeon.growth.bestSkill,Your best combat/magic skill,src/mod/page/dfo_dungeons.js
+dungeon.growth.weight,Average training weight (up to 1.5),src/mod/page/dfo_dungeons.js
+dungeon.growth.share,"Scaling share of this dungeon type (“{type}”): {pct}. In dungeons with a 100% share enemies get the full health and damage bonus; with a small share (a Mine or a Cave, for example) the bonus is only a tenth.",src/mod/page/dfo_dungeons.js
+dungeon.growth.above100Title,Training skills above 100,src/mod/page/dfo_dungeons.js
+dungeon.growth.above100Text,For a skill above 100 the game matches a given enemy's challenge level against your skill. The challenge level includes scaling; the average weight below is computed by the game's own training function.,src/mod/page/dfo_dungeons.js
+dungeon.growth.yours,Your best combat/magic skill: {skill}. Average training weight in this dungeon: {weight} of 1.5.,src/mod/page/dfo_dungeons.js
+dungeon.growth.note,"Scaling depends on the place, the character's skills, the specific enemy's share and the game's active modifiers. A high scaling share alone does not guarantee growth: the roster is a forecast, the actual room may differ.",src/mod/page/dfo_dungeons.js
+dungeon.col.place,Place,src/mod/page/dfo_dungeons.js
+dungeon.col.data,Data,src/mod/page/dfo_dungeons.js
+dungeon.details.type,Type,src/mod/page/dfo_dungeons.js
+dungeon.details.size,Size by the client's rules,src/mod/page/dfo_dungeons.js
+dungeon.details.blocks,Blocks of the source location,src/mod/page/dfo_dungeons.js
+dungeon.details.level,Dungeon tier,src/mod/page/dfo_dungeons.js
+dungeon.eliteLower,elite,src/mod/page/dfo_dungeons.js
+dungeon.ordinaryLower,ordinary,src/mod/page/dfo_dungeons.js
+dungeon.details.origin,Origin,src/mod/page/dfo_dungeons.js
+dungeon.details.region,Region,src/mod/page/dfo_dungeons.js
+dungeon.details.mapId,Map ID,src/mod/page/dfo_dungeons.js
+dungeon.details.mapCoords,Map coordinates,src/mod/page/dfo_dungeons.js
+dungeon.details.respawn,Enemy and chest respawn,src/mod/page/dfo_dungeons.js
+dungeon.minutes,{n} min,src/mod/page/dfo_dungeons.js
+dungeon.life.deadline,The log's deadline: {when} ({timer}). {log} A player inside may delay the vanishing; the client does not know the exact current occupancy from outside.,src/mod/page/dfo_dungeons.js
+dungeon.life.noRecord,"There is no current vanishing record in the available log. That means “unknown”, not “forever” or “nobody went in”.",src/mod/page/dfo_dungeons.js
+dungeon.aurum.title,Aurum and ore veins,src/mod/page/dfo_dungeons.js
+dungeon.aurum.online,The Aurum chest is available online only.,src/mod/page/dfo_dungeons.js
+dungeon.aurum.unknown,The Aurum reward for this place is not available to the client.,src/mod/page/dfo_dungeons.js
+dungeon.aurum.reward,Chest reward: {n} Aurum. It refills on Monday of the service's week.,src/mod/page/dfo_dungeons.js
+dungeon.aurum.taken, This device has a claim mark for the current week.,src/mod/page/dfo_dungeons.js
+dungeon.aurum.notTaken, There is no local mark for the current account this week.,src/mod/page/dfo_dungeons.js
+dungeon.col.vein,Vein,src/mod/page/dfo_dungeons.js
+dungeon.col.material,Material,src/mod/page/dfo_dungeons.js
+dungeon.veins.none,The vein list for this place is not available.,src/mod/page/dfo_dungeons.js
+dungeon.veins.note,The list is computed by the game's own professions law for the service's current day. How much is mined is known to the professions service; a row does not mean the vein is not dug out yet.,src/mod/page/dfo_dungeons.js
+dungeon.quests.title,Quests and party,src/mod/page/dfo_dungeons.js
+dungeon.quests.bounty,Bounty on this place,src/mod/page/dfo_dungeons.js
+dungeon.quests.mark,A quest mark points at these coordinates: {quests}.,src/mod/page/dfo_dungeons.js
+dungeon.quests.none,The client reports no active bounty or quest mark for these coordinates.,src/mod/page/dfo_dungeons.js
+dungeon.party.member,Party member,src/mod/page/dfo_dungeons.js
+dungeon.party.health,Health,src/mod/page/dfo_dungeons.js
+dungeon.party.magicka,Magicka,src/mod/page/dfo_dungeons.js
+dungeon.party.fatigue,Fatigue,src/mod/page/dfo_dungeons.js
+dungeon.party.room,Room / source,src/mod/page/dfo_dungeons.js
+dungeon.party.pose,place in the party's pose,src/mod/page/dfo_dungeons.js
+dungeon.party.none,No confirmed data about party members in this dungeon. The total number of players inside is unknown from outside.,src/mod/page/dfo_dungeons.js
+dungeon.visits.title,Personal visit log,src/mod/page/dfo_dungeons.js
+dungeon.visits.none,No saved observations of this dungeon.,src/mod/page/dfo_dungeons.js
+dungeon.visits.seen,Observed: {when} ({mode}).,src/mod/page/dfo_dungeons.js
+dungeon.visits.last,Last observation,src/mod/page/dfo_dungeons.js
+dungeon.col.count,Count,src/mod/page/dfo_dungeons.js
+dungeon.visits.alive,Living enemies,src/mod/page/dfo_dungeons.js
+dungeon.visits.dead,Slain enemies,src/mod/page/dfo_dungeons.js
+dungeon.visits.piles,Ground piles,src/mod/page/dfo_dungeons.js
+dungeon.visits.bodies,Bodies in the target list,src/mod/page/dfo_dungeons.js
+dungeon.visits.doors,Doors with a known state,src/mod/page/dfo_dungeons.js
+dungeon.visits.open,Of them open,src/mod/page/dfo_dungeons.js
+dungeon.visits.kind,Observed kind,src/mod/page/dfo_dungeons.js
+dungeon.travel.markGone,The mark is no longer available. Travel does not start.,src/mod/page/dfo_dungeons.js
+dungeon.dungeon,Dungeon,src/mod/page/dfo_dungeons.js
+dungeon.tag,[{type} - rank {rank}],src/mod/page/dfo_dungeons.js
+dungeon.spawnedShort,spawned · {timer},src/mod/page/dfo_dungeons.js
+dungeon.permanentShort,permanent,src/mod/page/dfo_dungeons.js
+dungeon.subtitle,  size {size} · {kind} · {life}{distance},src/mod/page/dfo_dungeons.js
+dungeon.markGone,The mark is no longer available.,src/mod/page/dfo_dungeons.js
+dungeon.travel.refused,The game did not start the journey. Check the game's message and the route conditions.,src/mod/page/dfo_dungeons.js
+dungeon.guide,Mini guide,src/mod/page/dfo_dungeons.js
+dungeon.visits.readFailed,Could not read the visit log.,src/mod/page/dfo_dungeons.js
+dungeon.visits.saveFailed,Could not save the visit log.,src/mod/page/dfo_dungeons.js
+dungeon.metalWord,metal,src/mod/page/dfo_dungeons.js
+dungeon.pick.alternate,varied,src/mod/page/dfo_dungeons.js
+dungeon.pick.classic,classic,src/mod/page/dfo_dungeons.js
+dungeon.roster.average,Averaged over {n} possible tables; the mode's active pick is not changed.,src/mod/page/dfo_dungeons.js
+dungeon.roster.oneTable,One encounter table.,src/mod/page/dfo_dungeons.js
+dungeon.notDetermined,not determined,src/mod/page/dfo_dungeons.js
+dungeon.life.clearedLog,The log marks it cleared.,src/mod/page/dfo_dungeons.js
+dungeon.life.firstEntry,The log holds the first entry.,src/mod/page/dfo_dungeons.js
+dungeon.online,online,src/mod/page/dfo_dungeons.js
+dungeon.offline,offline,src/mod/page/dfo_dungeons.js
+dungeon.familyShort.undead,undead,chip: first word of the family
+dungeon.familyShort.daedra,daedra,chip: first word of the family
+dungeon.familyShort.dragon,dragons,chip: first word of the family
+dungeon.familyShort.beast,beasts,chip: first word of the family
+dungeon.familyShort.brute,orcs,chip: first word of the family
+dungeon.familyShort.caster,mages,chip: first word of the family
+dungeon.familyShort.rogue,rogues,chip: first word of the family
+dungeon.familyShort.warrior,warriors,chip: first word of the family
+dungeon.veinShort.metal-silver,silver,chip: the vein
+dungeon.veinShort.metal-gold,gold,chip: the vein
+dungeon.veinShort.ore-dwarven,dwarven,chip: the vein
+dungeon.veinShort.metal-platinum,platinum,chip: the vein
+dungeon.veinShort.ore-adamantium,adamantium,chip: the vein
+dungeon.veinShort.ore-moonstone,moonstone,chip: the vein

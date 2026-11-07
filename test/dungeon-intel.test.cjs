@@ -2,6 +2,8 @@
 const { test } = require('node:test'), assert = require('node:assert/strict');
 const fs = require('node:fs'), path = require('node:path'), os = require('node:os'), vm = require('node:vm');
 const M = require('../src/mod/page/dfo_dungeon_model.js');
+// These checks read the Russian install's words; the English ones are checked where the locales are compared.
+globalThis.__dfoUi = require('../src/mod/item-text.cjs').uiText('ru');
 const { createLootStore } = require('../src/mod/loot-store.cjs');
 const { wrap } = require('../src/mod/hook.cjs');
 const { transformDungeons } = require('../src/mod/dungeon-transform.cjs');

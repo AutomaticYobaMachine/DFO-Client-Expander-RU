@@ -9,12 +9,13 @@
   const finite = value => typeof value === 'number' && Number.isFinite(value) && value >= 0;
   const money = value => finite(value) && value <= Number.MAX_SAFE_INTEGER;
   const nearestTen = value => money(value) && money(Math.round(value / 10) * 10) ? Math.round(value / 10) * 10 : null;
-  const variants = { Fur: 'Мех', Mail: 'Кольчужная', Brigandine: 'Бригандина' };
+  // The mod's own words, in the install's language (page/dfo_ui_text.js; English without the translation).
+  const T = (key, params) => (globalThis.__dfoUi ? globalThis.__dfoUi.t(key, params) : key);
+  const VARIANTS = new Set(['Fur', 'Mail', 'Brigandine']);
+  const variantTerm = word => (VARIANTS.has(word) ? T('cards.variant.' + word) : word);
   // Use canonical metal names: standalone words may be untranslated or confused with language skills by RU.
-  const materialTerms = {
-    Iron:'Железо',Steel:'Сталь',Silver:'Серебро',Elven:'Эльфийский металл',Dwarven:'Двемерский металл',
-    Mithril:'Мифрил',Adamantium:'Адамантит',Orcish:'Орочий металл',Ebony:'Эбонит',Daedric:'Даэдрический металл',
-  };
+  const METALS = new Set(['Iron', 'Steel', 'Silver', 'Elven', 'Dwarven', 'Mithril', 'Adamantium', 'Orcish', 'Ebony', 'Daedric']);
+  const materialTerm = name => (METALS.has(name) ? T('cards.metal.' + name) : null);
   const materialPalette = Object.freeze({
     Iron:{color:'#747980'},Steel:{color:'#c6cbd1'},Silver:{color:'#ffffff'},Elven:{color:'#95cfff'},
     Dwarven:{color:'#dfb84f'},Mithril:{color:'#40bfff'},Adamantium:{color:'#cbb3e8'},Orcish:{color:'#61c87e'},
@@ -32,13 +33,13 @@
   }
   function effectGroup(text) {
     const words = [
-      ['strike', 'Накладывает при попадании', /^(?:(?:Cast )?When Strikes|При ударе|При попадании)\s*:\s*(.+)$/i],
-      ['use', 'При использовании', /^(?:(?:Cast )?When Used|При использовании)\s*:\s*(.+)$/i],
-      ['held', 'При ношении', /^(?:(?:Cast )?When Held|При ношении|При экипировке)\s*:\s*(.+)$/i],
+      ['strike', 'cards.group.strike', /^(?:(?:Cast )?When Strikes|При ударе|При попадании)\s*:\s*(.+)$/i],
+      ['use', 'cards.group.use', /^(?:(?:Cast )?When Used|При использовании)\s*:\s*(.+)$/i],
+      ['held', 'cards.group.held', /^(?:(?:Cast )?When Held|При ношении|При экипировке)\s*:\s*(.+)$/i],
     ];
-    for (const [key, label, pattern] of words) { const m = pattern.exec(text); if (m) return { key, label, text: m[1] }; }
-    return /^[+\-−]\d/.test(text) ? { key: 'bonuses', label: 'Надбавки', text }
-      : { key: 'properties', label: 'Пассивные свойства', text };
+    for (const [key, label, pattern] of words) { const m = pattern.exec(text); if (m) return { key, label: T(label), text: m[1] }; }
+    return /^[+\-−]\d/.test(text) ? { key: 'bonuses', label: T('cards.group.bonuses'), text }
+      : { key: 'properties', label: T('cards.group.properties'), text };
   }
 
   /** Pure presentation data. Never mint, identify, repair or write to the item. */
@@ -53,20 +54,20 @@
     // What the description may say (dfo_item_text.js facts): the same visibility the card's own rows obey.
     const facts = { known };
     if (gear && !ammo) {
-      if (native.isHandWraps(item)) { material = 'Ткань'; facts.material = 'cloth'; }
-      else if (!Number.isInteger(item.material) || item.material < 0) material = 'Нет данных';
+      if (native.isHandWraps(item)) { material = T('cards.material.cloth'); facts.material = 'cloth'; }
+      else if (!Number.isInteger(item.material) || item.material < 0) material = T('cards.material.noData');
       else if (native.saysMaterial(item)) {
         const variant = String(native.variantWord(item) || '').trim();
-        if (variant) construction = variants[variant] || variant;
+        if (variant) construction = variantTerm(variant);
         if (variant === 'Mail' || variant === 'Brigandine') facts.construction = variant.toLowerCase();
-        if (variant === 'Fur') { material = 'Мех'; facts.material = 'fur'; }
+        if (variant === 'Fur') { material = T('cards.material.fur'); facts.material = 'fur'; }
         else {
           const name = native.material(item);
           if (typeof name === 'string' && /^(?:Iron|Steel|Silver|Elven|Dwarven|Mithril|Adamantium|Ebony|Orcish|Daedric|Leather|Chain)$/.test(name)) facts.material = name.toLowerCase();
-          material = name === 'Chain' ? 'Металл не указан' : name ? materialTerms[name] || native.materialLabel(name) : 'Нет данных';
+          material = name === 'Chain' ? T('cards.material.unknownMetal') : name ? materialTerm(name) || native.materialLabel(name) : T('cards.material.noData');
           if(Object.hasOwn(materialPalette,name))materialKey=name;
         }
-      } else material = line.material || 'Не указан';
+      } else material = line.material || T('cards.material.unspecified');
       // The native Type row (itemInfo.js itemArmorTypeLine): Leather, Chain or Plate, shown whatever the metal.
       const type = typeof line.armorType === 'string' ? line.armorType.trim().toLowerCase() : '';
       if (item.group === 'Armor' && (type === 'leather' || type === 'chain' || type === 'plate')) facts.armorType = type;
@@ -204,8 +205,8 @@ body .card.dfo-item-card[data-rarity=gilded] { border-width:4px!important; borde
     };
     // The RU runtime translates textContent synchronously, before the shared native builder returns.
     const said = text => node('span', null, text).textContent;
-    const formatter = new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 2 });
-    const format = number => formatter.format(number);
+    // The locale's own digits: «1 370» in Russian, "1,370" in English.
+    const format = number => (win.__dfoUi ? win.__dfoUi.number(number, { maximumFractionDigits: 2 }) : new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(number));
     const ready = () => DATA_KEYS.every(key => typeof native[key] === 'function');
     const addPair = (list, label, value) => {
       if (value == null || value === '') return;
@@ -219,7 +220,7 @@ body .card.dfo-item-card[data-rarity=gilded] { border-width:4px!important; borde
       if (!data) return;
       const value = data.price == null ? '—' : (data.approximate ? '~' : '') + format(data.price);
       if (state.priceValue.textContent !== value) state.priceValue.textContent = value;
-      state.priceBox.setAttribute('aria-label', data.price == null ? 'Стоимость неизвестна' : (data.approximate ? 'Примерная стоимость: ' : 'Стоимость: ') + format(data.price) + ' золота');
+      state.priceBox.setAttribute('aria-label', data.price == null ? T('cards.price.unknown') : T(data.approximate ? 'cards.price.approximate' : 'cards.price.exact', { value: format(data.price), n: data.price }));
     }
 
     // The tier line's own words name a Perfect rare ("Perfect Rare", lootRarity.js tierLabel), in any locale.
@@ -251,7 +252,7 @@ body .card.dfo-item-card[data-rarity=gilded] { border-width:4px!important; borde
       const colored=(into,text,group)=>{for(const part of effectParts(text,group,effectLabelNames)){const span=node('span','dfo-effect-'+part.kind);span.append(doc.createTextNode(part.text));into.append(span);}};
       for (const row of [...list.children]) {
         const original = row.textContent, powerAt = name ? original.indexOf(name) : -1;
-        const kind = powerAt >= 0 ? { key:'power',label:'Легендарное свойство',text:original } : effectGroup(original);
+        const kind = powerAt >= 0 ? { key:'power',label:T('cards.group.power'),text:original } : effectGroup(original);
         let group = groups.get(kind.key);
         if (!group) {
           const section = node('section','dfo-item-group');section.dataset.group=kind.key;section.append(node('h4',null,kind.label));
@@ -299,7 +300,7 @@ body .card.dfo-item-card[data-rarity=gilded] { border-width:4px!important; borde
               if (label === labels.damage || label === labels.armour) { primary = pair.cloneNode(true); continue; }
               if (label === labels.worth && data.source === 'credit') continue;
               const copy = pair.cloneNode(true);
-              if (label === labels.type) copy.querySelector('dt').textContent = 'Тип брони';
+              if (label === labels.type) copy.querySelector('dt').textContent = T('cards.armorType');
               stats.append(copy);
             }
             continue;
@@ -331,7 +332,7 @@ body .card.dfo-item-card[data-rarity=gilded] { border-width:4px!important; borde
         if (icon) head.append(icon); else head.style.gridTemplateColumns = 'minmax(0,1fr)';
         if(data.material){
           const row=node('div','dfo-item-material'),value=node('span','dfo-item-metal',data.material),palette=materialPalette[data.materialKey];
-          row.append(node('span','dfo-item-material-label','Материал'),value);
+          row.append(node('span','dfo-item-material-label',T('cards.material')),value);
           value.dataset.metal=data.materialKey||'other';
           if(palette)for(const key of ['color','stroke','shadow'])if(palette[key])value.style.setProperty('--dfo-metal-'+key,palette[key]);
           head.append(title,row);
@@ -343,13 +344,13 @@ body .card.dfo-item-card[data-rarity=gilded] { border-width:4px!important; borde
           left.append(badge);
         }
         const materialRows=node('dl');
-        if (data.construction && data.construction !== data.material) addPair(materialRows, 'Конструкция', data.construction);
+        if (data.construction && data.construction !== data.material) addPair(materialRows, T('cards.construction'), data.construction);
         if(materialRows.children.length)stats.prepend(...materialRows.children);
-        if (data.count > 1) addPair(stats, 'Количество', data.count);
+        if (data.count > 1) addPair(stats, T('cards.quantity'), format(data.count));
         const pricePerKg = nearestTen(data.perKg);
-        if (pricePerKg != null) addPair(stats, 'Цена / кг', '~' + format(pricePerKg) + ' зол.');
-        for(const pair of stats.children)if([said('Condition'),said('Worn'),'Цена / кг'].includes(pair.querySelector('dt')?.textContent))pair.dataset.divider='';
-        if(stats.children.length)left.append(node('h4','dfo-item-stat-heading','Общие сведения'));
+        if (pricePerKg != null) addPair(stats, T('cards.perKg'), T('cards.perKgValue', { value: format(pricePerKg), n: pricePerKg }));
+        for(const pair of stats.children)if([said('Condition'),said('Worn'),T('cards.perKg')].includes(pair.querySelector('dt')?.textContent))pair.dataset.divider='';
+        if(stats.children.length)left.append(node('h4','dfo-item-stat-heading',T('cards.general')));
         left.append(stats);
         if (statuses.children.length) left.append(statuses);
         if (meta.children.length) left.append(meta);

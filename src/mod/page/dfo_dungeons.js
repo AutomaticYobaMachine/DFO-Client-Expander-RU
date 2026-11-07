@@ -1,6 +1,8 @@
 (function (root) {
   'use strict';
   if (root.__dfoDungeons || root.__DFO_MOD_CFG__?.dungeons?.enabled === false) return;
+  // The mod's own words, in the install's language (page/dfo_ui_text.js; English without the translation).
+  const T = (key, params) => (root.__dfoUi ? root.__dfoUi.t(key, params) : key);
   const M = root.__dfoDungeonModel, doc = root.document, stack = [], modelCache = new WeakMap(), sprites = new Map(), distances = new Map(), markHeadings = new Map();
   let host = null, notes = {}, current = null, loadStarted = false, readError = '', cacheError = '', lastObservation = '', lastSaved = 0, retryObservationAt = 0;
   let questMarks = [];
@@ -8,8 +10,9 @@
   const safe = (fn, fallback = null) => { try { return fn() ?? fallback; } catch { return fallback; } };
   const el = (tag, cls, text) => { const n = doc.createElement(tag); if (cls) n.className = cls; if (text !== undefined) n.textContent = text; return n; };
   const btn = (text, action) => { const n = el('button', '', text); n.type = 'button'; n.onclick = action; return n; };
-  const pct = n => typeof n === 'number' && Number.isFinite(n) ? `${M.number(100 * n)}%` : 'неизвестно', mult = n => `×${M.number(n, 2)}`;
-  const when = at => new Date(at).toLocaleString('ru-RU', { dateStyle: 'short', timeStyle: 'short' });
+  const pct = n => typeof n === 'number' && Number.isFinite(n) ? `${M.number(100 * n)}%` : T('dungeon.unknown'), mult = n => `×${M.number(n, 2)}`;
+  const when = at => new Date(at).toLocaleString(root.__dfoUi?.tag || 'en-US', { dateStyle: 'short', timeStyle: 'short' });
+  const tenths = n => (root.__dfoUi ? root.__dfoUi.number(n, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) : n.toFixed(1));
   const tools = () => ({ ...root.__dfoDungeonTools, ...host?.__dfoWorld, online: () => host?.params?.has('online') === true });
   const keyOf = loc => String(loc?.mapTableData?.mapId ?? '');
   const allowed = loc => M.eligible(loc) && safe(() => tools().allowed?.(loc), false) === true;
@@ -30,7 +33,7 @@
     const old = modelCache.get(p.loc); if (old?.sig === sig) return old.model;
     const value = M.forecast(p, player, t, note?.online === t.online() ? note : null); modelCache.set(p.loc, { sig, model: value }); return value;
   }
-  const scoreText = m => `|${m.scores.threat ? M.SKULL.repeat(m.scores.threat) : '?'}|${m.scores.loot ? '◆'.repeat(m.scores.loot) : '?'}|${m.scores.growth ? '↑'.repeat(m.scores.growth) : '?'}| ★ - ${m.scores.renown == null ? '?' : m.scores.renown.toFixed(1).replace('.', ',')}`;
+  const scoreText = m => `|${m.scores.threat ? M.SKULL.repeat(m.scores.threat) : '?'}|${m.scores.loot ? '◆'.repeat(m.scores.loot) : '?'}|${m.scores.growth ? '↑'.repeat(m.scores.growth) : '?'}| ★ - ${m.scores.renown == null ? '?' : tenths(m.scores.renown)}`;
   function decorate(marks) {
     if (!host) return marks;
     questMarks = marks.filter(m => /^quest:-?\d+,-?\d+$/.test(m.key || ''));
@@ -46,7 +49,7 @@
       const signature = JSON.stringify([value.title, metadata, rating, value.color]);
       return { ...mark, label: value.title, sub: `${metadata}; ${rating}`, pick: true,
         dfoDungeon: { model: value, metadata, distance, signature },
-        tip: () => ({ title: value.name, lines: ['ЛКМ — сведения о данже', 'Оценки персонализированы по вашему персонажу.', '«Отправиться» — отдельной кнопкой в карточке.'] }) };
+        tip: () => ({ title: value.name, lines: [T('dungeon.tip.click'), T('dungeon.tip.personal'), T('dungeon.tip.travel')] }) };
     });
   }
 
@@ -63,7 +66,7 @@
       { text: '|', color: '#686f78' },
       { text: m.scores.growth ? '↑'.repeat(m.scores.growth) : '?', color: '#85dc91' },
       { text: '|', color: '#686f78' },
-      { text: ` ★ - ${m.scores.renown == null ? '?' : m.scores.renown.toFixed(1).replace('.', ',')}`, color: '#ffffff' },
+      { text: ` ★ - ${m.scores.renown == null ? '?' : tenths(m.scores.renown)}`, color: '#ffffff' },
     ];
     g.font = '600 11px system-ui, sans-serif'; const title = ellipsis(m.title, max - 18), titleW = g.measureText(title).width;
     g.font = '10px system-ui, sans-serif'; const sub = ellipsis(metadata, max - 18), subW = g.measureText(sub).width;
@@ -189,7 +192,7 @@
     let heading, wx, travelBtn, subNode;
     if (guide) {
       heading = el('span', 't', title); heading.id = `dfo-dungeon-title-${stack.length}`; node.setAttribute('aria-labelledby', heading.id);
-      wx = el('button', 'dfo-win-x', '✕'); wx.type = 'button'; wx.setAttribute('aria-label', 'Закрыть мини-гайд');
+      wx = el('button', 'dfo-win-x', '✕'); wx.type = 'button'; wx.setAttribute('aria-label', T('dungeon.guide.close'));
       wh.append(heading, wx);
     } else {
       const left = el('div', 'dfo-dungeon-header-left');
@@ -197,12 +200,12 @@
       subNode = el('div', 'dfo-dungeon-subtitle');
       left.append(heading, subNode);
       const right = el('div', 'dfo-dungeon-header-right');
-      travelBtn = el('button', 'dfo-btn-travel', '→ Отправиться'); travelBtn.type = 'button';
-      wx = el('button', 'dfo-win-x', '✕'); wx.type = 'button'; wx.setAttribute('aria-label', 'Закрыть карточку данжа');
+      travelBtn = el('button', 'dfo-btn-travel', T('dungeon.travel')); travelBtn.type = 'button';
+      wx = el('button', 'dfo-win-x', '✕'); wx.type = 'button'; wx.setAttribute('aria-label', T('dungeon.card.close'));
       right.append(travelBtn, wx);
       wh.append(left, right);
     }
-    const tabsWrap = el('div', 'tabs'); tabsWrap.setAttribute('role', 'tablist'); tabsWrap.setAttribute('aria-label', 'Сведения о данже');
+    const tabsWrap = el('div', 'tabs'); tabsWrap.setAttribute('role', 'tablist'); tabsWrap.setAttribute('aria-label', T('dungeon.card.title'));
     const body = el('div', 'wb'); body.setAttribute('role', 'tabpanel'); body.id = `dfo-dungeon-content-${stack.length}`;
     const acts = el('div', 'acts dfo-dungeon-footer');
     const status = el('span', 'dfo-dungeon-status'); status.setAttribute('role', 'status');
@@ -252,7 +255,7 @@
           td.textContent = value.text;
           if (value.color) td.style.color = value.color;
         } else {
-          td.textContent = value == null ? 'неизвестно' : String(value);
+          td.textContent = value == null ? T('dungeon.unknown') : String(value);
         }
         row.append(td);
       }
@@ -261,33 +264,33 @@
     t.append(tbody); wrap.append(t); body.append(wrap);
   }
   function guide() {
-    const m = modal('Как читать оценки данжа', { guide: true }), b = m.content;
-    paragraph(b, 'Это персональные индексы мода, а не вероятность победы или обещание конкретного дропа. Они пересчитываются по текущему персонажу.');
-    section(b, '☠ Угроза — от 1 до 5');
-    paragraph(b, 'Сравниваем средний уровень ожидаемых врагов с вашим эффективным уровнем, учитываем долю боссов, усиление здоровья и урона и долю врагов, которым не подходит базовый металл оружия. Усиление места, навыков, уровня и Славы читается из формул игры; элитный данж добавляет свои множители. Заклинания, тактика и мастерство игрока в индекс не входят.');
-    paragraph(b, 'Индекс до округления: 1 + 1,1 × (средний уровень / максимум из 5 и вашего уровня) + доля боссов + 0,55 × log₂(здоровье × урон) + доля неподходящего металла. Результат округляем и ограничиваем от 1 до 5. Множители здоровья и урона относительны базовому виду врага.');
-    section(b, '◆ Добыча — от 1 до 5');
-    paragraph(b, 'Оценивает качество источников: ранг сокровищ, долю боссов и элитный данж. Индекс: 1 + 2,5 × ранг / 18 + доля боссов + 0,5 за элитный данж, с округлением и ограничением 1–5. Это не число предметов за час: количество точек и длительность зачистки снаружи неизвестны. Точные пороги редкости для вашего уровня и Удачи показаны во вкладке «Добыча».');
-    section(b, '↑ Рост — от 1 до 5');
-    paragraph(b, 'До навыка 100 индекс равен 5: ограничение обучения от слабого противника ещё не действует. Выше 100 берём ваш самый высокий боевой/магический навык и средний вес обучения по прогнозу врагов. Игра сравнивает (5 × уровень вызова + 30) с навыком: ниже 75% обучение боевому навыку не идёт; от 75% до 100% вес растёт квадратично; далее доходит до 1,5. Индекс мода: 1 + 4 × вес / 1,5, округлённый в пределах 1–5. Магия также имеет обучение без боя, которое этот индекс не оценивает.');
-    section(b, '★ Слава — от 0,0 до 5,0');
-    paragraph(b, 'Средний опыт Славы за ожидаемое убийство делим на максимальную награду за одно убийство при вашей текущей Славе и умножаем на 5. Опыт и предел берём из игры; бонусы группы и лимиты сервиса могут изменить итог. В офлайне Слава не начисляется. Сырые XP показаны в карточке.');
-    section(b, 'Что известно до входа');
-    paragraph(b, 'Состав — прогноз по таблице и вашему уровню, без построения данжа. Если мод игры предлагает несколько таблиц, используется их равновесная смесь. Фиксированные и водные враги, серверная память предыдущего посетителя и квестовые подкрепления могут отличаться. Наблюдения после посещения показываются отдельно со временем; они не гарантируют текущее состояние комнаты.');
-    paragraph(b, 'Число врагов и сундуков без чтения игровых блоков заранее неизвестно. Клиент снаружи не знает общий онлайн внутри, точное содержимое сундуков, состояние Aurum и выработку жил. Отсутствие записи в журнале исчезновения не доказывает, что никто не входил.');
-    m.footerBtns.append(btn('Закрыть', m.close));
+    const m = modal(T('dungeon.guide.title'), { guide: true }), b = m.content;
+    paragraph(b, T('dungeon.guide.intro'));
+    section(b, T('dungeon.guide.threat'));
+    paragraph(b, T('dungeon.guide.threatText'));
+    paragraph(b, T('dungeon.guide.threatFormula'));
+    section(b, T('dungeon.guide.loot'));
+    paragraph(b, T('dungeon.guide.lootText'));
+    section(b, T('dungeon.guide.growth'));
+    paragraph(b, T('dungeon.guide.growthText'));
+    section(b, T('dungeon.guide.renown'));
+    paragraph(b, T('dungeon.guide.renownText'));
+    section(b, T('dungeon.guide.known'));
+    paragraph(b, T('dungeon.guide.knownText'));
+    paragraph(b, T('dungeon.guide.unknownText'));
+    m.footerBtns.append(btn(T('dungeon.close'), m.close));
   }
 
-  const TABS = [['overview', 'Оценка'], ['inhabitants', 'Обитатели'], ['loot', 'Добыча'], ['growth', 'Сила и рост'], ['intel', 'Сведения']];
+  const TABS = [['overview', T('dungeon.tab.rating')], ['inhabitants', T('dungeon.tab.inhabitants')], ['loot', T('dungeon.tab.loot')], ['growth', T('dungeon.tab.growth')], ['intel', T('dungeon.tab.details')]];
   function contents(body, tab, m, p) {
     if (tab === 'overview') {
-      if (!m.ready) paragraph(body, 'Часть данных игры ещё недоступна. Неизвестные оценки и вероятности не заменяются примерными числами.');
+      if (!m.ready) paragraph(body, T('dungeon.partialData'));
       const banner = el('div', 'dfo-dungeon-banner');
       const bItems = [
-        ['threat', 'УГРОЗА', m.scores.threat ? M.SKULL.repeat(m.scores.threat) : '?', 'val-threat'],
-        ['loot', 'ДОБЫЧА', m.scores.loot ? '◆'.repeat(m.scores.loot) : '?', 'val-loot'],
-        ['growth', 'РОСТ', m.scores.growth ? '↑'.repeat(m.scores.growth) : '?', 'val-growth'],
-        ['renown', 'СЛАВА', `★ ${m.scores.renown == null ? '?' : m.scores.renown.toFixed(1).replace('.', ',')}`, 'val-renown']
+        ['threat', T('dungeon.score.threat'), m.scores.threat ? M.SKULL.repeat(m.scores.threat) : '?', 'val-threat'],
+        ['loot', T('dungeon.score.loot'), m.scores.loot ? '◆'.repeat(m.scores.loot) : '?', 'val-loot'],
+        ['growth', T('dungeon.score.growth'), m.scores.growth ? '↑'.repeat(m.scores.growth) : '?', 'val-growth'],
+        ['renown', T('dungeon.score.renown'), `★ ${m.scores.renown == null ? '?' : tenths(m.scores.renown)}`, 'val-renown']
       ];
       for (const [, label, val, cls] of bItems) {
         const item = el('span', 'dfo-banner-item');
@@ -297,87 +300,88 @@
       body.append(banner);
 
       const chips = el('div', 'dfo-dungeon-chips');
-      if (m.blocked > 0) chips.append(el('span', 'dfo-chip chip-red', `ВАШЕ ОРУЖИЕ НЕ БЕРЁТ ${pct(m.blocked)} ВРАГОВ`));
-      if (m.scores.loot >= 4) chips.append(el('span', 'dfo-chip chip-teal', m.scores.loot >= 5 ? 'ОТЛИЧНАЯ ДОБЫЧА' : 'ХОРОШАЯ ДОБЫЧА'));
-      if (m.boss >= 0.33) chips.append(el('span', 'dfo-chip chip-gold', `БОССОВ ${pct(m.boss)}`));
+      if (m.blocked > 0) chips.append(el('span', 'dfo-chip chip-red', T('dungeon.chip.blocked',{pct:pct(m.blocked)})));
+      if (m.scores.loot >= 4) chips.append(el('span', 'dfo-chip chip-teal', m.scores.loot >= 5 ? T('dungeon.chip.lootGreat') : T('dungeon.chip.lootGood')));
+      if (m.boss >= 0.33) chips.append(el('span', 'dfo-chip chip-gold', T('dungeon.chip.bosses',{pct:pct(m.boss)})));
       if (m.family) {
-        const famShort = (M.FAMILY[m.family] || m.family).split(' ')[0].toUpperCase();
-        chips.append(el('span', 'dfo-chip chip-purple', `ЛЕГЕНДАРКИ: ${famShort}`));
+        const famShort = (root.__dfoUi?.has('dungeon.familyShort.' + m.family) ? T('dungeon.familyShort.' + m.family) : m.family).toUpperCase();
+        chips.append(el('span', 'dfo-chip chip-purple', T('dungeon.chip.legendaries',{family:famShort})));
       }
       if (m.aurum != null) chips.append(el('span', 'dfo-chip chip-gold', `AURUM: ${m.aurum}`));
       const topVein = m.veins?.reduce((top, v) => !top || v.tier > top.tier ? v : top, null);
       if (topVein && topVein.tier >= 4) {
-        const vName = (M.MATERIALS[topVein.material] || topVein.material).replace(/^(ore|metal):/, '').replace(' руда', '').toUpperCase();
-        chips.append(el('span', 'dfo-chip chip-teal', `ЖИЛА: ${vName}`));
+        const vein = String(topVein.material).replace(':', '-');
+        const vName = (root.__dfoUi?.has('dungeon.veinShort.' + vein) ? T('dungeon.veinShort.' + vein) : String(topVein.material).replace(/^(ore|metal):/, '')).toUpperCase();
+        chips.append(el('span', 'dfo-chip chip-teal', T('dungeon.chip.vein',{vein:vName})));
       }
-      if (m.elite || (m.eliteSlots && m.eliteSlots > 0)) chips.append(el('span', 'dfo-chip chip-purple', 'ЭЛИТНЫЕ ВРАГИ'));
+      if (m.elite || (m.eliteSlots && m.eliteSlots > 0)) chips.append(el('span', 'dfo-chip chip-purple', T('dungeon.chip.elites')));
       if (m.life?.expires) {
         if (m.life.expired) {
-          chips.append(el('span', 'dfo-chip chip-amber', 'СРОК ИСТЁК'));
+          chips.append(el('span', 'dfo-chip chip-amber', T('dungeon.chip.expired')));
         } else {
-          chips.append(el('span', 'dfo-chip chip-amber', `ИСЧЕЗНЕТ ЧЕРЕЗ: ${m.life.remaining}`.toUpperCase()));
+          chips.append(el('span', 'dfo-chip chip-amber', T('dungeon.chip.vanishes',{time:m.life.remaining})));
         }
       }
-      if (m.life?.cleared) chips.append(el('span', 'dfo-chip chip-amber', 'ЗАЧИЩЕН'));
+      if (m.life?.cleared) chips.append(el('span', 'dfo-chip chip-amber', T('dungeon.chip.cleared')));
       if (chips.children.length) body.append(chips);
 
-      const secThreat = el('div', 'dfo-sec-title', `☠ УГРОЗА — ${m.scores.threat ?? '?'} ИЗ 5`);
+      const secThreat = el('div', 'dfo-sec-title', T('dungeon.sec.threat',{score:m.scores.threat ?? '?'}));
       secThreat.style.color = '#ff8880';
       body.append(secThreat);
       const famCounts = new Map();
       for (const r of m.rows) famCounts.set(r.family, (famCounts.get(r.family) || 0) + r.probability);
       const dominant = [...famCounts].sort((a, b) => b[1] - a[1])[0];
-      const domName = dominant ? (M.FAMILY[dominant[0]] || dominant[0]) : 'смешанные враги';
-      paragraph(body, `Для персонажа ${m.level} уровня здесь в среднем враги ${M.number(m.meanLevel)} уровня; кто именно — ${domName} ${pct(dominant?.[1])}. Усиление места и ваших навыков делает сильных врагов в среднем ${mult(m.hp)} по здоровью и ${mult(m.damage)} по урону.`);
+      const domName = dominant ? (M.FAMILY[dominant[0]] || dominant[0]) : T('dungeon.mixedEnemies');
+      paragraph(body, T('dungeon.threat.summary',{level:m.level,mean:M.number(m.meanLevel),family:domName,share:pct(dominant?.[1]),hp:mult(m.hp),damage:mult(m.damage)}));
       if (m.weaponMetal == null) {
-        paragraph(body, 'Оружие в руке не определено — проверьте пригодность металла во вкладке «Обитатели».');
+        paragraph(body, T('dungeon.weapon.unknown'));
       } else if (!m.ready) {
-        paragraph(body, 'Таблица врагов ещё не полностью доступна; пригодность оружия пока неизвестна.');
+        paragraph(body, T('dungeon.weapon.tablePartial'));
       } else if (m.blocked > 0) {
         const pNode = el('div', 'p');
-        const warning = el('span', '', `не наносит урона ${pct(m.blocked)} врагов`); warning.style.color = '#ff9f98';
-        pNode.append(doc.createTextNode(`Оружие в руке (${m.weaponName || M.METALS[m.weaponMetal] || 'металл'}) `), warning, doc.createTextNode(' — им нужен металл получше (см. «Обитатели»).'));
+        const warning = el('span', '', T('dungeon.weapon.blocked',{pct:pct(m.blocked)})); warning.style.color = '#ff9f98';
+        pNode.append(doc.createTextNode(T('dungeon.weapon.inHand',{weapon:m.weaponName || M.METALS[m.weaponMetal] || T('dungeon.metalWord')})), warning, doc.createTextNode(T('dungeon.weapon.needsBetter')));
         body.append(pNode);
       } else {
-        paragraph(body, `Оружие в руке (${m.weaponName || M.METALS[m.weaponMetal] || 'металл'}) наносит урон всем ожидаемым врагам.`);
+        paragraph(body, T('dungeon.weapon.allHurt',{weapon:m.weaponName || M.METALS[m.weaponMetal] || T('dungeon.metalWord')}));
       }
 
-      const secLoot = el('div', 'dfo-sec-title', `◆ ДОБЫЧА — ${m.scores.loot ?? '?'} ИЗ 5`);
+      const secLoot = el('div', 'dfo-sec-title', T('dungeon.sec.loot',{score:m.scores.loot ?? '?'}));
       secLoot.style.color = '#f1cd70';
       body.append(secLoot);
-      if (!m.lootOn) paragraph(body, 'Система особой добычи отключена; прогноз редкости не применяется.');
-      else if (m.chances) paragraph(body, `Сундуки ${m.rank ?? '?'} ранга: каждая подходящая вещь (оружие, броня, украшения, одежда) для вас не ниже магической с шансом ${pct(m.chances.magic / 1000)}, редкой — ${pct(m.chances.rare / 1000)}, легендарной — ${pct(m.chances.legendary / 1000)}. Это вложенные пороги, а не шанс на весь сундук.`);
-      else paragraph(body, 'Шансы редкости для этого персонажа пока неизвестны.');
-      paragraph(body, `Боссы (даэдра и враги 18+ уровня) — ${pct(m.boss)} врагов: их тела дают добычу по усиленной таблице и без лимита «3 вещи с обычного врага».`);
+      if (!m.lootOn) paragraph(body, T('dungeon.loot.off'));
+      else if (m.chances) paragraph(body, T('dungeon.loot.chances',{rank:m.rank ?? '?',magic:pct(m.chances.magic / 1000),rare:pct(m.chances.rare / 1000),legendary:pct(m.chances.legendary / 1000)}));
+      else paragraph(body, T('dungeon.loot.chancesUnknown'));
+      paragraph(body, T('dungeon.loot.bosses',{pct:pct(m.boss)}));
       if (m.family) {
-        paragraph(body, `При уже состоявшемся легендарном выборе предметы семьи «${M.FAMILY[m.family] || m.family}» имеют пятикратный вес (виды вещей — во вкладке «Добыча»).`);
+        paragraph(body, T('dungeon.loot.family',{family:M.FAMILY[m.family] || m.family}));
       }
 
-      const secGrowth = el('div', 'dfo-sec-title', `↑ РОСТ — ${m.scores.growth ?? '?'} ИЗ 5`);
+      const secGrowth = el('div', 'dfo-sec-title', T('dungeon.sec.growth',{score:m.scores.growth ?? '?'}));
       secGrowth.style.color = '#95e79f';
       body.append(secGrowth);
       if (m.scores.growth == null) {
-        paragraph(body, 'Данных для персональной оценки роста навыков пока недостаточно.');
+        paragraph(body, T('dungeon.growth.noData'));
       } else if (m.bestSkill <= 100) {
-        paragraph(body, `Ваши навыки ниже 100 — растут от любого врага, оценка показывает, сколько здесь боёв (размер ${m.size}).`);
+        paragraph(body, T('dungeon.growth.below100',{size:m.size}));
       } else {
-        paragraph(body, `Ваш лучший боевой/магический навык: ${m.bestSkill}; средний вес обучения: ${m.growthWeight != null ? M.number(m.growthWeight, 2) : 'неизвестно'} из 1,5. Оценка отражает долю врагов, дающих рост навыка выше 100 в этом данже.`);
+        paragraph(body, T('dungeon.growth.above100',{skill:m.bestSkill,weight:m.growthWeight != null ? M.number(m.growthWeight, 2) : T('dungeon.unknown')}));
       }
 
-      const secRenown = el('div', 'dfo-sec-title', `★ СЛАВА — ${m.scores.renown != null ? m.scores.renown.toFixed(1).replace('.', ',') : '?'} ИЗ 5`);
+      const secRenown = el('div', 'dfo-sec-title', T('dungeon.sec.renown',{score:m.scores.renown != null ? tenths(m.scores.renown) : '?'}));
       secRenown.style.color = '#ffffff';
       body.append(secRenown);
       if (!m.online) {
-        paragraph(body, 'В офлайне Слава не начисляется.');
+        paragraph(body, T('dungeon.renown.offline'));
       } else {
-        paragraph(body, m.xp == null ? 'Средняя награда Славы пока неизвестна.' : `В среднем ≈${M.number(m.xp, 0)} XP Славы за убийство до бонуса группы и ограничений сервиса.`);
+        paragraph(body, m.xp == null ? T('dungeon.renown.unknown') : T('dungeon.renown.average',{xp:M.number(m.xp, 0)}));
       }
 
-      paragraph(body, 'Оценки персональные: в расчёт идут ваш уровень, навыки, Удача, Слава и оружие в руках.', 'dfo-dungeon-personal');
+      paragraph(body, T('dungeon.personalNote'), 'dfo-dungeon-personal');
     } else if (tab === 'inhabitants') {
-      paragraph(body, `Прогноз для уровня ${m.level}; ${m.alternate ? 'вариативный' : 'классический'} выбор. ${m.choices > 1 ? `Усреднение ${m.choices} возможных таблиц; активный выбор мода не изменяется.` : 'Одна таблица встреч.'} Доли относятся к случайным сухопутным точкам, не ко всем врагам данжа.`);
-      table(body, ['Враг', 'Доля', 'Уровень', 'HP / Урон', 'Вызов', 'Металл'], m.rows.map(r => {
-        const metalText = r.minMetal < 0 ? 'любой' : `${M.METALS[r.minMetal] || r.minMetal} и лучше`;
+      paragraph(body, T('dungeon.roster.forecast',{level:m.level,choice:m.alternate ? T('dungeon.pick.alternate') : T('dungeon.pick.classic'),tables:m.choices > 1 ? T('dungeon.roster.average',{n:m.choices}) : T('dungeon.roster.oneTable')}));
+      table(body, [T('dungeon.col.enemy'), T('dungeon.col.share'), T('dungeon.col.level'), T('dungeon.col.hpDamage'), T('dungeon.col.challenge'), T('dungeon.col.metal')], m.rows.map(r => {
+        const metalText = r.minMetal < 0 ? T('dungeon.anyMetal') : T('dungeon.metalOrBetter',{metal:M.METALS[r.minMetal] || r.minMetal});
         return [
           tr(r.name),
           pct(r.probability),
@@ -387,60 +391,60 @@
           r.blocked ? { text: metalText, color: '#ff9f98' } : metalText
         ];
       }));
-      paragraph(body, 'Босс для оценки добычи — даэдра по affinity либо враг уровня 18+. Это не обязательно отдельный босс с особым именем. Фиксированные, водные и квестовые враги сюда не входят.');
-      paragraph(body, 'В элитном данже обычных врагов ×3, их базовые здоровье и урон ×2. Особые элитные враги — отдельный механизм; точное число подходящих точек без раскладки блоков неизвестно.');
-      if (m.eliteSlots != null) paragraph(body, `План элитных врагов для ID этого места: до ${m.eliteSlots}. Это штатный детерминированный бюджет, а не подтверждение присутствия: нужны подходящие враги, а сохранённая сервером комната может отличаться. Особые элитные черты в общий индекс угрозы не входят.`);
+      paragraph(body, T('dungeon.roster.bossNote'));
+      paragraph(body, T('dungeon.roster.eliteNote'));
+      if (m.eliteSlots != null) paragraph(body, T('dungeon.roster.eliteSlots',{n:m.eliteSlots}));
     } else if (tab === 'loot') {
-      table(body, ['Параметр', 'Значение'], [['Ранг сокровищ', m.rank], ['Удача персонажа', m.luck], ['Множитель качества элитного данжа', m.elite ? '×1,2' : '×1'], ['Доля боссов', pct(m.boss)], ['Система редкости', m.lootOn ? 'включена' : 'выключена']]);
-      if (m.chances) table(body, ['Порог подходящего предмета из сундука', 'Вероятность'], [['Не ниже магического', `${M.number(m.chances.magic / 10, 2)}%`], ['Не ниже редкого', `${M.number(m.chances.rare / 10, 2)}%`], ['Не ниже легендарного', `${M.number(m.chances.legendary / 10, 2)}%`]]);
-      paragraph(body, 'Это вложенные пороги для предмета, пригодного для редкости, а не независимые события и не шанс на весь сундук. Уровень, Удача и доступные усиления поиска читаются из текущей игры. Количество предметов и точек снаружи неизвестно.');
-      section(body, 'Предпочтительные легендарные вещи');
-      paragraph(body, m.family ? `Семья «${M.FAMILY[m.family] || m.family}»: при уже состоявшемся легендарном выборе её предметы имеют пятикратный вес. Ранг не гарантирует легендарный предмет.` : 'У этого типа нет предпочтительной семьи.');
-      if (m.signatures.length) table(body, ['Предмет', 'ID'], m.signatures.map(r => [tr(r.name), r.id]));
-      paragraph(body, 'Трупы используют собственные уровень и семью врага; босс имеет более щедрый источник. Сундуки используют тип данжа. Чемпионы, квесты и особые враги могут иметь собственные правила.');
+      table(body, [T('dungeon.col.parameter'), T('dungeon.col.value')], [[T('dungeon.loot.rank'), m.rank], [T('dungeon.loot.luck'), m.luck], [T('dungeon.loot.eliteQuality'), m.elite ? '×1,2' : '×1'], [T('dungeon.loot.bossShare'), pct(m.boss)], [T('dungeon.loot.raritySystem'), m.lootOn ? T('dungeon.on') : T('dungeon.off')]]);
+      if (m.chances) table(body, [T('dungeon.loot.threshold'), T('dungeon.col.chance')], [[T('dungeon.loot.atLeastMagic'), `${M.number(m.chances.magic / 10, 2)}%`], [T('dungeon.loot.atLeastRare'), `${M.number(m.chances.rare / 10, 2)}%`], [T('dungeon.loot.atLeastLegendary'), `${M.number(m.chances.legendary / 10, 2)}%`]]);
+      paragraph(body, T('dungeon.loot.thresholdNote'));
+      section(body, T('dungeon.loot.preferred'));
+      paragraph(body, m.family ? T('dungeon.loot.preferredText',{family:M.FAMILY[m.family] || m.family}) : T('dungeon.loot.noFamily'));
+      if (m.signatures.length) table(body, [T('dungeon.col.item'), 'ID'], m.signatures.map(r => [tr(r.name), r.id]));
+      paragraph(body, T('dungeon.loot.sourcesNote'));
     } else if (tab === 'growth') {
-      section(body, 'Усиление монстров и доля места');
-      table(body, ['Персональный прогноз по формулам игры', 'Значение'], [
-        ['Средний уровень врага', M.number(m.meanLevel)],
-        ['Среднее усиление здоровья', mult(m.hp)],
-        ['Среднее усиление урона', mult(m.damage)],
-        ['Ваш лучший боевой/магический навык', m.scores.growth == null ? null : m.bestSkill],
-        ['Средний вес обучения (до 1,5)', M.number(m.growthWeight, 2)]
+      section(body, T('dungeon.growth.scaling'));
+      table(body, [T('dungeon.growth.forecast'), T('dungeon.col.value')], [
+        [T('dungeon.growth.meanLevel'), M.number(m.meanLevel)],
+        [T('dungeon.growth.meanHp'), mult(m.hp)],
+        [T('dungeon.growth.meanDamage'), mult(m.damage)],
+        [T('dungeon.growth.bestSkill'), m.scores.growth == null ? null : m.bestSkill],
+        [T('dungeon.growth.weight'), M.number(m.growthWeight, 2)]
       ]);
       const shareVal = m.share;
-      paragraph(body, `Доля усиления этого типа данжа («${m.typeName}»): ${pct(shareVal)}. В данжах со 100% долей враги получают полную прибавку к здоровью и урону; при малой доле (например, Шахта или Пещера) прибавка составляет лишь десятую часть.`);
-      section(body, 'Прокачка навыков выше 100');
-      paragraph(body, 'Для навыка выше 100 игра сопоставляет уровень вызова конкретного врага с вашим навыком. Уровень вызова учитывает усиление; средний вес ниже рассчитан штатной функцией обучения.');
-      paragraph(body, `Ваш лучший боевой/магический навык: ${m.bestSkill || 'не определён'}. Средний вес обучения в этом данже: ${m.growthWeight != null ? M.number(m.growthWeight, 2) : 'неизвестно'} из 1,5.`);
-      paragraph(body, 'Усиление зависит от места, навыков персонажа, доли конкретного противника и действующих модификаторов игры. Высокая доля усиления сама по себе не гарантирует рост: состав — прогноз, фактическая комната может отличаться.');
+      paragraph(body, T('dungeon.growth.share',{type:m.typeName,pct:pct(shareVal)}));
+      section(body, T('dungeon.growth.above100Title'));
+      paragraph(body, T('dungeon.growth.above100Text'));
+      paragraph(body, T('dungeon.growth.yours',{skill:m.bestSkill || T('dungeon.notDetermined'),weight:m.growthWeight != null ? M.number(m.growthWeight, 2) : T('dungeon.unknown')}));
+      paragraph(body, T('dungeon.growth.note'));
     } else if (tab === 'intel') {
       const regionName = p.loc.regionName || safe(() => root.__dfoWorld.maps().getRegionName(p.loc.regionIndex));
-      table(body, ['Место', 'Данные'], [
-        ['Тип', m.typeName],
-        ['Размер по правилам клиента', m.size],
-        ['Блоков исходной локации', p.loc.dungeon?.blocks?.length],
-        ['Уровень данжа', m.elite ? 'элитный' : 'обычный'],
-        ['Происхождение', m.life.text],
-        ['Регион', tr(regionName) || p.loc.regionIndex],
-        ['ID карты', keyOf(p.loc)],
-        ['Координаты карты', `${p.px}, ${p.py}`],
-        ['Возрождение врагов и сундуков', m.respawn == null ? null : `${M.number(m.respawn / 60000)} мин`]
+      table(body, [T('dungeon.col.place'), T('dungeon.col.data')], [
+        [T('dungeon.details.type'), m.typeName],
+        [T('dungeon.details.size'), m.size],
+        [T('dungeon.details.blocks'), p.loc.dungeon?.blocks?.length],
+        [T('dungeon.details.level'), m.elite ? T('dungeon.eliteLower') : T('dungeon.ordinaryLower')],
+        [T('dungeon.details.origin'), m.life.text],
+        [T('dungeon.details.region'), tr(regionName) || p.loc.regionIndex],
+        [T('dungeon.details.mapId'), keyOf(p.loc)],
+        [T('dungeon.details.mapCoords'), `${p.px}, ${p.py}`],
+        [T('dungeon.details.respawn'), m.respawn == null ? null : T('dungeon.minutes',{n:M.number(m.respawn / 60000)})]
       ]);
-      if (m.life.expires) paragraph(body, `Предельный срок по журналу: ${when(m.life.expires)} (${m.life.timerText || 'срок истёк'}). ${m.life.cleared ? 'Журнал отмечает зачистку.' : 'Журнал содержит первый вход.'} Нахождение игрока внутри может задерживать исчезновение; точную текущую занятость снаружи клиент не знает.`);
-      else if (p.loc.spawned) paragraph(body, 'Нет актуальной записи о сроке исчезновения в доступном журнале. Это означает «неизвестно», а не «вечный» или «никто не входил».');
+      if (m.life.expires) paragraph(body, T('dungeon.life.deadline',{when:when(m.life.expires),timer:m.life.timerText || T('dungeon.expired'),log:m.life.cleared ? T('dungeon.life.clearedLog') : T('dungeon.life.firstEntry')}));
+      else if (p.loc.spawned) paragraph(body, T('dungeon.life.noRecord'));
 
-      section(body, 'Aurum и жилы руды');
-      paragraph(body, !m.online ? 'Сундук Aurum доступен только в онлайне.' : m.aurum == null ? 'Награда Aurum для этого места недоступна клиенту.' : `Награда сундука: ${m.aurum} Aurum. Перезаполнение — в понедельник по неделе сервиса.` + (m.aurumTaken === true ? ' На этом устройстве есть отметка о получении на текущей неделе.' : m.aurumTaken === false ? ' Локальной отметки текущего аккаунта на этой неделе нет.' : ''));
-      if (m.veins) table(body, ['Жила', 'Материал', 'Уровень'], m.veins.map((r, i) => [i + 1, M.MATERIALS[r.material] || r.material, r.tier]));
-      else paragraph(body, 'Список жил для этого места недоступен.');
-      paragraph(body, 'Состав рассчитан штатным законом профессий для текущего дня сервиса. Выработку знает сервис профессий; наличие строки не означает, что жила ещё не выкопана.');
+      section(body, T('dungeon.aurum.title'));
+      paragraph(body, !m.online ? T('dungeon.aurum.online') : m.aurum == null ? T('dungeon.aurum.unknown') : T('dungeon.aurum.reward',{n:m.aurum}) + (m.aurumTaken === true ? T('dungeon.aurum.taken') : m.aurumTaken === false ? T('dungeon.aurum.notTaken') : ''));
+      if (m.veins) table(body, [T('dungeon.col.vein'), T('dungeon.col.material'), T('dungeon.col.level')], m.veins.map((r, i) => [i + 1, M.MATERIALS[r.material] || r.material, r.tier]));
+      else paragraph(body, T('dungeon.veins.none'));
+      paragraph(body, T('dungeon.veins.note'));
 
-      section(body, 'Квесты и группа');
+      section(body, T('dungeon.quests.title'));
       const bounties = safe(() => host.bountyHost.mapMarks(), []).filter(b => Math.floor(b.cx) === p.px && Math.floor(b.cy) === p.py);
-      if (bounties.length) paragraph(body, bounties.map(b => tr(b.label || 'Награда на это место')).join('; '));
+      if (bounties.length) paragraph(body, bounties.map(b => tr(b.label || T('dungeon.quests.bounty'))).join('; '));
       const quests = questMarks.filter(r => r.key === `quest:${p.px},${p.py}`);
-      if (quests.length) paragraph(body, `На эти координаты указывает метка квеста: ${quests.map(r => tr(r.label)).join('; ')}.`);
-      if (!bounties.length && !quests.length) paragraph(body, 'Клиент не сообщает активной награды или метки квеста для этих координат.');
+      if (quests.length) paragraph(body, T('dungeon.quests.mark',{quests:quests.map(r => tr(r.label)).join('; ')}));
+      if (!bounties.length && !quests.length) paragraph(body, T('dungeon.quests.none'));
 
       const poseOf = peer => peer.p ?? peer.pose ?? peer, roomOf = peer => peer.room ?? poseOf(peer).room;
       const peers = safe(() => host.social?.others?.(), []).filter(peer => {
@@ -450,35 +454,35 @@
       });
       const bar = (pose, now, max) => typeof pose[now] === 'number' ? `${pose[now]}${typeof pose[max] === 'number' ? ' / ' + pose[max] : ''}` : null;
       if (peers.length) {
-        table(body, ['Сопартиец', 'Здоровье', 'Магия', 'Усталость', 'Комната / источник'], peers.map(r => { const q = poseOf(r); return [r.name || 'Сопартиец', bar(q, 'h', 'hm'), bar(q, 'm', 'mm'), bar(q, 'f', 'fm'), roomOf(r) || q.ins || 'место в позе группы']; }));
+        table(body, [T('dungeon.party.member'), T('dungeon.party.health'), T('dungeon.party.magicka'), T('dungeon.party.fatigue'), T('dungeon.party.room')], peers.map(r => { const q = poseOf(r); return [r.name || T('dungeon.party.member'), bar(q, 'h', 'hm'), bar(q, 'm', 'mm'), bar(q, 'f', 'fm'), roomOf(r) || q.ins || T('dungeon.party.pose')]; }));
       } else {
-        paragraph(body, 'Нет доступных подтверждённых данных о сопартийцах в этом данже. Общее число игроков внутри снаружи не известно.');
+        paragraph(body, T('dungeon.party.none'));
       }
 
-      section(body, 'Журнал личных посещений');
+      section(body, T('dungeon.visits.title'));
       if (!m.note) {
-        paragraph(body, 'Сохранённых наблюдений об этом данже нет.');
+        paragraph(body, T('dungeon.visits.none'));
       } else {
-        paragraph(body, `Наблюдалось: ${when(m.note.at)} (${m.note.online ? 'онлайн' : 'офлайн'}).`);
-        table(body, ['Последнее наблюдение', 'Количество'], [['Живых врагов', m.note.alive], ['Убитых врагов', m.note.dead], ['Наземных куч', m.note.piles], ['Трупов в списке целей', m.note.corpses], ['Дверей, состояние которых доступно', m.note.doors], ['Открытых из них', m.note.openDoors]]);
-        if (m.note.counts?.length) table(body, ['Наблюдавшийся вид', 'Количество'], m.note.counts.map(r => [tr(tools().enemyName?.(r.type) || `Враг ${r.type}`), r.count]));
+        paragraph(body, T('dungeon.visits.seen',{when:when(m.note.at),mode:m.note.online ? T('dungeon.online') : T('dungeon.offline')}));
+        table(body, [T('dungeon.visits.last'), T('dungeon.col.count')], [[T('dungeon.visits.alive'), m.note.alive], [T('dungeon.visits.dead'), m.note.dead], [T('dungeon.visits.piles'), m.note.piles], [T('dungeon.visits.bodies'), m.note.corpses], [T('dungeon.visits.doors'), m.note.doors], [T('dungeon.visits.open'), m.note.openDoors]]);
+        if (m.note.counts?.length) table(body, [T('dungeon.visits.kind'), T('dungeon.col.count')], m.note.counts.map(r => [tr(tools().enemyName?.(r.type) || T('dungeon.enemy',{id:r.type})), r.count]));
       }
     }
   }
   function render(force = false) {
     if (!current) return;
     const p = records().get(current.key), m = p && model(p), state = current;
-    if (!m) { state.modal.status.textContent = 'Метка больше не доступна. Путешествие не запускается.'; if (state.modal.travelBtn) state.modal.travelBtn.disabled = true; return; }
+    if (!m) { state.modal.status.textContent = T('dungeon.travel.markGone'); if (state.modal.travelBtn) state.modal.travelBtn.disabled = true; return; }
     const distance = distances.get(state.key) || p.distance;
     const signature = JSON.stringify([m, state.tab, readError, cacheError, distance]); if (!force && signature === state.signature) return;
     state.signature = signature; state.place = p;
-    state.modal.heading.textContent = m.name || 'Данж';
+    state.modal.heading.textContent = m.name || T('dungeon.dungeon');
     if (state.modal.subNode) {
       state.modal.subNode.replaceChildren();
-      const tag = el('span', 'dfo-dungeon-tag', `[${m.typeName} - ${m.rank ?? '?'} ранг]`);
+      const tag = el('span', 'dfo-dungeon-tag', T('dungeon.tag',{type:m.typeName,rank:m.rank ?? '?'}));
       tag.style.color = m.color;
-      const lifeInfo = m.life.kind === 'spawned' ? (m.life.timerText ? `порождённый · ${m.life.timerText}` : m.life.text) : 'постоянный';
-      const subText = el('span', '', `  размер ${m.size} · ${m.elite ? 'Элитный' : 'Обычный'} · ${lifeInfo}${distance ? ' · ' + distance : ''}`);
+      const lifeInfo = m.life.kind === 'spawned' ? (m.life.timerText ? T('dungeon.spawnedShort',{timer:m.life.timerText}) : m.life.text) : T('dungeon.permanentShort');
+      const subText = el('span', '', T('dungeon.subtitle',{size:m.size,kind:m.elite ? T('dungeon.elite') : T('dungeon.ordinary'),life:lifeInfo,distance:distance ? ' · ' + distance : ''}));
       state.modal.subNode.append(tag, subText);
     }
     if (state.modal.travelBtn) {
@@ -487,13 +491,13 @@
         if (state.travelling) return;
         if (!viewReady()) { closeAll(); return; }
         const live = records().get(state.key);
-        if (!live) { state.modal.status.textContent = 'Метка больше не доступна.'; state.modal.travelBtn.disabled = true; return; }
+        if (!live) { state.modal.status.textContent = T('dungeon.markGone'); state.modal.travelBtn.disabled = true; return; }
         state.travelling = true; state.modal.travelBtn.disabled = true;
         state.message = '';
         try {
           const ok = await tools().travel?.(live);
           if (ok) closeAll();
-          else state.modal.status.textContent = state.message = 'Игра не начала путешествие. Проверьте сообщение игры и условия пути.';
+          else state.modal.status.textContent = state.message = T('dungeon.travel.refused');
         } catch (e) {
           state.modal.status.textContent = state.message = e.message || String(e);
         } finally {
@@ -520,7 +524,7 @@
     const p = records().get(key); if (!p) return false;
     void loadNotes();
     if (current) { current.key = key; current.tab = 'overview'; render(true); return true; }
-    const m = modal(p.loc.name || 'Данж');
+    const m = modal(p.loc.name || T('dungeon.dungeon'));
     const tabs = m.tabsWrap, body = m.body;
     body.id = 'dfo-dungeon-content';
     current = { modal: m, key, tab: 'overview', tabs: new Map(), body, travelling: false, signature: '' };
@@ -532,14 +536,14 @@
       tabs.append(b);
       current.tabs.set(id, b);
     }
-    m.footerBtns.append(btn('Мини-гайд', guide), btn('Закрыть', m.close));
+    m.footerBtns.append(btn(T('dungeon.guide'), guide), btn(T('dungeon.close'), m.close));
     render(true);
     return true;
   }
   function closeAll() { for (const m of [...stack].reverse()) m.close(); }
   async function loadNotes() {
     if (loadStarted) return; loadStarted = true;
-    try { const r = await root.fetch('/dfo-mod/dungeon-notes', { cache: 'no-store' }); if (!r.ok) throw new Error('Не удалось прочитать журнал посещений.'); const value = await r.json(); for (const v of value.notes || []) { const n = M.cleanNote(v); if (n && (!notes[n.id] || notes[n.id].at < n.at)) notes[n.id] = n; } readError = ''; }
+    try { const r = await root.fetch('/dfo-mod/dungeon-notes', { cache: 'no-store' }); if (!r.ok) throw new Error(T('dungeon.visits.readFailed')); const value = await r.json(); for (const v of value.notes || []) { const n = M.cleanNote(v); if (n && (!notes[n.id] || notes[n.id].at < n.at)) notes[n.id] = n; } readError = ''; }
     catch (e) { readError = e.message; loadStarted = false; }
   }
   function observe() {
@@ -558,7 +562,7 @@
     const signature = JSON.stringify({ ...value, at: 0 });
     if (signature === lastObservation && Date.now() - lastSaved < 30000) return;
     lastObservation = signature; lastSaved = Date.now(); notes[value.id] = value;
-    root.fetch('/dfo-mod/dungeon-notes', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(value) }).then(r => { if (!r.ok) throw new Error('Не удалось сохранить журнал посещений.'); cacheError = ''; }).catch(e => { cacheError = e.message; lastObservation = ''; retryObservationAt = Date.now() + 30000; });
+    root.fetch('/dfo-mod/dungeon-notes', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(value) }).then(r => { if (!r.ok) throw new Error(T('dungeon.visits.saveFailed')); cacheError = ''; }).catch(e => { cacheError = e.message; lastObservation = ''; retryObservationAt = Date.now() + 30000; });
   }
   function liveInfo(details = true) {
     const t = tools(), modes = t.modes?.();

@@ -1,0 +1,117 @@
+key,text,note
+lootRules.tag.weapons,Weapons,loot filter tag
+lootRules.tag.armor,Armour,loot filter tag
+lootRules.tag.clothing,Clothing,loot filter tag
+lootRules.tag.potions,Potions,loot filter tag
+lootRules.tag.ingredients,Ingredients,loot filter tag
+lootRules.tag.books,Books and maps,loot filter tag
+lootRules.tag.valuables,Valuables,loot filter tag
+lootRules.tag.misc,Miscellaneous,loot filter tag
+lootRules.tag.materials,Crafting materials,loot filter tag
+lootRules.tag.Magic,Magic items,loot filter tag
+lootRules.tag.Valuables,Valuables,loot filter tag
+lootRules.tag.Misc,Miscellaneous,loot filter tag
+lootRules.tag.Weapons,Weapons,loot filter tag
+lootRules.tag.Arrows,Arrows,loot filter tag
+lootRules.tag.Armor,Armour,loot filter tag
+lootRules.tag.Clothing,Clothing,loot filter tag
+lootRules.tag.Ingredients,Ingredients,loot filter tag
+lootRules.tag.Gold,Gold,loot filter tag
+lootRules.tag.Potions,Potions,loot filter tag
+lootRules.tag.Books,Books,loot filter tag
+lootRules.tag.Gems,Gems,loot filter tag
+lootRules.tag.Jewellery,Jewellery,loot filter tag
+lootRules.tag.Maps,Maps,loot filter tag
+lootRules.tag.Magic-Items,Magic items,loot filter tag
+lootRules.tag.Religious-Items,Religious items,loot filter tag
+lootRules.tag.Quest-Items,Quest items,loot filter tag
+lootRules.tag.Transportation,Transport,loot filter tag
+lootRules.tag.Other-Items,Other items,loot filter tag
+lootRules.tag.Drugs,Drugs,loot filter tag
+lootRules.tag.UselessItems1,Miscellaneous I,loot filter tag
+lootRules.tag.UselessItems2,Miscellaneous II,loot filter tag
+lootRules.tag.MiscItems,Miscellaneous items,loot filter tag
+lootRules.tag.MensClothing,Men's clothing,loot filter tag
+lootRules.tag.WomensClothing,Women's clothing,loot filter tag
+lootRules.tag.Furniture,Furniture,loot filter tag
+lootRules.tag.ReligiousItems,Religious items,loot filter tag
+lootRules.tag.MagicItems,Magic items,loot filter tag
+lootRules.tag.Artifacts,Artifacts,loot filter tag
+lootRules.tag.QuestItems,Quest items,loot filter tag
+lootRules.tag.Currency,Currency,loot filter tag
+lootRules.tag.Paintings,Paintings,loot filter tag
+lootRules.tag.Deeds,Property deeds,loot filter tag
+lootRules.tag.PlantIngredients1,Plant ingredients I,loot filter tag
+lootRules.tag.PlantIngredients2,Plant ingredients II,loot filter tag
+lootRules.tag.CreatureIngredients1,Creature ingredients I,loot filter tag
+lootRules.tag.CreatureIngredients2,Creature ingredients II,loot filter tag
+lootRules.tag.CreatureIngredients3,Creature ingredients III,loot filter tag
+lootRules.tag.MiscellaneousIngredients1,Miscellaneous ingredients I,loot filter tag
+lootRules.tag.MiscellaneousIngredients2,Miscellaneous ingredients II,loot filter tag
+lootRules.tag.MetalIngredients,Metal ingredients,loot filter tag
+lootRules.tag.common,Common,loot filter tag
+lootRules.tag.superior,Superior,loot filter tag
+lootRules.tag.magic,Magic,loot filter tag
+lootRules.tag.rare,Rare,loot filter tag
+lootRules.tag.legendary,Legendary,loot filter tag
+lootRules.tag.artifact,Artifacts,loot filter tag
+lootRules.tag.aetheric,Aetheric,loot filter tag
+lootRules.tag.gilded,Gilded,loot filter tag
+lootRules.tag.Leather,Leather,loot filter tag
+lootRules.tag.Chain,Chain,loot filter tag
+lootRules.tag.Iron,Iron,loot filter tag
+lootRules.tag.Steel,Steel,loot filter tag
+lootRules.tag.Silver,Silver,loot filter tag
+lootRules.tag.Elven,Elven,loot filter tag
+lootRules.tag.Dwarven,Dwarven,loot filter tag
+lootRules.tag.Mithril,Mithril,loot filter tag
+lootRules.tag.Adamantium,Adamantium,loot filter tag
+lootRules.tag.Ebony,Ebony,loot filter tag
+lootRules.tag.Orcish,Orcish,loot filter tag
+lootRules.tag.Daedric,Daedric,loot filter tag
+lootRules.state.quest,Quest,loot filter tag
+lootRules.state.enchanted,Enchanted,loot filter tag
+lootRules.state.artifact,Artifacts,loot filter tag
+lootRules.state.identified,Identified,loot filter tag
+lootRules.state.unidentified,Unidentified,loot filter tag
+lootRules.state.stolen,Stolen,loot filter tag
+lootRules.state.bound,Bound,loot filter tag
+lootRules.state.locked,Protected from removal,loot filter tag
+lootRules.state.junk,Marked as junk,loot filter tag
+lootRules.state.broken,Broken,loot filter tag
+lootRules.state.exalted,Exalted,loot filter tag
+lootRules.state.cursed,Cursed,loot filter tag
+lootRules.state.socket-empty,With an empty socket,loot filter tag
+lootRules.state.socket-set,With a socketed gem,loot filter tag
+lootRules.state.imprint,With an imprint,loot filter tag
+lootRules.state.imbued,Imbued,loot filter tag
+lootRules.state.honed,Honed,loot filter tag
+lootRules.state.masterwork,Masterwork,loot filter tag
+lootRules.state.heirloom,Heirlooms,loot filter tag
+lootRules.state.poisoned,Poisoned,loot filter tag
+lootRules.affix.damage,Damage,loot filter tag
+lootRules.affix.armor,Armour,loot filter tag
+lootRules.affix.weight,Carrying capacity,loot filter tag
+lootRules.affix.stat,Attribute,loot filter tag
+lootRules.affix.resist,Resistance,loot filter tag
+lootRules.affix.skill,Skill,loot filter tag
+lootRules.affix.elemental,Elemental damage,loot filter tag
+lootRules.affix.leech,Health leech,loot filter tag
+lootRules.affix.thorns,Return damage,loot filter tag
+lootRules.affix.focus,Spell cost,loot filter tag
+lootRules.affix.slayer,Damage to creatures,loot filter tag
+lootRules.affix.standing,Standing,loot filter tag
+lootRules.affix.warmth,Warmth,loot filter tag
+lootRules.affix.dry,Weather protection,loot filter tag
+lootRules.affix.castSpeed,Casting speed,loot filter tag
+lootRules.affix.potency,Spell power,loot filter tag
+lootRules.affix.wellspring,Magicka per kill,loot filter tag
+lootRules.affix.technique,Technique,loot filter tag
+lootRules.axis.page,Categories,loot filter tag
+lootRules.axis.group,Game groups,loot filter tag
+lootRules.axis.kind,Ground item types,loot filter tag
+lootRules.axis.rarity,Rarity,loot filter tag
+lootRules.axis.material,Material,loot filter tag
+lootRules.axis.state,Properties,loot filter tag
+lootRules.axis.affix,Affixes,loot filter tag
+lootRules.axis.type,Item kinds,loot filter tag

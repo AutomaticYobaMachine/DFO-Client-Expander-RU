@@ -1,5 +1,7 @@
 (function (root) {
   'use strict';
+  // The mod's own words, in the install's language (page/dfo_ui_text.js; English without the translation).
+  const T = (key, params) => (root.__dfoUi ? root.__dfoUi.t(key, params) : key);
   const Rules = typeof module === 'object' && module.exports ? require('./dfo_loot_rules.js') : root.__dfoLootRules;
   const STATE_KEY = 'dfoMod.nearbyLoot';
   function createClient({ request = (...a) => root.fetch(...a), storage = null } = {}) {
@@ -11,7 +13,7 @@
     async function json(url, body) {
       const res = await request(url, body === undefined ? { cache: 'no-store' } : { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
       const data = await res.json();
-      if (!res.ok) { const e = new Error(data.error || 'Не удалось сохранить настройки.'); e.status = res.status; throw e; }
+      if (!res.ok) { const e = new Error(data.error || T('loot.saveFailed')); e.status = res.status; throw e; }
       return data;
     }
     async function read() {
@@ -32,7 +34,7 @@
     }
     const serial = work => {
       const gen = generation;
-      const result = queue.then(() => { if (gen !== generation) throw new Error('Настройки изменились. Откройте окно заново.'); return work(); });
+      const result = queue.then(() => { if (gen !== generation) throw new Error(T('loot.settingsChanged')); return work(); });
       queue = result.catch(() => {}); return result;
     };
     const api = {
@@ -156,7 +158,7 @@
       const wh = el('div', 'wh');
       const heading = el('span', 't', title); heading.id = `dfo-loot-heading-${Date.now()}-${stack.length}`;
       node.setAttribute('aria-labelledby', heading.id);
-      const wx = el('button', 'dfo-win-x', '✕'); wx.type = 'button'; wx.setAttribute('aria-label', `Закрыть окно «${title}»`);
+      const wx = el('button', 'dfo-win-x', '✕'); wx.type = 'button'; wx.setAttribute('aria-label', T('loot.closeWindow',{title:title}));
       wh.append(heading, wx);
 
       const wb = el('div', 'wb');
@@ -210,15 +212,15 @@
     function tagPicker(selected, changed) {
       const all = Rules.catalog(tools()), picked = new Set(selected), host = el('fieldset'), controls = el('div', 'dfo-loot-tag-controls');
       const known = new Set(all.map(t => t.id));
-      for (const id of selected) if (!known.has(id)) { known.add(id); all.push({ id, axis: 'saved', group: 'Сохранённые', label: `Недоступный тег: ${id}` }); }
-      host.append(el('legend', null, 'Теги предметов'));
-      const axis = el('select'); axis.setAttribute('aria-label', 'Группа тегов');
-      for (const [id, name] of [['all', 'Все теги'], ...new Map(all.map(t => [t.axis, t.group])).entries()]) {
+      for (const id of selected) if (!known.has(id)) { known.add(id); all.push({ id, axis: 'saved', group: T('loot.tags.saved'), label: T('loot.tags.unavailable',{id:id}) }); }
+      host.append(el('legend', null, T('loot.tags.legend')));
+      const axis = el('select'); axis.setAttribute('aria-label', T('loot.tags.group'));
+      for (const [id, name] of [['all', T('loot.tags.all')], ...new Map(all.map(t => [t.axis, t.group])).entries()]) {
         const o = el('option', null, name); o.value = id; axis.append(o);
       }
-      const search = el('input'); search.type = 'search'; search.placeholder = 'Найти тег'; search.setAttribute('aria-label', 'Поиск тегов');
+      const search = el('input'); search.type = 'search'; search.placeholder = T('loot.tags.find'); search.setAttribute('aria-label', T('loot.tags.search'));
       controls.append(axis, search); host.append(controls);
-      const grid = el('div', 'dfo-loot-tags'); grid.setAttribute('aria-label', 'Теги в две колонки'); host.append(grid);
+      const grid = el('div', 'dfo-loot-tags'); grid.setAttribute('aria-label', T('loot.tags.grid')); host.append(grid);
       const count = el('p', 'dfo-loot-note'); host.append(count);
       const render = () => {
         grid.replaceChildren(); const query = search.value.trim().toLocaleLowerCase();
@@ -230,13 +232,13 @@
           }, t.id, t.group));
         }
       };
-      const updateCount = () => { count.textContent = `Выбрано: ${picked.size}. Совпадение хотя бы одного тега. Выберите нужные теги в колонках.`; };
+      const updateCount = () => { count.textContent = T('loot.tags.count',{n:picked.size}); };
       host.sync = tags => {
         picked.clear(); for (const tag of tags) picked.add(tag);
         let added = false;
-        for (const id of tags) if (!known.has(id)) { known.add(id); all.push({ id, axis: 'saved', group: 'Сохранённые', label: `Недоступный тег: ${id}` }); added = true; }
+        for (const id of tags) if (!known.has(id)) { known.add(id); all.push({ id, axis: 'saved', group: T('loot.tags.saved'), label: T('loot.tags.unavailable',{id:id}) }); added = true; }
         if (added) {
-          if (![...axis.options].some(o => o.value === 'saved')) { const o = el('option', null, 'Сохранённые'); o.value = 'saved'; axis.append(o); }
+          if (![...axis.options].some(o => o.value === 'saved')) { const o = el('option', null, T('loot.tags.saved')); o.value = 'saved'; axis.append(o); }
           render();
         }
         for (const input of grid.querySelectorAll('input[data-tag]')) input.checked = picked.has(input.dataset.tag);
@@ -251,17 +253,17 @@
       doc.body.append(a); a.click(); a.remove(); root.setTimeout(() => root.URL.revokeObjectURL(url), 1000);
     }
     function saveDialog(parent) {
-      const m = modal('Имя сохранённого фильтра', { small: true }), form = el('form', 'dfo-loot-form');
+      const m = modal(T('loot.preset.nameTitle'), { small: true }), form = el('form', 'dfo-loot-form');
       form.id = 'dfo-loot-save-form';
-      const label = el('label', null, 'Название: '), input = el('input'); input.type = 'text'; input.maxLength = 60; input.required = true; input.name = 'presetName'; label.append(input); form.append(label);
-      const save = button('Сохранить', () => form.requestSubmit()); save.type = 'button';
-      const cancel = button('Отмена', m.close, 'dfo-btn-sec');
+      const label = el('label', null, T('loot.preset.nameLabel')), input = el('input'); input.type = 'text'; input.maxLength = 60; input.required = true; input.name = 'presetName'; label.append(input); form.append(label);
+      const save = button(T('loot.save'), () => form.requestSubmit()); save.type = 'button';
+      const cancel = button(T('loot.cancel'), m.close, 'dfo-btn-sec');
       form.onsubmit = async e => {
         e.preventDefault(); if (save.disabled) return; save.disabled = true;
         try {
           const result = await client.savePreset(input.value);
-          try { download(result); parent.message(`Пресет «${result.preset.name}» сохранён в файл и кеш.`); }
-          catch { parent.message(`Пресет «${result.preset.name}» сохранён в кеш и файл клиента; браузерный экспорт не удался.`, true); }
+          try { download(result); parent.message(T('loot.preset.saved',{name:result.preset.name})); }
+          catch { parent.message(T('loot.preset.savedNoExport',{name:result.preset.name}), true); }
           m.close();
         }
         catch (err) { m.message(errorOf(err), true); } finally { save.disabled = false; }
@@ -271,59 +273,59 @@
       input.focus();
     }
     async function loadDialog(parent) {
-      const m = modal('Загрузить фильтр', { small: true });
+      const m = modal(T('loot.preset.loadTitle'), { small: true });
       let chosen = null;
-      const list = el('div', 'dfo-loot-list'); list.setAttribute('role', 'listbox'); list.setAttribute('aria-label', 'Сохранённые фильтры');
-      const load = button('Загрузить', async () => {
+      const list = el('div', 'dfo-loot-list'); list.setAttribute('role', 'listbox'); list.setAttribute('aria-label', T('loot.preset.list'));
+      const load = button(T('loot.load'), async () => {
         if (!chosen || load.disabled) return; load.disabled = true;
-        try { await client.update({ filter: chosen.filter }); parent.sync?.(); parent.message(`Загружен фильтр «${chosen.name}».`); m.close(); }
+        try { await client.update({ filter: chosen.filter }); parent.sync?.(); parent.message(T('loot.preset.loaded',{name:chosen.name})); m.close(); }
         catch (e) { m.message(errorOf(e), true); } finally { load.disabled = false; }
       }); load.disabled = true;
-      m.content(list); m.content(footer(load, button('Отмена', m.close, 'dfo-btn-sec')));
+      m.content(list); m.content(footer(load, button(T('loot.cancel'), m.close, 'dfo-btn-sec')));
       try { await client.refresh(); } catch (e) { m.message(errorOf(e), true); }
       if (!m.node.isConnected) return;
       for (const p of client.get().presets) {
-        const b = button(`${p.name} · ${p.filter.mode === 'white' ? 'белый' : 'чёрный'} · тегов: ${p.filter.tags.length}`, () => {
+        const b = button(T('loot.preset.row',{name:p.name,mode:T(p.filter.mode === 'white' ? 'loot.mode.white' : 'loot.mode.black'),n:p.filter.tags.length}), () => {
           chosen = p; load.disabled = false;
           for (const row of list.children) { row.setAttribute('aria-selected', String(row === b)); row.setAttribute('aria-pressed', String(row === b)); }
         }); b.setAttribute('role', 'option'); b.setAttribute('aria-selected', 'false'); list.append(b);
       }
-      if (!list.children.length) list.append(el('p', null, 'Сохранённых фильтров пока нет.'));
+      if (!list.children.length) list.append(el('p', null, T('loot.preset.none')));
     }
     function lootFilter() {
       if (stack.length) return;
-      const m = modal('Лутфильтр', { onClose: () => { if (!activeLoot?.isClosed?.()) repaint?.(); } }), body = el('div'); m.content(body);
+      const m = modal(T('loot.filter'), { onClose: () => { if (!activeLoot?.isClosed?.()) repaint?.(); } }), body = el('div'); m.content(body);
       const update = patch => { client.update(patch).catch(e => m.message(errorOf(e), true)); };
       const modes = el('div', 'dfo-loot-modes'), buttons = new Map();
-      for (const [id, word] of [['white', 'Белый список'], ['black', 'Чёрный список']]) {
+      for (const [id, word] of [['white', T('loot.mode.whiteList')], ['black', T('loot.mode.blackList')]]) {
         const b = button(word, () => { if (client.get().filter.mode !== id) update({ filter: { ...client.get().filter, mode: id } }); });
         buttons.set(id, b); modes.append(b);
       }
       const picker = tagPicker(client.get().filter.tags, tags => update({ filter: { ...client.get().filter, tags } }));
-      body.append(modes, el('p', 'dfo-loot-note', 'Белый список показывает совпавшее. Чёрный список скрывает совпавшее. Без отмеченных тегов белый список пуст, чёрный показывает всё.'), picker);
+      body.append(modes, el('p', 'dfo-loot-note', T('loot.mode.note')), picker);
       m.sync = () => {
         const f = client.get().filter;
         for (const [id, b] of buttons) b.setAttribute('aria-pressed', String(f.mode === id));
         picker.sync(f.tags);
       };
-      m.sync(); m.content(footer(button('Сохранить', () => saveDialog(m)), button('Загрузить', () => loadDialog(m)), button('Закрыть', m.close, 'dfo-btn-sec')));
+      m.sync(); m.content(footer(button(T('loot.save'), () => saveDialog(m)), button(T('loot.load'), () => loadDialog(m)), button(T('loot.close'), m.close, 'dfo-btn-sec')));
     }
     function autoDialog() {
       if (stack.length) return;
-      const m = modal('Автолут по кнопке лута', { onClose: () => { if (!activeLoot?.isClosed?.()) repaint?.(); } });
-      const note = el('p', 'dfo-loot-note', 'Подбирает выбранное до открытия списка. Лутфильтр и поиск окна на автолут не влияют. Без правил ничего не подбирается.'); m.content(note);
+      const m = modal(T('loot.auto.title'), { onClose: () => { if (!activeLoot?.isClosed?.()) repaint?.(); } });
+      const note = el('p', 'dfo-loot-note', T('loot.auto.note')); m.content(note);
       const update = auto => client.update({ autoLoot: auto }).catch(e => m.message(errorOf(e), true));
-      const enabled = checkbox('Автолут включён', client.get().autoLoot.enabled, yes => update({ ...client.get().autoLoot, enabled: yes })); enabled.querySelector('input').dataset.autolootEnabled = 'true'; m.content(enabled);
+      const enabled = checkbox(T('loot.auto.enabled'), client.get().autoLoot.enabled, yes => update({ ...client.get().autoLoot, enabled: yes })); enabled.querySelector('input').dataset.autolootEnabled = 'true'; m.content(enabled);
       const picker = tagPicker(client.get().autoLoot.tags, tags => update({ ...client.get().autoLoot, tags })); m.content(picker);
-      const host = el('fieldset'); host.append(el('legend', null, 'Конкретные предметы'));
-      const search = el('input'); search.type = 'search'; search.placeholder = 'Найти предмет'; search.setAttribute('aria-label', 'Поиск конкретного предмета'); host.append(search);
+      const host = el('fieldset'); host.append(el('legend', null, T('loot.auto.items')));
+      const search = el('input'); search.type = 'search'; search.placeholder = T('loot.auto.find'); search.setAttribute('aria-label', T('loot.auto.search')); host.append(search);
       const list = el('div', 'dfo-loot-item-picker'); host.append(list); const info = el('p', 'dfo-loot-note'); host.append(info);
       const items = new Map();
-      for (const it of activeLoot?.rawItems?.() ?? []) items.set(Rules.variantKey(it), { key: Rules.variantKey(it), name: `Рядом: ${it.group === '*' ? root.__translate?.(it.name) || it.name : tools()?.nameOf?.(it) || it.name}` });
-      for (const it of tools()?.templates?.() ?? []) items.set(Rules.typeKey(it), { key: Rules.typeKey(it), name: `Любая разновидность: ${it.group === '*' ? root.__translate?.(it.name) || it.name : tools()?.nameOf?.(it) || it.name}` });
-      for (const key of client.get().autoLoot.items) if (!items.has(key)) items.set(key, { key, name: `Сохранённое правило: ${key.startsWith('type:') ? key.slice(5) : 'предмет временно отсутствует'}` });
+      for (const it of activeLoot?.rawItems?.() ?? []) items.set(Rules.variantKey(it), { key: Rules.variantKey(it), name: T('loot.auto.nearby',{name:it.group === '*' ? root.__translate?.(it.name) || it.name : tools()?.nameOf?.(it) || it.name}) });
+      for (const it of tools()?.templates?.() ?? []) items.set(Rules.typeKey(it), { key: Rules.typeKey(it), name: T('loot.auto.anyKind',{name:it.group === '*' ? root.__translate?.(it.name) || it.name : tools()?.nameOf?.(it) || it.name}) });
+      for (const key of client.get().autoLoot.items) if (!items.has(key)) items.set(key, { key, name: T('loot.auto.savedRule',{name:key.startsWith('type:') ? key.slice(5) : T('loot.auto.missing')}) });
       let limit = 40;
-      const updateInfo = () => { info.textContent = `Правил: ${client.get().autoLoot.items.length}. Выбранные теги ИЛИ любой выбранный предмет. Каталог: ${items.size}.`; };
+      const updateInfo = () => { info.textContent = T('loot.auto.info',{n:client.get().autoLoot.items.length,catalog:items.size}); };
       const render = () => {
         list.replaceChildren(); const picked = new Set(client.get().autoLoot.items), query = search.value.toLocaleLowerCase().trim();
         const found = [...items.values()].filter(it => !query || it.name.toLocaleLowerCase().includes(query));
@@ -334,7 +336,7 @@
             update({ ...client.get().autoLoot, items: [...next] }); updateInfo();
           }); row.querySelector('input').dataset.itemKey = it.key; list.append(row);
         }
-        if (found.length > limit) list.append(button('Показать ещё', () => { limit += 40; render(); }));
+        if (found.length > limit) list.append(button(T('loot.more'), () => { limit += 40; render(); }));
         updateInfo();
       };
       m.sync = () => {
@@ -343,27 +345,27 @@
         for (const input of list.querySelectorAll('input[data-item-key]')) input.checked = a.items.includes(input.dataset.itemKey);
         updateInfo();
       };
-      search.oninput = () => { limit = 40; render(); }; render(); m.content(host); m.content(footer(button('Закрыть', m.close, 'dfo-btn-sec')));
+      search.oninput = () => { limit = 40; render(); }; render(); m.content(host); m.content(footer(button(T('loot.close'), m.close, 'dfo-btn-sec')));
     }
     function toolbar(parent, loot, refresh, options = {}) {
       if (!loot?.nearby) return;
       styles(); activeLoot = loot; repaint = refresh;
       const bar = el('div', 'dfo-loot-actions');
       for (const type of ['click', 'pointerdown', 'mousedown', 'mouseup', 'wheel']) bar.addEventListener(type, e => e.stopPropagation());
-      const auto = button('Автолут', autoDialog); auto.dataset.autoButton = 'true'; auto.setAttribute('aria-pressed', String(client.get().autoLoot.enabled));
+      const auto = button(T('loot.auto'), autoDialog); auto.dataset.autoButton = 'true'; auto.setAttribute('aria-pressed', String(client.get().autoLoot.enabled));
       const status = el('span', 'dfo-loot-status', lastError); status.setAttribute('role', 'status');
-      const take = button('Забрать все', () => {
+      const take = button(T('loot.takeAll'), () => {
         if (take.disabled || stack.length || loot.isClosed()) return;
         take.disabled = true;
         try {
           const shown = () => options.shown?.() ?? loot.items(), result = loot.takeAll(shown());
           if (!result.failed && !shown().length && options.close) { options.close(); return; }
-          const text = result.refusal || (result.failed ? 'Часть лута не удалось подобрать: предмет недоступен или не помещается в инвентарь.' : '');
+          const text = result.refusal || (result.failed ? T('loot.takeFailed') : '');
           if (options.notice) options.notice(text); else { status.textContent = text; refresh?.(); }
         } catch (e) { if (options.notice) options.notice(errorOf(e)); else status.textContent = errorOf(e); }
         finally { take.disabled = false; }
       }); take.dataset.takeAll = 'true';
-      bar.append(take, button('Лутфильтр', lootFilter), auto, status); parent.append(bar); return bar;
+      bar.append(take, button(T('loot.filter'), lootFilter), auto, status); parent.append(bar); return bar;
     }
     function classic(win, loot) {
       if (!win?.hooks || !loot.nearby) return () => {};

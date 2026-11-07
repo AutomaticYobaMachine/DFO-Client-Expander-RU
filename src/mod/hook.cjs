@@ -28,6 +28,7 @@ const OWN = Object.freeze({   // served at dagger://game/dfo-mod/<name>
   'dfo_font_data.js':'page/dfo_font_data.js',
   'dfo_item_cards.js': 'page/dfo_item_cards.js',
   'dfo_item_text.js': 'page/dfo_item_text.js',
+  'dfo_ui_text.js': 'page/dfo_ui_text.js',
   'dfo_service_details.js': 'page/dfo_service_details.js',
   'dfo_services.js': 'page/dfo_services.js',
   'item-font-title.ttf': 'fonts/item-font-title.ttf', 'item-font-text.ttf': 'fonts/item-font-text.ttf',
@@ -83,13 +84,14 @@ function wrap(handleDagger, { app = null } = {}) {
     let pack = null;
     if (ru) { try { pack = JSON.parse(fs.readFileSync(path.join(__dirname, 'ru-pack', 'index.json'), 'utf8')); } catch { pack = null; } }
     ctx = { ru, marks: !!cfg.marks, nearbyLoot: cfg.nearbyLoot !== false, dungeons: cfg.dungeons !== false, itemCards: cfg.itemCards !== false, fonts: cfg.fonts !== false, fontB64, quests, ql,
-      itemTextLocale: itemText.chooseLocale(ru),
-      pageCfg: { fonts: {enabled:cfg.fonts!==false,revision:VERSION}, itemCards: { enabled: cfg.itemCards !== false }, itemText: { locale: itemText.chooseLocale(ru) }, dungeons: { ...cfg.dungeonOptions, enabled: cfg.dungeons !== false }, nearbyLoot: { ...cfg.nearbyLootOptions, enabled: cfg.nearbyLoot !== false }, marks: { marks: !!cfg.marks, ...cfg.marksOptions }, ru: { on: ru, pack, gameLanguage: cfg.gameLanguage !== false } } };
+      itemTextLocale: itemText.chooseLocale(ru), uiLocale: itemText.chooseLocale(ru),
+      pageCfg: { fonts: {enabled:cfg.fonts!==false,revision:VERSION}, itemCards: { enabled: cfg.itemCards !== false }, itemText: { locale: itemText.chooseLocale(ru) }, ui: { locale: itemText.chooseLocale(ru) }, dungeons: { ...cfg.dungeonOptions, enabled: cfg.dungeons !== false }, nearbyLoot: { ...cfg.nearbyLootOptions, enabled: cfg.nearbyLoot !== false }, marks: { marks: !!cfg.marks, ...cfg.marksOptions }, ru: { on: ru, pack, gameLanguage: cfg.gameLanguage !== false } } };
     return ctx;
   };
   const cache = new Map();   // rel -> { key, text }
   const own = new Map();     // name -> Buffer
   let itemTextData = null;   // the page's item description locale, built once
+  let uiTextData = null;     // the page's interface strings, built once
   const seenHooks = new Map();   // hook id -> places found, this session
   let summaryTimer = null;
   /** Once the game's files have come (no new one for a few seconds): which expected hooks found no place at all. */
@@ -206,6 +208,11 @@ function wrap(handleDagger, { app = null } = {}) {
         const body = fs.readFileSync(path.join(__dirname, 'ru-pack', ...packFile[1].split('/')));
         return new Response(body, { headers: { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-cache' } });
       } catch { return new Response('not found', { status: 404 }); }
+    }
+    // The mod's interface strings: the same locale as the descriptions, English under it.
+    if (/^(?:play\/)?dfo-mod\/dfo_ui_text_data\.js$/.test(rel)) {
+      if (!uiTextData) { try { uiTextData = Buffer.from(itemText.uiBundle(context().uiLocale)); } catch (e) { log(`ui text: ${e?.message ?? e}`); uiTextData = Buffer.from('globalThis.__dfoUiPack=null;\n'); } }
+      return new Response(uiTextData, { headers: { 'Content-Type': 'text/javascript; charset=utf-8', 'Cache-Control': 'no-store' } });
     }
     // Item descriptions: the one locale this install speaks (Russian with the translation installed and on), as data.
     if (/^(?:play\/)?dfo-mod\/dfo_item_text_data\.js$/.test(rel)) {

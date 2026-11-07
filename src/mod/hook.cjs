@@ -103,36 +103,39 @@ function wrap(handleDagger, { app = null } = {}) {
 
   /** The page's account of its marks, as a player can read and send it: <userData>/dfo-mod-marks.txt. */
   const reportFile = userData && path.join(userData, 'dfo-mod-marks.txt');
-  const GROUP_WORD = { t: 'таверна', s: 'магазин', o: 'организация' };
+  // The report and the store's answers speak the install's language (the item-text packs' ui tables), English by default.
+  let uiStrings = null;
+  const T = (key, params) => { if (!uiStrings) uiStrings = itemText.uiText(context().uiLocale); return uiStrings.t(key, params); };
+  const GROUP_WORD = new Proxy({}, { get: (_, g) => (['t', 's', 'o'].includes(g) ? T('report.group.' + g) : undefined) });
   function writeReport(body) {
     if (!reportFile) return;
     try {
       const r = JSON.parse(String(body).slice(0, 400000));
-      const L = [`DFO Mod ${VERSION} - метки на Overworld, ${new Date().toLocaleString('ru-RU')}`];
+      const L = [T('report.title',{version:VERSION,when:new Date().toLocaleString(context().uiLocale === 'ru' ? 'ru-RU' : 'en-US')})];
       const src = r.sources ?? {};
-      L.push(`источники игры: здания города ${src.summaries ? 'да' : 'НЕТ'}, города по пикселям ${src.locIndex ? 'да' : 'НЕТ'}, книга города ${src.bookOf ? 'да' : 'НЕТ'}, открытые здания ${src.disc ? 'да' : 'НЕТ'}`);
-      const yn = (v) => (v ? 'да' : 'НЕТ');
-      L.push(`формула скупки игры: индекс лавки ${yn(src.shopAdj)}, CalculateCost ${yn(src.cost)}, торг ${yn(src.trade)}, навыки игрока ${yn(src.skills)}`);
-      L.push('проценты: доля базовой стоимости предмета, которую лавка платит; "базово" - для всех одинаково (без гильдии, Mercantile 0, Personality 50), "мне" - с вашими навыками и гильдией');
+      L.push(T('report.sources',{a:src.summaries ? T('report.yes') : T('report.NO'),b:src.locIndex ? T('report.yes') : T('report.NO'),c:src.bookOf ? T('report.yes') : T('report.NO'),d:src.disc ? T('report.yes') : T('report.NO')}));
+      const yn = (v) => (v ? T('report.yes') : T('report.NO'));
+      L.push(T('report.formula',{a:yn(src.shopAdj),b:yn(src.cost),c:yn(src.trade),d:yn(src.skills)}));
+      L.push(T('report.percent'));
       const c = r.cfg ?? {};
-      L.push(`настройки: только посещённые ${c.onlyVisited ? 'да' : 'нет'}, радиус ${c.markRadiusM} м, подписи ${c.nameRadiusM} м, не больше ${c.maxMarks}`);
-      L.push(`меток отдано на экран: ${r.made}`);
-      if (r.error) L.push(`ОШИБКА: ${r.error}`);
-      if (!r.towns?.length) L.push('городов в радиусе нет.');
+      L.push(T('report.settings',{visited:c.onlyVisited ? T('report.yes') : T('report.no'),radius:c.markRadiusM,labels:c.nameRadiusM,max:c.maxMarks}));
+      L.push(T('report.made',{n:r.made}));
+      if (r.error) L.push(T('report.error',{error:r.error}));
+      if (!r.towns?.length) L.push(T('report.noTowns'));
       for (const t of r.towns ?? []) {
-        L.push('', `Город: ${t.town ?? '?'}   книга: ${t.book ?? '-'}   способ: ${t.path}   до центра: ${t.centreM} м`);
-        L.push(`  открытых зданий в книге: ${t.discovered} (из них таверн/магазинов/организаций: ${t.discoveredOurs})`);
-        L.push(`  кандидатов: ${t.candidates}, с меткой: ${t.marked}, дальше радиуса: ${t.beyond}, без земли под ними: ${t.noGround}`);
+        L.push('', T('report.town',{town:t.town ?? '?',book:t.book ?? '-',path:t.path,m:t.centreM}));
+        L.push(T('report.discovered',{n:t.discovered,ours:t.discoveredOurs}));
+        L.push(T('report.candidates',{n:t.candidates,marked:t.marked,beyond:t.beyond,noGround:t.noGround}));
         for (const n of t.names ?? []) {
           if (n && typeof n === 'object') {
-            const price = n.base != null ? `   качество ${n.q}, скупка базово ${n.base}%${n.mine != null ? `, мне ${n.mine}%` : ''}` : '';
-            L.push(`    ${GROUP_WORD[n.g] ?? n.g} (тип ${n.type}): ${n.name} - ${n.m} м${price}`);
+            const price = n.base != null ? T('report.price',{q:n.q,base:n.base,mine:n.mine != null ? T('report.priceMine',{pct:n.mine}) : ''}) : '';
+            L.push(T('report.mark',{group:GROUP_WORD[n.g] ?? n.g,type:n.type,name:n.name,m:n.m,price:price}));
             continue;
           }
           const m = /^([tso])(\d+):(.*)@(\d+)m$/.exec(n);
-          L.push(m ? `    ${GROUP_WORD[m[1]]} (тип ${m[2]}): ${m[3]} - ${m[4]} м` : `    ${n}`);
+          L.push(m ? T('report.markShort',{group:GROUP_WORD[m[1]],type:m[2],name:m[3],m:m[4]}) : `    ${n}`);
         }
-        if (t.unplaced?.length) L.push(`  открыты, но не найдены в планировке города: ${t.unplaced.join('; ')}`);
+        if (t.unplaced?.length) L.push(T('report.unplaced',{list:t.unplaced.join('; ')}));
       }
       fs.writeFileSync(reportFile, `${L.join('\n')}\n`);
     } catch (e) { log(`report: ${e?.message ?? e}`); }
@@ -194,13 +197,13 @@ function wrap(handleDagger, { app = null } = {}) {
       const json = (body, status = 200) => new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' } });
       try {
         if (req.method === 'GET') return json(rel.endsWith('dungeon-notes') ? { notes: lootStore.dungeonNotes() } : lootStore.state());
-        if (req.method !== 'POST') return json({ error: 'Метод не поддерживается.' }, 405);
+        if (req.method !== 'POST') return json({ error: T('store.method') }, 405);
         const body = await req.text();
-        if (Buffer.byteLength(body) > 2 * 1024 * 1024) return json({ error: 'Слишком большой пресет.' }, 413);
-        let data; try { data = JSON.parse(body); } catch { return json({ error: 'Некорректный JSON.' }, 400); }
-        if (!data || typeof data !== 'object' || Array.isArray(data)) return json({ error: 'Некорректные настройки.' }, 400);
+        if (Buffer.byteLength(body) > 2 * 1024 * 1024) return json({ error: T('store.tooLarge') }, 413);
+        let data; try { data = JSON.parse(body); } catch { return json({ error: T('store.badJson') }, 400); }
+        if (!data || typeof data !== 'object' || Array.isArray(data)) return json({ error: T('store.badSettings') }, 400);
         return json(rel.endsWith('dungeon-notes') ? lootStore.saveDungeonNote(data) : rel.endsWith('loot-presets') ? lootStore.savePreset(data) : lootStore.saveSettings(data));
-      } catch (e) { log(`${rel}: ${e?.message ?? e}`); return json({ error: e.message || 'Не удалось сохранить настройки.' }, e.status || 500); }
+      } catch (e) { log(`${rel}: ${e?.message ?? e}`); return json({ error: T(e.message || 'loot.saveFailed') }, e.status || 500); }
     }
     const packFile = /^(?:play\/)?dfo-mod\/ru-pack\/((?:Text\/(?:(?:Quests|Books)\/)?)?[\w$.-]+\.(?:csv|txt|json))$/.exec(rel);
     if (packFile) {

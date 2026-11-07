@@ -1,0 +1,14 @@
+key,text,note
+store.noUserData,Нет каталога пользовательских данных.,src/mod/loot-store.cjs
+store.badCacheFile,Некорректный файл кеша.,src/mod/loot-store.cjs
+store.cacheTooLarge,Превышен размер кеша.,src/mod/loot-store.cjs
+store.badCache,Некорректный кеш.,src/mod/loot-store.cjs
+store.badKeys,Некорректные клавиши.,src/mod/loot-store.cjs
+store.badLootKey,Некорректная кнопка лута.,src/mod/loot-store.cjs
+store.badDungeonKey,Некорректная кнопка сведений о данже.,src/mod/loot-store.cjs
+store.changedElsewhere,Настройки изменились в другом окне. Откройте их заново.,src/mod/loot-store.cjs
+store.nameNeeded,Введите имя фильтра.,src/mod/loot-store.cjs
+store.tooMany,Сохранено слишком много фильтров.,src/mod/loot-store.cjs
+store.nameTaken,Фильтр с таким именем уже существует.,src/mod/loot-store.cjs
+store.badNote,Некорректное наблюдение данжа.,src/mod/loot-store.cjs
+store.badNoteTime,Некорректное время наблюдения.,src/mod/loot-store.cjs

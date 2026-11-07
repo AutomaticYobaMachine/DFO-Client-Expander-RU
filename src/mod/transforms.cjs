@@ -30,7 +30,7 @@ function sub(text, re, fn, log, id) {
 
 // ─── MARKS ──────────────────────────────────────────────────────────────────────────────────────────────────────────
 /** The page runtime's filter groups and their words (TV_FILTER_TEXT); also the kind's second word (`dfo <group>`). */
-const MARK_GROUPS = Object.freeze([['taverns', 'Таверны'], ['shops', 'Магазины'], ['orgs', 'Организации']]);
+const MARK_GROUPS = Object.freeze([['taverns', 'Taverns'], ['shops', 'Shops'], ['orgs', 'Organisations']]);
 
 /** world chunk: the built town pixels, the world's state and its ground, from the yards' own wiring. */
 function marksWorld(text, log) {
@@ -78,7 +78,8 @@ function marksFilters(text, log) {
   let t = sub(text, /Object\.freeze\(\[(`towns`,`distant`[^\]]*)\]\)/g,
     (all, list) => (list.includes('`taverns`') ? all : `Object.freeze([${list},${MARK_GROUPS.map(([g]) => `\`${g}\``).join(',')}])`), log, 'marks.groups');
   t = sub(t, /Object\.freeze\(\{title:`Show`,towns:`Towns`/g,
-    () => `Object.freeze({title:\`Show\`,${MARK_GROUPS.map(([g, w]) => `${g}:\`${w}\``).join(',')},towns:\`Towns\``, log, 'marks.words');
+    // The page's strings (dfo_ui_text.js) load before the game's modules: the install's language, English without them.
+    () => `Object.freeze({title:\`Show\`,${MARK_GROUPS.map(([g, w]) => `${g}:(globalThis.__dfoUi?.t(\`marks.group.${g}\`)??\`${w}\`)`).join(',')},towns:\`Towns\``, log, 'marks.words');
   t = sub(t, new RegExp(`(function ${ID}\\((${ID})=\`\`\\)\\{let (${ID})=String\\(\\2\\)\\.split\\(\` \`\\),(${ID})=\\3\\[0\\];return )(\\3\\.includes\\(\`chase\`\\))`, 'g'),
     (all, head, e, words, first, chase) => `${head}${first}===\`dfo\`?${words}[1]??null:${chase}`, log, 'marks.group');
   return t;

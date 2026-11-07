@@ -1,0 +1,23 @@
+key,text,note
+nav.target.exit,Выход из данжа,src/mod/page/dfo_dungeon_nav_model.js
+nav.target.aurum,Сундук с аурумом,src/mod/page/dfo_dungeon_nav_model.js
+nav.target.elite,Ближайший элитный противник,src/mod/page/dfo_dungeon_nav.js
+nav.target.quest,Цель задания,src/mod/page/dfo_dungeon_nav_model.js
+nav.none.exit,Выход в этой локации не найден.,src/mod/page/dfo_dungeon_nav.js
+nav.none.aurum,Сундук с аурумом недоступен или уже открыт.,src/mod/page/dfo_dungeon_nav.js
+nav.none.elite,Живых элитных противников здесь нет.,src/mod/page/dfo_dungeon_nav.js
+nav.none.quest,Активных целей этого задания в данже нет.,src/mod/page/dfo_dungeon_nav.js
+nav.routing,Прокладываю путь…,src/mod/page/dfo_dungeon_nav.js
+nav.noPath,Путь в загруженной геометрии не найден.,src/mod/page/dfo_dungeon_nav.js
+nav.failed,Не удалось проложить путь.,src/mod/page/dfo_dungeon_nav.js
+nav.building,Подготавливаю профили данжа…,src/mod/page/dfo_dungeon_nav.js
+nav.arrived,Цель рядом.,src/mod/page/dfo_dungeon_nav.js
+nav.model.elite,Элитный противник,src/mod/page/dfo_dungeon_nav_model.js
+nav.model.questItem,Предмет задания,src/mod/page/dfo_dungeon_nav_model.js
+nav.model.carrier,носитель,src/mod/page/dfo_dungeon_nav_model.js
+nav.graph.noGeometry,Геометрия данжа недоступна.,src/mod/page/dfo_dungeon_graph.js
+nav.graph.noSurfaces,В данже нет загруженных поверхностей для маршрута.,src/mod/page/dfo_dungeon_graph.js
+nav.graph.tooLarge,Геометрия данжа слишком велика для текущего построителя маршрутов.,src/mod/page/dfo_dungeon_graph.js
+nav.graph.cancelled,Фоновый расчёт маршрута прерван.,src/mod/page/dfo_dungeon_graph.js
+nav.graph.notReady,Профили данжа ещё не готовы.,src/mod/page/dfo_dungeon_graph.js
+nav.graph.badRequest,Неизвестный запрос навигации.,src/mod/page/dfo_dungeon_graph.js

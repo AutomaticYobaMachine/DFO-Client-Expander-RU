@@ -11,6 +11,8 @@
 (() => {
   'use strict';
   if (globalThis.__dfoMarks) return;
+  // The mod's own words, in the install's language (page/dfo_ui_text.js; English without the translation).
+  const T = (key, params) => (globalThis.__dfoUi ? globalThis.__dfoUi.t(key, params) : key);
   const CFG = Object.assign({ marks: true, onlyVisited: true, markRadiusM: 1200, nameRadiusM: 300, maxMarks: 60 },
     globalThis.__DFO_MOD_CFG__?.marks ?? {});
 
@@ -21,11 +23,11 @@
   // to read on the dark land: hue kept, lightness 60% (the shops' blue lighter still - 75%, it read too dark).
   const COLOR = Object.freeze({ taverns: '#61d19d', shops: '#80b0ff', orgs: '#d19361' });
   /** A building with no name of its own (the "all buildings" mode) is named by its kind. */
-  const KIND = { 0: 'Алхимик', 2: 'Бронник', 3: 'Банк', 5: 'Книжная лавка', 6: 'Портной', 7: 'Мебельщик', 8: 'Ювелир', 9: 'Лавка',
-    10: 'Библиотека', 12: 'Ломбард', 13: 'Оружейник', 11: 'Гильдия', 14: 'Храм', 15: 'Таверна' };
+  const KIND_TYPES = new Set(['0', '2', '3', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15']);
+  // The words are the install's language (ui/marks.csv: marks.kind.<type>, marks.type.<type>), read when a label is made.
+  const KIND = new Proxy({}, { get: (_, type) => (KIND_TYPES.has(String(type)) ? T('marks.kind.' + String(type)) : undefined) });
   /** The kind as the label's bracket says it: [Книжный]Название. */
-  const TYPE_WORD = { 0: 'Алхимик', 2: 'Бронник', 3: 'Банк', 5: 'Книжный', 6: 'Одежда', 7: 'Мебель', 8: 'Ювелир', 9: 'Общий',
-    10: 'Библиотека', 12: 'Ломбард', 13: 'Оружейник', 11: 'Гильдия', 14: 'Храм', 15: 'Таверна' };
+  const TYPE_WORD = new Proxy({}, { get: (_, type) => (KIND_TYPES.has(String(type)) ? T('marks.type.' + String(type)) : undefined) });
 
   // ─── what a shop pays: the game's own law, through the PRICES hooks ───────────────────────────────────────────────
   /** The shops that buy anything (systems/shopStock.js SHOP_BUYS_GROUPS): the bank and the library buy nothing. */
@@ -353,9 +355,9 @@
     const lines = [[{ t: `${kind ? `[${kind}]` : ''}${name === KIND[type] ? '' : name}`, c: color }]];
     const q = Number(w[3]), base = Number(w[4]), mine = Number(w[5]);
     if (w.length >= 5 && Number.isFinite(base)) {
-      const price = [{ t: `+${base}% Общее`, c: pctColor(base) }];
+      const price = [{ t: T('marks.price.base',{pct:base}), c: pctColor(base) }];
       if (q === 20) price.push({ t: '!!!', c: '#ffffff' });
-      if (Number.isFinite(mine)) price.push({ t: '; ', c: '#d8d8d8' }, { t: `+${mine}% лично мне`, c: GOLD });
+      if (Number.isFinite(mine)) price.push({ t: '; ', c: '#d8d8d8' }, { t: T('marks.price.mine',{pct:mine}), c: GOLD });
       lines.push(price);
     }
     return lines;

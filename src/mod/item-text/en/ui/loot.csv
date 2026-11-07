@@ -48,3 +48,4 @@ loot.settingsLoadFailed,Could not load the loot settings. Press J again.,src/mod
 loot.mode.white,white,src/mod/page/dfo_loot_ui.js
 loot.mode.black,black,src/mod/page/dfo_loot_ui.js
 loot.auto.missing,the item is not here right now,src/mod/page/dfo_loot_ui.js
+loot.gone,Loot is no longer available or the weight limit is exceeded.,src/mod/nearby-loot-transform.cjs

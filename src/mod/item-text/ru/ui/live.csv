@@ -1,0 +1,105 @@
+key,text,note
+live.enemy,Враг {id},src/mod/page/dfo_dungeon_live_model.js
+live.trait.elite,Элитный,src/mod/page/dfo_dungeon_live_model.js
+live.trait.dungeonBoost,Усиление данжа,src/mod/page/dfo_dungeon_live_model.js
+live.trait.topBoost,Высшее усиление,src/mod/page/dfo_dungeon_live_model.js
+live.trait.named,Именованный,src/mod/page/dfo_dungeon_live_model.js
+live.trait.revenant,Ревенант,src/mod/page/dfo_dungeon_live_model.js
+live.trait.quest,Квестовый,src/mod/page/dfo_dungeon_live_model.js
+live.trait.surrendered,Сдался,src/mod/page/dfo_dungeon_live_model.js
+live.players.solo,Одиночная игра.,src/mod/page/dfo_dungeon_live_model.js
+live.players.connecting,Ожидание соединения с комнатой данжа.,src/mod/page/dfo_dungeon_live_model.js
+live.players.pending,Список участников ещё не получен.,src/mod/page/dfo_dungeon_live_model.js
+live.players.room,Включая вас; участники этой сетевой комнаты.,src/mod/page/dfo_dungeon_live_model.js
+live.players.partial,Известные клиенту участники. Полнота списка не подтверждена.,src/mod/page/dfo_dungeon_live_model.js
+live.quest,Задание,src/mod/page/dfo_dungeon_live_model.js
+live.dungeon,Подземелье,src/mod/page/dfo_dungeon_live_model.js
+live.tab.summary,Сводка,src/mod/page/dfo_dungeon_live.js
+live.tab.enemies,Враги,src/mod/page/dfo_dungeon_live.js
+live.tab.loot,Добыча,src/mod/page/dfo_dungeon_live.js
+live.tab.prep,Подготовка,src/mod/page/dfo_dungeon_live.js
+live.quest.gone,Задание больше не активно в этом данже.,src/mod/page/dfo_dungeon_live.js
+live.journal.failed,Не удалось открыть журнал. Завершите другое действие и повторите.,src/mod/page/dfo_dungeon_live.js
+live.nav.title,Навигация по данжу,src/mod/page/dfo_dungeon_live.js
+live.nav.help,"Выберите цель — окно закроется, а светящаяся линия на полу покажет проход. Двери открываются вручную.",src/mod/page/dfo_dungeon_live.js
+live.nav.questLabel,Задание: ,src/mod/page/dfo_dungeon_live.js
+live.nav.questSelect,Задание для навигации,src/mod/page/dfo_dungeon_live.js
+live.nav.questDefault,Отслеживаемое или ближайшая активная цель,src/mod/page/dfo_dungeon_live.js
+live.nav.toExit,К выходу,src/mod/page/dfo_dungeon_live.js
+live.nav.noExit,В этой локации не найден выход.,src/mod/page/dfo_dungeon_live.js
+live.nav.toAurum,К сундуку с аурумом,src/mod/page/dfo_dungeon_live.js
+live.nav.noAurum,Сундук недоступен или уже открыт.,src/mod/page/dfo_dungeon_live.js
+live.nav.toElite,К ближайшему элитнику,src/mod/page/dfo_dungeon_live.js
+live.nav.noElite,Живых элитных противников нет.,src/mod/page/dfo_dungeon_live.js
+live.nav.toQuest,К цели задания,src/mod/page/dfo_dungeon_live.js
+live.nav.noQuest,Доступных целей задания нет.,src/mod/page/dfo_dungeon_live.js
+live.nav.preparing,Навигация ещё подготавливается.,src/mod/page/dfo_dungeon_live.js
+live.nav.clear,Убрать маршрут,src/mod/page/dfo_dungeon_live.js
+live.summary.enemiesLeft,Осталось врагов,src/mod/page/dfo_dungeon_live.js
+live.summary.elitesLeft,Из них элитных,src/mod/page/dfo_dungeon_live.js
+live.summary.players,Игроков в данже,src/mod/page/dfo_dungeon_live.js
+live.summary.syncing,Часть противников ещё синхронизируется. Это известный клиенту состав.,src/mod/page/dfo_dungeon_live.js
+live.regen.noClock,Реген: время сервера пока неизвестно.,src/mod/page/dfo_dungeon_live.js
+live.regen.solo,Реген: в одиночной игре автоматическое восстановление не идёт.,src/mod/page/dfo_dungeon_live.js
+live.regen.none,Реген: нет известного запущенного отсчёта. Обычный интервал — {n} мин.,src/mod/page/dfo_dungeon_live.js
+live.regen.next,До ближайшего регена: {n} мин.{due},src/mod/page/dfo_dungeon_live.js
+live.regen.note,"Враги и опустошённые источники восстанавливаются каждый по своему времени; это ближайший известный срок, а не сброс всего данжа.",src/mod/page/dfo_dungeon_live.js
+live.aurum.taken,Аурум: получение отмечено для вашего аккаунта на этой неделе.,src/mod/page/dfo_dungeon_live.js
+live.aurum.online,Аурум: сундук доступен в онлайне.,src/mod/page/dfo_dungeon_live.js
+live.aurum.none,Аурум: в этом типе локации сундук не предусмотрен.,src/mod/page/dfo_dungeon_live.js
+live.aurum.state,Аурум: {amount}. {state},src/mod/page/dfo_dungeon_live.js
+live.quests.title,Задания в этом данже,src/mod/page/dfo_dungeon_live.js
+live.quests.none,Известных активных заданий здесь нет.,src/mod/page/dfo_dungeon_live.js
+live.enemies.note,Живые противники текущей сцены. Индивидуальные элитники и усиление всего данжа указаны отдельно.,src/mod/page/dfo_dungeon_live.js
+live.enemies.pending,Состав ещё не получен.,src/mod/page/dfo_dungeon_live.js
+live.enemies.none,Живых противников не осталось.,src/mod/page/dfo_dungeon_live.js
+live.col.enemy,Противник,src/mod/page/dfo_dungeon_live.js
+live.col.left,Осталось,src/mod/page/dfo_dungeon_live.js
+live.col.level,Уровень,src/mod/page/dfo_dungeon_live.js
+live.col.traits,Свойства,src/mod/page/dfo_dungeon_live.js
+live.col.health,Здоровье,src/mod/page/dfo_dungeon_live.js
+live.trait.ordinary,Обычный,src/mod/page/dfo_dungeon_live.js
+live.loot.title,На что идти за добычей,src/mod/page/dfo_dungeon_live.js
+live.loot.special,Для этой особой локации стандартный прогноз недоступен. Сводка и список врагов работают по текущей сцене.,src/mod/page/dfo_dungeon_live.js
+live.loot.rank,Ранг добычи: {rank}. Удача персонажа: {luck}.,src/mod/page/dfo_dungeon_live.js
+live.loot.minRarity,Минимальная редкость,src/mod/page/dfo_dungeon_live.js
+live.loot.chance,Шанс подходящей вещи,src/mod/page/dfo_dungeon_live.js
+live.loot.atLeastMagic,Не ниже магической,src/mod/page/dfo_dungeon_live.js
+live.loot.atLeastRare,Не ниже редкой,src/mod/page/dfo_dungeon_live.js
+live.loot.atLeastLegendary,Не ниже легендарной,src/mod/page/dfo_dungeon_live.js
+live.loot.unknown,Шансы редкости клиенту пока неизвестны.,src/mod/page/dfo_dungeon_live.js
+live.loot.preferred,Предпочтительные легендарные вещи,src/mod/page/dfo_dungeon_live.js
+live.loot.note,"Это прогноз по таблицам, а не содержимое неоткрытых сундуков. Фактически доступные предметы показывает «Лут рядом».",src/mod/page/dfo_dungeon_live.js
+live.prep.title,Подготовка к оставшимся противникам,src/mod/page/dfo_dungeon_live.js
+live.prep.note,Ориентируйтесь на живой список и свойства противников во вкладке «Враги».,src/mod/page/dfo_dungeon_live.js
+live.prep.weapon,Оружие в руках: {weapon}.,src/mod/page/dfo_dungeon_live.js
+live.prep.noWeapon,Оружие в руках не определено.,src/mod/page/dfo_dungeon_live.js
+live.prep.noData,Недостаточно данных для оценки пригодности оружия.,src/mod/page/dfo_dungeon_live.js
+live.prep.blocked,Часть ожидаемых противников требует другого материала оружия: примерно {pct}% по таблице данжа.,src/mod/page/dfo_dungeon_live.js
+live.prep.ok,Материал оружия подходит ожидаемым видам противников.,src/mod/page/dfo_dungeon_live.js
+live.prep.priorities,Приоритеты,src/mod/page/dfo_dungeon_live.js
+live.prep.elites,Осталось элитных противников: {n}. Проверьте их свойства во вкладке «Враги» перед боем.,src/mod/page/dfo_dungeon_live.js
+live.prep.noElites,Индивидуальные элитные противники в текущем списке не обнаружены.,src/mod/page/dfo_dungeon_live.js
+live.prep.note2,Здоровье в таблице суммируется по группе одинаковых противников. Прогноз материалов относится к таблицам появления и может отличаться от оставшегося состава.,src/mod/page/dfo_dungeon_live.js
+live.tabs,Разделы текущего данжа,src/mod/page/dfo_dungeon_live.js
+live.automap,Автокарта,src/mod/page/dfo_dungeon_live.js
+live.journal,Журнал заданий,src/mod/page/dfo_dungeon_live.js
+live.close,Закрыть,src/mod/page/dfo_dungeon_live.js
+live.key.space,Пробел,src/mod/page/dfo_dungeon_live.js
+live.key.mouse,Мышь ,src/mod/page/dfo_dungeon_live.js
+live.launcher,Сведения о данже · ,src/mod/page/dfo_dungeon_live.js
+live.hud,Счётчики данжа,src/mod/page/dfo_dungeon_live.js
+live.hud.enemies,Живые враги,src/mod/page/dfo_dungeon_live.js
+live.hud.elites,Элитные враги,src/mod/page/dfo_dungeon_live.js
+live.hud.players,Игроки,src/mod/page/dfo_dungeon_live.js
+live.hud.unknown,Данные пока неизвестны,src/mod/page/dfo_dungeon_live.js
+live.hud.partial,Известно: {value}. Состав ещё уточняется.,src/mod/page/dfo_dungeon_live.js
+live.keyClash,Клавиша совпадает с «Лут рядом». Назначьте разные кнопки в установщике.,src/mod/page/dfo_dungeon_live.js
+live.quest.chosen,Выбранное задание,src/mod/page/dfo_dungeon_live.js
+live.aurum.amountUnknown,сумма неизвестна,src/mod/page/dfo_dungeon_live.js
+live.aurum.statePending,Состояние сундука ещё не получено.,src/mod/page/dfo_dungeon_live.js
+live.aurum.stateNoMark,Нет местной отметки о получении; сервер подтвердит при открытии.,src/mod/page/dfo_dungeon_live.js
+live.regen.due, Ожидание обновления комнаты.,src/mod/page/dfo_dungeon_live.js
+live.unknownM,неизвестен,src/mod/page/dfo_dungeon_live.js
+live.unknownF,неизвестна,src/mod/page/dfo_dungeon_live.js
+live.metres,{n} м,distance

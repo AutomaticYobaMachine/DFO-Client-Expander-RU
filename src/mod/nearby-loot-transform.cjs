@@ -83,9 +83,9 @@ function inventory(text) {
   const picked = need(text.slice(gate.index, gate.index + 400), rx(`return ${ID}\\(\\);(${ID})=null,`))[1];
   const held = rx(`Promise\\.resolve\\((${ID})\\((${ID}),(${ID}),(${ID}),(${ID})\\)\\)\\.then\\(\\(\\)=>\\{`);
   need(out, held);
-  out = out.replace(held, (all) => all.replace('then(()=>{', `then(_dfoOk=>{if(${gate[5]}.loot?.nearby){${picked}=null;if(_dfoOk===false)${notice}="Лут уже недоступен или превышен допустимый вес.";}`));
+  out = out.replace(held, (all) => all.replace('then(()=>{', `then(_dfoOk=>{if(${gate[5]}.loot?.nearby){${picked}=null;if(_dfoOk===false)${notice}=(globalThis.__dfoUi?.t(\"loot.gone\")??\"Loot is no longer available or the weight limit is exceeded.\");}`));
   out = out.replace(/([\w$]+)\(`inventory.store.chestShut`,`The chest stays shut\.`\)/g,
-    all => `(${gate[5]}.loot?.nearby?"Лут уже недоступен или превышен допустимый вес.":${all})`);
+    all => `(${gate[5]}.loot?.nearby?(globalThis.__dfoUi?.t(\"loot.gone\")??\"Loot is no longer available or the weight limit is exceeded.\"):${all})`);
   const update = need(text, rx(`\\.then\\(\\(\\)=>\\{${ID}\\.delete\\(${ID}\\),(${ID})\\(\\),(${ID})\\(\\)\\}`));
   const take = need(text, rx(`if\\((${ID})\\.has\\((${ID})\\.kind\\)\\)\\{let (${ID})=${ID}\\(\`button\`,\`act\`,${ID}\\(\`inventory.store.takeAll\`,\`Take all\`\\)\\);\\3\\.onclick=\\(\\)=>(${ID})\\(\`take\`\\)`));
   const shown = need(text, rx(`function ${take[4]}\\((${ID})\\)\\{${notice}=null;let (${ID})=\\1===\`take\`,${ID}=\\2\\?(${ID})\\(${take[2]}\\.items,(${ID})\\(\\),(${ID})\\)`));

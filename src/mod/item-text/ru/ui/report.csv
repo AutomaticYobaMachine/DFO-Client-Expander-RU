@@ -1,0 +1,27 @@
+key,text,note
+report.title,"DFO Mod {version} - метки на Overworld, {when}",src/mod/hook.cjs
+report.sources,"источники игры: здания города {a}, города по пикселям {b}, книга города {c}, открытые здания {d}",src/mod/hook.cjs
+report.yes,да,src/mod/hook.cjs
+report.NO,НЕТ,src/mod/hook.cjs
+report.formula,"формула скупки игры: индекс лавки {a}, CalculateCost {b}, торг {c}, навыки игрока {d}",src/mod/hook.cjs
+report.percent,"проценты: доля базовой стоимости предмета, которую лавка платит; ""базово"" - для всех одинаково (без гильдии, Mercantile 0, Personality 50), ""мне"" - с вашими навыками и гильдией",src/mod/hook.cjs
+report.settings,"настройки: только посещённые {visited}, радиус {radius} м, подписи {labels} м, не больше {max}",src/mod/hook.cjs
+report.made,меток отдано на экран: {n},src/mod/hook.cjs
+report.error,ОШИБКА: {error},src/mod/hook.cjs
+report.noTowns,городов в радиусе нет.,src/mod/hook.cjs
+report.town,Город: {town}   книга: {book}   способ: {path}   до центра: {m} м,src/mod/hook.cjs
+report.discovered,  открытых зданий в книге: {n} (из них таверн/магазинов/организаций: {ours}),src/mod/hook.cjs
+report.candidates,"  кандидатов: {n}, с меткой: {marked}, дальше радиуса: {beyond}, без земли под ними: {noGround}",src/mod/hook.cjs
+report.price,"   качество {q}, скупка базово {base}%{mine}",src/mod/hook.cjs
+report.mark,    {group} (тип {type}): {name} - {m} м{price},src/mod/hook.cjs
+report.markShort,    {group} (тип {type}): {name} - {m} м,src/mod/hook.cjs
+report.unplaced,"  открыты, но не найдены в планировке города: {list}",src/mod/hook.cjs
+store.method,Метод не поддерживается.,src/mod/hook.cjs
+store.tooLarge,Слишком большой пресет.,src/mod/hook.cjs
+store.badJson,Некорректный JSON.,src/mod/hook.cjs
+store.badSettings,Некорректные настройки.,src/mod/hook.cjs
+report.no,нет,src/mod/hook.cjs
+report.priceMine,", мне {pct}%",src/mod/hook.cjs
+report.group.t,таверна,marks report
+report.group.s,магазин,marks report
+report.group.o,организация,marks report

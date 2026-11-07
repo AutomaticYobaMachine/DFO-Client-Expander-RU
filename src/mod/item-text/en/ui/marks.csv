@@ -1,0 +1,34 @@
+key,text,note
+marks.price.base,+{pct}% general,src/mod/page/dfo_marks.js
+marks.price.mine,+{pct}% for me,src/mod/page/dfo_marks.js
+marks.kind.0,Alchemist,a building named by its kind
+marks.type.0,Alchemist,the label's [bracket] word
+marks.kind.2,Armourer,a building named by its kind
+marks.type.2,Armourer,the label's [bracket] word
+marks.kind.3,Bank,a building named by its kind
+marks.type.3,Bank,the label's [bracket] word
+marks.kind.5,Bookseller,a building named by its kind
+marks.type.5,Books,the label's [bracket] word
+marks.kind.6,Tailor,a building named by its kind
+marks.type.6,Clothing,the label's [bracket] word
+marks.kind.7,Furniture store,a building named by its kind
+marks.type.7,Furniture,the label's [bracket] word
+marks.kind.8,Jeweller,a building named by its kind
+marks.type.8,Jeweller,the label's [bracket] word
+marks.kind.9,General store,a building named by its kind
+marks.type.9,General,the label's [bracket] word
+marks.kind.10,Library,a building named by its kind
+marks.type.10,Library,the label's [bracket] word
+marks.kind.12,Pawnshop,a building named by its kind
+marks.type.12,Pawnshop,the label's [bracket] word
+marks.kind.13,Weaponsmith,a building named by its kind
+marks.type.13,Weaponsmith,the label's [bracket] word
+marks.kind.11,Guild,a building named by its kind
+marks.type.11,Guild,the label's [bracket] word
+marks.kind.14,Temple,a building named by its kind
+marks.type.14,Temple,the label's [bracket] word
+marks.kind.15,Tavern,a building named by its kind
+marks.type.15,Tavern,the label's [bracket] word
+marks.group.taverns,Taverns,Overworld filter group
+marks.group.shops,Shops,Overworld filter group
+marks.group.orgs,Organisations,Overworld filter group

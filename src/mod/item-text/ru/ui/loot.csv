@@ -48,3 +48,4 @@ loot.settingsLoadFailed,Не удалось загрузить настройк�
 loot.mode.white,белый,src/mod/page/dfo_loot_ui.js
 loot.mode.black,чёрный,src/mod/page/dfo_loot_ui.js
 loot.auto.missing,предмет временно отсутствует,src/mod/page/dfo_loot_ui.js
+loot.gone,Лут уже недоступен или превышен допустимый вес.,src/mod/nearby-loot-transform.cjs

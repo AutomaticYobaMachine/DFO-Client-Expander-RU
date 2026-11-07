@@ -42,6 +42,30 @@
       : { key: 'properties', label: T('cards.group.properties'), text };
   }
 
+  // Where a piece is worn, and the skill a weapon's blows train - the game's own answers (item-cards-transform.cjs:
+  // the empty equip table the inventory's Wear test asks, the hand law, weaponSkillUsed), told in the pack's words.
+  // A slot the inventory would not offer Wear for (ammunition, food, a wand) gets no row.
+  const HAND_WORD = { Either: 'EitherHand', Both: 'BothHands', RightOnly: 'RightHand', LeftOnly: 'LeftHand' };
+  const has = key => typeof globalThis.__dfoUi?.has === 'function' && globalThis.__dfoUi.has(key);
+  const spaced = name => name.replace(/([a-z])([A-Z])/g, '$1 $2');
+  function wornIn(item, ammo, native) {
+    const out = { slot: null, skill: null };
+    if (ammo || typeof native.slotName !== 'function') return out;
+    let name = null;
+    try { name = native.slotName(item); } catch { return out; }
+    if (typeof name !== 'string' || name === 'None') return out;
+    let word = name.replace(/\d+$/, '');
+    const hand = word === 'RightHand' || word === 'LeftHand';
+    if (hand && typeof native.handsName === 'function') { try { word = HAND_WORD[native.handsName(item)] || word; } catch {} }
+    if (has(`cards.slot.${word}`)) out.slot = T(`cards.slot.${word}`);
+    if (hand && item.group === 'Weapons' && typeof native.weaponSkill === 'function') {
+      let skill = null;
+      try { skill = native.weaponSkill(item.templateIndex); } catch {}
+      if (typeof skill === 'string' && skill) out.skill = has(`cards.skill.${skill}`) ? T(`cards.skill.${skill}`) : spaced(skill);
+    }
+    return out;
+  }
+
   /** Pure presentation data. Never mint, identify, repair or write to the item. */
   function derive(item, line, native, context = {}) {
     if (!item || typeof item !== 'object' || Array.isArray(item)) return null;
@@ -110,7 +134,8 @@
     const perKg = ordinaryWeight && money(estimate) && finite(line.weight) && line.weight > 0
       ? estimate / line.weight : null;
     const power = known && typeof native.power === 'function' ? native.power(item) : null;
-    return { known, facts, count, material, materialKey, construction, unitValue, total, source, power, price, approximate,
+    const { slot, skill } = wornIn(item, ammo, native);
+    return { known, facts, count, material, materialKey, construction, slot, skill, unitValue, total, source, power, price, approximate,
       perKg: finite(perKg) && perKg <= Number.MAX_SAFE_INTEGER ? perKg : null };
   }
 
@@ -246,13 +271,24 @@ body .card.dfo-item-card[data-rarity=gilded] { border-width:4px!important; borde
     }
 
     function groupedPowers(list, data) {
-      const groups = new Map(), name = typeof data.power?.name === 'string' ? said(data.power.name) : null;
+      const groups = new Map(), raw = typeof data.power?.name === 'string' && data.power.name ? data.power.name : null;
+      // The power's own line, whatever the translation made of it: its name - as the runtime words it, or as the game wrote
+      // it when the line stayed untranslated - heads the line ("Name: brief") or follows the imprint's label ("…: Name (…").
+      const names = raw ? [...new Set([said(raw), raw])].filter(Boolean).sort((a, b) => b.length - a.length) : [];
+      const powerName = text => {
+        for (const n of names) {
+          if (text.startsWith(n + ':')) return { name: n, at: 0 };
+          const at = text.indexOf(': ' + n + ' (');
+          if (at >= 0) return { name: n, at: at + 2 };
+        }
+        return null;
+      };
       const labels=native.effectLabels?.()||[],key=JSON.stringify([labels,win.__DFO_MOD_CFG__?.ru?.on]);
       if(key!==effectLabelKey){effectLabelKey=key;effectLabelNames=labels.map(label=>said(label).trim().replace(/:$/,'')).filter(Boolean).sort((a,b)=>b.length-a.length);}
       const colored=(into,text,group)=>{for(const part of effectParts(text,group,effectLabelNames)){const span=node('span','dfo-effect-'+part.kind);span.append(doc.createTextNode(part.text));into.append(span);}};
       for (const row of [...list.children]) {
-        const original = row.textContent, powerAt = name ? original.indexOf(name) : -1;
-        const kind = powerAt >= 0 ? { key:'power',label:T('cards.group.power'),text:original } : effectGroup(original);
+        const original = row.textContent, found = powerName(original);
+        const kind = found ? { key:'power',label:T('cards.group.power'),text:original } : effectGroup(original);
         let group = groups.get(kind.key);
         if (!group) {
           const section = node('section','dfo-item-group');section.dataset.group=kind.key;section.append(node('h4',null,kind.label));
@@ -262,8 +298,9 @@ body .card.dfo-item-card[data-rarity=gilded] { border-width:4px!important; borde
         // trigger is written once visually as the group's heading.
         row.setAttribute('aria-label',original);
         if (kind.key==='power') {
-          const detail=node('span','dfo-item-power-detail');colored(detail,original.slice(0,powerAt)+original.slice(powerAt+name.length).replace(/^:\s*/,''),'power');
-          row.replaceChildren(node('strong','dfo-item-power-name',name),detail);
+          const rest=(original.slice(0,found.at)+original.slice(found.at+found.name.length).replace(/^:\s*/,'')).replace(/\s{2,}/g,' ').trim();
+          const detail=node('span','dfo-item-power-detail');colored(detail,rest,'power');
+          row.replaceChildren(node('strong','dfo-item-power-name',found.name),detail);
         } else {row.replaceChildren();colored(row,kind.text,kind.key);}
         group.rows.append(row);
       }
@@ -344,6 +381,8 @@ body .card.dfo-item-card[data-rarity=gilded] { border-width:4px!important; borde
           left.append(badge);
         }
         const materialRows=node('dl');
+        addPair(materialRows, T('cards.slot'), data.slot);
+        addPair(materialRows, T('cards.skill'), data.skill);
         if (data.construction && data.construction !== data.material) addPair(materialRows, T('cards.construction'), data.construction);
         if(materialRows.children.length)stats.prepend(...materialRows.children);
         if (data.count > 1) addPair(stats, T('cards.quantity'), format(data.count));
@@ -578,7 +617,7 @@ body .card.dfo-item-card[data-rarity=gilded] { border-width:4px!important; borde
     win.visualViewport?.addEventListener('scroll', reposition);
     doc.fonts?.addEventListener?.('loadingdone', () => { for (const [card] of active) if(card.isConnected)fit(card,true); });
     win.__dfoItemCards = Object.freeze({
-      register(parts) { for (const key of [...DATA_KEYS,'power','effectLabels']) if (typeof parts?.[key] === 'function') native[key] = parts[key]; },
+      register(parts) { for (const key of [...DATA_KEYS,'power','effectLabels','slotName','handsName','weaponSkill']) if (typeof parts?.[key] === 'function') native[key] = parts[key]; },
       dress,
       // The native second argument is room in pixels, not our internal dirty/invalidation flag.
       fitCard(card) {

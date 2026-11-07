@@ -17,8 +17,12 @@ function jointOnly(key) {
 /** ru_dict.js: the master dictionary as the page global the runtime reads (the joint-only templates left out). */
 function buildDict(dataDir) {
   const dict = JSON.parse(fs.readFileSync(path.join(dataDir, 'ru_master.json'), 'utf8'));
-  const services = path.join(dataDir, 'ui_service_windows.json');
-  if (fs.existsSync(services)) Object.assign(dict, JSON.parse(fs.readFileSync(services, 'utf8')));
+  // Hand-made additions over the machine dictionary: service windows, and the legendary powers' names, lines and imprints
+  // (whole lines, so the runtime never words them piece by piece).
+  for (const name of ['ui_service_windows.json', 'ui_item_powers.json']) {
+    const file = path.join(dataDir, name);
+    if (fs.existsSync(file)) Object.assign(dict, JSON.parse(fs.readFileSync(file, 'utf8')));
+  }
   for (const k of Object.keys(dict)) if (jointOnly(k)) delete dict[k];
   return `window.__RU_DICT__ = ${JSON.stringify(dict)};\n`;
 }

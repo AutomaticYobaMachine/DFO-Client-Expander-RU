@@ -77,6 +77,32 @@ function effectLabels(text) {
   return text+`\n;globalThis.__dfoItemCards?.register({effectLabels:${labels}});\n`;
 }
 
+// An enum member's name by its value, for the card's words (both enums are frozen objects of the module).
+const enumName = (enumId, value) => `((__dfoEnum,__dfoValue)=>{for(const __dfoKey in __dfoEnum)if(__dfoEnum[__dfoKey]===__dfoValue)return __dfoKey;return null})(${enumId},${value})`;
+
+// Where a piece goes: the equip table asked empty - systems/equip.js wearableItem, the inventory's own Wear test -
+// and, for a hand slot, the hand law (getItemHands) that says which hand.
+function equipSlots(text) {
+  const wear = need(text, /([\w$]+)=([\w$]+)=>!!\2&&([\w$]+)\(\)\.getEquipSlot\(([\w$]+)\(\2\)\)!==([\w$]+)\.None/);
+  const [, , , table, numeric, slots] = wear;
+  const handArrows = [...text.matchAll(new RegExp(`(?<![\\w$])(${ID})=(${ID})=>(${ID})\\(${escapeRx(numeric)}\\(\\2\\)\\)`, 'g'))];
+  if (handArrows.length !== 1) throw new Error('ambiguous item hands reader');
+  const handsOf = handArrows[0][3];
+  const body = need(text, rx(`function ${escapeRx(handsOf)}\\(`));
+  const kinds = need(text.slice(body.index, body.index + 400), /return ([\w$]+)\.None;/)[1];
+  need(text, rx(`${escapeRx(kinds)}=Object\\.freeze\\(\\{None:0,`));
+  return text + `\n;globalThis.__dfoItemCards?.register({slotName:_item=>${enumName(slots, `${table}().getEquipSlot(${numeric}(_item))`)},handsName:_item=>${enumName(kinds, `${handArrows[0][1]}(_item)`)}});\n`;
+}
+
+// The skill a weapon's blows train: weaponSkillUsed by template, with attackSkillOf's Hand-to-Hand for an unmapped
+// weapon (scenes/hostCombat.js: tallySkill(player, attackSkillOf(weapon), 1)).
+const WEAPON_SKILL = /function ([\w$]+)\(([\w$]+)\)\{(?:if\([^{}]*?\)return [\w$]+\.[A-Za-z]+;)*let ([\w$]+)=[\w$]+\(\2\);return \3\?\.weaponSkillUsed\?([\w$]+)\[\3\.weaponSkillUsed\]:[\w$]+\.get\(\2\)\?\?null\}/;
+function weaponSkills(text) {
+  if ([...text.matchAll(new RegExp(WEAPON_SKILL.source, 'g'))].length !== 1) throw new Error('ambiguous weapon skill reader');
+  const [, used, , , skills] = need(text, WEAPON_SKILL);
+  return text + `\n;globalThis.__dfoItemCards?.register({weaponSkill:_template=>${enumName(skills, `${used}(_template)??${skills}.HandToHand`)}});\n`;
+}
+
 function transformItemCards(rel, text, log) {
   // Worker entries cannot display DOM cards; they duplicate large, tree-shaken item tables.
   if (/Worker-[^/]+\.js$/.test(rel)) return text;
@@ -88,6 +114,8 @@ function transformItemCards(rel, text, log) {
   if (text.includes('modeActionEnabled:') && /function [\w$]+\([\w$]+,[\w$]+=\[\],\{quality:/.test(text)) jobs.push(['itemCards.prices', prices]);
   if (/\/equip-[^/]+\.js$/.test(rel) && text.includes('`Currency`')) jobs.push(['itemCards.currency', currency]);
   if (text.includes('`itemPowers`')) jobs.push(['itemCards.effectLabels',effectLabels]);
+  if (text.includes('.getEquipSlot(') && /=>!![\w$]+&&[\w$]+\(\)\.getEquipSlot\(/.test(text)) jobs.push(['itemCards.slots', equipSlots]);
+  if (text.includes('.weaponSkillUsed?') && WEAPON_SKILL.test(text)) jobs.push(['itemCards.skills', weaponSkills]);
   let out = text;
   for (const [id, run] of jobs) {
     if (out.includes(`/*${id}*/`)) continue;

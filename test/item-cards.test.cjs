@@ -162,3 +162,25 @@ test('the description is told only what the card shows: identification, a shown 
   assert.deepEqual(derive({group:'WomensClothing',templateIndex:205,dye:0},line,native,known).facts,{known:true});
   assert.equal(derive({...cuirass,material:513},{...line,armorType:'Robe'},native,known).facts.armorType,undefined,'only the three native types');
 });
+
+test('the slot and the weapon skill are the game\'s answers, told in the pack\'s words',()=>{
+  // Native readers as item-cards-transform.cjs registers them: enum member names (equip table, hand law, weaponSkillUsed).
+  const slots={120:'RightHand',130:'RightHand',111:'LeftHand',135:'Ring0',106:'RightArm',102:'ChestArmor',205:'ChestClothes',131:'None',140:'None'};
+  const hands={120:'Either',130:'Both',111:'LeftOnly'};
+  const skills={120:'LongBlade',130:'Archery'};
+  const worn={...native,slotName:item=>slots[item.templateIndex]??'None',handsName:item=>hands[item.templateIndex]??'None',weaponSkill:t=>skills[t]??'HandToHand'};
+  const at=(group,templateIndex,extra={})=>derive({group,templateIndex,material:1,value:10,...extra},line,worn,known);
+  assert.deepEqual([at('Weapons',120).slot,at('Weapons',120).skill],['Любая рука','Длинные Клинки']);
+  assert.deepEqual([at('Weapons',130).slot,at('Weapons',130).skill],['Обе руки','Стрельба из лука']);
+  assert.deepEqual([at('Armor',111,{material:513}).slot,at('Armor',111,{material:513}).skill],['Левая рука',null],'a shield is held, but trains no weapon skill');
+  assert.equal(at('Jewellery',135).slot,'Кольцо','a paired slot is one word');
+  assert.equal(at('Armor',106,{material:513}).slot,'Правое плечо');
+  assert.equal(at('WomensClothing',205).slot,'Грудь, одежда');
+  assert.deepEqual([at('Weapons',131).slot,at('Weapons',131).skill],[null,null],'ammunition is worn nowhere');
+  assert.equal(at('Jewellery',140).slot,null,'a slot the inventory would not offer Wear for gets no row');
+  assert.equal(derive({group:'Weapons',templateIndex:999,material:1},line,{...worn,slotName:()=>'RightHand',handsName:()=>'Either'},known).skill,'Рукопашный бой','an unmapped weapon swings Hand-to-Hand');
+  assert.deepEqual([derive(sword,line,native,known).slot,derive(sword,line,native,known).skill],[null,null],'without the readers the card keeps its rows');
+  assert.deepEqual(at('Weapons',120,{isIdentified:false}).slot,'Любая рука','the template is visible before identification');
+  const en=globalThis.__dfoUi;globalThis.__dfoUi=require('../src/mod/item-text.cjs').uiText('en');
+  try{assert.deepEqual([at('Weapons',120).slot,at('Weapons',120).skill],['Either hand','Long Blade']);}finally{globalThis.__dfoUi=en;}
+});

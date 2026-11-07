@@ -52,6 +52,10 @@ const cases={
  fur:mk('Fur jerkin','Armor',520,0,{message:1,value:120}),
  stolen:mk('Stolen dagger','Weapons',113,1,{value:60,stolen:true}),
  shirt:mk('Long Shirt','WomensClothing',205,0,{value:12,dye:0}),
+ bow:mk('Long bow','Weapons',130,1,{value:200}),
+ shield:mk('Kite shield','Armor',111,513,{value:150}),
+ pauldron:mk('Right pauldron','Armor',106,513,{value:150}),
+ ring:mk('Plain ring','Jewellery',135,undefined,{value:100}),
 };
 cases.combined={...cases.spells,name:'Set weapon with spells and sockets',sockets:['ruby'],sigil:{set:'ruhn',power:8,party:2,xp:37500}};
 const entity={isPlayer:true,name:'Card check',career:{name:'Spellsword'},level:12,stats:{strength:50,endurance:50,willpower:50,intelligence:50,agility:50,speed:50,personality:50,luck:50},skills:new Array(35).fill(40),items:Object.values(cases),goldPieces:0,spells:[],activeEffects:[],health:100,maxHealth:100,magicka:20,maxMagicka:20,fatigue:200,maxFatigue:200};
@@ -251,6 +255,13 @@ async function main() {
         assert.equal(await card.locator('.dfo-item-head .dfo-item-material').count(),1,'Material belongs to the name block');
         assert.equal(await card.locator('.dfo-item-stats dt').evaluateAll(rows=>rows.some(x=>x.textContent==='Material')),false,'Material is not duplicated among general stats');
       }
+      // Where the piece is worn and the skill a weapon trains: the game's equip table and weaponSkillUsed, in the pack's words.
+      const slot={steel:'Chest, armor',rare:'Either hand',stolen:'Either hand',bow:'Both hands',shield:'Left hand',pauldron:'Right arm',ring:'Ring',shirt:'Chest, clothes'}[id];
+      const skill={rare:'Long Blade',stolen:'Short Blade',bow:'Archery'}[id];
+      if(slot)assert.ok(result.left.includes('Slot\n'+slot),id+' slot '+slot+': '+result.left);
+      if(skill)assert.ok(result.left.includes('Skill\n'+skill),id+' skill '+skill+': '+result.left);
+      if(['stack','pellets','credit','coins','invalid'].includes(id))assert.doesNotMatch(result.left,/^Slot$/m,id+' is worn nowhere');
+      if(['steel','shield','ring','shirt','pauldron'].includes(id))assert.doesNotMatch(result.left,/^Skill$/m,id+' trains no weapon skill');
       if(id==='mail'){assert.match(result.left,/Mail/);assert.match(result.left,/Steel/);}
       if(id==='fur')assert.match(result.left,/Fur/);
       if(['ruhn','wyrd'].includes(id)){assert.ok(result.blocks.some(x=>x[0].includes('sigilbox')),id+' native sigil');assert.ok(result.blocks.some(x=>x[0].includes('setbox')),id+' native set');}
@@ -287,7 +298,7 @@ async function main() {
       for(const power of await original.locator('.inv-tip ul.rarity>li').allTextContents())assert.ok(powers.includes(power),id+' preserves native power: '+power);
     }
     assert.deepEqual(errors,[],'No browser exceptions');
-    for(const key of ['itemCards.inventory','itemCards.values','itemCards.materials','itemCards.powers','itemCards.prices','itemCards.currency','itemCards.effectLabels'])assert.ok(logs.some(x=>x[0]===key&&x[1]===1),key);
+    for(const key of ['itemCards.inventory','itemCards.values','itemCards.materials','itemCards.powers','itemCards.prices','itemCards.currency','itemCards.effectLabels','itemCards.slots','itemCards.skills'])assert.ok(logs.some(x=>x[0]===key&&x[1]===1),key);
     await page.evaluate(()=>probe.show('ruhn'));await page.evaluate(()=>new Promise(r=>requestAnimationFrame(r)));
     if(process.env.DFO_SCREENSHOT_DIR){fs.mkdirSync(process.env.DFO_SCREENSHOT_DIR,{recursive:true});await page.screenshot({path:path.join(process.env.DFO_SCREENSHOT_DIR,'item-card-game.png')});}
     const ru=await browser.newPage({viewport:{width:1920,height:1080}});ru.on('pageerror',e=>errors.push(e.stack));
@@ -295,7 +306,11 @@ async function main() {
     for(const id of ['steel','rare','ruhn','wyrd','spells','credit']){
       await ru.evaluate(id=>probe.show(id),id);const c=ru.locator('.inv-tip .dfo-item-card');await c.waitFor();
       if(id==='steel'){assert.equal(await c.locator('.dfo-item-primary').count(),1);assert.match(await c.locator('.dfo-item-stats').innerText(),/Тип брони/);assert.match(await c.locator('.dfo-item-head').innerText(),/Материал/);}
-      if(id==='rare')assert.match(await c.locator('.dfo-item-price-value').innerText(),/^~1\s370$/,'Russian digits on the Russian page');
+      if(id==='rare'){
+        assert.match(await c.locator('.dfo-item-price-value').innerText(),/^~1\s370$/,'Russian digits on the Russian page');
+        const stats=await c.locator('.dfo-item-stats').innerText();
+        assert.ok(stats.includes('Слот\nЛюбая рука')&&stats.includes('Навык\nДлинные Клинки'),'RU slot and skill: '+stats);
+      }
       assert.equal(await c.locator(':is(.dfo-item-effects,.dfo-item-overflow) li').evaluateAll(list=>list.every(n=>getComputedStyle(n).display!=='none')),true);
     }
     // The translated page speaks Russian: the garment's colour agrees with it, the stolen mark stays red.

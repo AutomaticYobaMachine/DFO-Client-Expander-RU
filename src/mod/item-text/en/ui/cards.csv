@@ -33,3 +33,31 @@ cards.general,General,left column heading
 cards.price.unknown,Value unknown,price aria-label
 cards.price.approximate,Approximate value: {value} gold,price aria-label
 cards.price.exact,Value: {value} gold,price aria-label
+cards.slot,Slot,row label: where the piece is worn
+cards.slot.Head,Head,equip slot (the inventory's own label)
+cards.slot.Amulet,Amulet,equip slot
+cards.slot.Cloak,Cloak,equip slot
+cards.slot.ChestClothes,"Chest, clothes",equip slot
+cards.slot.ChestArmor,"Chest, armor",equip slot
+cards.slot.RightArm,Right arm,equip slot (pauldron)
+cards.slot.LeftArm,Left arm,equip slot (pauldron)
+cards.slot.Bracer,Bracer,equip slot
+cards.slot.Bracelet,Bracelet,equip slot
+cards.slot.Ring,Ring,equip slot
+cards.slot.Gloves,Gloves,equip slot
+cards.slot.LegsArmor,"Legs, armor",equip slot
+cards.slot.LegsClothes,"Legs, clothes",equip slot
+cards.slot.Feet,Feet,equip slot
+cards.slot.Mark,Mark,equip slot
+cards.slot.Crystal,Crystal,equip slot
+cards.slot.EitherHand,Either hand,a one-handed piece: right or left
+cards.slot.BothHands,Both hands,a two-handed piece
+cards.slot.RightHand,Right hand,a right-hand-only piece
+cards.slot.LeftHand,Left hand,a left-hand-only piece (a shield)
+cards.skill,Skill,row label: the skill a weapon's blows train
+cards.skill.ShortBlade,Short Blade,the game's skill name
+cards.skill.LongBlade,Long Blade,the game's skill name
+cards.skill.Axe,Axe,the game's skill name
+cards.skill.BluntWeapon,Blunt Weapon,the game's skill name
+cards.skill.Archery,Archery,the game's skill name
+cards.skill.HandToHand,Hand-to-Hand,the game's skill name

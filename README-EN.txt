@@ -1,4 +1,4 @@
-DFO-Client-Expander-RU 1.25.2
+DFO-Client-Expander-RU 1.26.0
 =============================
 Author: AutomaticYobaMachine
 Made especially for the Russian-speaking DFO Online community.
@@ -31,7 +31,8 @@ HOW TO INSTALL
 
 FEATURES
 - Item cards: one two-column card in the enhanced inventory, containers and
-  trade: material apart from the armor type, properties and effects as lists,
+  trade: the slot a piece is worn in and the skill a weapon's blows train,
+  material apart from the armor type, properties and effects as lists,
   the game's own sigil, set and comparison blocks, the item's description and
   its worth at the bottom. It always fits on the screen.
 - Russian translation: the interface, items, quests and books in Russian.

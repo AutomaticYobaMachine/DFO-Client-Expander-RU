@@ -38,6 +38,8 @@
 (() => {
   'use strict';
   if (globalThis.__dfoTown) return;
+  /** The install's words (dfo_ui_text.js: src/mod/item-text/<en|ru>/ui/town.csv), the key itself before they load. */
+  const L = (key, params) => (globalThis.__dfoUi ? globalThis.__dfoUi.t(key, params) : key);
   const CFG = Object.assign({ marks: true }, globalThis.__DFO_MOD_CFG__?.marks ?? {});
   if (CFG.marks === false) return;
 
@@ -506,7 +508,7 @@
   /** `force`: a town read before is read again once ASK_GAP_MS is past; `now`: whatever its age ("Обновить базу"). */
   function askTowns(towns, { force, now = false }) {
     const H = homesReg();
-    if (!H?.ensure) { status = 'реестр домов игры недоступен'; return; }
+    if (!H?.ensure) { status = L('town.status.noRegistry'); return; }
     for (const T of towns) {
       const g = T.g;
       if (!g) continue;
@@ -884,9 +886,9 @@ border:1px solid transparent;border-radius:2px;font:inherit;font-size:12px;lette
 #dfo-city-ui .dfo-win .sys{margin:2px 0 8px;font-size:12px;color:#9fd3c7}`;
   const el = (tag, cls, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; };
   const BAR = [
-    ['influence', 'Влияние гильдий', 'hsl(280,80%,74%)'],
-    ['doors', 'Входы и владельцы', GOLD],
-    ['marks', 'Метки заведений', GROUP_COLOR.shops],
+    ['influence', L('town.bar.influence'), 'hsl(280,80%,74%)'],
+    ['doors', L('town.bar.doors'), GOLD],
+    ['marks', L('town.bar.marks'), GROUP_COLOR.shops],
   ];
   function ensureDom() {
     const root = document.querySelector('.tview');
@@ -928,7 +930,7 @@ border:1px solid transparent;border-radius:2px;font:inherit;font-size:12px;lette
     b.id = 'dfo-city-btn';
     b.type = 'button';
     const d = el('span', 'tview-fdot'); d.style.background = '#f6e7b0';
-    b.append(d, el('span', 'tview-fword', 'Подробная карта города'));
+    b.append(d, el('span', 'tview-fword', L('town.button')));
     b.onclick = (e) => { e.preventDefault(); e.stopPropagation(); if (!b.disabled) enterWanted = true; };
     return b;
   }
@@ -945,16 +947,16 @@ border:1px solid transparent;border-radius:2px;font:inherit;font-size:12px;lette
       b.onclick = (e) => { e.preventDefault(); state[k] = !state[k]; saveState(); paintUi(); };
       barEl.append(b);
     }
-    const info = el('button', 'dfo-info', 'ℹ Инфо о городе');
+    const info = el('button', 'dfo-info', L('town.bar.info'));
     info.type = 'button';
     info.onclick = (e) => { e.preventDefault(); if (win?.kind === 'town') closeWin(); else openWin({ kind: 'town', tab: lastTab }); };
     barEl.append(info);
-    const data = el('button', 'dfo-info', '⟳ Данные города');
+    const data = el('button', 'dfo-info', L('town.bar.data'));
     data.type = 'button';
     data.dataset.win = 'data';
     data.onclick = (e) => { e.preventDefault(); if (win?.kind === 'data') closeWin(); else openWin({ kind: 'data' }); };
     barEl.append(data);
-    const x = el('button', 'dfo-exit', '✕ Выйти (Esc)');
+    const x = el('button', 'dfo-exit', L('town.bar.exit'));
     x.type = 'button';
     x.onclick = (e) => { e.preventDefault(); exitMode(); };
     barEl.append(x);
@@ -965,7 +967,7 @@ border:1px solid transparent;border-radius:2px;font:inherit;font-size:12px;lette
     keyEl = el('div', 'dfo-panel dfo-key');
     rowsEl = el('div', 'rows');
     const head = el('div', 'h');
-    allBtn = el('button', null, 'Скрыть окраску');
+    allBtn = el('button', null, L('town.key.hideAll'));
     allBtn.type = 'button';
     allBtn.onclick = (e) => {   // every row's switch at once: all off, or (all off already) all on
       e.preventDefault();
@@ -974,7 +976,7 @@ border:1px solid transparent;border-radius:2px;font:inherit;font-size:12px;lette
       for (const k of keys2) { if (off) hidden.delete(k); else hidden.add(k); }
       state.hidden = [...hidden]; saveState(); keySig = '';
     };
-    head.append(el('span', null, 'Легенда'), allBtn);
+    head.append(el('span', null, L('town.key.title')), allBtn);
     keyEl.append(head, rowsEl);
     winEl = el('div', 'dfo-panel dfo-win');
     const wh = el('div', 'wh');
@@ -1003,7 +1005,7 @@ border:1px solid transparent;border-radius:2px;font:inherit;font-size:12px;lette
   /** The key: each row a switch - its swatch, its words, how many, and whether it is shown. */
   function paintKey(sections) {
     keyRows = sections.flatMap((sec) => sec.rows);
-    if (allBtn) setText(allBtn, keyRows.length && keyRows.every((r) => hidden.has(r.key)) ? 'Показать окраску' : 'Скрыть окраску');
+    if (allBtn) setText(allBtn, keyRows.length && keyRows.every((r) => hidden.has(r.key)) ? L('town.key.showAll') : L('town.key.hideAll'));
     const sig = JSON.stringify(sections) + [...hidden].join('|');
     if (sig === keySig || !rowsEl) return;
     keySig = sig;
@@ -1027,26 +1029,29 @@ border:1px solid transparent;border-radius:2px;font:inherit;font-size:12px;lette
   // ─── the windows: the town's card (its tabs) and a building's ───────────────────────────────────────────────────
   /** The open window: { kind: 'town', tab } or { kind: 'building', key } - or null. */
   let win = null, winSig = '', lastTab = 'overview';
-  const TOWN_TABS = [['overview', 'Обзор'], ['guilds', 'Гильдии'], ['people', 'Жители'], ['estate', 'Недвижимость'],
-    ['venues', 'Заведения'], ['economy', 'Экономика'], ['seat', 'Престол']];
-  const TYPE_NAME = { 0: 'Алхимик', 1: 'Дом на продажу', 2: 'Бронник', 3: 'Банк', 4: 'Городское здание', 5: 'Книжная лавка', 6: 'Портной',
-    7: 'Мебельщик', 8: 'Ювелир', 9: 'Общий магазин', 10: 'Библиотека', 11: 'Гильдия / орден', 12: 'Ломбард', 13: 'Оружейник', 14: 'Храм',
-    15: 'Таверна', 16: 'Дворец', 17: 'Дом', 18: 'Дом', 19: 'Дом', 20: 'Дом', 21: 'Дом', 22: 'Дом', 23: 'Городское здание', 24: 'Корабль' };
+  /** A table of words by id, each read in the install's language when it is used (town.<area>.<word>). */
+  const words = (area, ids) => new Proxy(ids, { get: (o, k) => (typeof k === 'string' && Object.prototype.hasOwnProperty.call(o, k) ? L(`town.${area}.${o[k]}`) : undefined) });
+  const TOWN_TAB_IDS = ['overview', 'guilds', 'people', 'estate', 'venues', 'economy', 'seat'];
+  const townTabs = () => TOWN_TAB_IDS.map((id) => [id, L(`town.tab.${id}`)]);
+  const TYPE_NAME = words('building', { 0: 'alchemist', 1: 'houseForSale', 2: 'armorer', 3: 'bank', 4: 'townHall', 5: 'bookseller', 6: 'clothier',
+    7: 'furnitureStore', 8: 'gemStore', 9: 'generalStore', 10: 'library', 11: 'guildHall', 12: 'pawnShop', 13: 'weaponSmith', 14: 'temple',
+    15: 'tavern', 16: 'palace', 17: 'house', 18: 'house', 19: 'house', 20: 'house', 21: 'house', 22: 'house', 23: 'townHall', 24: 'ship' });
   /** What each shop buys (systems/shopStock.js SHOP_BUYS_GROUPS), in words. */
-  const BUYS_RU = { 0: 'самоцветы, ингредиенты (растения, части тварей, металлы, прочие)', 2: 'доспехи, оружие', 5: 'книги',
-    6: 'мужская и женская одежда', 7: 'мебель', 8: 'самоцветы, украшения', 9: 'книги, одежда, украшения, оружие, безделушки',
-    12: 'доспехи, книги, одежда, самоцветы, украшения, религиозные предметы, оружие, безделушки, картины', 13: 'доспехи, оружие' };
-  const ENTRY_RU = { private: 'только владелец', party: 'группа владельца', public: 'все', guild: 'гильдия владельца' };
-  const BAND_RU = { Booming: 'процветает', Thriving: 'богатеет', Steady: 'держится', Struggling: 'бедствует', Destitute: 'разорена' };
-  const EDICT_RU = { 'market-day': 'рыночный день', festival: 'праздник', levy: 'поборы', curfew: 'комендантский час', 'open-gates': 'открытые ворота',
-    conscription: 'набор в войско', tithe: 'десятина' };
-  const TIER_RU = { palace: 'дворец', crown: 'корона' };
-  const SOURCE_RU = { hub: 'список онлайна', tag: 'видели в игре', ow: 'видели на карте', roster: 'состав вашей гильдии' };
+  const BUYS = words('buys', { 0: 'alchemist', 2: 'armorer', 5: 'bookseller', 6: 'clothier', 7: 'furnitureStore', 8: 'gemStore', 9: 'generalStore',
+    12: 'pawnShop', 13: 'weaponSmith' });
+  const ENTRY = words('entry', { private: 'private', party: 'party', public: 'public', guild: 'guild' });
+  const BAND = words('band', { Booming: 'Booming', Thriving: 'Thriving', Steady: 'Steady', Struggling: 'Struggling', Destitute: 'Destitute' });
+  const EDICT = words('edict', { 'market-day': 'market-day', festival: 'festival', levy: 'levy', curfew: 'curfew', 'open-gates': 'open-gates',
+    conscription: 'conscription', tithe: 'tithe' });
+  const TIER = words('tier', { palace: 'palace', crown: 'crown' });
+  const SOURCE = words('source', { hub: 'hub', tag: 'tag', ow: 'ow', roster: 'roster' });
   /** The vanilla greeting's band of a shop's quality (DaggerfallTradeWindow: 266-270). */
-  const qualityWord = (q) => (q > 17 ? 'роскошная' : q > 13 ? 'богатая' : q > 7 ? 'обычная' : q > 3 ? 'скромная' : 'захудалая');
+  const qualityWord = (q) => L(`town.quality.${q > 17 ? 'luxurious' : q > 13 ? 'rich' : q > 7 ? 'common' : q > 3 ? 'modest' : 'shabby'}`);
   const tr = (t) => { try { return typeof globalThis.__translate === 'function' && t ? globalThis.__translate(t) ?? t : t; } catch { return t; } };
   const pct = (x) => `${Math.round(x)}%`;
-  const ago = (at) => { if (!at) return '—'; const m = Math.round((Date.now() - at) / 60000); return m < 1 ? 'только что' : m < 60 ? `${m} мин назад` : m < 2880 ? `${Math.round(m / 60)} ч назад` : `${Math.round(m / 1440)} дн назад`; };
+  /** A sum in the install's digits: «1 234» in Russian, 1,234 in English. */
+  const num = (n) => (globalThis.__dfoUi ? globalThis.__dfoUi.number(n) : String(n));
+  const ago = (at) => { if (!at) return '—'; const m = Math.round((Date.now() - at) / 60000); return m < 1 ? L('town.ago.now') : m < 60 ? L('town.ago.minutes',{m:m}) : m < 2880 ? L('town.ago.hours',{h:Math.round(m / 60)}) : L('town.ago.days',{d:Math.round(m / 1440)}); };
   const guildName = (tag) => (tag ? `[${tag}]${cache.guilds[tag]?.n ? ` ${cache.guilds[tag].n}` : ''}` : '—');
   /** A shop's figures through the game's own law (dfo_marks.js priceOf), or null. */
   const priceAt = (v, s) => { try { return globalThis.__dfoMod?.priceOf?.({ buildingType: s.type, quality: s.quality, buildingKey: s.key, regionIndex: v.g.loc.regionIndex ?? 0, townMapId: v.g.mapId }) ?? null; } catch { return null; } };
@@ -1058,7 +1063,7 @@ border:1px solid transparent;border-radius:2px;font:inherit;font-size:12px;lette
     if (everyone) globalThis.__dfoNoGuild = true;
     try { const n = adj(b, mode); return Number.isFinite(n) ? n / 1000 : null; } catch { return null; } finally { globalThis.__dfoNoGuild = false; }
   }
-  const holderWords = (H) => (!H ? '—' : H.k === 'own' ? 'вы / ваша гильдия' : H.k === 'guild' ? guildName(H.tag) : H.k === 'none' ? 'без гильдии' : 'неизвестна');
+  const holderWords = (H) => (!H ? '—' : H.k === 'own' ? L('town.holder.own') : H.k === 'guild' ? guildName(H.tag) : H.k === 'none' ? L('town.holder.none') : L('town.holder.unknown'));
   /** The town's figures once: its homes, accounts, guilds, venues. */
   function townFacts(v) {
     const S = v.g.sites, I = v.info;
@@ -1101,42 +1106,42 @@ border:1px solid transparent;border-radius:2px;font:inherit;font-size:12px;lette
     const guildRows = [...F.guilds].filter(([k]) => k !== 'unknown' && k !== 'none');
     if (tab === 'overview') {
       B.push({ kv: [
-        ['Город', g.name], ['Регион', tr(regionName) || '—'], ['Клетка карты', `${g.p.px}, ${g.p.py}`],
-        ['Размер', `${g.bw}×${g.bh} кварталов (${g.cells.size}), ~${Math.round(g.cells.size * SIDE * SIDE / 1e4) / 100} км²`],
-        ['Зданий всего', S.length],
-        ['Жилой фонд', `${F.homes.length} домов: занято ${F.owned.length} (${pct(ownedPct)}), свободно ${F.homes.length - F.owned.length}`],
-        ['Залы гильдий игроков', F.halls.length],
-        ['Жители (аккаунты)', `${F.accounts.size}`],
-        ['Гильдии игроков с владениями', guildRows.filter(([k]) => k !== 'own').length + (F.guilds.has('own') && v.own?.tag ? 1 : 0)],
-        ['Магазины / таверны / организации', `${F.venues.shops.length} / ${F.venues.taverns.length} / ${F.venues.orgs.length}` + (F.venues.other.length ? ` (+ банков и библиотек: ${F.venues.other.length})` : '')],
-        ['Престол', v.seat ? `${v.seat.name}${v.seat.tag ? ` [${v.seat.tag}]` : ''}` : 'нет / не занят'],
-        ['Экономика', p != null ? `${BAND_RU[band] ?? band ?? ''} (${p} из 100)` : '—'],
-        ['Игроков в городе сейчас', onlineNow.length],
-        ['Данные о владельцах', t ? ago(t.at) : 'нет'] ] });
+        [L('town.info.town'), g.name], [L('town.info.region'), tr(regionName) || '—'], [L('town.info.cell'), `${g.p.px}, ${g.p.py}`],
+        [L('town.info.size'), L('town.info.sizeValue',{w:g.bw,h:g.bh,cells:g.cells.size,km:Math.round(g.cells.size * SIDE * SIDE / 1e4) / 100})],
+        [L('town.info.buildings'), S.length],
+        [L('town.info.housing'), L('town.info.housingValue',{n:F.homes.length,owned:F.owned.length,pct:pct(ownedPct),free:F.homes.length - F.owned.length})],
+        [L('town.info.halls'), F.halls.length],
+        [L('town.info.accounts'), `${F.accounts.size}`],
+        [L('town.info.guilds'), guildRows.filter(([k]) => k !== 'own').length + (F.guilds.has('own') && v.own?.tag ? 1 : 0)],
+        [L('town.info.venues'), `${F.venues.shops.length} / ${F.venues.taverns.length} / ${F.venues.orgs.length}` + (F.venues.other.length ? L('town.info.venuesOther',{n:F.venues.other.length}) : '')],
+        [L('town.seat'), v.seat ? `${v.seat.name}${v.seat.tag ? ` [${v.seat.tag}]` : ''}` : L('town.info.noSeat')],
+        [L('town.info.economy'), p != null ? L('town.info.economyValue',{band:BAND[band] ?? band ?? '',p:p}) : '—'],
+        [L('town.info.online'), onlineNow.length],
+        [L('town.info.ownerData'), t ? ago(t.at) : L('town.none')] ] });
     } else if (tab === 'guilds') {
       const rows = [];
       const order = [...F.guilds].sort((a, b) => (a[0] === 'own' ? -1 : b[0] === 'own' ? 1 : (b[1].homes + b[1].halls) - (a[1].homes + a[1].halls)));
       for (const [k, G] of order) {
-        const name = k === 'own' ? `Вы и ваша гильдия${v.own?.tag ? ` [${v.own.tag}]` : ''}` : k === 'unknown' ? 'Гильдия неизвестна' : k === 'none' ? 'Без гильдии' : guildName(k.slice(2));
+        const name = k === 'own' ? L('town.guilds.own',{tag:v.own?.tag ? ` [${v.own.tag}]` : ''}) : k === 'unknown' ? L('town.guilds.unknown') : k === 'none' ? L('town.guilds.none') : guildName(k.slice(2));
         const sw = k === 'unknown' ? GOLD : k === 'none' ? '#444' : v.colorOfKey(k);
         const n = G.homes + G.halls;
-        rows.push([{ t: name, sw }, n, F.owned.length ? pct((n / F.owned.length) * 100) : '—', G.accounts.size, G.halls ? `да (${G.halls})` : '—', G.seat ? 'да' : '—']);
+        rows.push([{ t: name, sw }, n, F.owned.length ? pct((n / F.owned.length) * 100) : '—', G.accounts.size, G.halls ? L('town.yesCount',{n:G.halls}) : '—', G.seat ? L('town.yes') : '—']);
       }
-      B.push({ grid: rows, head: ['Гильдия', 'Владений', 'Доля', 'Аккаунтов', 'Зал', 'Престол'] });
+      B.push({ grid: rows, head: [L('town.guild'), L('town.guilds.holdings'), L('town.guilds.share'), L('town.guilds.accounts'), L('town.guilds.hall'), L('town.seat')] });
     } else if (tab === 'people') {
       const rows = [...F.accounts.values()].sort((a, b) => b.keys.length - a.keys.length || (a.name < b.name ? -1 : 1)).map((a) => {
         const rec = cache.players[norm(a.name)];
-        const how = a.mine ? 'ваш аккаунт' : rec ? `${SOURCE_RU[rec.s] ?? rec.s}, ${ago(rec.at)}` : 'не встречали онлайн';
+        const how = a.mine ? L('town.people.mine') : rec ? `${SOURCE[rec.s] ?? rec.s}, ${ago(rec.at)}` : L('town.people.unseen');
         return [{ t: a.name, c: a.mine ? WHITE : undefined }, a.keys.length, holderWords(a.holder), how];
       });
-      B.push({ grid: rows, head: ['Аккаунт', 'Домов', 'Гильдия', 'Откуда известно'] });
+      B.push({ grid: rows, head: [L('town.people.account'), L('town.people.homes'), L('town.guild'), L('town.people.source')] });
       const on = onlineNow;
-      B.push({ sec: `Сейчас в городе онлайн: ${on.length}` });
-      if (on.length) B.push({ grid: on.map((o) => [o.name, o.gt ? guildName(o.gt) : '—', o.kind === 'party' ? 'ваша группа' : o.kind === 'stranger' ? 'враждебный' : '']), head: ['Игрок', 'Гильдия', ''] });
-      else B.push({ p: 'Никого из других игроков в черте города не видно.' });
+      B.push({ sec: L('town.people.onlineNow',{n:on.length}) });
+      if (on.length) B.push({ grid: on.map((o) => [o.name, o.gt ? guildName(o.gt) : '—', o.kind === 'party' ? L('town.people.party') : o.kind === 'stranger' ? L('town.people.hostile') : '']), head: [L('town.people.player'), L('town.guild'), ''] });
+      else B.push({ p: L('town.people.nobody') });
     } else if (tab === 'estate') {
       const byType = new Map();
-      for (const i of F.homes) { const w = S[i].type === 1 ? 'Дома на продажу (вывеска)' : 'Жилые дома'; byType.set(w, (byType.get(w) ?? 0) + 1); }
+      for (const i of F.homes) { const w = S[i].type === 1 ? L('town.estate.forSale') : L('town.estate.dwellings'); byType.set(w, (byType.get(w) ?? 0) + 1); }
       const entry = new Map(), rent = [], sale = [], votes = [];
       let painted = 0, deeds = 0;
       for (const i of F.owned) {
@@ -1149,70 +1154,70 @@ border:1px solid transparent;border-radius:2px;font:inherit;font-size:12px;lette
         if (h.d) deeds++;
       }
       B.push({ kv: [
-        ['Всего жилого фонда', F.homes.length],
+        [L('town.estate.total'), F.homes.length],
         ...[...byType].map(([w, n]) => [`  ${w}`, n]),
-        ['Занято', `${F.owned.length} (${pct(ownedPct)})`], ['Свободно', F.homes.length - F.owned.length],
-        ['Залы гильдий игроков', F.halls.length ? F.halls.map((i) => `${I[i].h.hall.n}${I[i].h.hall.t ? ` [${I[i].h.hall.t}]` : ''}`).join(', ') : '—'],
-        ['Перекрашены владельцами', painted], ['Дары короны (дома рыцарей)', deeds] ] });
-      B.push({ sec: 'Кто может войти' });
-      B.push({ kv: [...entry].map(([e, n]) => [ENTRY_RU[e] ?? e, n]) });
-      B.push({ sec: `Комнаты в аренду: ${rent.reduce((a, r) => a + r[1], 0)}` });
-      if (rent.length) B.push({ grid: rent.map(([o, n, f]) => [o, n, f != null ? `от ${f} зол./день` : '—']), head: ['Владелец', 'Свободно комнат', 'Цена'] });
-      B.push({ sec: `Продаются владельцами: ${sale.length}` });
-      if (sale.length) B.push({ grid: sale.sort((a, b) => a[1] - b[1]).map(([o, n]) => [o, `${n.toLocaleString('ru-RU')} зол.`]), head: ['Владелец', 'Цена'] });
+        [L('town.estate.taken'), `${F.owned.length} (${pct(ownedPct)})`], [L('town.estate.free'), F.homes.length - F.owned.length],
+        [L('town.info.halls'), F.halls.length ? F.halls.map((i) => `${I[i].h.hall.n}${I[i].h.hall.t ? ` [${I[i].h.hall.t}]` : ''}`).join(', ') : '—'],
+        [L('town.estate.painted'), painted], [L('town.estate.deeds'), deeds] ] });
+      B.push({ sec: L('town.entry') });
+      B.push({ kv: [...entry].map(([e, n]) => [ENTRY[e] ?? e, n]) });
+      B.push({ sec: L('town.estate.rooms',{n:rent.reduce((a, r) => a + r[1], 0)}) });
+      if (rent.length) B.push({ grid: rent.map(([o, n, f]) => [o, n, f != null ? L('town.rentFrom',{f:f}) : '—']), head: [L('town.owner'), L('town.estate.roomsFree'), L('town.price')] });
+      B.push({ sec: L('town.estate.sales',{n:sale.length}) });
+      if (sale.length) B.push({ grid: sale.sort((a, b) => a[1] - b[1]).map(([o, n]) => [o, L('town.gold', { n: num(n) })]), head: [L('town.owner'), L('town.price')] });
       if (votes.length) {
-        B.push({ sec: 'Оценки соседей (голоса за дом)' });
-        B.push({ grid: votes.sort((a, b) => b[1] - a[1]).slice(0, 12).map(([o, n]) => [o, { t: n > 0 ? `+${n}` : String(n), c: n > 0 ? '#9be89b' : '#ff8a7a' }]), head: ['Владелец', 'Оценка'] });
+        B.push({ sec: L('town.estate.votes') });
+        B.push({ grid: votes.sort((a, b) => b[1] - a[1]).slice(0, 12).map(([o, n]) => [o, { t: n > 0 ? `+${n}` : String(n), c: n > 0 ? '#9be89b' : '#ff8a7a' }]), head: [L('town.owner'), L('town.estate.vote')] });
       }
     } else if (tab === 'venues') {
       const shopRows = F.venues.shops.map((i) => {
-        const s = S[i], pr = BUYS_RU[s.type] ? priceAt(v, s) : null;
+        const s = S[i], pr = BUYS[s.type] ? priceAt(v, s) : null;
         return [TYPE_NAME[s.type], tr(s.name) ?? '', `${s.quality ?? '?'} — ${qualityWord(s.quality ?? 0)}`,
           pr ? { t: `+${Math.round(pr.base)}%${pr.q === 20 ? '!!!' : ''}`, c: globalThis.__dfoMod?.pctColor?.(pr.base) } : '—',
           pr?.mine != null ? { t: `+${Math.round(pr.mine)}%`, c: GOLD } : '—'];
       }).sort((a, b) => (a[0] < b[0] ? -1 : 1));
-      B.push({ sec: `Магазины: ${F.venues.shops.length}` });
-      B.push({ grid: shopRows, head: ['Тип', 'Название', 'Качество', 'Скупка общая', 'Лично мне'] });
-      B.push({ sec: `Таверны: ${F.venues.taverns.length}` });
-      B.push({ grid: F.venues.taverns.map((i) => [tr(S[i].name) ?? 'Таверна', `${S[i].quality ?? '?'} — ${qualityWord(S[i].quality ?? 0)}`]), head: ['Название', 'Качество'] });
-      B.push({ sec: `Организации: ${F.venues.orgs.length}` });
-      B.push({ grid: F.venues.orgs.map((i) => [TYPE_NAME[S[i].type], tr(S[i].name) ?? '']), head: ['Тип', 'Название'] });
+      B.push({ sec: L('town.count.shops',{n:F.venues.shops.length}) });
+      B.push({ grid: shopRows, head: [L('town.type'), L('town.name'), L('town.quality'), L('town.pays'), L('town.paysMe')] });
+      B.push({ sec: L('town.count.taverns',{n:F.venues.taverns.length}) });
+      B.push({ grid: F.venues.taverns.map((i) => [tr(S[i].name) ?? L('town.building.tavern'), `${S[i].quality ?? '?'} — ${qualityWord(S[i].quality ?? 0)}`]), head: [L('town.name'), L('town.quality')] });
+      B.push({ sec: L('town.count.orgs',{n:F.venues.orgs.length}) });
+      B.push({ grid: F.venues.orgs.map((i) => [TYPE_NAME[S[i].type], tr(S[i].name) ?? '']), head: [L('town.type'), L('town.name')] });
       if (F.venues.other.length) {
-        B.push({ sec: `Банки и библиотеки: ${F.venues.other.length}` });
-        B.push({ grid: F.venues.other.map((i) => [TYPE_NAME[S[i].type], tr(S[i].name) ?? '']), head: ['Тип', 'Название'] });
+        B.push({ sec: L('town.count.other',{n:F.venues.other.length}) });
+        B.push({ grid: F.venues.other.map((i) => [TYPE_NAME[S[i].type], tr(S[i].name) ?? '']), head: [L('town.type'), L('town.name')] });
       }
     } else if (tab === 'economy') {
       const askAll = indexAt(v, 'Buy'), payAll = indexAt(v, 'Sell'), region = indexAt(v, 'Buy', { town: false });
       const askMe = indexAt(v, 'Buy', { everyone: false }), payMe = indexAt(v, 'Sell', { everyone: false });
-      const x = (n) => (n == null ? '—' : `×${n.toFixed(2)} (${pct(n * 100)} нормы)`);
+      const x = (n) => (n == null ? '—' : L('town.economy.index',{x:n.toFixed(2),pct:pct(n * 100)}));
       const ex = (() => { try { return econ?.exchangeOf?.(g.mapId) ?? null; } catch { return null; } })();
       B.push({ kv: [
-        ['Процветание', p != null ? `${p} из 100 — ${BAND_RU[band] ?? band ?? ''}` : '—'],
-        ['Индекс цен региона', x(region)],
-        ['Лавки просят (для всех)', x(askAll)], ['Лавки платят (для всех)', x(payAll)],
-        ['Лавки просят (с вашей гильдией)', x(askMe)], ['Лавки платят (с вашей гильдией)', x(payMe)],
-        ['Портовая биржа', ex ? `продаёт ×${ex.ask.toFixed(2)}, покупает ×${ex.pay.toFixed(2)}` : 'нет (не порт)'] ] });
-      const best = F.venues.shops.map((i) => ({ s: S[i], pr: BUYS_RU[S[i].type] ? priceAt(v, S[i]) : null })).filter((o) => o.pr).sort((a, b) => b.pr.base - a.pr.base).slice(0, 5);
+        [L('town.economy.prosperity'), p != null ? L('town.economy.prosperityValue',{p:p,band:BAND[band] ?? band ?? ''}) : '—'],
+        [L('town.economy.region'), x(region)],
+        [L('town.economy.askAll'), x(askAll)], [L('town.economy.payAll'), x(payAll)],
+        [L('town.economy.askMe'), x(askMe)], [L('town.economy.payMe'), x(payMe)],
+        [L('town.economy.exchange'), ex ? L('town.economy.exchangeValue',{ask:ex.ask.toFixed(2),pay:ex.pay.toFixed(2)}) : L('town.economy.noPort')] ] });
+      const best = F.venues.shops.map((i) => ({ s: S[i], pr: BUYS[S[i].type] ? priceAt(v, S[i]) : null })).filter((o) => o.pr).sort((a, b) => b.pr.base - a.pr.base).slice(0, 5);
       if (best.length) {
-        B.push({ sec: 'Где выгоднее всего продавать' });
-        B.push({ grid: best.map(({ s, pr }) => [TYPE_NAME[s.type], tr(s.name) ?? '', { t: `+${Math.round(pr.base)}%`, c: globalThis.__dfoMod?.pctColor?.(pr.base) }, pr.mine != null ? { t: `+${Math.round(pr.mine)}%`, c: GOLD } : '—']), head: ['Тип', 'Название', 'Общая', 'Лично мне'] });
+        B.push({ sec: L('town.economy.best') });
+        B.push({ grid: best.map(({ s, pr }) => [TYPE_NAME[s.type], tr(s.name) ?? '', { t: `+${Math.round(pr.base)}%`, c: globalThis.__dfoMod?.pctColor?.(pr.base) }, pr.mine != null ? { t: `+${Math.round(pr.mine)}%`, c: GOLD } : '—']), head: [L('town.type'), L('town.name'), L('town.economy.everyone'), L('town.paysMe')] });
       }
       const tip = (() => { try { return econ?.tipAt?.(g.mapId) ?? null; } catch { return null; } })();
-      if (tip?.lines?.length) { B.push({ sec: 'Как видит город игра' }); for (const l of tip.lines) B.push({ p: tr(l) }); }
+      if (tip?.lines?.length) { B.push({ sec: L('town.economy.game') }); for (const l of tip.lines) B.push({ p: tr(l) }); }
     } else if (tab === 'seat') {
       if (!seatRaw?.holder) {
-        B.push({ p: seatRaw ? `Престол «${seatRaw.name ?? g.name}» никем не занят.` : 'У города нет престола, и он не входит во владения хартии — гильдии им не правят.' });
+        B.push({ p: seatRaw ? L('town.seat.empty',{name:seatRaw.name ?? g.name}) : L('town.seat.none') });
       } else {
         const h = seatRaw.holder, b = seatRaw.battle;
         B.push({ kv: [
-          ['Престол', `${seatRaw.name ?? '—'}${seatRaw.tier ? ` (${TIER_RU[seatRaw.tier] ?? seatRaw.tier})` : ''}`],
-          ['Держит', `${h.guild?.name ?? '—'}${h.guild?.tag ? ` [${h.guild.tag}]` : ''}${v.seatK === 'own' ? ' — ваша гильдия' : ''}`],
-          ['С недели', h.since ?? '—'], ['Настроение города (Standing)', h.standing != null ? `${h.standing} из 100` : '—'],
-          ['Указ', h.edict ? EDICT_RU[h.edict] ?? h.edict : 'нет'], ['Десятина', h.tithe != null ? `${h.tithe}%` : '—'],
-          ['Битва на этой неделе', b ? `${b.kind === 'revolt' ? 'восстание' : b.kind === 'tourney' ? 'турнир' : 'осада'}${b.guild?.name ? `: ${b.guild.name}` : ''}${b.against?.name ? ` против ${b.against.name}` : ''}` : 'нет'] ] });
+          [L('town.seat'), `${seatRaw.name ?? '—'}${seatRaw.tier ? ` (${TIER[seatRaw.tier] ?? seatRaw.tier})` : ''}`],
+          [L('town.seat.holder'), `${h.guild?.name ?? '—'}${h.guild?.tag ? ` [${h.guild.tag}]` : ''}${v.seatK === 'own' ? ` — ${L('town.ownGuild')}` : ''}`],
+          [L('town.seat.since'), h.since ?? '—'], [L('town.seat.standing'), h.standing != null ? L('town.seat.standingValue',{n:h.standing}) : '—'],
+          [L('town.seat.edict'), h.edict ? EDICT[h.edict] ?? h.edict : L('town.none')], [L('town.seat.tithe'), h.tithe != null ? `${h.tithe}%` : '—'],
+          [L('town.seat.battle'), b ? `${L(`town.battle.${b.kind === 'revolt' ? 'revolt' : b.kind === 'tourney' ? 'tourney' : 'siege'}`)}${b.guild?.name ? `: ${b.guild.name}` : ''}${b.against?.name ? ` ${L('town.battle.against', { name: b.against.name })}` : ''}` : L('town.none')] ] });
       }
     }
-    return { title: `${g.name} — сведения о городе`, tabs: TOWN_TABS, tab, blocks: B };
+    return { title: L('town.info.title',{name:g.name}), tabs: townTabs(), tab, blocks: B };
   }
   /** A BUILDING'S CARD: a home's owner and its door's words, a venue's trade, the palace's seat. */
   function buildingModel(v, key) {
@@ -1222,67 +1227,67 @@ border:1px solid transparent;border-radius:2px;font:inherit;font-size:12px;lette
     const area = g.area ? Math.round(g.area[i] * g.res * g.res) : 0;
     const nearCount = new Map();
     for (const j of s.near) { const H = v.info[j].holder; const k = H?.k === 'own' ? 'own' : H?.k === 'guild' ? `g:${H.tag}` : null; if (k) nearCount.set(k, (nearCount.get(k) ?? 0) + 1); }
-    const nearWords = [...nearCount].sort((a, b) => b[1] - a[1]).map(([k, n]) => `${k === 'own' ? 'вы / ваша гильдия' : guildName(k.slice(2))}: ${n}`).join('; ') || 'нет';
-    const plot = ['Участок', `≈${area} м², соседних участков: ${s.near.size}`];
-    let title = `${TYPE_NAME[s.type] ?? 'Здание'}${s.name && !I.home ? `: ${tr(s.name)}` : ''}`;
+    const nearWords = [...nearCount].sort((a, b) => b[1] - a[1]).map(([k, n]) => `${k === 'own' ? L('town.holder.own') : guildName(k.slice(2))}: ${n}`).join('; ') || L('town.none');
+    const plot = [L('town.plot'), L('town.plotValue',{area:area,n:s.near.size})];
+    let title = `${TYPE_NAME[s.type] ?? L('town.building.other')}${s.name && !I.home ? `: ${tr(s.name)}` : ''}`;
     if (I.home) {
       if (!h) {
-        B.push({ kv: [['Владелец', 'никто — дом свободен'], ['Тип', TYPE_NAME[s.type]], plot, ['Соседи-гильдии', nearWords]] });
+        B.push({ kv: [[L('town.owner'), L('town.home.free')], [L('town.type'), TYPE_NAME[s.type]], plot, [L('town.nearGuilds'), nearWords]] });
       } else if (h.hall) {
-        title = `Зал гильдии: ${h.hall.n}`;
-        B.push({ kv: [['Гильдия', `${h.hall.n}${h.hall.t ? ` [${h.hall.t}]` : ''}`], ['Ваша', h.mem ? 'да' : 'нет'], ['Кто может войти', h.e ? ENTRY_RU[h.e] ?? h.e : '—'], plot, ['Соседи-гильдии', nearWords]] });
+        title = L('town.hall.title',{name:h.hall.n});
+        B.push({ kv: [[L('town.guild'), `${h.hall.n}${h.hall.t ? ` [${h.hall.t}]` : ''}`], [L('town.hall.yours'), h.mem ? L('town.yes') : L('town.no')], [L('town.entry'), h.e ? ENTRY[h.e] ?? h.e : '—'], plot, [L('town.nearGuilds'), nearWords]] });
       } else {
         const rec = cache.players[norm(h.o)], all = v.perAccount.get(norm(h.o)) ?? 1;
-        title = `Дом: ${h.o}`;
+        title = L('town.home.title',{name:h.o});
         B.push({ kv: [
-          ['Аккаунт владельца', `${h.o}${h.m ? ' (ваш)' : ''}`],
-          ['Владений в городе на аккаунте', all],
-          ['Гильдия владельца', holderWords(I.holder)],
-          ['Откуда известно', h.m ? 'ваш аккаунт' : I.holder?.k === 'own' && !rec ? 'ваша гильдия' : rec ? `${SOURCE_RU[rec.s] ?? rec.s}, ${ago(rec.at)}` : 'аккаунт не встречали онлайн'],
-          ['Кто может войти', h.e ? ENTRY_RU[h.e] ?? h.e : '—'],
-          ['Комнаты в аренду', h.r?.v > 0 ? `${h.r.v}${h.r.f != null ? `, от ${h.r.f} зол./день` : ''}` : 'нет'],
-          ['Продаётся владельцем', h.op ? `за ${h.op.toLocaleString('ru-RU')} зол.` : 'нет'],
-          ['Оценка соседей', h.sc ? (h.sc > 0 ? `+${h.sc}` : String(h.sc)) : '0'],
-          ['Перекрашен владельцем', h.lk ? 'да' : 'нет'], ['Дар короны', h.d ? 'да' : 'нет'],
-          ['Тип здания', TYPE_NAME[s.type]], plot, ['Соседи-гильдии', nearWords] ] });
+          [L('town.home.account'), `${h.o}${h.m ? ` (${L('town.yours')})` : ''}`],
+          [L('town.home.holdings'), all],
+          [L('town.home.guild'), holderWords(I.holder)],
+          [L('town.people.source'), h.m ? L('town.people.mine') : I.holder?.k === 'own' && !rec ? L('town.home.yourGuild') : rec ? `${SOURCE[rec.s] ?? rec.s}, ${ago(rec.at)}` : L('town.home.unseen')],
+          [L('town.entry'), h.e ? ENTRY[h.e] ?? h.e : '—'],
+          [L('town.home.rooms'), h.r?.v > 0 ? `${h.r.v}${h.r.f != null ? `, ${L('town.rentFrom', { f: h.r.f })}` : ''}` : L('town.none')],
+          [L('town.home.sale'), h.op ? L('town.forGold', { n: num(h.op) }) : L('town.no')],
+          [L('town.home.vote'), h.sc ? (h.sc > 0 ? `+${h.sc}` : String(h.sc)) : '0'],
+          [L('town.home.painted'), h.lk ? L('town.yes') : L('town.no')], [L('town.home.deed'), h.d ? L('town.yes') : L('town.no')],
+          [L('town.home.type'), TYPE_NAME[s.type]], plot, [L('town.nearGuilds'), nearWords] ] });
       }
     } else if (I.group) {
-      const rows = [['Тип', TYPE_NAME[s.type]], ['Название', tr(s.name) ?? '—']];
-      if (I.group !== 'orgs') rows.push(['Качество', `${s.quality ?? '?'} из 20 — ${qualityWord(s.quality ?? 0)}`]);
-      if (BUYS_RU[s.type]) {
+      const rows = [[L('town.type'), TYPE_NAME[s.type]], [L('town.name'), tr(s.name) ?? '—']];
+      if (I.group !== 'orgs') rows.push([L('town.quality'), L('town.qualityValue',{q:s.quality ?? '?',word:qualityWord(s.quality ?? 0)})]);
+      if (BUYS[s.type]) {
         const pr = priceAt(v, s);
-        rows.push(['Скупка общая', pr ? { t: `+${Math.round(pr.base)}%${pr.q === 20 ? '!!!' : ''}`, c: globalThis.__dfoMod?.pctColor?.(pr.base) } : '—']);
-        rows.push(['Скупка лично мне', pr?.mine != null ? { t: `+${Math.round(pr.mine)}%`, c: GOLD } : '—']);
-        rows.push(['Что скупает', BUYS_RU[s.type]]);
-      } else if (I.group === 'shops') rows.push(['Скупка', 'ничего не скупает']);
-      rows.push(['Влияние вокруг', nearWords], plot);
+        rows.push([L('town.pays'), pr ? { t: `+${Math.round(pr.base)}%${pr.q === 20 ? '!!!' : ''}`, c: globalThis.__dfoMod?.pctColor?.(pr.base) } : '—']);
+        rows.push([L('town.venue.paysMe'), pr?.mine != null ? { t: `+${Math.round(pr.mine)}%`, c: GOLD } : '—']);
+        rows.push([L('town.venue.buys'), BUYS[s.type]]);
+      } else if (I.group === 'shops') rows.push([L('town.venue.buying'), L('town.venue.buysNothing')]);
+      rows.push([L('town.venue.near'), nearWords], plot);
       B.push({ kv: rows });
     } else if (i === v.palace) {
-      B.push({ kv: [['Название', tr(s.name) || '—'], ['Престол', v.seat ? `${v.seat.name}${v.seat.tag ? ` [${v.seat.tag}]` : ''}` : 'не занят'], plot] });
-    } else B.push({ kv: [['Тип', TYPE_NAME[s.type] ?? `тип ${s.type}`], ['Название', tr(s.name) ?? '—'], plot] });
+      B.push({ kv: [[L('town.name'), tr(s.name) || '—'], [L('town.seat'), v.seat ? `${v.seat.name}${v.seat.tag ? ` [${v.seat.tag}]` : ''}` : L('town.unheld')], plot] });
+    } else B.push({ kv: [[L('town.type'), TYPE_NAME[s.type] ?? L('town.typeN',{n:s.type})], [L('town.name'), tr(s.name) ?? '—'], plot] });
     return { title, tabs: [], blocks: B };
   }
   const clock = (at) => {
     const d = new Date(at), today = new Date().toDateString() === d.toDateString();
-    const hm = d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
-    return today ? hm : `${d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })} ${hm}`;
+    const hm = d.toLocaleTimeString(globalThis.__dfoUi?.tag ?? 'en-US', { hour: '2-digit', minute: '2-digit' });
+    return today ? hm : `${d.toLocaleDateString(globalThis.__dfoUi?.tag ?? 'en-US', { day: 'numeric', month: 'short' })} ${hm}`;
   };
-  const when = (at) => (at ? `${clock(at)} (${ago(at)})` : 'ещё не было');
+  const when = (at) => (at ? `${clock(at)} (${ago(at)})` : L('town.data.never'));
   /** THE TOWN'S DATA: when each part of it was last brought in, and the two ways to bring it in now. */
   function dataModel(v) {
     const g = v.g, t = cache.towns[g.mapId], m = g.meta;
     const last = Math.max(t?.at ?? 0, m?.at ?? 0, lastAsk);
     const B = [];
-    B.push({ sys: last ? `Последнее обновление: ${when(last)}` : 'Данные ещё не обновлялись' });
+    B.push({ sys: last ? L('town.data.last',{when:when(last)}) : L('town.data.none') });
     B.push({ kv: [
-      ['Владельцы недвижимости', when(t?.at)],
-      ['Список игроков онлайн', when(cache.asked.who)],
-      ['Названия гильдий', when(cache.asked.arms)],
-      ['Слепок города (здания, двери)', when(m?.at)],
-      ['Дверей известно', `${g.sites.filter((s) => s.door).length} из ${g.sites.length}`] ] });
-    if (inflight.has(g.mapId)) B.push({ sys: 'Идёт запрос к серверу…' });
-    B.push({ acts: [{ id: 'refresh', t: 'Обновить базу' }, { id: 'regen', t: 'Перегенерировать город', warn: true }] });
-    return { title: `${g.name} — данные`, tabs: [], blocks: B };
+      [L('town.data.owners'), when(t?.at)],
+      [L('town.data.who'), when(cache.asked.who)],
+      [L('town.data.arms'), when(cache.asked.arms)],
+      [L('town.data.snapshot'), when(m?.at)],
+      [L('town.data.doors'), L('town.data.doorsValue',{n:g.sites.filter((s) => s.door).length,all:g.sites.length})] ] });
+    if (inflight.has(g.mapId)) B.push({ sys: L('town.data.asking') });
+    B.push({ acts: [{ id: 'refresh', t: L('town.data.refresh') }, { id: 'regen', t: L('town.data.regen'), warn: true }] });
+    return { title: L('town.data.title',{name:g.name}), tabs: [], blocks: B };
   }
   const ACTS = { refresh: () => refreshNow(), regen: () => regenerateNow() };
   function openWin(w) {
@@ -1853,8 +1858,8 @@ border:1px solid transparent;border-radius:2px;font:inherit;font-size:12px;lette
         if (!I.h || di < labelFrom) continue;
         const n = perAccount.get(norm(I.h.o)) ?? 1;
         labels.push([at.x, at.y - 7, I.h.hall
-          ? [{ t: `Зал гильдии: ${I.h.hall.n}${I.h.hall.t ? ` [${I.h.hall.t}]` : ''}`, c: '#f4f1e8' }]
-          : [{ t: `Аккаунт: ${I.h.o}`, c: '#f4f1e8' }, { t: `(${n} ${plural(n)} в городе на аккаунте)`, c: GOLD }]]);
+          ? [{ t: L('town.label.hall',{name:I.h.hall.n,tag:I.h.hall.t ? ` [${I.h.hall.t}]` : ''}), c: '#f4f1e8' }]
+          : [{ t: L('town.label.account',{name:I.h.o}), c: '#f4f1e8' }, { t: L('town.label.holdings', { n }), c: GOLD }]]);
       }
       ctx.lineWidth = 1.5; ctx.strokeStyle = '#000';
       for (const [color, pts] of byColor) {
@@ -1866,13 +1871,13 @@ border:1px solid transparent;border-radius:2px;font:inherit;font-size:12px;lette
       if (state.influence && seat && palace >= 0 && !hidden.has('seat')) {
         const s = S[palace], lx = s.door?.[0] ?? s.x, lz = s.door?.[1] ?? s.z, y = heightAt(T.ox + lx, T.oz + lz);
         const at = project([T.ox + lx, Number.isFinite(y) ? y : T.oy, T.oz + lz]);
-        if (at?.front) { const sp = spriteOf([{ t: `Город под контролем ${seat.name}`, c: seatK === 'own' ? WHITE : GOLD }], 16, dpr); ctx.drawImage(sp.c, at.x - sp.w / 2, at.y - 14 - sp.h, sp.w, sp.h); }
+        if (at?.front) { const sp = spriteOf([{ t: L('town.heldBy',{name:seat.name}), c: seatK === 'own' ? WHITE : GOLD }], 16, dpr); ctx.drawImage(sp.c, at.x - sp.w / 2, at.y - 14 - sp.h, sp.w, sp.h); }
       }
     }
 
     // the title and the key
     setText(titleEl, g.name);
-    setText(subEl, seat ? `Город под контролем ${seat.name}${seat.tag ? ` [${seat.tag}]` : ''}` : '');
+    setText(subEl, seat ? L('town.heldByTag',{name:seat.name,tag:seat.tag ? ` [${seat.tag}]` : ''}) : '');
     // the key: again when what it counts changed, and now and then (the owners' age)
     const legendSig = `${dataSig}|${inflight.has(g.mapId)}`;
     if (legendSig === lastLegend && frameNo % 30 !== 0) return;
@@ -1881,34 +1886,33 @@ border:1px solid transparent;border-radius:2px;font:inherit;font-size:12px;lette
     const sections = [];
     if (state.influence) {
       const rows = [];
-      if (seat) rows.push({ key: 'seat', color: colorOfKey(seatK ?? 'none'), text: `Престол: ${seat.name}${seat.tag ? ` [${seat.tag}]` : ''}` });
-      rows.push({ key: 'own', color: WHITE, text: `Вы${own?.tag ? ` и ваша гильдия [${own.tag}]` : ''}: ${n('own')}` });
+      if (seat) rows.push({ key: 'seat', color: colorOfKey(seatK ?? 'none'), text: L('town.key.seat',{name:seat.name,tag:seat.tag ? ` [${seat.tag}]` : ''}) });
+      rows.push({ key: 'own', color: WHITE, text: own?.tag ? L('town.key.ownGuild', { tag: own.tag, n: n('own') }) : L('town.key.own', { n: n('own') }) });
       for (const [k] of [...weight].sort((a2, b2) => b2[1] - a2[1])) {
         const tag = k.slice(2), name = cache.guilds[tag]?.n;
         rows.push({ key: k, color: colorOfKey(k), text: `[${tag}]${name ? ` ${name}` : ''}: ${n(k)}` });
       }
-      rows.push({ key: 'unknown', tile: tileUrl(askTile()), size: '14px 14px', color: 'transparent', text: `Гильдия неизвестна: ${n('unknown')}` });
-      rows.push({ key: 'none', tile: tileUrl(hatchTile()), color: '#444', text: `Без гильдии: ${n('none')}` });
-      rows.push({ key: 'free', color: FREE, text: `Свободно: ${n('free')}` });
-      sections.push({ title: 'Влияние гильдий', rows });
-      sections.push({ title: 'Заведения', rows: [{ key: 'venues', tile: tileUrl(stripeTile(FREE, null, 4.5)), color: '#777', text: `Таверны, магазины, организации: ${n('venues')}` }] });
+      rows.push({ key: 'unknown', tile: tileUrl(askTile()), size: '14px 14px', color: 'transparent', text: L('town.key.unknown',{n:n('unknown')}) });
+      rows.push({ key: 'none', tile: tileUrl(hatchTile()), color: '#444', text: L('town.key.none',{n:n('none')}) });
+      rows.push({ key: 'free', color: FREE, text: L('town.key.free',{n:n('free')}) });
+      sections.push({ title: L('town.bar.influence'), rows });
+      sections.push({ title: L('town.key.venues'), rows: [{ key: 'venues', tile: tileUrl(stripeTile(FREE, null, 4.5)), color: '#777', text: L('town.key.venuesCount',{n:n('venues')}) }] });
     } else {
-      const rows = [{ key: 'own', color: WHITE, text: `Ваше: ${n('own')}` }];
+      const rows = [{ key: 'own', color: WHITE, text: L('town.key.yours',{n:n('own')}) }];
       for (const k of many) {
         const name = Object.values(town?.homes ?? {}).find((h) => norm(h.o) === k)?.o ?? k;
-        rows.push({ key: `a:${k}`, color: accountHue.get(k), text: `${name}: ${perAccount.get(k)} ${plural(perAccount.get(k))}` });
+        rows.push({ key: `a:${k}`, color: accountHue.get(k), text: L('town.key.account', { name, n: perAccount.get(k) }) });
       }
-      rows.push({ key: 'single', tile: tileUrl(RED), color: '#c83030', text: `Один дом на аккаунте: ${n('single')}` });
-      rows.push({ key: 'free', color: FREE, text: `Свободно: ${n('free')}` });
-      sections.push({ title: 'Недвижимость', rows });
-      sections.push({ title: 'Заведения', rows: [
-        { key: 'taverns', color: GROUP_COLOR.taverns, text: `Таверны: ${n('taverns')}` },
-        { key: 'shops', color: GROUP_COLOR.shops, text: `Магазины: ${n('shops')}` },
-        { key: 'orgs', color: GROUP_COLOR.orgs, text: `Организации: ${n('orgs')}` }] });
+      rows.push({ key: 'single', tile: tileUrl(RED), color: '#c83030', text: L('town.key.single',{n:n('single')}) });
+      rows.push({ key: 'free', color: FREE, text: L('town.key.free',{n:n('free')}) });
+      sections.push({ title: L('town.key.estate'), rows });
+      sections.push({ title: L('town.key.venues'), rows: [
+        { key: 'taverns', color: GROUP_COLOR.taverns, text: L('town.count.taverns',{n:n('taverns')}) },
+        { key: 'shops', color: GROUP_COLOR.shops, text: L('town.count.shops',{n:n('shops')}) },
+        { key: 'orgs', color: GROUP_COLOR.orgs, text: L('town.count.orgs',{n:n('orgs')}) }] });
     }
     paintKey(sections);
   }
-  const plural = (n) => { const a = n % 10, b = n % 100; return a === 1 && b !== 11 ? 'владение' : a >= 2 && a <= 4 && (b < 12 || b > 14) ? 'владения' : 'владений'; };
 
   globalThis.__dfoTown = { version: '1.9.0', state, cache, get mode() { return mode; }, enter: () => { enterWanted = true; }, exit: exitMode, geoOf, holderOf,
     openTown: (tab) => openWin({ kind: 'town', tab: tab ?? 'overview' }), openBuilding: (key) => openWin({ kind: 'building', key }), clickAt, get win() { return win; }, get gl() { return !!gl; }, perf, get view() { return lastView; }, refreshNow, regenerateNow };

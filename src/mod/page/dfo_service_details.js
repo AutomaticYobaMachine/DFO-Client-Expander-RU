@@ -6,103 +6,95 @@
   else root.__dfoServiceDetails = api;
 })(typeof globalThis === "object" ? globalThis : this, function () {
   "use strict";
+  /** The install's words (dfo_ui_text.js: src/mod/item-text/<en|ru>/ui/svc.csv), the key itself before they load. */
+  const T = (key, params) =>
+    globalThis.__dfoUi ? globalThis.__dfoUi.t(key, params) : key;
   const n = (x) => (Number.isFinite(Number(x)) ? Number(x) : 0),
     per = (x) => Math.max(1, n(x)),
     fmt = (x) =>
-      Number(x).toLocaleString("ru-RU", { maximumFractionDigits: 2 }),
+      Number(x).toLocaleString(globalThis.__dfoUi?.tag ?? "en-US", {
+        maximumFractionDigits: 2,
+      }),
     range = (a, b) => (a === b ? fmt(a) : fmt(a) + "–" + fmt(b));
-  const attr = [
-      "силы",
-      "интеллекта",
-      "силы воли",
-      "ловкости",
-      "выносливости",
-      "обаяния",
-      "скорости",
-      "удачи",
-    ],
-    vital = ["здоровья", "сил", "маны"];
+  /** A word picked by a sub-type: svc.<area>.<sub>, or svc.<area>.other past the list's end. */
+  const word = (area, sub, count) =>
+    T(
+      `svc.${area}.${Number.isInteger(sub) && sub >= 0 && sub < count ? sub : "other"}`,
+    );
   const mechanics = {
-    0: "Парализует цель: она не может двигаться и атаковать. Сам по себе паралич не запрещает произносить заклинания; иммунитет к параличу блокирует действие.",
-    1: "Каждый магический раунд уменьшает запас {vital}. Величина бросается заново каждый раунд; первая проверка происходит сразу при наложении.",
-    2: "Создаёт временный предмет. Его существование ограничено длительностью эффекта; это не постоянная добыча.",
-    3: "При успешной проверке снимает {cure}. Величина и длительность не используются.",
-    4: "Однократно уменьшает запас {vital}. Базовая величина задаётся двумя независимыми целочисленными бросками.",
-    5: "При успешной проверке уничтожает подходящую цель. Защита и иммунитеты цели остаются в силе; это не гарантированное убийство.",
-    6: "При успешной проверке {dispel}.",
-    7: "Снижает значение {attr} на величину M. Потерянную характеристику восстанавливают соответствующим лечением; таймер длительности здесь не задаётся.",
-    8: "Даёт сопротивление выбранной стихии. Шанс эффекта участвует в защите от соответствующего воздействия; это не постоянное процентное уменьшение любого урона.",
-    9: "Временно повышает значение {attr} на M. При окончании эффекта прибавка снимается.",
-    10: "Восстанавливает {heal} на величину M, не превращая восстановление в постоянную прибавку сверх допустимого максимума.",
-    11: "Применяет к цели и заклинателю передачу {transfer}; точное действие зависит от выбранного ресурса.",
-    12: "Накладывает ловушку душ на подходящего монстра. Душа захватывается при его гибели, если есть доступный пустой камень; смерть монстра сама по себе не гарантирует захват.",
-    13: "Делает персонажа невидимым. {conceal}",
-    14: "Позволяет подниматься и спускаться в воздухе на время действия. Величина урона и отдельная вероятность не задаются.",
-    15: "Создаёт магическое освещение вокруг персонажа на время действия.",
-    16: "При успешной проверке подготавливает магическое запирание. Эффект срабатывает при взаимодействии с подходящей дверью, а не в момент произнесения.",
-    17: "При успешной проверке подготавливает магическое открытие. Затем нужно взаимодействовать с дверью; результат также зависит от замка и уровня персонажа.",
-    18: "Восстанавливает здоровье каждый магический раунд. Величина бросается заново на каждом срабатывании; первый раунд выполняется сразу.",
-    19: "Запрещает цели произносить заклинания, пока действует молчание. Успех наложения и сопротивление цели проверяются отдельно.",
-    20: "Даёт шанс поглотить эффект школы Разрушения и вернуть его стоимость в ману. Нужен свободный объём в запасе маны; восстановление не превышает рассчитанную стоимость эффекта.",
-    21: "Даёт шанс отразить входящее заклинание. Это проверка отражения, а не прибавка к броне или уменьшение урона на указанное число процентов.",
-    22: "Даёт дополнительную проверку сопротивления входящему заклинанию. Указанное число — вероятность проверки, а не гарантированное снижение урона.",
-    23: "Маскирует персонажа, затрудняя обнаружение. {conceal}",
-    24: "Скрывает персонажа в тени. Действие зависит от освещения. {conceal}",
-    25: "Замедляет падение и снижает связанные с ним последствия, пока эффект активен. Не создаёт опору в воздухе.",
-    26: "Снимает действующий паралич и защищает от новых параличей на время действия.",
-    27: "Усиливает прыжок: к множителю скорости отрыва добавляется 0,6. Даёт управление в воздухе на время действия; это не +60% к итоговой высоте прыжка.",
-    28: "Улучшает возможности скалолазания на время действия. Это состояние усиленного лазания, а не прибавка величины M к навыку.",
-    29: "Меняет форму персонажа. Этот эффект не предлагается для самостоятельного создания в мастерской.",
-    30: "Позволяет дышать под водой на время действия. Не восстанавливает здоровье и не снимает прочие источники урона.",
-    31: "Позволяет перемещаться по поверхности воды на время действия.",
-    33: "При успешной проверке успокаивает существ выбранной группы. На существа другой группы не действует; дальнейшая агрессия может нарушить мир.",
-    34: "Улучшает возможность мирного взаимодействия с целью через проверку очарования. Это не прямой контроль её передвижения.",
-    35: "Создаёт щит с запасом поглощения M. Щит заканчивается при исчерпании запаса либо длительности; число M не является бонусом брони.",
-    39: "Позволяет обнаруживать {detect} на время действия. Видимость, дальность и доступные объекты определяет игровой детектор.",
-    40: "При успешной проверке опознаёт предмет. Это не создание нового предмета и не изменение его скрытых свойств.",
-    43: "Ставит якорь либо возвращает к ранее поставленному якорю. Учитываются штатные запреты телепортации и наличие точки возврата.",
-    44: "Позволяет понимать языки и участвует в проверках мирного взаимодействия с соответствующими существами. Длительность и вероятность задаются отдельно.",
-    45: "Воскрешает павшего участника группы у его тела с 30% максимального здоровья. Это готовое заклинание; мастерская не предлагает его создание.",
-    46: "Пока эффект активен, разведанные вами участки карты данжа передаются участникам группы в том же данже. Между разными данжами карта не передаётся.",
+    0: "svc.mechanic.0",
+    1: "svc.mechanic.1",
+    2: "svc.mechanic.2",
+    3: "svc.mechanic.3",
+    4: "svc.mechanic.4",
+    5: "svc.mechanic.5",
+    6: "svc.mechanic.6",
+    7: "svc.mechanic.7",
+    8: "svc.mechanic.8",
+    9: "svc.mechanic.9",
+    10: "svc.mechanic.10",
+    11: "svc.mechanic.11",
+    12: "svc.mechanic.12",
+    13: "svc.mechanic.13",
+    14: "svc.mechanic.14",
+    15: "svc.mechanic.15",
+    16: "svc.mechanic.16",
+    17: "svc.mechanic.17",
+    18: "svc.mechanic.18",
+    19: "svc.mechanic.19",
+    20: "svc.mechanic.20",
+    21: "svc.mechanic.21",
+    22: "svc.mechanic.22",
+    23: "svc.mechanic.23",
+    24: "svc.mechanic.24",
+    25: "svc.mechanic.25",
+    26: "svc.mechanic.26",
+    27: "svc.mechanic.27",
+    28: "svc.mechanic.28",
+    29: "svc.mechanic.29",
+    30: "svc.mechanic.30",
+    31: "svc.mechanic.31",
+    33: "svc.mechanic.33",
+    34: "svc.mechanic.34",
+    35: "svc.mechanic.35",
+    39: "svc.mechanic.39",
+    40: "svc.mechanic.40",
+    43: "svc.mechanic.43",
+    44: "svc.mechanic.44",
+    45: "svc.mechanic.45",
+    46: "svc.mechanic.46",
   };
   function mechanic(type, sub) {
-    let text = mechanics[type];
+    const text = mechanics[type];
     if (!text) return null;
+    const one = Number.isInteger(sub) && sub >= 0 && sub < 8;
     const replace = {
-      vital: vital[sub] ?? "ресурса",
-      attr: attr[sub] ?? "характеристики",
-      cure: ["болезни", "яды", "паралич"][sub] ?? "соответствующее состояние",
+      vital: word("vital", sub, 3),
+      attr: word("attr", sub, 8),
+      cure: word("cure", sub, 3),
       heal:
         sub < 8
-          ? "повреждённое значение " + (attr[sub] ?? "характеристики")
+          ? one
+            ? T("svc.heal.attr", { attr: word("attr", sub, 8) })
+            : T("svc.heal.attrAny")
           : sub === 8
-            ? "здоровье"
-            : "запас сил",
+            ? T("svc.heal.health")
+            : T("svc.heal.stamina"),
       transfer:
         sub < 8
-          ? "значение " + (attr[sub] ?? "характеристики")
+          ? one
+            ? T("svc.transfer.attr", { attr: word("attr", sub, 8) })
+            : T("svc.transfer.attrAny")
           : sub === 8
-            ? "здоровье"
-            : "запас сил",
-      dispel:
-        sub === 0
-          ? "рассеивает магические эффекты"
-          : sub === 1
-            ? "изгоняет подходящую нежить"
-            : sub === 2
-              ? "изгоняет подходящего даэдра"
-              : "рассеивает магию или изгоняет существ выбранной группы",
-      detect:
-        ["магические объекты", "врагов", "сокровища"][sub] ??
-        "выбранные объекты",
-      conceal:
-        sub < 0
-          ? "Обычный вариант прерывается враждебным действием; истинный сохраняется."
-          : sub === 0
-            ? "Обычный вариант прерывается враждебным действием."
-            : "Истинный вариант не снимается обычным враждебным действием.",
+            ? T("svc.heal.health")
+            : T("svc.heal.stamina"),
+      dispel: word("dispel", sub, 3),
+      detect: word("detect", sub, 3),
+      conceal: T(
+        `svc.conceal.${sub < 0 ? "both" : sub === 0 ? "normal" : "true"}`,
+      ),
     };
-    return text.replace(/\{(\w+)\}/g, (_, k) => replace[k] ?? "");
+    return T(text, replace);
   }
   function spell(effect, settings, level) {
     if (!effect || typeof effect !== "object") return null;
@@ -114,12 +106,15 @@
     if (type === 11)
       text =
         sub < 8
-          ? "Снижает " +
-            (attr[sub] ?? "характеристику") +
-            " цели на M и лечит повреждение той же характеристики у заклинателя. Не повышает здоровую характеристику сверх базового значения."
+          ? T("svc.drain.attr", {
+              attr:
+                Number.isInteger(sub) && sub >= 0
+                  ? word("attr", sub, 8)
+                  : T("svc.attr.any"),
+            })
           : sub === 8
-            ? "Наносит цели M урона и восстанавливает заклинателю M здоровья, не выше его максимума. Восстановление вызывается на рассчитанную величину, а не на остаток здоровья врага."
-            : "Уменьшает запас сил цели и восстанавливает запас сил заклинателя на M × 64 внутренних единиц. Каждая сторона ограничена своим диапазоном запаса сил.";
+            ? T('svc.drain.health')
+            : T('svc.drain.stamina');
     const s = settings ?? {},
       L = Math.max(1, Math.trunc(n(level) || 1)),
       stats = [],
@@ -145,7 +140,7 @@
     if (effect.duration) {
       const k = Math.max(1, Math.floor(L / per(s.durationPerLevel))),
         D = n(s.durationBase) + n(s.durationMod) * k;
-      stats.push(["Базовая длительность", fmt(D) + " раунд."]);
+      stats.push([T("svc.stat.duration"), T("svc.value.rounds", { n: fmt(D) })]);
       formula.push(
         "D = " +
           n(s.durationBase) +
@@ -160,25 +155,25 @@
           ".",
       );
       notes.push(
-        "1 магический раунд = 1 игровая минута. Первый раунд выполняется при наложении; скорость мира влияет на реальное время.",
+        T('svc.note.round'),
       );
       if (type === 2) {
         stats.push([
-          "Срок созданной вещи",
-          fmt(Math.max(0, D - 1)) + " игр. мин.",
+          T('svc.stat.itemLife'),
+          T("svc.value.gameMinutes", { n: fmt(Math.max(0, D - 1)) }),
         ]);
         formula.push(
-          "Срок вещи = max(0, D − 1): начальный раунд уже израсходован до выбора предмета.",
+          T('svc.formula.itemLife'),
         );
       }
     } else
       stats.push([
-        "Длительность",
+        T('svc.stat.durationNone'),
         [16, 17].includes(type)
-          ? "До взаимодействия с дверью"
+          ? T('svc.duration.door')
           : type === 7 || (type === 11 && sub < 8)
-            ? "До восстановления характеристики"
-            : "Мгновенное действие",
+            ? T('svc.duration.attr')
+            : T('svc.duration.instant'),
       ]);
     if (effect.magnitude) {
       const k = Math.floor(L / per(s.magnitudePerLevel)),
@@ -186,18 +181,22 @@
         hi = n(s.magnitudeBaseHigh) + n(s.magnitudeLevelHigh) * k;
       stats.push([
         type === 35
-          ? "Запас щита"
+          ? T('svc.stat.shield')
           : type === 18 || type === 10
-            ? "Базовое восстановление"
-            : "Базовая величина",
+            ? T('svc.stat.restore')
+            : T('svc.stat.magnitude'),
         range(lo, hi),
       ]);
       formula.push(
-        "M = Случ[" +
+        "M = " +
+          T("svc.rand") +
+          "[" +
           n(s.magnitudeBaseLow) +
           "; " +
           n(s.magnitudeBaseHigh) +
-          "] + Случ[" +
+          "] + " +
+          T("svc.rand") +
+          "[" +
           n(s.magnitudeLevelBase) +
           "; " +
           n(s.magnitudeLevelHigh) +
@@ -217,8 +216,8 @@
         c = Math.max(0, Math.min(type === 20 ? 50 : 100, C));
       stats.push([
         type === 20
-          ? "Поглощение при уровне получателя " + L
-          : "Базовый шанс при уровне " + L,
+          ? T("svc.stat.absorbAt", { level: L })
+          : T("svc.stat.chanceAt", { level: L }),
         fmt(c) + "%",
       ]);
       formula.push(
@@ -234,47 +233,47 @@
           fmt(C) +
           "%; " +
           (type === 20
-            ? "предел поглощения — 50%."
-            : "вероятность ограничена 0–100%."),
+            ? T('svc.formula.absorbCap')
+            : T('svc.formula.chanceCap')),
       );
     }
     if (effect.magnitude || effect.chance)
       notes.push(
-        "⌊x⌋ — округление вниз; Случ[a; b] — отдельный целочисленный бросок, включая границы.",
+        T('svc.note.notation'),
       );
     if (((type === 1 || type === 4) && sub === 1) || (type === 10 && sub === 9))
       notes.push(
-        "Внутренний запас сил изменяется на M × 64; величина M задана в классических единицах эффекта.",
+        T('svc.note.stamina64'),
       );
     if (type === 20)
       notes.push(
-        "Для поглощения используется уровень ПОЛУЧАТЕЛЯ эффекта при входящем ударе, а не сохранённый уровень заклинателя. Проверяются школа Разрушения и свободная мана.",
+        T('svc.note.absorbLevel'),
       );
     if (type === 12)
       notes.push(
-        "Шанс ловушки проверяется при гибели монстра. Само наложение ловушки не расходует эту проверку; на людей и обычных NPC ловушка не действует.",
+        T('svc.note.soulTrap'),
       );
     if (type === 6)
       notes.push(
         sub === 0
-          ? "Выбирается целая связка действующих чар персонажа, включая чары надетой вещи. Отмена выбора не возвращает потраченную ману."
-          : "Шанс проверяется отдельно для каждого подходящего существа рядом. Изгнанный враг исчезает без добычи и без зачёта убийства для задания.",
+          ? T('svc.note.dispelMagic')
+          : T('svc.note.banish'),
       );
     if (type === 8)
       notes.push(
-        "C — шанс полностью отклонить воздействие выбранной стихии до обычного спасброска. При наложении на себя отдельного броска C нет.",
+        T('svc.note.resist'),
       );
     if (type === 33 || type === 34)
       notes.push(
-        "Однократное успокоение сохраняется до нападения игрока. Длительность в мастерской для этого эффекта не задаётся.",
+        T('svc.note.calm'),
       );
     if (type === 3 && sub === 0)
       notes.push(
-        "Если вместе с инфекцией вампиризма или ликантропии есть обычная болезнь, сначала снимаются обычные болезни. При отсутствии обычных болезней лечение может снять инфекцию.",
+        T('svc.note.cureOrder'),
       );
     if (effect.magnitude)
       notes.push(
-        "Показаны базовые числа. При применении не на себя сопротивление цели изменяет M; навыки школы свыше 100 и действующие усиления могут изменить итог.",
+        T('svc.note.base'),
       );
     return {
       key: type + "," + sub,
@@ -286,30 +285,30 @@
     };
   }
   const enchantNames = {
-    AbsorbsSpells: "Поглощение заклинаний",
-    BadReactionsFrom: "Неприязнь существ",
-    BadRepWith: "Плохая репутация",
-    CastWhenHeld: "Заклинание при ношении",
-    CastWhenStrikes: "Заклинание при попадании",
-    CastWhenUsed: "Заклинание при использовании",
-    ExtraSpellPts: "Дополнительная мана",
-    ExtraWeight: "Увеличенный вес",
-    FeatherWeight: "Невесомость",
-    GoodRepWith: "Хорошая репутация",
-    HealthLeech: "Потеря здоровья",
-    ImprovesTalents: "Улучшение талантов",
-    IncreasedWeightAllowance: "Грузоподъёмность",
-    ItemDeteriorates: "Изнашивание предмета",
-    LowDamageVs: "Слабость против существ",
-    PotentVs: "Сила против существ",
-    RegensHealth: "Регенерация здоровья",
-    RepairsObjects: "Ремонт предметов",
-    SoulBound: "Связанная душа",
-    StrengthensArmor: "Усиление брони",
-    UserTakesDamage: "Урон владельцу",
-    VampiricEffect: "Вампиризм",
-    WeakensArmor: "Ослабление брони",
-    EnhancesSkill: "Усиление навыка",
+    AbsorbsSpells: "svc.enchant.AbsorbsSpells",
+    BadReactionsFrom: "svc.enchant.BadReactionsFrom",
+    BadRepWith: "svc.enchant.BadRepWith",
+    CastWhenHeld: "svc.enchant.CastWhenHeld",
+    CastWhenStrikes: "svc.enchant.CastWhenStrikes",
+    CastWhenUsed: "svc.enchant.CastWhenUsed",
+    ExtraSpellPts: "svc.enchant.ExtraSpellPts",
+    ExtraWeight: "svc.enchant.ExtraWeight",
+    FeatherWeight: "svc.enchant.FeatherWeight",
+    GoodRepWith: "svc.enchant.GoodRepWith",
+    HealthLeech: "svc.enchant.HealthLeech",
+    ImprovesTalents: "svc.enchant.ImprovesTalents",
+    IncreasedWeightAllowance: "svc.enchant.IncreasedWeightAllowance",
+    ItemDeteriorates: "svc.enchant.ItemDeteriorates",
+    LowDamageVs: "svc.enchant.LowDamageVs",
+    PotentVs: "svc.enchant.PotentVs",
+    RegensHealth: "svc.enchant.RegensHealth",
+    RepairsObjects: "svc.enchant.RepairsObjects",
+    SoulBound: "svc.enchant.SoulBound",
+    StrengthensArmor: "svc.enchant.StrengthensArmor",
+    UserTakesDamage: "svc.enchant.UserTakesDamage",
+    VampiricEffect: "svc.enchant.VampiricEffect",
+    WeakensArmor: "svc.enchant.WeakensArmor",
+    EnhancesSkill: "svc.enchant.EnhancesSkill",
   };
   function enchant(type, param, { name = "", cost = null } = {}) {
     if (!Object.hasOwn(enchantNames, type)) return null;
@@ -322,171 +321,171 @@
     switch (type) {
       case "AbsorbsSpells":
         summary =
-          "При ношении даёт 50% шанс поглотить эффект школы Разрушения. Поглощение возвращает рассчитанную стоимость эффекта в ману, только если для неё есть место.";
+          T('svc.ench.AbsorbsSpells.summary');
         formula.push(
-          "Мана после = min(максимум маны, текущая мана + стоимость поглощённого эффекта).",
+          T('svc.ench.AbsorbsSpells.formula'),
         );
         break;
       case "EnhancesSkill":
         summary =
-          "При ношении повышает выбранный навык на 15 пунктов. Прибавки этого типа складываются.";
+          T('svc.ench.EnhancesSkill.summary');
         formula.push(
-          "Навык = базовое значение + 15 × число действующих зачарований для этого навыка + прочие модификаторы.",
+          T('svc.ench.EnhancesSkill.formula'),
         );
         break;
       case "ExtraSpellPts":
         summary =
-          "Увеличивает максимум маны на 75, пока выполняется выбранное условие: сезон, фаза луны или наличие подходящего существа в радиусе 18 м.";
+          T('svc.ench.ExtraSpellPts.summary');
         formula.push(
-          "Максимум маны = обычный максимум + 75 за каждое действующее зачарование.",
+          T('svc.ench.ExtraSpellPts.formula'),
         );
         notes.push(
-          "Это прибавка к максимуму, а не мгновенное восстановление 75 маны.",
+          T('svc.ench.ExtraSpellPts.note'),
         );
         break;
       case "FeatherWeight":
         summary =
-          "Устанавливает вес одной вещи равным 0,25 кг. Это фиксированный вес, а не снижение веса на 25%.";
-        stats.push(["Вес одной вещи", "0,25 кг"]);
+          T('svc.ench.FeatherWeight.summary');
+        stats.push([T('svc.stat.itemWeight'), T('svc.value.featherWeight')]);
         break;
       case "ExtraWeight":
-        summary = "При зачаровании увеличивает вес предмета в 4 раза.";
-        formula.push("Новый вес = прежний вес × 4.");
+        summary = T('svc.ench.ExtraWeight.summary');
+        formula.push(T('svc.ench.ExtraWeight.formula'));
         break;
       case "IncreasedWeightAllowance":
         summary =
           p == null
-            ? "При ношении увеличивает грузоподъёмность на 25% или 50%, по выбранному варианту."
-            : `При ношении увеличивает грузоподъёмность на ${p === 1 ? 50 : 25}%.`;
+            ? T('svc.ench.IncreasedWeightAllowance.summary')
+            : T('svc.ench.IncreasedWeightAllowance.one',{pct:p === 1 ? 50 : 25});
         formula.push(
-          "Грузоподъёмность = базовая × (1 + наибольший бонус этого типа).",
+          T('svc.ench.IncreasedWeightAllowance.formula'),
         );
         notes.push(
-          "Несколько таких бонусов не суммируются: используется наибольший.",
+          T('svc.ench.IncreasedWeightAllowance.note'),
         );
         break;
       case "StrengthensArmor":
         summary =
-          "При ношении улучшает броню на 5 в отображении персонажа; боевое значение брони уменьшается на 5. Одинаковые источники не складываются.";
-        stats.push(["Бонус брони", "+5"]);
+          T('svc.ench.StrengthensArmor.summary');
+        stats.push([T('svc.stat.armorBonus'), "+5"]);
         break;
       case "WeakensArmor":
         summary =
-          "В текущем клиенте это свойство даёт отрицательную стоимость зачарования, но не снижает боевую защиту: положительный штраф +5 не проходит штатное правило минимума.";
-        formula.push("Боевой модификатор = min(0, +5) = 0.");
+          T('svc.ench.WeakensArmor.summary');
+        formula.push(T('svc.ench.WeakensArmor.formula'));
         break;
       case "GoodRepWith":
       case "BadRepWith":
-        summary = `Пока предмет действует, репутация у выбранной группы изменяется на ${type === "GoodRepWith" ? "+10" : "−10"}. Это модификатор, а не накопление по 10 каждый раунд.`;
+        summary = T('svc.ench.rep.summary',{v:type === "GoodRepWith" ? "+10" : "−10"});
         break;
       case "PotentVs":
       case "LowDamageVs":
-        summary = `При попадании по существу выбранной группы прибавляет к урону ${type === "PotentVs" ? "+5" : "−5"}. Это абсолютные пункты, а не проценты.`;
+        summary = T('svc.ench.damageVs.summary',{v:type === "PotentVs" ? "+5" : "−5"});
         break;
       case "BadReactionsFrom":
         summary =
-          "Если существо выбранной группы находится в радиусе 8 м, шанс попадания владельца снижается на 5 пунктов. Одновременно применяется отдельный канал брони −5; его повторы не складываются.";
+          T('svc.ench.BadReactionsFrom.summary');
         notes.push(
-          "Штраф к попаданию от нескольких источников складывается. Канал брони отличается от «Усиления брони».",
+          T('svc.ench.BadReactionsFrom.note'),
         );
         break;
       case "RegensHealth":
         summary =
-          "При ношении восстанавливает базово 1 здоровье каждые 4 магических раунда: всегда, на солнечном свету или в темноте — по выбранному варианту.";
-        formula.push("Здоровье после = min(максимум здоровья, здоровье + 1).");
+          T('svc.ench.RegensHealth.summary');
+        formula.push(T('svc.ench.RegensHealth.formula'));
         notes.push(
-          "Мировые ограничения восстановления могут изменить получаемое лечение.",
+          T('svc.ench.RegensHealth.note'),
         );
         break;
       case "RepairsObjects":
         summary =
-          "Каждые 4 магических раунда чинит один подходящий повреждённый предмет. Сначала выбирается надетая экипировка, затем изнашивающаяся надетая вещь, затем рюкзак.";
+          T('svc.ench.RepairsObjects.summary');
         formula.push(
-          "Ремонт обычной вещи = max(1, round(максимальная прочность / 50)); магический предмет или артефакт — 1 единица.",
+          T('svc.ench.RepairsObjects.formula'),
         );
         notes.push(
-          "Итог не превышает максимальную прочность. Неремонтируемые вещи пропускаются; ремонт магических вещей зависит от разрешённого режима.",
+          T('svc.ench.RepairsObjects.note'),
         );
         break;
       case "ItemDeteriorates":
         summary =
-          "При ношении теряет 1 единицу прочности каждые 4 магических раунда при выбранном условии: всегда, на солнечном свету или в святых местах.";
-        stats.push(["Износ", "−1 / 4 раунда"]);
+          T('svc.ench.ItemDeteriorates.summary');
+        stats.push([T('svc.stat.wear'), T('svc.value.wear')]);
         break;
       case "UserTakesDamage":
         summary =
-          "Наносит владельцу 1 урон каждые 4 магических раунда, если он находится на солнечном свету или в святом месте — по варианту.";
+          T('svc.ench.UserTakesDamage.summary');
         break;
       case "VampiricEffect":
         summary =
           p === 1
-            ? "При попадании восстанавливает владельцу здоровье на величину урона удара, не выше максимума. По защищённой цели не срабатывает."
+            ? T('svc.ench.VampiricEffect.hit')
             : p === 0
-              ? "Каждые 4 магических раунда отнимает 1 здоровье у каждого подходящего врага в радиусе 2,25 м и восстанавливает владельцу по 1 за каждого."
-              : "Два варианта: высасывание у врагов в радиусе 2,25 м каждые 4 раунда либо лечение на величину урона при попадании.";
+              ? T('svc.ench.VampiricEffect.drain')
+              : T('svc.ench.VampiricEffect.both');
         break;
       case "HealthLeech":
         summary =
           p === 0
-            ? "При использовании отнимает у владельца 16 здоровья; при ударе — 8. Время последнего использования обновляется."
+            ? T('svc.ench.HealthLeech.use')
             : p === 1 || p === 2
-              ? `Если предмет не использовался дольше ${p === 1 ? "1 игровых суток" : "7 игровых суток"}, отнимает 1 здоровье каждые 4 магических раунда. Использование или удар обновляет отсчёт.`
-              : "Варианты: потеря здоровья при использовании/ударе либо по 1 каждые 4 раунда, если вещью не пользовались сутки или неделю.";
+              ? T('svc.ench.HealthLeech.idle',{span:T(p === 1 ? "svc.span.day" : "svc.span.week")})
+              : T('svc.ench.HealthLeech.both');
         break;
       case "SoulBound":
         summary =
-          "Расходует заполненный камень с выбранной душой и увеличивает доступный бюджет зачарования на её стоимость. При поломке предмета связанное существо может быть выпущено.";
+          T('svc.ench.SoulBound.summary');
         notes.push(
-          "Некоторые души автоматически добавляют сопутствующие свойства; они отображаются в итоговом списке и удаляются вместе с родительской душой.",
+          T('svc.ench.SoulBound.note'),
         );
         break;
       case "CastWhenUsed":
         summary =
-          "Запускает выбранное готовое заклинание при использовании предмета; расходует 10 единиц его прочности. Цель и параметры берутся из самого заклинания.";
+          T('svc.ench.CastWhenUsed.summary');
         notes.push(
-          "Самонаправленное заклинание применяется сразу; направленное сначала подготавливается к выпуску.",
+          T('svc.ench.CastWhenUsed.note'),
         );
         break;
       case "CastWhenStrikes":
         summary =
-          "При успешном ударе с ненулевым уроном применяет выбранное готовое заклинание к цели и расходует 10 единиц прочности. По защищённой цели не срабатывает.";
+          T('svc.ench.CastWhenStrikes.summary');
         break;
       case "CastWhenHeld":
         summary =
-          "При надевании применяет выбранное готовое заклинание. Его параметры берутся из игрового каталога, а не из числовых полей мастерской.";
+          T('svc.ench.CastWhenHeld.summary');
         formula.push(
-          "Износ при обычной игре: −1 прочности раз в 36 магических раундов; при отдыхе — раз в 60.",
+          T('svc.ench.CastWhenHeld.formula'),
         );
         notes.push(
-          "При первом надевании: износ = min(штатная цена заклинания в мане, текущая прочность − 1), не ниже 0. Повторное надевание в течение 6 игровых часов бесплатно; легендарные вещи не оплачивают надевание. Снятие прекращает связанные эффекты.",
+          T('svc.ench.CastWhenHeld.note'),
         );
         break;
       case "ImprovesTalents":
         summary =
           p === 0
-            ? "Улучшает острый слух: множитель слышимости врагов для обладателя таланта меняется с 1,25 на 1,5."
+            ? T('svc.ench.ImprovesTalents.hearing')
             : p === 1
-              ? "Улучшает атлетизм только при наличии соответствующей особенности карьеры: ещё +0,1 к множителю прыжка и расход запаса сил ×0,8 вместо ×0,9. Сама особенность даёт +0,1 к прыжку. Без неё предмет не даёт этот бонус."
+              ? T('svc.ench.ImprovesTalents.athleticism')
               : p === 2
-                ? "Улучшает прилив адреналина при наличии соответствующей особенности: боевой модификатор +12 вместо +8."
-                : "Улучшает выбранный талант: острый слух, атлетизм или прилив адреналина. Эффект зависит от соответствующей способности персонажа.";
+                ? T('svc.ench.ImprovesTalents.adrenaline')
+                : T('svc.ench.ImprovesTalents.any');
         break;
     }
     if (!summary) return null;
     if (cost != null && Number.isFinite(Number(cost))) {
       const C = Number(cost);
       stats.push([
-        C < 0 ? "Освобождает бюджет" : "Стоимость зачарования",
-        fmt(Math.abs(C)) + " очк.",
+        C < 0 ? T('svc.stat.freesBudget') : T('svc.stat.enchantCost'),
+        T("svc.value.points", { n: fmt(Math.abs(C)) }),
       ]);
       notes.push(
         C < 0
-          ? "Отрицательная стоимость уменьшает сумму очков; недостаток не является отдельной платой золотом."
-          : "Положительная стоимость входит в общую сумму очков. Золото рассчитывает мастерская по выбранному предмету и навыкам.",
+          ? T('svc.note.negativeCost')
+          : T('svc.note.positiveCost'),
       );
     }
-    if (p != null && name) stats.unshift(["Выбранный вариант", name]);
-    return { type, title: enchantNames[type], summary, stats, formula, notes };
+    if (p != null && name) stats.unshift([T('svc.stat.variant'), name]);
+    return { type, title: T(enchantNames[type]), summary, stats, formula, notes };
   }
   return Object.freeze({ spell, enchant, mechanic, enchantNames, mechanics });
 });

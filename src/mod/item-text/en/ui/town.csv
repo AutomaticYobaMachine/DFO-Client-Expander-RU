@@ -1,0 +1,236 @@
+key,text,note
+town.status.noRegistry,the game's home registry is unavailable,src/mod/page/dfo_town.js
+town.bar.influence,Guild influence,src/mod/page/dfo_town.js
+town.bar.doors,Doors and owners,src/mod/page/dfo_town.js
+town.bar.marks,Venue marks,src/mod/page/dfo_town.js
+town.button,Detailed town map,src/mod/page/dfo_town.js
+town.bar.info,ℹ Town info,src/mod/page/dfo_town.js
+town.bar.data,⟳ Town data,src/mod/page/dfo_town.js
+town.bar.exit,✕ Exit (Esc),src/mod/page/dfo_town.js
+town.key.hideAll,Hide colours,src/mod/page/dfo_town.js
+town.key.showAll,Show colours,src/mod/page/dfo_town.js
+town.key.title,Legend,src/mod/page/dfo_town.js
+town.ago.now,just now,src/mod/page/dfo_town.js
+town.ago.minutes,{m} min ago,src/mod/page/dfo_town.js
+town.ago.hours,{h} h ago,src/mod/page/dfo_town.js
+town.ago.days,{d} d ago,src/mod/page/dfo_town.js
+town.holder.none,no guild,src/mod/page/dfo_town.js
+town.holder.unknown,unknown,src/mod/page/dfo_town.js
+town.info.town,Town,src/mod/page/dfo_town.js
+town.info.region,Region,src/mod/page/dfo_town.js
+town.info.cell,Map cell,src/mod/page/dfo_town.js
+town.info.size,Size,src/mod/page/dfo_town.js
+town.info.sizeValue,"{w}×{h} blocks ({cells}), ~{km} km²",src/mod/page/dfo_town.js
+town.info.buildings,Buildings in total,src/mod/page/dfo_town.js
+town.info.housing,Housing,src/mod/page/dfo_town.js
+town.info.housingValue,"{n} {n:home|homes}: {owned} taken ({pct}), {free} free",src/mod/page/dfo_town.js
+town.info.halls,Player guild halls,src/mod/page/dfo_town.js
+town.info.accounts,Residents (accounts),src/mod/page/dfo_town.js
+town.info.guilds,Player guilds holding property,src/mod/page/dfo_town.js
+town.info.venues,Shops / taverns / organisations,src/mod/page/dfo_town.js
+town.info.venuesOther, (+ banks and libraries: {n}),src/mod/page/dfo_town.js
+town.seat,Seat,src/mod/page/dfo_town.js
+town.info.noSeat,none / unheld,src/mod/page/dfo_town.js
+town.info.economy,Economy,src/mod/page/dfo_town.js
+town.info.economyValue,{band} ({p} of 100),src/mod/page/dfo_town.js
+town.info.online,Players in town now,src/mod/page/dfo_town.js
+town.info.ownerData,Owner data,src/mod/page/dfo_town.js
+town.no,no,src/mod/page/dfo_town.js
+town.yes,yes,src/mod/page/dfo_town.js
+town.yesCount,yes ({n}),src/mod/page/dfo_town.js
+town.guilds.own,You and your guild{tag},src/mod/page/dfo_town.js
+town.guilds.unknown,Guild unknown,src/mod/page/dfo_town.js
+town.guilds.none,No guild,src/mod/page/dfo_town.js
+town.guild,Guild,src/mod/page/dfo_town.js
+town.guilds.holdings,Holdings,src/mod/page/dfo_town.js
+town.guilds.share,Share,src/mod/page/dfo_town.js
+town.guilds.accounts,Accounts,src/mod/page/dfo_town.js
+town.guilds.hall,Hall,src/mod/page/dfo_town.js
+town.people.mine,your account,src/mod/page/dfo_town.js
+town.people.unseen,never seen online,src/mod/page/dfo_town.js
+town.people.account,Account,src/mod/page/dfo_town.js
+town.people.homes,Homes,src/mod/page/dfo_town.js
+town.people.source,Known from,src/mod/page/dfo_town.js
+town.people.onlineNow,Online in town now: {n},src/mod/page/dfo_town.js
+town.people.party,your party,src/mod/page/dfo_town.js
+town.people.hostile,hostile,src/mod/page/dfo_town.js
+town.people.player,Player,src/mod/page/dfo_town.js
+town.people.nobody,No other players are in sight within the town.,src/mod/page/dfo_town.js
+town.estate.forSale,Houses for sale (signboard),src/mod/page/dfo_town.js
+town.estate.dwellings,Dwellings,src/mod/page/dfo_town.js
+town.estate.total,Total housing,src/mod/page/dfo_town.js
+town.estate.taken,Taken,src/mod/page/dfo_town.js
+town.estate.free,Free,src/mod/page/dfo_town.js
+town.estate.painted,Repainted by owners,src/mod/page/dfo_town.js
+town.estate.deeds,Crown gifts (knights' houses),src/mod/page/dfo_town.js
+town.entry,Who may enter,src/mod/page/dfo_town.js
+town.estate.rooms,Rooms to rent: {n},src/mod/page/dfo_town.js
+town.rentFrom,from {f} gold/day,src/mod/page/dfo_town.js
+town.owner,Owner,src/mod/page/dfo_town.js
+town.estate.roomsFree,Rooms free,src/mod/page/dfo_town.js
+town.price,Price,src/mod/page/dfo_town.js
+town.estate.sales,For sale by owners: {n},src/mod/page/dfo_town.js
+town.estate.votes,Neighbours' ratings (votes for the house),src/mod/page/dfo_town.js
+town.estate.vote,Rating,src/mod/page/dfo_town.js
+town.count.shops,Shops: {n},src/mod/page/dfo_town.js
+town.type,Type,src/mod/page/dfo_town.js
+town.name,Name,src/mod/page/dfo_town.js
+town.quality,Quality,src/mod/page/dfo_town.js
+town.pays,Pays (everyone),src/mod/page/dfo_town.js
+town.paysMe,To me,src/mod/page/dfo_town.js
+town.count.taverns,Taverns: {n},src/mod/page/dfo_town.js
+town.building.tavern,Tavern,src/mod/page/dfo_town.js
+town.count.orgs,Organisations: {n},src/mod/page/dfo_town.js
+town.count.other,Banks and libraries: {n},src/mod/page/dfo_town.js
+town.economy.index,×{x} ({pct} of normal),src/mod/page/dfo_town.js
+town.economy.prosperity,Prosperity,src/mod/page/dfo_town.js
+town.economy.prosperityValue,{p} of 100 — {band},src/mod/page/dfo_town.js
+town.economy.region,Regional price index,src/mod/page/dfo_town.js
+town.economy.askAll,Shops ask (everyone),src/mod/page/dfo_town.js
+town.economy.payAll,Shops pay (everyone),src/mod/page/dfo_town.js
+town.economy.askMe,Shops ask (with your guild),src/mod/page/dfo_town.js
+town.economy.payMe,Shops pay (with your guild),src/mod/page/dfo_town.js
+town.economy.exchange,Port exchange,src/mod/page/dfo_town.js
+town.economy.exchangeValue,"sells ×{ask}, buys ×{pay}",src/mod/page/dfo_town.js
+town.economy.noPort,none (not a port),src/mod/page/dfo_town.js
+town.economy.best,Where selling pays best,src/mod/page/dfo_town.js
+town.economy.everyone,Everyone,src/mod/page/dfo_town.js
+town.economy.game,How the game sees the town,src/mod/page/dfo_town.js
+town.seat.empty,The seat “{name}” is held by no one.,src/mod/page/dfo_town.js
+town.seat.none,The town has no seat and is not among the charter's holdings: no guild rules it.,src/mod/page/dfo_town.js
+town.seat.holder,Held by,src/mod/page/dfo_town.js
+town.seat.since,Since week,src/mod/page/dfo_town.js
+town.seat.standing,Town standing,src/mod/page/dfo_town.js
+town.seat.standingValue,{n} of 100,src/mod/page/dfo_town.js
+town.seat.edict,Edict,src/mod/page/dfo_town.js
+town.seat.tithe,Tithe,src/mod/page/dfo_town.js
+town.seat.battle,Battle this week,src/mod/page/dfo_town.js
+town.info.title,{name} — town info,src/mod/page/dfo_town.js
+town.plot,Plot,src/mod/page/dfo_town.js
+town.plotValue,"≈{area} m², neighbouring plots: {n}",src/mod/page/dfo_town.js
+town.home.free,nobody — the house is free,src/mod/page/dfo_town.js
+town.nearGuilds,Neighbouring guilds,src/mod/page/dfo_town.js
+town.hall.title,Guild hall: {name},src/mod/page/dfo_town.js
+town.hall.yours,Yours,src/mod/page/dfo_town.js
+town.home.title,House: {name},src/mod/page/dfo_town.js
+town.home.account,Owner's account,src/mod/page/dfo_town.js
+town.home.holdings,Holdings in town on the account,src/mod/page/dfo_town.js
+town.home.guild,Owner's guild,src/mod/page/dfo_town.js
+town.home.yourGuild,your guild,src/mod/page/dfo_town.js
+town.home.unseen,account never seen online,src/mod/page/dfo_town.js
+town.home.rooms,Rooms to rent,src/mod/page/dfo_town.js
+town.home.sale,For sale by owner,src/mod/page/dfo_town.js
+town.home.vote,Neighbours' rating,src/mod/page/dfo_town.js
+town.home.painted,Repainted by owner,src/mod/page/dfo_town.js
+town.home.deed,Crown gift,src/mod/page/dfo_town.js
+town.home.type,Building type,src/mod/page/dfo_town.js
+town.qualityValue,{q} of 20 — {word},src/mod/page/dfo_town.js
+town.venue.paysMe,Pays to me,src/mod/page/dfo_town.js
+town.venue.buys,Buys,src/mod/page/dfo_town.js
+town.venue.buying,Buying,src/mod/page/dfo_town.js
+town.venue.buysNothing,buys nothing,src/mod/page/dfo_town.js
+town.venue.near,Influence around,src/mod/page/dfo_town.js
+town.unheld,unheld,src/mod/page/dfo_town.js
+town.typeN,type {n},src/mod/page/dfo_town.js
+town.data.never,not yet,src/mod/page/dfo_town.js
+town.data.last,Last update: {when},src/mod/page/dfo_town.js
+town.data.none,The data has not been updated yet,src/mod/page/dfo_town.js
+town.data.owners,Property owners,src/mod/page/dfo_town.js
+town.data.who,Online players list,src/mod/page/dfo_town.js
+town.data.arms,Guild names,src/mod/page/dfo_town.js
+town.data.snapshot,"Town snapshot (buildings, doors)",src/mod/page/dfo_town.js
+town.data.doors,Doors known,src/mod/page/dfo_town.js
+town.data.doorsValue,{n} of {all},src/mod/page/dfo_town.js
+town.data.asking,Asking the server…,src/mod/page/dfo_town.js
+town.data.refresh,Refresh data,src/mod/page/dfo_town.js
+town.data.regen,Regenerate town,src/mod/page/dfo_town.js
+town.data.title,{name} — data,src/mod/page/dfo_town.js
+town.label.hall,Guild hall: {name}{tag},src/mod/page/dfo_town.js
+town.label.account,Account: {name},src/mod/page/dfo_town.js
+town.heldBy,Town held by {name},src/mod/page/dfo_town.js
+town.heldByTag,Town held by {name}{tag},src/mod/page/dfo_town.js
+town.key.seat,Seat: {name}{tag},src/mod/page/dfo_town.js
+town.key.unknown,Guild unknown: {n},src/mod/page/dfo_town.js
+town.key.none,No guild: {n},src/mod/page/dfo_town.js
+town.key.free,Free: {n},src/mod/page/dfo_town.js
+town.key.venues,Venues,src/mod/page/dfo_town.js
+town.key.venuesCount,"Taverns, shops, organisations: {n}",src/mod/page/dfo_town.js
+town.key.yours,Yours: {n},src/mod/page/dfo_town.js
+town.key.single,One house per account: {n},src/mod/page/dfo_town.js
+town.key.estate,Property,src/mod/page/dfo_town.js
+town.none,none,src/mod/page/dfo_town.js
+town.battle.revolt,revolt,src/mod/page/dfo_town.js
+town.battle.tourney,tourney,src/mod/page/dfo_town.js
+town.battle.siege,siege,src/mod/page/dfo_town.js
+town.battle.against,against {name},src/mod/page/dfo_town.js
+town.ownGuild,your guild,src/mod/page/dfo_town.js
+town.holder.own,you / your guild,src/mod/page/dfo_town.js
+town.building.other,Building,src/mod/page/dfo_town.js
+town.yours,yours,src/mod/page/dfo_town.js
+town.gold,{n} gold,src/mod/page/dfo_town.js
+town.forGold,for {n} gold,src/mod/page/dfo_town.js
+town.label.holdings,({n} {n:holding|holdings} in town on this account),src/mod/page/dfo_town.js
+town.key.own,You: {n},src/mod/page/dfo_town.js
+town.key.ownGuild,You and your guild [{tag}]: {n},src/mod/page/dfo_town.js
+town.key.account,{name}: {n} {n:holding|holdings},src/mod/page/dfo_town.js
+town.tab.overview,Overview,src/mod/page/dfo_town.js
+town.tab.guilds,Guilds,src/mod/page/dfo_town.js
+town.tab.people,Residents,src/mod/page/dfo_town.js
+town.tab.estate,Property,src/mod/page/dfo_town.js
+town.tab.venues,Venues,src/mod/page/dfo_town.js
+town.tab.economy,Economy,src/mod/page/dfo_town.js
+town.tab.seat,Seat,src/mod/page/dfo_town.js
+town.building.alchemist,Alchemist,src/mod/page/dfo_town.js
+town.building.houseForSale,House for sale,src/mod/page/dfo_town.js
+town.building.armorer,Armorer,src/mod/page/dfo_town.js
+town.building.bank,Bank,src/mod/page/dfo_town.js
+town.building.townHall,Town building,src/mod/page/dfo_town.js
+town.building.bookseller,Bookseller,src/mod/page/dfo_town.js
+town.building.clothier,Clothier,src/mod/page/dfo_town.js
+town.building.furnitureStore,Furniture store,src/mod/page/dfo_town.js
+town.building.gemStore,Jeweler,src/mod/page/dfo_town.js
+town.building.generalStore,General store,src/mod/page/dfo_town.js
+town.building.library,Library,src/mod/page/dfo_town.js
+town.building.guildHall,Guild / order,src/mod/page/dfo_town.js
+town.building.pawnShop,Pawnshop,src/mod/page/dfo_town.js
+town.building.weaponSmith,Weaponsmith,src/mod/page/dfo_town.js
+town.building.temple,Temple,src/mod/page/dfo_town.js
+town.building.palace,Palace,src/mod/page/dfo_town.js
+town.building.house,House,src/mod/page/dfo_town.js
+town.building.ship,Ship,src/mod/page/dfo_town.js
+town.buys.alchemist,"gems, ingredients (plants, creature parts, metals, other)",src/mod/page/dfo_town.js
+town.buys.armorer,"armor, weapons",src/mod/page/dfo_town.js
+town.buys.bookseller,books,src/mod/page/dfo_town.js
+town.buys.clothier,men's and women's clothing,src/mod/page/dfo_town.js
+town.buys.furnitureStore,furniture,src/mod/page/dfo_town.js
+town.buys.gemStore,"gems, jewelry",src/mod/page/dfo_town.js
+town.buys.generalStore,"books, clothing, jewelry, weapons, trinkets",src/mod/page/dfo_town.js
+town.buys.pawnShop,"armor, books, clothing, gems, jewelry, religious items, weapons, trinkets, paintings",src/mod/page/dfo_town.js
+town.buys.weaponSmith,"armor, weapons",src/mod/page/dfo_town.js
+town.entry.private,owner only,src/mod/page/dfo_town.js
+town.entry.party,owner's party,src/mod/page/dfo_town.js
+town.entry.public,everyone,src/mod/page/dfo_town.js
+town.entry.guild,owner's guild,src/mod/page/dfo_town.js
+town.band.Booming,booming,src/mod/page/dfo_town.js
+town.band.Thriving,thriving,src/mod/page/dfo_town.js
+town.band.Steady,steady,src/mod/page/dfo_town.js
+town.band.Struggling,struggling,src/mod/page/dfo_town.js
+town.band.Destitute,destitute,src/mod/page/dfo_town.js
+town.edict.market-day,market day,src/mod/page/dfo_town.js
+town.edict.festival,festival,src/mod/page/dfo_town.js
+town.edict.levy,levy,src/mod/page/dfo_town.js
+town.edict.curfew,curfew,src/mod/page/dfo_town.js
+town.edict.open-gates,open gates,src/mod/page/dfo_town.js
+town.edict.conscription,conscription,src/mod/page/dfo_town.js
+town.edict.tithe,tithe,src/mod/page/dfo_town.js
+town.tier.palace,palace,src/mod/page/dfo_town.js
+town.tier.crown,crown,src/mod/page/dfo_town.js
+town.source.hub,online list,src/mod/page/dfo_town.js
+town.source.tag,seen in game,src/mod/page/dfo_town.js
+town.source.ow,seen on the map,src/mod/page/dfo_town.js
+town.source.roster,your guild's roster,src/mod/page/dfo_town.js
+town.quality.luxurious,luxurious,src/mod/page/dfo_town.js
+town.quality.rich,rich,src/mod/page/dfo_town.js
+town.quality.common,common,src/mod/page/dfo_town.js
+town.quality.modest,modest,src/mod/page/dfo_town.js
+town.quality.shabby,shabby,src/mod/page/dfo_town.js

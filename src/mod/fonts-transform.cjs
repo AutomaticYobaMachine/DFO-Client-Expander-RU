@@ -52,7 +52,7 @@ function transformFonts(rel,text,log){
  if(text.includes('#sdf')&&text.includes('drawScreenQuadRun'))jobs.push(['fonts.classic',classic]);
  if(/^assets\/bookReader-[^/]+\.js$/.test(rel)&&text.includes('BOOK00I0.IMG'))jobs.push(['fonts.bookClassic',classicBook]);
  if(/^assets\/enhancedBook-[^/]+\.js$/.test(rel))jobs.push(['fonts.bookCanvas',canvasBook]);
- if(text.includes('dyslexic:`Dyslexic`'))jobs.push(['fonts.choices',text=>text.replace('Object.freeze({game:`Game`,sans:`Sans`,mono:`Monospace`,dyslexic:`Dyslexic`,system:`My font`})','Object.freeze({game:`Шрифты сообщества`})')]);
+ if(text.includes('dyslexic:`Dyslexic`'))jobs.push(['fonts.choices',text=>text.replace('Object.freeze({game:`Game`,sans:`Sans`,mono:`Monospace`,dyslexic:`Dyslexic`,system:`My font`})','Object.freeze({game:globalThis.__dfoUi?.t(`fonts.community`)??`Community fonts`})')]);
  if(text.includes('dagger-enhanced-fonts'))jobs.push(['fonts.network',text=>text.replace(/(function [\w$]+\([\w$]+=document,[\w$]+=globalThis\.location\?\.search\?\?``\)\{)/,'$1if(globalThis.__dfoFonts)return;')]);
  for(const [id,apply]of jobs){if(text.includes('/*'+id+'*/'))continue;try{const next=apply(text);if(next===text)throw Error('No matching declaration');text=next+'\n/*'+id+'*/\n';log.push([id,1])}catch(e){log.push([id+'!error '+e.message,0])}}
  return transformCalibration(rel,text,log);

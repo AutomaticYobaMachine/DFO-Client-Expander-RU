@@ -33,3 +33,31 @@ cards.general,Общие сведения,left column heading
 cards.price.unknown,Стоимость неизвестна,price aria-label
 cards.price.approximate,Примерная стоимость: {value} золота,price aria-label
 cards.price.exact,Стоимость: {value} золота,price aria-label
+cards.slot,Слот,row label: where the piece is worn
+cards.slot.Head,Голова,equip slot (the inventory's own label)
+cards.slot.Amulet,Амулет,equip slot
+cards.slot.Cloak,Плащ,equip slot
+cards.slot.ChestClothes,"Грудь, одежда",equip slot
+cards.slot.ChestArmor,"Грудь, броня",equip slot
+cards.slot.RightArm,Правое плечо,equip slot (pauldron)
+cards.slot.LeftArm,Левое плечо,equip slot (pauldron)
+cards.slot.Bracer,Наруч,equip slot
+cards.slot.Bracelet,Браслет,equip slot
+cards.slot.Ring,Кольцо,equip slot
+cards.slot.Gloves,Перчатки,equip slot
+cards.slot.LegsArmor,"Ноги, броня",equip slot
+cards.slot.LegsClothes,"Ноги, одежда",equip slot
+cards.slot.Feet,Обувь,equip slot
+cards.slot.Mark,Метка,equip slot
+cards.slot.Crystal,Кристалл,equip slot
+cards.slot.EitherHand,Любая рука,a one-handed piece: right or left
+cards.slot.BothHands,Обе руки,a two-handed piece
+cards.slot.RightHand,Правая рука,a right-hand-only piece
+cards.slot.LeftHand,Левая рука,a left-hand-only piece (a shield)
+cards.skill,Навык,row label: the skill a weapon's blows train
+cards.skill.ShortBlade,Короткие Клинки,the game's skill name
+cards.skill.LongBlade,Длинные Клинки,the game's skill name
+cards.skill.Axe,Топор,the game's skill name
+cards.skill.BluntWeapon,Дробящее оружие,the game's skill name
+cards.skill.Archery,Стрельба из лука,the game's skill name
+cards.skill.HandToHand,Рукопашный бой,the game's skill name

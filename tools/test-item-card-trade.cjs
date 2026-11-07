@@ -72,7 +72,9 @@ async function main(){
    }
   }
   assert.deepEqual(errors,[]);
-  const report={gameVersion:JSON.parse(fs.readFileSync(path.join(build,'verified-manifest.json'))).version,language:russian?'ru':'en',rows,unknownPowersRemainHidden:true,errors};
+  // fetch-build's verified manifest names the release; a cached build directory (tools/dev-env.sh) is named by it.
+  const gameVersion=(()=>{try{return JSON.parse(fs.readFileSync(path.join(build,'verified-manifest.json'))).version}catch{return path.basename(build)}})();
+  const report={gameVersion,language:russian?'ru':'en',rows,unknownPowersRemainHidden:true,errors};
   if(process.env.DFO_TRADE_REPORT)fs.writeFileSync(process.env.DFO_TRADE_REPORT,JSON.stringify(report,null,2)+'\n');
   console.log(JSON.stringify(report,null,2));
  }finally{await browser?.close();await new Promise(resolve=>server.close(resolve))}

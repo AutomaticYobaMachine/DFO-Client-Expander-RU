@@ -83,7 +83,7 @@ function inventory(text) {
   if (deps !== refresh[3]) throw new Error('pack refresh: another deps');
   out = put(out, close[0], `__dfoPackHead$(${close[4]},()=>{${refresh[1]}();${render}()});${close[0]}`);
   out = put(out, refresh[0], `${refresh[1]}=()=>{__dfoPackRefresh$(${deps},()=>!!${salvage}||!!${chestRefusal}(${deps}),()=>${sortInPlace}(${deps}.entity?.items,{nameOf:${nameOf}}));${refresh[2]}=${pm}(${refresh[3]}),`);
-  return guardRender(out, render) + '\n;function __dfoPackList$(t,p){try{return globalThis.__dfoPack?.list?.(t,p)??t}catch{return t}}'
+  return out + '\n;function __dfoPackList$(t,p){try{return globalThis.__dfoPack?.list?.(t,p)??t}catch{return t}}'
     + 'function __dfoPackBuild$(f,e){const p=globalThis.__dfoPack;return typeof p?.build===\'function\'?p.build(f,e):f(e)}'
     + 'function __dfoPackMode$(){try{return globalThis.__dfoPack?.mode?.()??\'\'}catch{return\'\'}}'
     + 'function __dfoPackListRow$(){try{return globalThis.__dfoPack?.listRow?.()===!0}catch{return!1}}'
@@ -100,9 +100,19 @@ function receipt(text) {
   return put(text, whole, `function ${name}(${list},${item},${at}=\`back\`){try{globalThis.__dfoPack?.received?.(${list},${item},${at})}catch{}${body}`);
 }
 
+
+// Independent of the list/style hooks: if a future game version changes
+// inventory.view's signatures, the original game's recursive icon repaint
+// still needs its own guard. Keep its log/expected hook separate.
+function reentrant(text) {
+  const callers = [...text.matchAll(/\(\)=>\{[\w$]+\(`packPhoneDoll`,![\w$]+\),([\w$]+)\(\)\}/g)];
+  if (callers.length !== 1) throw new Error(`inventory render symbol: ${callers.length} matches`);
+  return guardRender(text, callers[0][1]);
+}
 const JOBS = [
   ['inventory.pages', (rel, text) => /\/storeFilter-[^/]+\.js$/.test(rel) && text.includes('[`weapons`,`Weapons`]'), pages],
   ['inventory.view', (rel, text) => text.includes('`packPhoneDoll`') && text.includes('`packempty`'), inventory],
+  ['inventory.reentrant', (rel, text) => /\/enhancedInventory-[^/]+\.js$/.test(rel) && text.includes('`packPhoneDoll`'), reentrant],
   ['inventory.receipt', (rel, text) => !/Worker-/.test(rel) && text.includes('AddItem() encountered a duplicate item'), receipt],
 ];
 
@@ -115,4 +125,4 @@ function transformInventory(rel, text, log) {
   return out;
 }
 
-module.exports = { transformInventory, pages, inventory, receipt, guardRender };
+module.exports = { transformInventory, pages, inventory, receipt, guardRender, reentrant };

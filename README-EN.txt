@@ -1,4 +1,4 @@
-DFO-Client-Expander-RU 1.27.0
+DFO-Client-Expander-RU 1.28.0
 =============================
 Author: AutomaticYobaMachine
 Made especially for the Russian-speaking DFO Online community.
@@ -35,7 +35,9 @@ FEATURES
   material apart from the armor type, properties and effects as lists,
   the game's own sigil, set and comparison blocks, the item's description and
   its worth at the bottom. It always fits on the screen. The quick-loot list
-  at the crosshair shows a compact card of the lit item beside it.
+  at the crosshair shows a compact card of the lit item beside it, and the
+  rows of a chest, the wagon, the bag or a body say the armor type and metal
+  ("Chain Ebony"), the weight ("2.0 kg") and the price.
 - Russian translation: the interface, items, quests and books in Russian.
 - Marks and town map: venues on the Overworld and a detailed town map.
   "Only visited" hides the buildings you have not been to yet.

@@ -458,7 +458,7 @@ function injectPage(html, prefix, ctx) {
   tags.push(`<script>window.__DFO_MOD_CFG__=${JSON.stringify(ctx.pageCfg ?? {})};</script>`);
   // The mod's own strings first: every script after them speaks the install's language (English without the translation).
   tags.push(`<script src="${prefix}dfo-mod/dfo_ui_text_data.js"></script>`, `<script src="${prefix}dfo-mod/dfo_ui_text.js"></script>`);
-  if (ctx.fonts === true) tags.push(`<script src="${prefix}dfo-mod/dfo_font_data.js?dfo=1.27.0"></script>`,`<script src="${prefix}dfo-mod/dfo_fonts.js?dfo=1.27.0"></script>`);
+  if (ctx.fonts === true) tags.push(`<script src="${prefix}dfo-mod/dfo_font_data.js?dfo=1.28.0"></script>`,`<script src="${prefix}dfo-mod/dfo_fonts.js?dfo=1.28.0"></script>`);
   if (ctx.ru && !html.includes('ru_dict.js')) tags.push(`<script src="${prefix}dfo-mod/ru_dict.js"></script>`, `<script src="${prefix}dfo-mod/ru_i18n.js"></script>`);
   tags.push(`<script src="${prefix}dfo-mod/ru_locale.js"></script>`, `<script src="${prefix}dfo-mod/ru_items.js"></script>`);
   if (ctx.ru || ctx.fonts) tags.push(`<script src="${prefix}dfo-mod/dfo_service_details.js"></script>`, `<script src="${prefix}dfo-mod/dfo_services.js"></script>`);
@@ -475,7 +475,7 @@ function injectPage(html, prefix, ctx) {
  *  off in this version of the game (the log says which). The other ids are older shapes of the same places. */
 const EXPECTED = Object.freeze({
   fonts: ['fonts.classic','fonts.choices','fonts.network','fonts.bookClassic','fonts.bookCanvas','fonts.fnt','fonts.pixels','fonts.resources','fonts.worker','fonts.uiSizes','fonts.titleSizes','fonts.dial','fonts.statusLayout','fonts.mapHost','fonts.mapProject','fonts.mapHud'],
-  itemCards: ['itemCards.inventory', 'itemCards.values', 'itemCards.materials', 'itemCards.powers', 'itemCards.prices', 'itemCards.currency', 'itemCards.effectLabels', 'itemCards.slots', 'itemCards.skills', 'itemCards.quick', 'itemCards.letters'],
+  itemCards: ['itemCards.inventory', 'itemCards.values', 'itemCards.materials', 'itemCards.powers', 'itemCards.prices', 'itemCards.currency', 'itemCards.effectLabels', 'itemCards.slots', 'itemCards.skills', 'itemCards.quick', 'itemCards.letters', 'itemCards.rows'],
   dungeons: ['dungeon.world', 'dungeon.hud', 'dungeon.travelView', 'dungeon.bestiary', 'dungeon.tables', 'dungeon.scaling', 'dungeon.rewards', 'dungeon.runtime', 'dungeon.lifetime', 'dungeon.aurum', 'dungeon.ore', 'dungeon.renown', 'dungeon.respawn', 'dungeon.layout', 'dungeon.sizes', 'dungeon.elites', 'dungeon.live', 'dungeon.journalDoor', 'dungeon.journalClassic', 'dungeon.journalFocus', 'dungeon.traits', 'dungeon.navContext', 'dungeon.navDraw', 'dungeon.navQuests'],
   nearbyLoot: ['loot.tags', 'loot.types', 'loot.kinds', 'loot.identified', 'loot.bound', 'loot.bootstrap', 'loot.world', 'loot.exterior', 'loot.modes', 'loot.dungeon', 'loot.finds', 'loot.spoils', 'loot.inventory', 'loot.transfer', 'loot.arrows'],
   marks: ['marks.world', 'marks.townSources', 'marks.list', 'marks.look', 'marks.glyph', 'marks.groups', 'marks.words', 'marks.group', 'marks.discovery',

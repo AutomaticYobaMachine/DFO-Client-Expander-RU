@@ -61,3 +61,7 @@ cards.skill.Axe,Axe,the game's skill name
 cards.skill.BluntWeapon,Blunt Weapon,the game's skill name
 cards.skill.Archery,Archery,the game's skill name
 cards.skill.HandToHand,Hand-to-Hand,the game's skill name
+cards.armor.Leather,Leather,a loot row's armour type
+cards.armor.Chain,Chain,a loot row's armour type
+cards.armor.Plate,Plate,a loot row's armour type
+cards.kg,kg,a loot row's weight unit

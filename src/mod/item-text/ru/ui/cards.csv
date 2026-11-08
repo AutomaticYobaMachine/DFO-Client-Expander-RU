@@ -61,3 +61,7 @@ cards.skill.Axe,Топор,the game's skill name
 cards.skill.BluntWeapon,Дробящее оружие,the game's skill name
 cards.skill.Archery,Стрельба из лука,the game's skill name
 cards.skill.HandToHand,Рукопашный бой,the game's skill name
+cards.armor.Leather,Кожа,a loot row's armour type
+cards.armor.Chain,Кольчуга,a loot row's armour type
+cards.armor.Plate,Латы,a loot row's armour type
+cards.kg,кг,a loot row's weight unit

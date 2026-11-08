@@ -21,7 +21,9 @@ function inventory(text) {
   const item = head[2];
   if (text.includes('__dfoItemCardContext')) throw new Error('item-card helper name collision');
   // Resolve game imports at module scope: minifiers reuse those identifiers as card-local variables.
-  const context = `\nfunction __dfoItemCardContext(_item,_body){return {body:_body,known:()=>${known}(_item),meta:[${piece[6]}(_item),...${piece[2]}(_item,${piece[4]}(_item))].filter(Boolean),credit:()=>${credit}(_item)}}\n`;
+  const context = `\nfunction __dfoItemCardContext(_item,_body){return {body:_body,known:()=>${known}(_item),meta:[${piece[6]}(_item),...${piece[2]}(_item,${piece[4]}(_item))].filter(Boolean),credit:()=>${credit}(_item)}}\n`
+    // A loot row's lighter context: whether the piece is known and whether it is a letter - never the card's metadata.
+    + `function __dfoItemRowContext(_item){return {known:()=>${known}(_item),credit:()=>${credit}(_item)}}\n`;
   const call = `try{globalThis.__dfoItemCards?.dress(${tail[1]},${tail[2]},__dfoItemCardContext(${item},${head[6]}))}catch(_dfoItemCard){}`;
   const at = head.index + tail.index;
   let out = text.slice(0, at) + call + text.slice(at);
@@ -114,6 +116,21 @@ function quickPanel(text) {
   return text.slice(0, at) + call + text.slice(at);
 }
 
+// The loot window's rows (enhancedInventory.js itemRow - a chest's, a wagon's, the bag's, a body's): handed to the card
+// script once the native row stands - its picture, its name and sub-line, its weight column - with its native line,
+// its side, its light context and the native quest word, so the sub-line and the right column can be the card's.
+function rows(text) {
+  // Only beside a wrapped card: its light context is the inventory hook's, and a chunk the card cannot wrap stays as it is.
+  if (!text.includes('function __dfoItemRowContext(')) return null;
+  const head = need(text, /function ([\w$]+)\(([\w$]+),([\w$]+)=`local`\)\{let ([\w$]+)=[\w$]+\(\2\),/);
+  const [, , item, from, line] = head, l = escapeRx(line), slice = text.slice(head.index, head.index + 2500);
+  const sub = need(slice, rx(`let (${ID})=\\[${l}\\.material,${l}\\.word,${l}\\.lit\\?\`lit\`:null,${l}\\.quest==null\\?null:(${ID})\\(\\)\\]\\.filter\\(Boolean\\)\\.join\\(\` · \`\\);`));
+  const weight = need(slice, rx(`(${ID})\\.append\\(${ID}\\(\`span\`,\`itemwt\`,${ID}\\(${ID}\\(${escapeRx(item)},${l}\\)\\)\\)\\),`));
+  const at = head.index + weight.index + weight[0].length;
+  const call = `(typeof __dfoItemRowContext==="function"&&globalThis.__dfoItemCards?.row?.(${weight[1]},${line},${from},__dfoItemRowContext(${item}),${line}.quest==null?null:${sub[2]}())),`;
+  return text.slice(0, at) + call + text.slice(at);
+}
+
 // A letter of credit's worth (walletItem.js letterWorthGold): its non-null answer marks the letter, priced exactly.
 function letters(text) {
   const m = need(text, /([\w$]+)=([\w$]+)=>\2\?\.templateIndex===\d+\?`\$\{[\w$]+\(Math\.max\(0,Math\.trunc\(Number\(\2\.value\)\|\|0\)\)\)\} gold`:null/);
@@ -125,6 +142,7 @@ function transformItemCards(rel, text, log) {
   if (/Worker-[^/]+\.js$/.test(rel)) return text;
   const jobs = [];
   if (/\/enhancedInventory-[^/]+\.js$/.test(rel) && text.includes('return{c:') && text.includes('tip-tight')) jobs.push(['itemCards.inventory', inventory]);
+  if (/\/enhancedInventory-[^/]+\.js$/.test(rel) && text.includes('`itemwt`')) jobs.push(['itemCards.rows', rows]);
   if (text.includes('.variantWord?') && /Number\.isFinite\([\w$]+\?\.value\)/.test(text)) jobs.push(['itemCards.values', templates]);
   if (text.includes('HelmAndShieldMaterialDisplay') && text.includes('[`rare`,`legendary`,`aetheric`,`gilded`]')) jobs.push(['itemCards.materials', materials]);
   if (text.includes('Imprint: ') && text.includes('.legendary?') && text.includes('.gilded?')) jobs.push(['itemCards.powers', powers]);

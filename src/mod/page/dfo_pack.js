@@ -304,6 +304,7 @@ html[data-dfo-pack] .pack-shell:not(.paired) .pack-win {
   }
   html[data-dfo-pack] .pack-shell:not(.paired) .pack-dock .packcats .packtabs {
     display:grid; grid-template-columns:repeat(9,minmax(0,1fr)); gap:3px; margin:0;
+    flex:1 1 auto; min-width:0; width:100%;
   }
   html[data-dfo-pack] .pack-shell:not(.paired) .pack-dock .packcats .packtab {
     display:flex; min-width:0; min-height:36px; padding:3px 2px;

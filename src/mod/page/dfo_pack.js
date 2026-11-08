@@ -209,7 +209,13 @@
       const baseFrame = win.getBoundingClientRect();
       const baseMain = main.getBoundingClientRect();
       const baseDock = dock.getBoundingClientRect();
-      if (!(baseMain.width > 0 && baseMain.height > 0)) return;
+      // In standalone mode the NATIVE grid allocates everything except the 380px
+      // dock to the character (1216px at 1600px outer width!). That pre-mod width
+      // is NOT the paired reference. Use the paired track's 656px instead, as in
+      // 1.29.4; only paired can measure its own native left pane directly.
+      const viewportWidth = root.innerWidth || doc.documentElement.clientWidth;
+      const referenceLeft = paired ? baseMain.width : Math.min(656, Math.max(0, viewportWidth - 774));
+      if (!(referenceLeft > 0 && baseMain.height > 0)) return;
 
       // Keep both axes at EXACTLY the same factor. Only constrain when the viewport
       // cannot hold an enlarged frame alongside the native remote loot window.
@@ -220,10 +226,10 @@
         const remote = shell.querySelector(':scope > .loot-win');
         const remoteWidth = remote?.getBoundingClientRect().width || 340;
         const availableWidth = (root.innerWidth || doc.documentElement.clientWidth) - 32 - 18 - remoteWidth;
-        scale = Math.min(scale, 1 + Math.max(0, availableWidth - baseFrame.width) / baseMain.width);
+        scale = Math.min(scale, 1 + Math.max(0, availableWidth - baseFrame.width) / referenceLeft);
       }
       scale = Math.max(1, Math.min(1.2, scale));
-      const extraWidth = baseMain.width * (scale - 1);
+      const extraWidth = referenceLeft * (scale - 1);
       const extraHeight = baseMain.height * (scale - 1);
 
       // Standalone keeps its 1600px outside frame: only the RIGHT inventory yields
@@ -236,7 +242,7 @@
       }
       win.style.setProperty('height', (baseFrame.height + extraHeight) + 'px', 'important');
       grid.style.setProperty('display', 'grid', 'important');
-      grid.style.setProperty('grid-template-columns', (baseMain.width * scale) + 'px minmax(0,1fr)', 'important');
+      grid.style.setProperty('grid-template-columns', (referenceLeft * scale) + 'px minmax(0,1fr)', 'important');
       main.style.setProperty('min-width', '0');
       dock.style.setProperty('min-width', '0');
       // CSS zoom scales the character's OWN contents and padding, unlike merely

@@ -189,15 +189,45 @@
     header.classList.add('dfo-pack-head');
     header.append(view, auto, junk);
     shown = { header, repaint };
-    // The game creates/replaces .pack-win after this hook. Set its real outer width
-    // after render, not the inner category bar: this also defeats native 1040px
-    // sizing when the base stylesheet is injected later than the mod's stylesheet.
-    // The paired container window must continue using the native fit rule.
+    // The game creates the .pack, tabs and item columns AFTER this header hook.
+    // Apply geometry once the synchronous native render is finished. In 1.29.2 we
+    // only forced the OUTER .pack-win, leaving the native grid's fluid LEFT pane
+    // and its narrow right dock intact. Force BOTH the frame and the actual grid.
+    // Inline important also survives late-injected native/skin styles. Paired and
+    // narrow/phone windows retain the native layout unmodified.
     Promise.resolve().then(() => {
+      if (root.matchMedia && !root.matchMedia('(min-width: 1000px)').matches) return;
       const win = doc.querySelector('.pack-shell:not(.paired) > .pack-win');
       if (!win || !win.isConnected) return;
+      const grid = win.querySelector('.pack');
+      const main = grid?.querySelector('.pack-main');
+      const dock = grid?.querySelector('.pack-dock');
+      if (!grid || !main || !dock) return;
       win.style.setProperty('width', 'calc(100vw - 24px)', 'important');
       win.style.setProperty('max-width', '1600px', 'important');
+      grid.style.setProperty('display', 'grid', 'important');
+      grid.style.setProperty('grid-template-columns', '540px minmax(0,1fr)', 'important');
+      main.style.setProperty('min-width', '0');
+      dock.style.setProperty('min-width', '0');
+      // All nine named categories AND counts occupy the entire RIGHT dock,
+      // never a strip over equipment. Preserve native tab buttons and handlers.
+      const shelf = dock.querySelector('.packcats');
+      const tabs = shelf?.querySelector('.packtabs');
+      if (shelf && tabs) {
+        shelf.style.setProperty('width', '100%', 'important');
+        shelf.style.setProperty('min-width', '0');
+        tabs.style.setProperty('display', 'grid', 'important');
+        tabs.style.setProperty('grid-template-columns', 'repeat(9,minmax(0,1fr))', 'important');
+        tabs.style.setProperty('width', '100%', 'important');
+        tabs.style.setProperty('min-width', '0');
+      }
+      if (state.view === 'rows') {
+        const items = dock.querySelector('.packlists > .packcol');
+        if (items) {
+          items.style.setProperty('display', 'grid', 'important');
+          items.style.setProperty('grid-template-columns', 'repeat(2,minmax(0,1fr))', 'important');
+        }
+      }
     });
   }
   function showView() {
@@ -310,7 +340,7 @@ html[data-dfo-pack] .pack-shell:not(.paired) .pack-win {
 @media (min-width:1000px) {
   html[data-dfo-pack] .pack-shell:not(.paired) .pack {
     /* Keep the character/equipment area unchanged; all extra width goes to the item dock. */
-    grid-template-columns:540px minmax(0,1fr);
+    grid-template-columns:540px minmax(0,1fr) !important;
   }
   /* Nine equal category cells, confined to the right pane, never spanning the paper doll. */
   html[data-dfo-pack] .pack-shell:not(.paired) .pack-dock .packcats {
@@ -373,7 +403,7 @@ html[data-dfo-pack-view="rows"] .pack-shell .pack-dock .packcol:not(.packcats) {
 }
 html[data-dfo-pack-view="rows"] .pack-shell:not(.paired) .pack-dock .packcol:not(.packcats) {
   /* Each card takes half the widened dock, with the same gap as container rows. */
-  grid-template-columns:repeat(2,minmax(0,1fr)); justify-content:stretch;
+  grid-template-columns:repeat(2,minmax(0,1fr)) !important; justify-content:stretch;
 }
 html[data-dfo-pack-view="rows"] .pack-shell.paired .pack-dock .packcol:not(.packcats) {
   grid-template-columns:minmax(0,1fr);

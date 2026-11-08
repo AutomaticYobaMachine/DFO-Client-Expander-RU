@@ -24,7 +24,10 @@ function measure(paired) {
       '.pack-id h2{display:flex;gap:10px;align-items:center;font-size:18px;margin:0;color:#edca81}',
       '.pack-id .act{white-space:nowrap;padding:6px 8px;font-size:12px}',
       '.pack{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(300px,380px)}',
-      '.pack-main{min-width:0;background:#080a0d;padding:10px;box-sizing:border-box;color:#d3c7aa}',
+      '.pack-main{display:grid;grid-template-columns:1fr;min-width:0;background:#080a0d;box-sizing:border-box;color:#d3c7aa}',
+      '.charcol{box-sizing:border-box;display:flex;flex-direction:column;min-height:0;padding:12px 22px 16px;overflow:hidden}',
+      '.character-test{width:100px;height:60px;flex:none;background:#cea36e}',
+      '.loot-win{width:340px;height:500px}',
       '.pack-dock{min-width:0;display:flex;flex-direction:column;border-left:2px solid #777;background:#0c0e11}',
       '.packcats{min-width:0;display:flex;flex-wrap:wrap;gap:2px;padding:0 8px;box-sizing:border-box}',
       '.packtabs{display:grid;grid-template-columns:repeat(3,1fr);width:100%;margin:0}',
@@ -54,7 +57,8 @@ function measure(paired) {
       'const close=el("button","act","ЗАКРЫТЬ");',
       'win.append(head);',
       'window.__dfoPack.head(head,function(){});head.append(close);',
-      'const grid=el("div","pack"); const main=el("div","pack-main","ЭКИПИРОВКА");',
+      'const grid=el("div","pack"); const main=el("div","pack-main");',
+      'const charcol=el("div","charcol"), proof=el("div","character-test"); charcol.append(proof);main.append(charcol);',
       'const dock=el("div","pack-dock"), shelf=el("section","packcol packcats"), tabs=el("div","packtabs");',
       'const labels=["ОРУЖИЕ","БРОНЯ","ОДЕЖДА","ЗЕЛЬЯ","ИНГРЕДИЕНТЫ","КНИГИ","ЦЕННОСТИ","РАЗНОЕ","ХЛАМ"];',
       'labels.forEach((name,i)=>{const b=el("button","packtab",name); b.append(el("span","count",String([2,0,0,2,0,9,1,22,1][i]))); tabs.append(b)});',
@@ -69,7 +73,8 @@ function measure(paired) {
       ' const rect=n=>{const r=n.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height,right:r.right}};',
       ' const all=[...tabs.querySelectorAll(".packtab")];const rows=[...items.querySelectorAll(".itemrow")];',
       ' const result={',
-      '  window:rect(win),main:rect(main),dock:rect(dock),',
+      '  window:rect(win),main:rect(main),dock:rect(dock),character:rect(charcol),glyph:rect(proof),',
+      '  scale:getComputedStyle(charcol).zoom, paired:'+JSON.stringify(paired)+',',
       '  categoryRects:all.map(rect),',
       '  categoryVisible:all.map(b=>b.scrollWidth<=b.clientWidth+1 && (function(){const r=b.getBoundingClientRect(),n=b.querySelector(".count").getBoundingClientRect();return n.left>=r.left-1&&n.right<=r.right+1})()),',
       '  rowRects:rows.map(rect),',
@@ -96,24 +101,33 @@ function measure(paired) {
   }
 }
 
-test('real Chromium: the widened standalone frame gives its NEW space to the right dock, not equipment', { skip: !browser }, () => {
+test('real Chromium: the standalone frame reallocates 20% of the character width from the item dock', { skip: !browser }, () => {
   const result=measure(false);
-  assert.ok(result.window.width>=1550,JSON.stringify(result));
-  assert.ok(Math.abs(result.main.width-656)<=1,JSON.stringify(result));
-  assert.ok(result.dock.width>=900,JSON.stringify(result));
-  const firstY=result.categoryRects[0].y;
-  assert.ok(result.categoryRects.every(r=>Math.abs(r.y-firstY)<2),JSON.stringify(result));
-  assert.ok(result.categoryVisible.every(Boolean),'at least one category label or its numeric count is clipped: '+JSON.stringify(result));
-  assert.ok(result.rowRects[0].width>=450,JSON.stringify(result));
-  assert.ok(result.rowRects[1].width>=450,JSON.stringify(result));
-  assert.ok(Math.abs(result.rowRects[0].y-result.rowRects[1].y)<2,'item rows are not two side-by-side cards');
-  assert.ok(result.rowRects[1].x>=result.rowRects[0].right,'item columns overlap');
-  assert.ok(result.inlineGrid.includes('656px') && result.inlineGrid.includes('minmax(0px, 1fr)'), 'native paired width not preserved: '+result.inlineGrid);
+  assert.ok(Math.abs(result.window.width-1600)<2,JSON.stringify(result));
+  assert.ok(Math.abs(result.main.width-656*1.2)<=2,JSON.stringify(result));
+  assert.ok(Math.abs(result.dock.width-(1600-4-656*1.2))<=2,JSON.stringify(result));
+  // A 100x60 glyph INSIDE the character must become 120x72 on screen.
+  assert.ok(Math.abs(result.glyph.width-120)<=1,JSON.stringify(result));
+  assert.ok(Math.abs(result.glyph.height-72)<=1,JSON.stringify(result));
+  assert.ok(Math.abs(result.window.height-(660+602*0.2))<=2,JSON.stringify(result));
+  assert.ok(Math.abs(result.main.height-602*1.2)<=2,JSON.stringify(result));
+  assert.ok(result.categoryRects.every(r=>Math.abs(r.y-result.categoryRects[0].y)<2),'nine tabs must share one row');
+  assert.ok(result.categoryVisible.every(Boolean),'a category name or numeric count is clipped: '+JSON.stringify(result));
+  assert.ok(result.rowRects[0].width>350 && result.rowRects[1].width>350,JSON.stringify(result));
+  assert.ok(Math.abs(result.rowRects[0].y-result.rowRects[1].y)<2,'item rows must be side by side');
+  assert.ok(result.rowRects[1].x>=result.rowRects[0].right,'item rows must not overlap');
+  assert.ok(result.inlineGrid.includes('787.2px'),'actual 20% width not applied: '+result.inlineGrid);
 });
 
-test('real Chromium: a paired container window is NOT forced into the standalone wide layout', { skip: !browser }, () => {
+test('real Chromium: a paired container expands its OUTER frame 20% of the equipment track without shrinking its 380px item dock', { skip: !browser }, () => {
   const result=measure(true);
-  assert.equal(result.inlineGrid,'');
-  assert.equal(result.inlineFrame,'');
-  assert.ok(Math.abs(result.main.width-656)<=1,'native paired equipment reference is no longer 656px: '+JSON.stringify(result));
+  assert.ok(Math.abs(result.main.width-656*1.2)<=2,JSON.stringify(result));
+  assert.ok(Math.abs(result.dock.width-380)<=2,JSON.stringify(result));
+  assert.ok(Math.abs(result.window.width-(1040+656*0.2))<=2,JSON.stringify(result));
+  assert.ok(Math.abs(result.window.height-(660+602*0.2))<=2,JSON.stringify(result));
+  assert.ok(Math.abs(result.main.height-602*1.2)<=2,JSON.stringify(result));
+  assert.ok(Math.abs(result.glyph.width-120)<=1,JSON.stringify(result));
+  assert.ok(Math.abs(result.glyph.height-72)<=1,JSON.stringify(result));
+  assert.ok(result.rowRects[0].width>=350 && result.rowRects[0].width<=380,'paired item tiles changed width');
+  assert.ok(result.rowRects[1].y>result.rowRects[0].y,'paired item list must remain one column');
 });

@@ -189,47 +189,90 @@
     header.classList.add('dfo-pack-head');
     header.append(view, auto, junk);
     shown = { header, repaint };
-    // The game creates the .pack, tabs and item columns AFTER this header hook.
-    // Apply geometry once the synchronous native render is finished. In 1.29.2 we
-    // only forced the OUTER .pack-win. Preserve the NATIVE paired inventory's
-    // equipment width in standalone mode: paired .pack-win is 1040px wide
-    // (or 100vw-390px when smaller); its right dock has a 380px track.
-    // The 4px frame border is part of that width (box-sizing:border-box).
-    // Thus the actual paired LEFT content track is min(656px,100vw-774px).
-    // Force the two-column grid after native render to survive late CSS.
-    // Paired and narrow/phone windows retain native behavior.
+    // Uniform 120% enlargement of the EQUIPMENT REGION, not just its grid track.
+    // A native paired pack is 1040px overall with 656px of equipment and a 380px
+    // item dock (4px of frame). Standalone takes the extra 131.2px from its right
+    // dock; paired grows the whole pack by 131.2px, preserving the 380px item dock.
+    // The header hook runs before the native pack is appended; the microtask runs
+    // after the native render finishes. Repaints get fresh DOM and fresh geometry.
     Promise.resolve().then(() => {
       if (root.matchMedia && !root.matchMedia('(min-width: 1000px)').matches) return;
-      const win = doc.querySelector('.pack-shell:not(.paired) > .pack-win');
+      const shell = doc.querySelector('.pack-shell');
+      const win = shell?.querySelector(':scope > .pack-win');
       if (!win || !win.isConnected) return;
       const grid = win.querySelector('.pack');
       const main = grid?.querySelector('.pack-main');
       const dock = grid?.querySelector('.pack-dock');
-      if (!grid || !main || !dock) return;
-      win.style.setProperty('width', 'calc(100vw - 24px)', 'important');
-      win.style.setProperty('max-width', '1600px', 'important');
+      const character = main?.querySelector(':scope > .charcol');
+      if (!grid || !main || !dock || !character) return;
+      const paired = shell.classList.contains('paired');
+      const baseFrame = win.getBoundingClientRect();
+      const baseMain = main.getBoundingClientRect();
+      const baseDock = dock.getBoundingClientRect();
+      if (!(baseMain.width > 0 && baseMain.height > 0)) return;
+
+      // Keep both axes at EXACTLY the same factor. Only constrain when the viewport
+      // cannot hold an enlarged frame alongside the native remote loot window.
+      let scale = 1.2;
+      const availableHeight = Math.max(baseFrame.height, (root.innerHeight || doc.documentElement.clientHeight) - 24);
+      scale = Math.min(scale, 1 + Math.max(0, availableHeight - baseFrame.height) / baseMain.height);
+      if (paired) {
+        const remote = shell.querySelector(':scope > .loot-win');
+        const remoteWidth = remote?.getBoundingClientRect().width || 340;
+        const availableWidth = (root.innerWidth || doc.documentElement.clientWidth) - 32 - 18 - remoteWidth;
+        scale = Math.min(scale, 1 + Math.max(0, availableWidth - baseFrame.width) / baseMain.width);
+      }
+      scale = Math.max(1, Math.min(1.2, scale));
+      const extraWidth = baseMain.width * (scale - 1);
+      const extraHeight = baseMain.height * (scale - 1);
+
+      // Standalone keeps its 1600px outside frame: only the RIGHT inventory yields
+      // the width consumed by the 20% larger character. In paired mode the entire
+      // pack window grows and the item dock remains the ORIGINAL 380px wide.
+      if (paired) win.style.setProperty('width', (baseFrame.width + extraWidth) + 'px', 'important');
+      else {
+        win.style.setProperty('width', 'calc(100vw - 24px)', 'important');
+        win.style.setProperty('max-width', '1600px', 'important');
+      }
+      win.style.setProperty('height', (baseFrame.height + extraHeight) + 'px', 'important');
       grid.style.setProperty('display', 'grid', 'important');
-      grid.style.setProperty('grid-template-columns', 'min(656px, calc(100vw - 774px)) minmax(0,1fr)', 'important');
+      grid.style.setProperty('grid-template-columns', (baseMain.width * scale) + 'px minmax(0,1fr)', 'important');
       main.style.setProperty('min-width', '0');
       dock.style.setProperty('min-width', '0');
-      // All nine named categories AND counts occupy the entire RIGHT dock,
-      // never a strip over equipment. Preserve native tab buttons and handlers.
-      const shelf = dock.querySelector('.packcats');
-      const tabs = shelf?.querySelector('.packtabs');
-      if (shelf && tabs) {
-        shelf.style.setProperty('width', '100%', 'important');
-        shelf.style.setProperty('min-width', '0');
-        tabs.style.setProperty('display', 'grid', 'important');
-        tabs.style.setProperty('grid-template-columns', 'repeat(9,minmax(0,1fr))', 'important');
-        tabs.style.setProperty('width', '100%', 'important');
-        tabs.style.setProperty('min-width', '0');
-      }
-      if (state.view === 'rows') {
-        const items = dock.querySelector('.packlists > .packcol');
-        if (items) {
-          items.style.setProperty('display', 'grid', 'important');
-          items.style.setProperty('grid-template-columns', 'repeat(2,minmax(0,1fr))', 'important');
+      // CSS zoom scales the character's OWN contents and padding, unlike merely
+      // enlarging its parent; it participates in layout and preserves hit targets.
+      character.style.setProperty('zoom', String(scale), 'important');
+
+      if (!paired) {
+        // Nine named categories with numeric counts stay INSIDE the right dock.
+        const shelf = dock.querySelector('.packcats');
+        const tabs = shelf?.querySelector('.packtabs');
+        if (shelf && tabs) {
+          shelf.style.setProperty('width', '100%', 'important');
+          shelf.style.setProperty('min-width', '0');
+          tabs.style.setProperty('display', 'grid', 'important');
+          tabs.style.setProperty('grid-template-columns', 'repeat(9,minmax(0,1fr))', 'important');
+          tabs.style.setProperty('width', '100%', 'important');
+          tabs.style.setProperty('min-width', '0');
+          // The right strip is slightly narrower after enlarging the character.
+          // Fit the names AND the counters; never hide or remove any of them.
+          for (let size = 10; size >= 7.5; size -= 0.5) {
+            for (const tab of tabs.children) tab.style.setProperty('font-size', size + 'px', 'important');
+            const clipped = Array.from(tabs.children).some(tab => tab.scrollWidth > tab.clientWidth + 1);
+            if (!clipped) break;
+          }
         }
+        if (state.view === 'rows') {
+          const items = dock.querySelector('.packlists > .packcol');
+          if (items) {
+            items.style.setProperty('display', 'grid', 'important');
+            items.style.setProperty('grid-template-columns', 'repeat(2,minmax(0,1fr))', 'important');
+          }
+        }
+      } else {
+        // Paired: the original right dock and its one-column list are unchanged.
+        // Enlarging height goes to the ordinary scrolling item viewport.
+        dock.style.setProperty('width', baseDock.width + 'px', 'important');
       }
     });
   }

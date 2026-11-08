@@ -16,7 +16,8 @@ test('standalone inventory expands the actual frame, not a fake row across equip
   assert.match(css, /max-width:1600px !important/);
   assert.match(source, /win\.style\.setProperty\('width', 'calc\(100vw - 24px\)', 'important'\)/);
   assert.match(source, /win\.style\.setProperty\('max-width', '1600px', 'important'\)/);
-  assert.match(source, /grid\.style\.setProperty\('grid-template-columns', \(baseMain\.width \* scale\) \+ 'px minmax\(0,1fr\)', 'important'\)/);
+  assert.match(source, /grid\.style\.setProperty\('grid-template-columns', \(referenceLeft \* scale\) \+ 'px minmax\(0,1fr\)', 'important'\)/);
+  assert.match(source, /referenceLeft = paired \? baseMain\.width : Math\.min\(656, Math\.max\(0, viewportWidth - 774\)\)/);
   assert.match(source, /character\.style\.setProperty\('zoom', String\(scale\), 'important'\)/);
   assert.match(source, /win\.style\.setProperty\('height', \(baseFrame\.height \+ extraHeight\) \+ 'px', 'important'\)/);
   assert.match(source, /if \(paired\) win\.style\.setProperty\('width', \(baseFrame\.width \+ extraWidth\) \+ 'px', 'important'\)/);

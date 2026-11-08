@@ -1,4 +1,4 @@
-DFO-Client-Expander-RU 1.26.0
+DFO-Client-Expander-RU 1.27.0
 =============================
 Author: AutomaticYobaMachine
 Made especially for the Russian-speaking DFO Online community.
@@ -34,13 +34,17 @@ FEATURES
   trade: the slot a piece is worn in and the skill a weapon's blows train,
   material apart from the armor type, properties and effects as lists,
   the game's own sigil, set and comparison blocks, the item's description and
-  its worth at the bottom. It always fits on the screen.
+  its worth at the bottom. It always fits on the screen. The quick-loot list
+  at the crosshair shows a compact card of the lit item beside it.
 - Russian translation: the interface, items, quests and books in Russian.
 - Marks and town map: venues on the Overworld and a detailed town map.
   "Only visited" hides the buildings you have not been to yet.
-- Loot nearby: drops and items on the floor within 15 m in one window, with
-  filters, presets, sorting, autoloot and "Take all". J by default; assign
-  your own key (a keyboard key or mouse button 3/4/5) in the installer.
+- Loot nearby: drops and items on the floor within 15 m in one window - on
+  slopes and at a cliff's foot too, stuck arrows, an instance's reward on the
+  floor (the Sky-Ketch, the Rift) and a searched chest's find while its search
+  cools - with filters, presets, sorting, autoloot and "Take all". J by
+  default; assign your own key (a keyboard key or mouse button 3/4/5) in the
+  installer.
 - Dungeon intel: dungeon cards on the Overworld; inside a dungeon, live
   counters top right and a summary on K with quests, aurum, respawn and a
   route line to the exit, the aurum, an elite or a quest target.

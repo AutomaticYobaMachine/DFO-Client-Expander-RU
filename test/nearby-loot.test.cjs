@@ -27,14 +27,15 @@ function fixture(records = []) {
 const item = (name, stackCount = 1) => ({ name, stackCount });
 const pile = (key, items, pos = [0, 0, 0]) => ({ key, pos, items: () => items, visit: fn => fn(items) });
 
-test('15 m is inclusive and spherical; searchables, graves, chests and invalid coordinates are excluded', () => {
+test('15 m is inclusive and spherical; searchables, graves, chests, coffers and invalid coordinates are excluded', () => {
   const f = fixture([
     pile('corpse:1', [item('body')], [9, 0, 12]),
     pile('loot:0', [item('floor')], [0, 0, 15]),
     pile('droppedLoot:2', [item('drop')], [14, 0, 0]),
     pile('corpse:2', [item('far')], [15.001, 0, 0]),
     pile('loot:3', [item('other floor')], [12, 10, 0]),
-    ...['search:1', 'srch:1', 'chest:1', 'delve:1', 'aurum:1'].map(k => pile(k, [item(k)])),
+    // srch: is a searched chest's find, minted only while its search cools (dungeonSources); search: would roll one.
+    ...['search:1', 'chest:1', 'container:1', 'delve:1', 'aurum:1', 'spoilGold:1'].map(k => pile(k, [item(k)])),
     pile('loot:4', [item('invalid')], [NaN, 0, 0]),
   ]);
   assert.deepEqual(f.loot.items().map(x => x.name), ['body', 'floor', 'drop']);

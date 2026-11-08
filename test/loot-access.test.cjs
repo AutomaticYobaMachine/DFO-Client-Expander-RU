@@ -69,9 +69,11 @@ test('real game collider: walls and closed moving doors block loot; the same doo
 });
 
 test('real game collider: the ray must reach the item, while an opening need not fit a walking capsule', native, async () => {
-  const window = await world(); wall(window, 'sill', 2, -1, 1.1);
+  const window = await world(); wall(window, 'sill', 2, -1, 1.3);
   assert.equal(window.raycast([0, 1.6, 0], [1, 0, 0], 5), Infinity);
-  assert.equal(canReach([0, 0, 0], [5, 0, 0], window), false);
+  assert.equal(canReach([0, 0, 0], [5, 0, 0], window), false, 'a breast-high sill hides the whole pile behind it');
+  const parapet = await world(); wall(parapet, 'parapet', 2, -1, 1.1);
+  assert.equal(canReach([0, 0, 0], [5, 0, 0], parapet), true, 'over a waist-high wall the top of the pile is in sight, as the press ray sees its box');
   const slit = await world(); wall(slit, 'left', 2, -1, 3, -3, -0.2); wall(slit, 'right', 2, -1, 3, 0.2, 3);
   assert.equal(slit.raycast([0, 1, 0], [1, 0, 0], 5), Infinity);
   assert.equal(canReach([0, 0, 0], [5, 0, 0], slit), true);

@@ -9,13 +9,13 @@ DFO Online.
 
 ## Скачать готовую программу
 
-Готовый релиз **1.26.0**. Версии 1.22.0–1.25.2 предложат обновление диалогом «Да/Нет».
+Готовый релиз **1.27.0**. Версии 1.22.0–1.26.0 предложат обновление диалогом «Да/Нет».
 При переходе с более ранних версий скачайте и запустите новый EXE вручную.
 
-**[Скачать установщик EXE для Windows 10/11 x64](https://github.com/AutomaticYobaMachine/DFO-Client-Expander-RU/releases/download/v1.26.0/DFO-Client-Expander-RU-1.26.0.exe)**
+**[Скачать установщик EXE для Windows 10/11 x64](https://github.com/AutomaticYobaMachine/DFO-Client-Expander-RU/releases/download/v1.27.0/DFO-Client-Expander-RU-1.27.0.exe)**
 
-[ZIP с программой, инструкцией и лицензиями](https://github.com/AutomaticYobaMachine/DFO-Client-Expander-RU/releases/download/v1.26.0/DFO-Client-Expander-RU-1.26.0.zip)
-· [Страница релиза](https://github.com/AutomaticYobaMachine/DFO-Client-Expander-RU/releases/tag/v1.26.0)
+[ZIP с программой, инструкцией и лицензиями](https://github.com/AutomaticYobaMachine/DFO-Client-Expander-RU/releases/download/v1.27.0/DFO-Client-Expander-RU-1.27.0.zip)
+· [Страница релиза](https://github.com/AutomaticYobaMachine/DFO-Client-Expander-RU/releases/tag/v1.27.0)
 
 EXE уже содержит все компоненты. В ZIP находятся только EXE, инструкция и лицензии.
 
@@ -38,7 +38,7 @@ optional Russian translation. Since **1.25.1** everything the extension adds
 speaks English without the translation (and Russian with it); the installer
 opens in your Windows language and has an English/Русский switch.
 
-Download the **[Windows 10/11 x64 installer](https://github.com/AutomaticYobaMachine/DFO-Client-Expander-RU/releases/download/v1.26.0/DFO-Client-Expander-RU-1.26.0.exe)**,
+Download the **[Windows 10/11 x64 installer](https://github.com/AutomaticYobaMachine/DFO-Client-Expander-RU/releases/download/v1.27.0/DFO-Client-Expander-RU-1.27.0.exe)**,
 close the game, run it, tick the features you want and press **Install selected**.
 The English guide is README-EN.txt in the ZIP (the **Guide** button opens it).
 The rest of this page and docs/ are in Russian; the original game is
@@ -59,6 +59,14 @@ The rest of this page and docs/ are in Russian; the original game is
 с последним релизом игры.
 
 ## Установщик и рабочая ветка
+
+В **1.27.0** масс-лутер («Лут рядом») видит то, что пропускал: вещи ниже и выше по склону,
+вещи с тела, упавшие с обрыва, стрелы, застрявшие в стенах и земле, награды Небесной шхуны
+и Разлома на полу, а также содержимое уже обысканных сундуков, пока его можно забрать
+без нового обыска. [Детектор лута](docs/nearby-loot.md). Окно быстрого лута у прицела
+получило свою сжатую карточку справа от списка — материал, урон или броня, слот, навык,
+вес, состояние, цена за кг и ценник — а сам список оформлен в стиле карточек.
+[Карточка предмета](docs/item-cards.md).
 
 В **1.26.0** карточка предмета сообщает, куда надевается вещь (**«Слот»**), а у оружия —
 какой навык качают удары им (**«Навык»**: длинные клинки, дробящее, стрельба из лука…);

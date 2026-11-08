@@ -212,6 +212,39 @@ body .card.dfo-item-card[data-rarity=gilded] { border-width:4px!important; borde
 .dfo-item-card :is(.dfo-item-stats,.dfo-item-lines,.cmp-head,.cmp-line,.sigil-effect,.sigil-progress,.set-tier-effect) { font-family:'DFO Gabin',var(--data,serif)!important; }
 .dfo-item-card .sigilbox .sigil-stage { font-family:'DFO Ckazka',var(--display,serif)!important; font-size:17px!important; letter-spacing:.02em; }
 .dfo-item-card .setbox .set-name { font-family:'DFO Ritalin',var(--display,serif)!important; font-size:18px!important; letter-spacing:.02em; }
+/* QUICK LOOT: the plaque's loot list in the card's dress (only an itemised plaque - never a name or a verb menu) */
+.wplaque.dfo-quick.has-list:not(.has-actions) { background:var(--ink,#0e1013); border:2px solid #756346; box-shadow:inset 0 0 0 1px #000,0 5px 18px #0008; text-shadow:none; }
+.wplaque.dfo-quick.has-list:not(.has-actions) .wplaque-title { font-family:'DFO Greengoth',var(--display,Georgia,serif); font-size:17px; line-height:1.25; color:var(--bone,#e9e4d9); }
+.wplaque.dfo-quick.has-list:not(.has-actions) .wplaque-sub { font-family:'DFO Gabin',var(--data,serif); color:#b7a071; }
+.wplaque.dfo-quick.has-list:not(.has-actions) .wplaque-list { border-top:1px solid #756346; }
+.wplaque.dfo-quick.has-list:not(.has-actions) .wplaque-row { font-family:'DFO Gabin',var(--data,serif); }
+.wplaque.dfo-quick.has-list:not(.has-actions) .wplaque-row.sel { background:rgba(183,160,113,.16); box-shadow:inset 2px 0 0 #d5b26e; }
+.wplaque.dfo-quick.has-list:not(.has-actions) .wplaque-count { font-family:'DFO Flexi',var(--data,monospace); color:#d5b26e; }
+.wplaque.dfo-quick.has-list:not(.has-actions) :is(.wplaque-empty,.wplaque-more) { color:#a89f88; }
+/* ...and the lit row's card beside it: the left column, compact, and the price */
+.dfo-quick-card { --dfo-quick-rar:#827a68; }
+.wplaque .wplaque-stats.dfo-quick-card { width:236px; padding:9px 11px 8px; background:var(--ink,#0e1013); border:2px solid var(--dfo-quick-rar); box-shadow:inset 0 0 0 1px #000,0 5px 18px #0008; color:var(--bone,#e9e4d9); font:12px/1.3 'DFO Gabin',var(--data,serif); text-shadow:none; -webkit-font-smoothing:auto; }
+.wplaque .wplaque-stats.dfo-quick-card[data-side="below"] { width:auto; border:0; border-top:1px solid #756346; box-shadow:none; background:none; padding:7px 0 0; }
+.dfo-quick-card[data-rarity="magic"] { --dfo-quick-rar:#6f9ee8; }
+.dfo-quick-card[data-rarity="rare"] { --dfo-quick-rar:#e4c34f; }
+.dfo-quick-card[data-rarity="legendary"] { --dfo-quick-rar:#e07a2e; }
+.dfo-quick-card[data-rarity="aetheric"] { --dfo-quick-rar:#bfe8ff; }
+.dfo-quick-card[data-rarity="artifact"] { --dfo-quick-rar:#b57bee; }
+.dfo-quick-card[data-rarity="gilded"] { --dfo-quick-rar:#ff3b4a; }
+.dfo-quick-name { margin:0 0 5px; font:400 16px/1.15 'DFO Greengoth',var(--display,Georgia,serif); color:var(--bone,#e9e4d9); overflow-wrap:anywhere; }
+.dfo-quick-card[data-rarity]:not([data-rarity="common"]) .dfo-quick-name { color:var(--dfo-quick-rar); }
+.dfo-quick-card>.dfo-item-material { display:flex; flex-wrap:wrap; justify-content:space-between; gap:2px 8px; margin:0 0 6px; font-size:11px; line-height:1.3; color:#b7a071; }
+.dfo-quick-primary { display:flex; align-items:baseline; justify-content:space-between; gap:8px; margin:0 0 6px; padding:0 0 5px; border-bottom:1px solid #454534; }
+.dfo-quick-primary>span { font-size:11px; color:var(--dim,#a89f88); }
+.dfo-quick-primary>strong { font:400 18px/1.1 'DFO Flexi',var(--data,monospace); color:var(--bone,#e9e4d9); white-space:nowrap; }
+.dfo-quick-stats { display:block; margin:0; padding:0; }
+.dfo-quick-stats>.pair { display:flex; justify-content:space-between; gap:8px; margin:0 0 3px; }
+.dfo-quick-stats>.pair>dt { margin:0; font:inherit; color:var(--dim,#a89f88); }
+.dfo-quick-stats>.pair>dd { margin:0; min-width:0; text-align:right; overflow-wrap:anywhere; }
+.dfo-quick-note { margin:0 0 3px; color:#a49a80; }
+.dfo-quick-price { display:flex; justify-content:flex-end; align-items:center; gap:6px; margin:6px 0 0; padding:6px 0 0; border-top:1px solid #756346; color:#f5d451; }
+.dfo-quick-price>.dfo-item-price-value { font-size:17px; }
+.dfo-quick-price>.dfo-item-coin { width:16px; height:16px; }
 `;
 
   function install(win) {
@@ -220,7 +253,7 @@ body .card.dfo-item-card[data-rarity=gilded] { border-width:4px!important; borde
     const fontRoot = new URL('.', doc.currentScript?.src || new URL('dfo-mod/dfo_item_cards.js', doc.baseURI || win.location.href)).href;
     const fontFaces = [['DFO Greengoth','title','ttf'],['DFO Flexi','numbers','ttf'],['DFO Gabin','text','ttf'],['DFO Ckazka','sigil','ttf'],['DFO Ritalin','set','ttf'],['DFO Wolga','legendary','otf'],['DFO Flow','description','otf']]
       .map(([family,file,ext])=>`@font-face{font-family:'${family}';src:url(${JSON.stringify(new URL('item-font-'+file+'.'+ext,fontRoot).href)}) format('${ext==='otf'?'opentype':'truetype'}');font-style:normal;font-weight:400;font-display:swap;}`).join('\n');
-    const counters = { dressed: 0, failures: 0, lastError: '', layouts: 0, balances: 0, balanceTrials: 0, placements: 0, observerCallbacks: 0 };
+    const counters = { dressed: 0, quick: 0, failures: 0, lastError: '', layouts: 0, balances: 0, balanceTrials: 0, placements: 0, observerCallbacks: 0 };
     let scheduled = false, effectLabelKey='',effectLabelNames=[];
     const node = (tag, cls, text) => {
       const value = doc.createElement(tag);
@@ -307,6 +340,85 @@ body .card.dfo-item-card[data-rarity=gilded] { border-width:4px!important; borde
       return [...groups.values()].map(g=>g.section);
     }
 
+    // The material under the name - its label sand, its value in the metal's colour - the card's and the quick panel's.
+    function materialRow(data) {
+      const row=node('div','dfo-item-material'),value=node('span','dfo-item-metal',data.material),palette=materialPalette[data.materialKey];
+      row.append(node('span','dfo-item-material-label',T('cards.material')),value);
+      value.dataset.metal=data.materialKey||'other';
+      if(palette)for(const key of ['color','stroke','shadow'])if(palette[key])value.style.setProperty('--dfo-metal-'+key,palette[key]);
+      return row;
+    }
+    function coinMark() {
+      const coin=doc.createElementNS('http://www.w3.org/2000/svg','svg');
+      coin.setAttribute('viewBox','0 0 20 20');coin.setAttribute('class','dfo-item-coin');coin.setAttribute('aria-hidden','true');
+      for(const [tag,attributes]of [['circle',{cx:10,cy:10,r:8,fill:'#8e6118',stroke:'currentColor','stroke-width':1.5}],['circle',{cx:10,cy:10,r:5.5,fill:'#c99a2d',stroke:'#f8df80','stroke-width':.8}],['path',{d:'M8 6.5h2.2c4 0 4 7 0 7H8zm1-1.5v10',fill:'none',stroke:'#805313','stroke-width':1.4}]]){
+        const part=doc.createElementNS('http://www.w3.org/2000/svg',tag);for(const [key,value]of Object.entries(attributes))part.setAttribute(key,String(value));coin.append(part);
+      }
+      return coin;
+    }
+
+    // THE QUICK-LOOT PANEL (ui/worldPlaque.js paint, hook itemCards.quick): beside the plaque's list, the lit row's
+    // card - its left column, compact, and its price; no picture. It reads only what the plaque itself would draw (the
+    // native stat rows, itemInfo.js itemStatRows) and the card's own pure readers, so it says no more than the native
+    // panel knew: the material as the card shows it, the slot, the skill, the price. Anything wrong leaves the native one.
+    const QUICK_W = 236, QUICK_ROOM = 150 + 8 + QUICK_W + 12;   // half the plaque's widest, the native gap, ours, a margin
+    const quickSide = anchorX => {
+      const width = win.innerWidth || 0;
+      if (!Number.isFinite(anchorX) || width <= 0) return 'below';
+      return anchorX + QUICK_ROOM <= width ? 'right' : anchorX - QUICK_ROOM >= 0 ? 'left' : 'below';
+    };
+    const QUICK_SKIP = new Set(['Damage', 'Armour', 'Material', 'Weight']);
+    function quick(host, row, rows, anchorX) {
+      try {
+        host?.classList?.add('dfo-quick');   // the plaque's loot list in the mod's dress (the sheet scopes it to lists)
+        const item = row?.item;
+        if (!ready() || !host || !item || typeof item !== 'object' || Array.isArray(item)) return false;
+        const told = new Map(), list = Array.isArray(rows) ? rows.filter(r => r && typeof r.text === 'string') : [];
+        for (const r of list) if (r.label) told.set(r.label, r.text);
+        // Native English before any translation: the stack's weight as itemInfo.js weightString writes it.
+        const kg = Number.parseFloat(told.get('Weight') ?? '');
+        const line = { weight: Number.isFinite(kg) ? kg : null, armorType: told.get('Type') ?? null, material: told.get('Material') ?? null };
+        const data = derive(item, line, native, { known: () => false, credit: () => native.letterWorth?.(item) ?? null });
+        if (!data) return false;
+        ensureStyle();
+        const panel = node('div', 'wplaque-stats dfo-quick-card');
+        panel.dataset.side = quickSide(anchorX);
+        if (typeof row.rarity === 'string' && row.rarity) panel.dataset.rarity = row.rarity;
+        panel.append(node('div', 'dfo-quick-name', row.name ?? item.name ?? ''));
+        if (data.material) panel.append(materialRow(data));
+        const primary = told.has('Damage') ? 'Damage' : told.has('Armour') ? 'Armour' : null;
+        if (primary) {
+          const badge = node('div', 'dfo-quick-primary');
+          badge.append(node('span', null, primary), node('strong', null, told.get(primary)));
+          panel.append(badge);
+        }
+        const stats = node('dl', 'dfo-quick-stats');
+        addPair(stats, T('cards.slot'), data.slot);
+        addPair(stats, T('cards.skill'), data.skill);
+        if (data.construction && data.construction !== data.material) addPair(stats, T('cards.construction'), data.construction);
+        for (const r of list) {
+          if (QUICK_SKIP.has(r.label)) continue;
+          if (!r.label) { stats.append(node('div', 'dfo-quick-note', r.text)); continue; }
+          addPair(stats, r.label === 'Type' ? T('cards.armorType') : r.label, r.text);
+        }
+        if (told.has('Weight')) addPair(stats, 'Weight', told.get('Weight'));
+        if (data.count > 1) addPair(stats, T('cards.quantity'), format(data.count));
+        const perKg = nearestTen(data.perKg);
+        if (perKg != null) addPair(stats, T('cards.perKg'), T('cards.perKgValue', { value: format(perKg), n: perKg }));
+        if (stats.children.length) panel.append(stats);
+        const priceBox = node('div', 'dfo-quick-price'), priceValue = node('strong', 'dfo-item-price-value');
+        priceBox.append(priceValue, coinMark());
+        price({ priceBox, priceValue }, data);
+        panel.append(priceBox);
+        host.append(panel);
+        counters.quick++;
+        return true;
+      } catch (error) {
+        counters.failures++; counters.lastError = String(error?.message || error);
+        return false;
+      }
+    }
+
     function dress(card, line, context) {
       if (!ready() || !card || !line?.item || states.has(card) || typeof context?.known !== 'function') return;
       const into = [...card.children].find(child => child.classList.contains('card-body')) || card;
@@ -367,13 +479,7 @@ body .card.dfo-item-card[data-rarity=gilded] { border-width:4px!important; borde
         if (tier) title.append(node('div', 'dfo-item-tier', tier));
         if (name) title.append(name);
         if (icon) head.append(icon); else head.style.gridTemplateColumns = 'minmax(0,1fr)';
-        if(data.material){
-          const row=node('div','dfo-item-material'),value=node('span','dfo-item-metal',data.material),palette=materialPalette[data.materialKey];
-          row.append(node('span','dfo-item-material-label',T('cards.material')),value);
-          value.dataset.metal=data.materialKey||'other';
-          if(palette)for(const key of ['color','stroke','shadow'])if(palette[key])value.style.setProperty('--dfo-metal-'+key,palette[key]);
-          head.append(title,row);
-        }else head.append(title);
+        if(data.material)head.append(title,materialRow(data));else head.append(title);
         left.append(head);
         if (primary) {
           const badge = node('div', 'dfo-item-primary');
@@ -399,12 +505,8 @@ body .card.dfo-item-card[data-rarity=gilded] { border-width:4px!important; borde
         if (socketLines.children.length) effects.append(socketLines);
         main.append(left, effects);
         const footer = node('div', 'dfo-item-footer'), priceBox = node('div', 'dfo-item-price');
-        const priceValue = node('strong', 'dfo-item-price-value'), coin=doc.createElementNS('http://www.w3.org/2000/svg','svg');
-        coin.setAttribute('viewBox','0 0 20 20');coin.setAttribute('class','dfo-item-coin');coin.setAttribute('aria-hidden','true');
-        for(const [tag,attributes]of [['circle',{cx:10,cy:10,r:8,fill:'#8e6118',stroke:'currentColor','stroke-width':1.5}],['circle',{cx:10,cy:10,r:5.5,fill:'#c99a2d',stroke:'#f8df80','stroke-width':.8}],['path',{d:'M8 6.5h2.2c4 0 4 7 0 7H8zm1-1.5v10',fill:'none',stroke:'#805313','stroke-width':1.4}]]){
-          const part=doc.createElementNS('http://www.w3.org/2000/svg',tag);for(const [key,value]of Object.entries(attributes))part.setAttribute(key,String(value));coin.append(part);
-        }
-        priceBox.append(priceValue,coin);
+        const priceValue = node('strong', 'dfo-item-price-value');
+        priceBox.append(priceValue,coinMark());
         const text = description(line.item, data, card.dataset.rarity === 'rare' && !!tier && isPerfect(tier));
         if (text) footer.append(text);
         footer.append(priceBox);
@@ -617,8 +719,9 @@ body .card.dfo-item-card[data-rarity=gilded] { border-width:4px!important; borde
     win.visualViewport?.addEventListener('scroll', reposition);
     doc.fonts?.addEventListener?.('loadingdone', () => { for (const [card] of active) if(card.isConnected)fit(card,true); });
     win.__dfoItemCards = Object.freeze({
-      register(parts) { for (const key of [...DATA_KEYS,'power','effectLabels','slotName','handsName','weaponSkill']) if (typeof parts?.[key] === 'function') native[key] = parts[key]; },
+      register(parts) { for (const key of [...DATA_KEYS,'power','effectLabels','slotName','handsName','weaponSkill','letterWorth']) if (typeof parts?.[key] === 'function') native[key] = parts[key]; },
       dress,
+      quick,
       // The native second argument is room in pixels, not our internal dirty/invalidation flag.
       fitCard(card) {
         const state = states.get(card);

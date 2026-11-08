@@ -443,3 +443,18 @@ return true;
 **Уточнение предыдущего F-32:** `Object.itemIcon` здесь не классический `textureCanvas.requestIcon`, а синхронный метод `fpArm.itemIcon` Morrowind-моделей. Главный триггер — `preloadIcon`/общее событие `fpArm.subscribe`. `landingTiles` уже защищает обычные текстурные иконки от полного repaint и не является причиной обнаруженного 46-shell случая. Исправление должно сохранять подписку на настоящую готовность модели, чтобы пропавшие изображения могли дописываться.
 
 **Статус:** корень доказан согласованными stack traces и веткой исходника. Исправление и игровые регрессионные тесты в момент этой фиксации журнала ещё не установлены.
+
+
+### 2026-11-09 — P0 исправление в ветке + изолированная проверка (F-34)
+
+После F-33 внесена **точечная защита** в мод, исходную игру на диске не перепаковывали и готовый EXE не выпускали.
+
+**Код, рабочая ветка `fix/inventory-window-single-row-2026-11-08`:**
+- `src/mod/inventory-transform.cjs`: `guardRender(text, renderName)` оборачивает живую minified-функцию `render` в защиту от reentrant-исполнения. Обычные вызовы `render` синхронны, но вложенные вызовы при работающем render подавляются и сливаются в один `requestAnimationFrame`. Отложенная работа привязана к конкретному DOM `#enhanced-inventory` и отменяется, если он удалён, чтобы отложенный callback старой сессии не перерисовывал новую. Коммит `780bb4ed91743a9e795db2e4adf53fb5aced4a5e`.
+- Отдельный `inventory.reentrant`-job (не зависит от успешного `inventory.view`): извлекает имя функции из сигнатуры встроенной кнопки `packPhoneDoll`, инъецирует защиту в `assets/enhancedInventory-*.js`, пишет `inventory.reentrant`/ошибку в журнал установочного hook. Коммит `e45127cf0a4d581aa437ad8cd112926d00fa8e1e`.
+- `src/mod/transforms.cjs` — `inventory.reentrant` добавлен в `EXPECTED.inventory` для обнаружения при обновлении клиента. Коммит `bdd8bc2bbcfead00534e79f1acc01daeb4de7123`.
+- `test/inventory-render-reentrancy.test.cjs` — четыре регрессии: 46 синхронных иконок не создают 46 shell, отложенный redraw не рисует в удалённый host, обычный прямой redraw остаётся синхронным, отдельный native hook находит символ minified render даже когда большой layout-transform не проходит. Коммиты `fb02a75940b7fc8517f7b16c6647fa3733639a93`, `9bcee98558d1b3f55cafa95db1c6ef6fa2ca77a4`.
+
+**Что реально проверено:** код обоих трансформеров и теста успешно разобран JS-парсером; `transformInventory('assets/enhancedInventory-live.js', minifiedFixture)` дал `[['inventory.reentrant', 1]]`, экспортный JS содержит `__dfoInventoryOriginalRender$=R` и маркер `/*inventory.reentrant*/`. Подлинный `guardRender`, загруженный непосредственно из текущего GitHub blob, исполнен на синтетической рекурсивной симуляции **46 иконок**: до кадра `paints=1/shells=1/queuedFrames=1`; после кадра `paints=2/shells=1`, новых кадров нет. Пройден этот локальный in-memory тест; **полный Node-test файл в настоящем checkout/CI и установленная сборка в Electron ещё не проверялись**. Требуется последующий интеграционный тест на `DFOOnline/0.1.14575`.
+
+**Ограничения:** патч убирает синхронное накопление оболочек. Он не перерабатывает весь native layout/virtualRows и не гарантирует устранение независимых проблем F-09 (lifetime mount), F-11/F-12 (геометрический microtask), дополнительных вне-render icon notifications или серверных HTTP 503 из консоли. В live-версии нужно повторить исходный сценарий и убедиться: `state.hosts[*].shells===1` при любых переключениях категорий и загрузке предметов, а число LONGTASK заметно сократилось. Проверить `dfo-mod.log` наличие строки `inventory.reentrant:1`/без ошибок, а также сохранность иконок после завершения загрузки.

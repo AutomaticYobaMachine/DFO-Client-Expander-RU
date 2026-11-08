@@ -351,9 +351,18 @@ html[data-dfo-pack] .pack-shell.paired .pack-id.dfo-pack-head .act { font-size:1
 html[data-dfo-pack] .pack-shell .pack-id .dfo-pack-act.on {
   color:#211b10; background:#d8b34f; border-color:#ffe3a0; text-shadow:none;
 }
-html[data-dfo-pack-view="rows"] .pack-shell .pack-dock .packcol { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:0 8px; align-content:start; padding:6px 8px; }
-html[data-dfo-pack-view="rows"] .pack-shell.paired .pack-dock .packcol { grid-template-columns:minmax(0,1fr); }
-html[data-dfo-pack-view="rows"] .pack-shell .pack-dock .packcol > .packempty { grid-column:1 / -1; }
+/* The tab shelf itself is a .packcol: never apply the two-item grid to .packcats. */
+html[data-dfo-pack-view="rows"] .pack-shell .pack-dock .packcol:not(.packcats) {
+  display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:0 8px;
+  align-content:start; padding:6px 8px;
+}
+html[data-dfo-pack-view="rows"] .pack-shell:not(.paired) .pack-dock .packcol:not(.packcats) {
+  grid-template-columns:repeat(2,minmax(0,360px)); justify-content:center;
+}
+html[data-dfo-pack-view="rows"] .pack-shell.paired .pack-dock .packcol:not(.packcats) {
+  grid-template-columns:minmax(0,1fr);
+}
+html[data-dfo-pack-view="rows"] .pack-shell .pack-dock .packcol:not(.packcats) > .packempty { grid-column:1 / -1; }
 html[data-dfo-pack-view="rows"] .pack-shell .pack-dock .itemrow { width:100%; height:auto; min-height:52px; display:flex; align-items:center; justify-content:flex-start; gap:12px; text-align:left; outline:0; }
 html[data-dfo-pack-view="rows"] .pack-shell .pack-dock .itemrow:not(.dfo-item-row) { padding:8px 14px; border:0; border-bottom:2px solid rgba(125,116,96,.16); background:transparent; }
 html[data-dfo-pack-view="rows"] .pack-shell .pack-dock .itemrow:not(.dfo-item-row):hover { background:rgba(125,116,96,.12); }

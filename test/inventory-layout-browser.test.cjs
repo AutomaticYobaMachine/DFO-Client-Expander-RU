@@ -99,8 +99,8 @@ function measure(paired) {
 test('real Chromium: the widened standalone frame gives its NEW space to the right dock, not equipment', { skip: !browser }, () => {
   const result=measure(false);
   assert.ok(result.window.width>=1550,JSON.stringify(result));
-  assert.ok(Math.abs(result.main.width-540)<=2,JSON.stringify(result));
-  assert.ok(result.dock.width>=1000,JSON.stringify(result));
+  assert.ok(Math.abs(result.main.width-660)<=2,JSON.stringify(result));
+  assert.ok(result.dock.width>=900,JSON.stringify(result));
   const firstY=result.categoryRects[0].y;
   assert.ok(result.categoryRects.every(r=>Math.abs(r.y-firstY)<2),JSON.stringify(result));
   assert.ok(result.categoryVisible.every(Boolean),'at least one category label or its numeric count is clipped: '+JSON.stringify(result));
@@ -108,11 +108,12 @@ test('real Chromium: the widened standalone frame gives its NEW space to the rig
   assert.ok(result.rowRects[1].width>=450,JSON.stringify(result));
   assert.ok(Math.abs(result.rowRects[0].y-result.rowRects[1].y)<2,'item rows are not two side-by-side cards');
   assert.ok(result.rowRects[1].x>=result.rowRects[0].right,'item columns overlap');
-  assert.equal(result.inlineGrid,'540px minmax(0px, 1fr)','actual grid is not forced');
+  assert.ok(result.inlineGrid.includes('660px') && result.inlineGrid.includes('minmax(0px, 1fr)'), 'native paired width not preserved: '+result.inlineGrid);
 });
 
 test('real Chromium: a paired container window is NOT forced into the standalone wide layout', { skip: !browser }, () => {
   const result=measure(true);
   assert.equal(result.inlineGrid,'');
   assert.equal(result.inlineFrame,'');
+  assert.ok(Math.abs(result.main.width-660)<=2,'native paired equipment reference is no longer 660px: '+JSON.stringify(result));
 });

@@ -25,37 +25,6 @@ function pages(text) {
     + 'function __dfoPackPage$(e){try{const p=globalThis.__dfoPack?.page;return p?p(e,__dfoPageBase$,__dfoPageNative$):__dfoPageNative$(e)}catch{return __dfoPageNative$(e)}}\n';
 }
 
-
-// F-33: the game's fpArm.itemIcon() can synchronously notify its listeners from
-// preloadIcon() when no await is reached. The subscribed inventory render then
-// recurses into itself before its outer DOM build appends its shell. Do not change
-// the native render's other timing: defer ONLY reentrant requests, coalesced to
-// one animation frame. A stale frame is not allowed to redraw a closed host.
-function guardRender(text, render) {
-  if (!/^[A-Za-z_$][\w$]*$/.test(render)) throw new Error('invalid inventory render name');
-  return text + `
-;const __dfoInventoryOriginalRender$=${render};
-let __dfoInventoryRenderBusy$=false,__dfoInventoryRenderQueued$=false;
-${render}=function(...args){
-  if(__dfoInventoryRenderBusy$){
-    if(!__dfoInventoryRenderQueued$){
-      __dfoInventoryRenderQueued$=true;
-      const owner=typeof document!=='undefined'?document.getElementById('enhanced-inventory'):null;
-      const later=globalThis.requestAnimationFrame??((cb)=>setTimeout(cb,0));
-      later(()=>{
-        __dfoInventoryRenderQueued$=false;
-        if(owner&&!owner.isConnected)return;
-        ${render}();
-      });
-    }
-    return;
-  }
-  __dfoInventoryRenderBusy$=true;
-  try{return __dfoInventoryOriginalRender$(...args)}
-  finally{__dfoInventoryRenderBusy$=false}
-};
-`;
-}
 // enhancedInventory-*.js: the dock's list (listCol), its rows' picture box (itemRow), the header's buttons (render) and
 // the refresh every act and every open runs (refresh) - where the sort stands, by the native Sort's own call.
 function inventory(text) {
@@ -100,19 +69,9 @@ function receipt(text) {
   return put(text, whole, `function ${name}(${list},${item},${at}=\`back\`){try{globalThis.__dfoPack?.received?.(${list},${item},${at})}catch{}${body}`);
 }
 
-
-// Independent of the list/style hooks: if a future game version changes
-// inventory.view's signatures, the original game's recursive icon repaint
-// still needs its own guard. Keep its log/expected hook separate.
-function reentrant(text) {
-  const callers = [...text.matchAll(/\(\)=>\{[\w$]+\(`packPhoneDoll`,![\w$]+\),([\w$]+)\(\)\}/g)];
-  if (callers.length !== 1) throw new Error(`inventory render symbol: ${callers.length} matches`);
-  return guardRender(text, callers[0][1]);
-}
 const JOBS = [
   ['inventory.pages', (rel, text) => /\/storeFilter-[^/]+\.js$/.test(rel) && text.includes('[`weapons`,`Weapons`]'), pages],
   ['inventory.view', (rel, text) => text.includes('`packPhoneDoll`') && text.includes('`packempty`'), inventory],
-  ['inventory.reentrant', (rel, text) => /\/enhancedInventory-[^/]+\.js$/.test(rel) && text.includes('`packPhoneDoll`'), reentrant],
   ['inventory.receipt', (rel, text) => !/Worker-/.test(rel) && text.includes('AddItem() encountered a duplicate item'), receipt],
 ];
 
@@ -125,4 +84,4 @@ function transformInventory(rel, text, log) {
   return out;
 }
 
-module.exports = { transformInventory, pages, inventory, receipt, guardRender, reentrant };
+module.exports = { transformInventory, pages, inventory, receipt };

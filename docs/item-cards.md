@@ -96,6 +96,30 @@
 видны и у неопознанной вещи. Привязки: хуки `itemCards.slots` (чанк экипировки)
 и `itemCards.skills` (модуль оружия) в `item-cards-transform.cjs`.
 
+### Быстрый лут: сжатая карточка у прицела (1.27.0)
+
+Табличка быстрого лута (наведение на тело или кучу, `ui/worldPlaque.js`) состоит
+из списка с прокруткой колёсиком и панели подсвеченной строки справа. Список остаётся
+родным, но одет как карточка: непрозрачный фон `--ink`, латунная рамка, заголовок
+Greengoth, строки Gabin, количество Flexi, подсветка с латунной чертой. Это касается
+только таблички со списком вещей; подписи имён и меню действий не меняются.
+
+Правая панель — наша сжатая карточка (хук `itemCards.quick` в родном `paint`): имя в цвете
+редкости, рамка того же цвета, материал (как в карточке, со своей видимостью), основной
+параметр (урон или броня), слот, навык, конструкция, тип брони, хват, состояние, вес,
+количество, цена за кг и внизу ценник с монетой. Иконки нет. Панель строится только из
+того, что табличка и так рисует (родные строки `itemInfo.js itemStatRows`), и из чистых
+чтений карточки, поэтому знает не больше родной панели. Неопознанная вещь получает
+оценку, но не металл. Аккредитив опознаётся родным `letterWorthGold` (хук
+`itemCards.letters`) и показывает точный номинал. Ширина 236 px; сторона выбирается
+по ширине экрана: справа, слева или под списком. При любой ошибке или без функции
+«Карточки предметов» остаётся родная панель.
+
+Проверка: `tools/test-quick-card-browser.cjs` берёт опубликованный `paint` таблички с хуком
+и без него, запускает их на странице стенда карточек с настоящими `itemStatRows` на
+английском и русском, сверяет строки с пакетами, сторону, цвета редкости, цену и
+отсутствие картинки; `DFO_SCREENSHOT_DIR` сохраняет снимки «было/стало».
+
 ### Легендарный блок на обоих языках
 
 Строку легендарного свойства (`Имя: краткое описание`, у отпечатка
@@ -162,6 +186,7 @@ DFO_BUILD_DIR=/path/to/published-build node --test --test-isolation=none test/it
 DFO_PLAYWRIGHT_MODULE=/path/to/playwright node tools/test-item-cards-browser.cjs /path/to/published-build
 DFO_PLAYWRIGHT_MODULE=/path/to/playwright node tools/audit-item-cards-browser.cjs /path/to/published-build
 DFO_PLAYWRIGHT_MODULE=/path/to/playwright node tools/test-item-card-groups.cjs /path/to/published-build
+DFO_PLAYWRIGHT_MODULE=/path/to/playwright node tools/test-quick-card-browser.cjs /path/to/published-build
 DFO_PLAYWRIGHT_MODULE=/path/to/playwright DFO_ARENA2_DIR=/path/to/ARENA2 DFO_CARD_AUDIT_FULL_RU=1 node tools/test-item-card-states.cjs /path/to/published-build
 node tools/check-build.cjs /path/to/published-build
 sh tools/build.sh

@@ -103,6 +103,23 @@ function weaponSkills(text) {
   return text + `\n;globalThis.__dfoItemCards?.register({weaponSkill:_template=>${enumName(skills, `${used}(_template)??${skills}.HandToHand`)}});\n`;
 }
 
+// The quick-loot plaque (ui/worldPlaque.js paint): the lit row's panel beside the list is ours - built from the same
+// native stat rows the plaque would draw - and the native one stays whenever ours is not drawn.
+function quickPanel(text) {
+  const fn = need(text, /function ([\w$]+)\(([\w$]+),([\w$]+),([\w$]+)=-1,([\w$]+)=\[\]\)\{\2\.textContent=``/);
+  const [, , host, frame, lit, rows] = fn;
+  const tail = need(text.slice(fn.index, fn.index + 6000), rx(`if\\(!${escapeRx(rows)}\\.length\\)return;let (${ID})=document\\.createElement\\(\`div\`\\);\\1\\.className=\`wplaque-stats\`,\\1\\.dataset\\.side=(${ID})\\((${ID}),globalThis\\.innerWidth\\?\\?0\\);`));
+  const at = fn.index + tail.index;
+  const call = `if(globalThis.__dfoItemCards?.quick?.(${host},${lit}>=0?${frame}.rows?.[${lit}]??null:null,${rows},${tail[3]}))return;`;
+  return text.slice(0, at) + call + text.slice(at);
+}
+
+// A letter of credit's worth (walletItem.js letterWorthGold): its non-null answer marks the letter, priced exactly.
+function letters(text) {
+  const m = need(text, /([\w$]+)=([\w$]+)=>\2\?\.templateIndex===\d+\?`\$\{[\w$]+\(Math\.max\(0,Math\.trunc\(Number\(\2\.value\)\|\|0\)\)\)\} gold`:null/);
+  return text + `\n;globalThis.__dfoItemCards?.register({letterWorth:${m[1]}});\n`;
+}
+
 function transformItemCards(rel, text, log) {
   // Worker entries cannot display DOM cards; they duplicate large, tree-shaken item tables.
   if (/Worker-[^/]+\.js$/.test(rel)) return text;
@@ -116,6 +133,8 @@ function transformItemCards(rel, text, log) {
   if (text.includes('`itemPowers`')) jobs.push(['itemCards.effectLabels',effectLabels]);
   if (text.includes('.getEquipSlot(') && /=>!![\w$]+&&[\w$]+\(\)\.getEquipSlot\(/.test(text)) jobs.push(['itemCards.slots', equipSlots]);
   if (text.includes('.weaponSkillUsed?') && WEAPON_SKILL.test(text)) jobs.push(['itemCards.skills', weaponSkills]);
+  if (text.includes('className=`wplaque-stats`')) jobs.push(['itemCards.quick', quickPanel]);
+  if (text.includes('(Number(') && /\)\)\)\} gold`:null/.test(text)) jobs.push(['itemCards.letters', letters]);
   let out = text;
   for (const [id, run] of jobs) {
     if (out.includes(`/*${id}*/`)) continue;

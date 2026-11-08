@@ -34,7 +34,8 @@ FEATURES
   trade: the slot a piece is worn in and the skill a weapon's blows train,
   material apart from the armor type, properties and effects as lists,
   the game's own sigil, set and comparison blocks, the item's description and
-  its worth at the bottom. It always fits on the screen.
+  its worth at the bottom. It always fits on the screen. The quick-loot list
+  at the crosshair shows a compact card of the lit item beside it.
 - Russian translation: the interface, items, quests and books in Russian.
 - Marks and town map: venues on the Overworld and a detailed town map.
   "Only visited" hides the buildings you have not been to yet.

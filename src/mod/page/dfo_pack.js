@@ -165,6 +165,27 @@
     const junk = toggle(T('pack.junk.button'), false, () => junkDialog(repaint), T('pack.junk.how'));
     junk.removeAttribute('aria-pressed');
     junk.setAttribute('aria-haspopup', 'dialog');
+    // The native header title is "Pack" plus .pack-who. Keep the character name and
+    // native actions; only replace that redundant word with an accessible bag glyph.
+    const title = header.querySelector('h2');
+    if (title) {
+      const who = title.querySelector('.pack-who');
+      const ns = 'http://www.w3.org/2000/svg';
+      const bag = doc.createElementNS(ns, 'svg');
+      bag.classList.add('dfo-pack-bag');
+      bag.setAttribute('viewBox', '0 0 24 24');
+      bag.setAttribute('fill', 'none');
+      bag.setAttribute('stroke', 'currentColor');
+      bag.setAttribute('stroke-width', '1.8');
+      bag.setAttribute('stroke-linecap', 'round');
+      bag.setAttribute('stroke-linejoin', 'round');
+      bag.setAttribute('role', 'img');
+      bag.setAttribute('aria-label', 'Рюкзак');
+      const outline = doc.createElementNS(ns, 'path');
+      outline.setAttribute('d', 'M5 8h14l-1 12H6L5 8Zm4 0V6a3 3 0 0 1 6 0v2');
+      bag.append(outline);
+      title.replaceChildren(bag, ...(who ? [who] : []));
+    }
     header.classList.add('dfo-pack-head');
     header.append(view, auto, junk);
     shown = { header, repaint };
@@ -265,17 +286,71 @@
   // Keys meant for the window never reach the pack's listeners (they stand on the window, in capture).
   root.addEventListener('keydown', (e) => { if (open && e.key !== 'Escape') e.stopImmediatePropagation(); }, true);
 
-  // ── THE LOOK: the window wide alone (two columns of rows), its native width beside a container (one column); the icon
-  // view fills the same field with the native plates. Borders, never margins: the list measures each row's box.
+  // ── THE LOOK: the native desktop anatomy stays intact: .pack-main (equipment) is on the left,
+  // .pack-dock (tabs, list, list actions) is on the right. Do NOT hoist tabs across both columns:
+  // that adds a row above the equipment and pushes its temperature/slots downward.
+  // The only wide-screen change is the actual window and its right-hand list column.
   const CSS = `
-html[data-dfo-pack] .pack-shell:not(.paired) .pack-win { width:min(1380px,96vw); }
-@media (min-width:1000px) { html[data-dfo-pack] .pack-shell:not(.paired) .pack { grid-template-columns:minmax(560px,1fr) minmax(300px,700px); } }
-html[data-dfo-pack] .pack-shell .pack-id.dfo-pack-head { flex-wrap:wrap; justify-content:flex-end; gap:6px; }
-html[data-dfo-pack] .pack-shell .pack-id.dfo-pack-head .act { min-width:0; padding-left:10px; padding-right:10px; letter-spacing:.06em; }
-html[data-dfo-pack] .pack-shell .pack-id.dfo-pack-head > :first-child { margin-right:auto; }
-html[data-dfo-pack] .pack-shell .pack-id .dfo-pack-view { display:inline-flex; gap:0; }
-html[data-dfo-pack] .pack-shell .pack-id .dfo-pack-view > .act + .act { margin-left:-2px; }
-html[data-dfo-pack] .pack-shell .pack-id .dfo-pack-act.on { color:#211b10; background:#d8b34f; border-color:#ffe3a0; text-shadow:none; }
+html[data-dfo-pack] .pack-shell:not(.paired) .pack-win {
+  box-sizing:border-box; width:min(1460px,calc(100vw - 32px)) !important; max-width:none;
+}
+@media (min-width:1000px) {
+  html[data-dfo-pack] .pack-shell:not(.paired) .pack {
+    grid-template-columns:minmax(490px,540px) minmax(0,1fr);
+  }
+  /* Nine equal category cells, confined to the right pane, never spanning the paper doll. */
+  html[data-dfo-pack] .pack-shell:not(.paired) .pack-dock .packcats {
+    box-sizing:border-box; min-width:0; width:100%; overflow-x:hidden;
+  }
+  html[data-dfo-pack] .pack-shell:not(.paired) .pack-dock .packcats .packtabs {
+    display:grid; grid-template-columns:repeat(9,minmax(0,1fr)); gap:3px; margin:0;
+  }
+  html[data-dfo-pack] .pack-shell:not(.paired) .pack-dock .packcats .packtab {
+    display:flex; min-width:0; min-height:36px; padding:3px 2px;
+    justify-content:center; gap:3px; text-align:center;
+    font-size:11px; letter-spacing:0; white-space:nowrap;
+  }
+  html[data-dfo-pack] .pack-shell:not(.paired) .pack-dock .packcats .packtab .count {
+    flex:0 0 auto; margin-left:2px; font-size:10px;
+  }
+  /* The narrower paired inventory keeps native three-by-three tabs in its OWN right pane. */
+  html[data-dfo-pack] .pack-shell.paired .pack-dock .packcats .packtabs {
+    display:grid; grid-template-columns:repeat(3,minmax(0,1fr));
+  }
+}
+html[data-dfo-pack] .pack-shell .pack-id.dfo-pack-head {
+  display:flex; flex-flow:row nowrap; align-items:center; justify-content:flex-end;
+  gap:5px; padding:8px 10px; min-width:0;
+}
+html[data-dfo-pack] .pack-shell .pack-id.dfo-pack-head > div:first-child {
+  flex:1 1 auto; min-width:0; overflow:hidden; margin-right:auto;
+}
+html[data-dfo-pack] .pack-shell .pack-id.dfo-pack-head h2 {
+  display:flex; align-items:center; min-width:0; gap:7px; margin:0;
+  font-size:17px; letter-spacing:.04em; text-indent:0; white-space:nowrap;
+}
+html[data-dfo-pack] .pack-shell .pack-id.dfo-pack-head h2::before { display:none; content:none; }
+html[data-dfo-pack] .pack-shell .pack-id.dfo-pack-head .dfo-pack-bag {
+  width:20px; height:20px; flex:0 0 20px; color:#dec37f;
+}
+html[data-dfo-pack] .pack-shell .pack-id.dfo-pack-head .pack-who {
+  flex:0 1 auto; min-width:0; margin-left:0; overflow:hidden;
+  text-overflow:ellipsis; white-space:nowrap;
+}
+html[data-dfo-pack] .pack-shell .pack-id.dfo-pack-head .pack-who::before { content:none; margin:0; }
+html[data-dfo-pack] .pack-shell .pack-id.dfo-pack-head .act {
+  flex:0 0 auto; min-width:0; padding:7px 7px; font-size:11.5px;
+  letter-spacing:0; white-space:nowrap; box-sizing:border-box;
+}
+html[data-dfo-pack] .pack-shell .pack-id.dfo-pack-head .dfo-pack-view {
+  display:inline-flex; flex:0 0 auto; gap:0; white-space:nowrap;
+}
+html[data-dfo-pack] .pack-shell .pack-id.dfo-pack-head .dfo-pack-view > .act + .act { margin-left:-2px; }
+html[data-dfo-pack] .pack-shell.paired .pack-id.dfo-pack-head { gap:3px; padding:7px 6px; }
+html[data-dfo-pack] .pack-shell.paired .pack-id.dfo-pack-head .act { font-size:10.5px; padding:6px 4px; }
+html[data-dfo-pack] .pack-shell .pack-id .dfo-pack-act.on {
+  color:#211b10; background:#d8b34f; border-color:#ffe3a0; text-shadow:none;
+}
 html[data-dfo-pack-view="rows"] .pack-shell .pack-dock .packcol { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:0 8px; align-content:start; padding:6px 8px; }
 html[data-dfo-pack-view="rows"] .pack-shell.paired .pack-dock .packcol { grid-template-columns:minmax(0,1fr); }
 html[data-dfo-pack-view="rows"] .pack-shell .pack-dock .packcol > .packempty { grid-column:1 / -1; }

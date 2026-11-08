@@ -194,7 +194,8 @@
     // only forced the OUTER .pack-win. Preserve the NATIVE paired inventory's
     // equipment width in standalone mode: paired .pack-win is 1040px wide
     // (or 100vw-390px when smaller); its right dock has a 380px track.
-    // Therefore its left track is min(660px,100vw-770px), NOT 540px.
+    // The 4px frame border is part of that width (box-sizing:border-box).
+    // Thus the actual paired LEFT content track is min(656px,100vw-774px).
     // Force the two-column grid after native render to survive late CSS.
     // Paired and narrow/phone windows retain native behavior.
     Promise.resolve().then(() => {
@@ -208,7 +209,7 @@
       win.style.setProperty('width', 'calc(100vw - 24px)', 'important');
       win.style.setProperty('max-width', '1600px', 'important');
       grid.style.setProperty('display', 'grid', 'important');
-      grid.style.setProperty('grid-template-columns', 'min(660px, calc(100vw - 770px)) minmax(0,1fr)', 'important');
+      grid.style.setProperty('grid-template-columns', 'min(656px, calc(100vw - 774px)) minmax(0,1fr)', 'important');
       main.style.setProperty('min-width', '0');
       dock.style.setProperty('min-width', '0');
       // All nine named categories AND counts occupy the entire RIGHT dock,
@@ -342,8 +343,8 @@ html[data-dfo-pack] .pack-shell:not(.paired) .pack-win {
 @media (min-width:1000px) {
   html[data-dfo-pack] .pack-shell:not(.paired) .pack {
     /* Match the EQUIPMENT track of the paired native window exactly:
-       paired width=min(1040px,100vw - 390px), right track=380px. */
-    grid-template-columns:min(660px, calc(100vw - 770px)) minmax(0,1fr) !important;
+       paired outer width=min(1040px,100vw - 390px), 4px border, right track=380px. */
+    grid-template-columns:min(656px, calc(100vw - 774px)) minmax(0,1fr) !important;
   }
   /* Nine equal category cells, confined to the right pane, never spanning the paper doll. */
   html[data-dfo-pack] .pack-shell:not(.paired) .pack-dock .packcats {
@@ -354,12 +355,12 @@ html[data-dfo-pack] .pack-shell:not(.paired) .pack-win {
     flex:1 1 auto; min-width:0; width:100%;
   }
   html[data-dfo-pack] .pack-shell:not(.paired) .pack-dock .packcats .packtab {
-    display:flex; min-width:0; min-height:36px; padding:3px 2px;
-    justify-content:center; gap:3px; text-align:center;
-    font-size:11px; letter-spacing:0; white-space:nowrap;
+    display:flex; min-width:0; min-height:36px; padding:3px 1px;
+    justify-content:center; gap:1px; text-align:center;
+    font-size:10px; letter-spacing:0; white-space:nowrap;
   }
   html[data-dfo-pack] .pack-shell:not(.paired) .pack-dock .packcats .packtab .count {
-    flex:0 0 auto; margin-left:2px; font-size:10px;
+    flex:0 0 auto; margin-left:0; font-size:9px;
   }
   /* The narrower paired inventory keeps native three-by-three tabs in its OWN right pane. */
   html[data-dfo-pack] .pack-shell.paired .pack-dock .packcats .packtabs {

@@ -207,3 +207,26 @@ copy(__dfoInventoryProbe.export());
 **Следствие:** первая классификация игрового лога — отдельно `#enhanced-inventory` host count, число и владельцы `.pack-shell`, `shell.isConnected`, вызовы `render`/mount с session ID. Если хостов несколько, но shell один, первичен lifecycle-хостов; если shell два в одном host, первична вложенная/некорректная DOM-сборка; если shell нет в активном host — искать F-09 и поздний stale mount; если shell один и только визуально два — проверить отдельный compositor/другой overlay до изменения кода.
 
 **Статус проверки:** настоящие события экстерьерного мира/подземелья не воспроизводились; выводы ограничены доступным исходным кодом.
+
+
+### 2026-11-09 — итерация 5: конкретные источники повторных полных render, проверка версии исторического freeze
+
+**F-16 — при штатном mount почти неизбежна дополнительная полная DOM-перестройка от `refreshFigure()`, даже если композиция персонажа ничего не построила. Подтверждено кодом.**
+
+В [`enhancedInventory.js#L4835-L4850`](https://github.com/Lattymoy/daggerfall-js-source/blob/a3eb160/src/ui/enhanced/enhancedInventory.js#L4835-L4850) порядок: `refresh(); render(); ... refreshFigure();`. [`refreshFigure()` ~837–844](https://github.com/Lattymoy/daggerfall-js-source/blob/a3eb160/src/ui/enhanced/enhancedInventory.js#L833-L845) делает:
+
+```js
+Promise.resolve(refreshPaperDoll(deps.entity))
+  .then(() => { if (host) render(); })
+  .catch(...);
+```
+
+[`paperDoll.js#L638-L649`](https://github.com/Lattymoy/daggerfall-js-source/blob/a3eb160/src/ui/paperDoll.js#L638-L649) при отсутствующих `_art` или `_deps` **возвращает `undefined`**; `Promise.resolve(undefined).then(...)` всё равно вызывает `render()` через микрозадачу, если `host` существует. При наличии графики вызов приходит после асинхронной композиции. Следовательно, даже успешное «открыть и ничего не трогать» способно построить DOM не один, а минимум два раза; это не второй host, потому что `render` очищает тот же host. В вариантах с активным `fpArm` подписка [`enhancedInventory.js#L4780-L4784`](https://github.com/Lattymoy/daggerfall-js-source/blob/a3eb160/src/ui/enhanced/enhancedInventory.js#L4780-L4784) при уведомлении о сборке 3D-модели также вызывает **целый `render()`**, а не обновление конкретного `figure`. Нагрузка на CPU/DOM без взаимодействия игрока имеет реальный исходный источник.
+
+**F-17 — точная историческая микрозадачная бесконечная петля уже была в оригинале и кодом адресована. Это не доказательство её наличия в текущем релизе.**
+
+В [`paperDoll.js#L213-L225`](https://github.com/Lattymoy/daggerfall-js-source/blob/a3eb160/src/ui/paperDoll.js#L213-L225) разработчик прямо документировал жалобу «game freezes when opening inventory»: старый `paperDollStale()` сообщал «устарело» во время идущего compose, `refreshFigure()` принимал это и по немедленно завершённому/coalesced Promise делал `render()`, который снова спрашивал `paperDollStale()`: **render → stale → async ask → resolved → render**, потенциальный бесконечный цикл. В снимке `a3eb160` от этого введены `_refreshing`, `_composedGen` и **`_staleTried`**, ограничивающие запрос одним разом на поколение. Эту старую петлю **нельзя** объявлять активной без проверки конкретных скомпилированных файлов версии 0.1.14597 и фактического стека в проблемной сессии.
+
+**Диагностическое отличие:** если `render()` часто вызывается при постоянном одном host/shell, проверять `refreshFigure`/подписку rig/кеш стагнации; если растёт число `#enhanced-inventory`, первичнее lifecycle и повторные открытия. Отслеживать `__pack()` (в оригинальном окне глобальный отладочный счётчик `repaints`, `landings`, `painted`, `count`), но учитывать, что при новом mount счётчик сбрасывается.
+
+**Статус:** F-16 и исторический F-17 доказаны чтением исходников; их доля в текущих задержках пока не замерена.

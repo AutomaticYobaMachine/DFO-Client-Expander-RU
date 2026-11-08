@@ -40,7 +40,7 @@
 
 ### F-03 — защита `JAN2` от осиротевшей панели есть, но действует на этапе mount — ПОДТВЕРЖДЕНО КОДОМ
 
-**Место:** [`enhancedInventory.js`, `mountEnhancedInventory()`, ~4655–4670](https://github.com/Lattymoy/daggerfall-js-source/blob/a3eb160/src/ui/enhanced/enhancedInventory.js#L4655-L4670).
+**Место:** [`enhancedInventory.js`, `mountEnhancedInventory()`, ~4761–4783](https://github.com/Lattymoy/daggerfall-js-source/blob/a3eb160/src/ui/enhanced/enhancedInventory.js#L4761-L4783).
 
 Авторский комментарий документирует старый баг: второе открытие оставляло первую панель на экране; старые кнопки затем падали из-за `host === null`. В ответ добавлена ветка: при `host && host !== hostEl` вызвать `_view?.unmount()` и `prev.remove()`. При этом `host`, `deps` и состояние view — **синглтоны модуля**.
 
@@ -460,7 +460,7 @@ Object.itemIcon               worldTick-DneeGzUc.js:4:62109
 
 #### F-33. Почему `host.innerHTML=''` не удаляет накопленные окна
 
-Реальный механизм полного рендера — [`enhancedInventory.js#L4317-L4415`](https://github.com/Lattymoy/daggerfall-js-source/blob/a3eb160/src/ui/enhanced/enhancedInventory.js#L4317-L4415) и [`конец render с host.append(shell)`](https://github.com/Lattymoy/daggerfall-js-source/blob/a3eb160/src/ui/enhanced/enhancedInventory.js#L4650-L4660):
+Реальный механизм полного рендера — [`enhancedInventory.js#L4317-L4415`](https://github.com/Lattymoy/daggerfall-js-source/blob/a3eb160/src/ui/enhanced/enhancedInventory.js#L4317-L4415) и [`конец render с host.append(shell)`](https://github.com/Lattymoy/daggerfall-js-source/blob/a3eb160/src/ui/enhanced/enhancedInventory.js#L4637-L4650):
 
 1. `render A` в начале освобождает старые виртуальные списки (`dropLists`), сбрасывает ожидающие плитки (`_tiles.clear`), делает `host.innerHTML=''` и приступает к конструированию **локального, ещё не вставленного** `shellA`.
 2. Обращаясь к холодному модельному ключу, `render A` через `preloadIcon` синхронно уведомляет подписку, немедленно вызывающую `render B`. `render B` ещё раз очищает host и строит свой локальный `shellB`; встретив другой холодный ключ, может таким же образом запустить `render C` и т. д.

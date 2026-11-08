@@ -9,14 +9,14 @@ const css = source.split('  const CSS = `')[1]?.split('`;')[0];
 test('standalone inventory expands the actual frame, not a fake row across equipment', () => {
   assert.ok(css, 'inventory stylesheet must be present');
   assert.match(css, /\.pack-shell:not\(\.paired\) \.pack-win\s*\{[^}]*width:calc\(100vw - 24px\) !important/s);
-  assert.match(css, /\.pack-shell:not\(\.paired\) \.pack\s*\{[^}]*grid-template-columns:540px minmax\(0,1fr\)/s);
+  assert.ok(css.includes('grid-template-columns:min(660px, calc(100vw - 770px)) minmax(0,1fr) !important;'), 'standalone must inherit the paired equipment width');
   assert.doesNotMatch(css, /grid-template-areas:[^;]*tabs tabs/);
   assert.doesNotMatch(css, /\.pack-dock\s*\{\s*display:contents/);
   assert.doesNotMatch(css, /\.pack-main\s*\{\s*grid-area:/);
   assert.match(css, /max-width:1600px !important/);
   assert.match(source, /win\.style\.setProperty\('width', 'calc\(100vw - 24px\)', 'important'\)/);
   assert.match(source, /win\.style\.setProperty\('max-width', '1600px', 'important'\)/);
-  assert.match(source, /grid\.style\.setProperty\('grid-template-columns', '540px minmax\(0,1fr\)', 'important'\)/);
+  assert.ok(source.includes("grid.style.setProperty('grid-template-columns', 'min(660px, calc(100vw - 770px)) minmax(0,1fr)', 'important')"));
   assert.match(source, /dock\.style\.setProperty\('min-width', '0'\)/);
   assert.match(source, /tabs\.style\.setProperty\('grid-template-columns', 'repeat\(9,minmax\(0,1fr\)\)', 'important'\)/);
 });

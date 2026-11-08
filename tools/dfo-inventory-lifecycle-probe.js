@@ -77,6 +77,11 @@
     var hosts = Array.from(doc.querySelectorAll('#enhanced-inventory'));
     var shells = Array.from(doc.querySelectorAll('.pack-shell'));
     return {
+      mod: {
+        stylesheetPresent: !!doc.getElementById('dfo-pack-style'),
+        enabledAttribute: doc.documentElement.getAttribute('data-dfo-pack'),
+        viewAttribute: doc.documentElement.getAttribute('data-dfo-pack-view')
+      },
       hosts: hosts.map(function(h) {
         return {
           id: nodeId(h), connected: h.isConnected, shells: h.querySelectorAll('.pack-shell').length,
@@ -178,6 +183,12 @@
   var api = {
     version: 1,
     snapshot: snapshot,
+    mark: function(label) {
+      var s = snapshot();
+      push('USER-MARK', { label: String(label || 'observation').slice(0, 180), state: s });
+      console.info('[DFO Probe] marked:', label || 'observation', s);
+      return s;
+    },
     report: function() {
       var s = snapshot();
       var byType = {};

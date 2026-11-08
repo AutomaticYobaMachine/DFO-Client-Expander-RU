@@ -108,7 +108,7 @@ test('real Chromium: the widened standalone frame gives its NEW space to the rig
   assert.ok(result.rowRects[1].width>=450,JSON.stringify(result));
   assert.ok(Math.abs(result.rowRects[0].y-result.rowRects[1].y)<2,'item rows are not two side-by-side cards');
   assert.ok(result.rowRects[1].x>=result.rowRects[0].right,'item columns overlap');
-  assert.equal(result.inlineGrid,'540px minmax(0px, 1fr)'.replace('0px','0'),'actual grid is not forced');
+  assert.match(result.inlineGrid,/^540px\\s+minmax\\(0(?:px)?,\\s*1fr\\)$/,'actual grid is not forced');
 });
 
 test('real Chromium: a paired container window is NOT forced into the standalone wide layout', { skip: !browser }, () => {

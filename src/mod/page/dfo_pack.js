@@ -189,6 +189,16 @@
     header.classList.add('dfo-pack-head');
     header.append(view, auto, junk);
     shown = { header, repaint };
+    // The game creates/replaces .pack-win after this hook. Set its real outer width
+    // after render, not the inner category bar: this also defeats native 1040px
+    // sizing when the base stylesheet is injected later than the mod's stylesheet.
+    // The paired container window must continue using the native fit rule.
+    Promise.resolve().then(() => {
+      const win = doc.querySelector('.pack-shell:not(.paired) > .pack-win');
+      if (!win || !win.isConnected) return;
+      win.style.setProperty('width', 'calc(100vw - 24px)', 'important');
+      win.style.setProperty('max-width', '1600px', 'important');
+    });
   }
   function showView() {
     const html = doc.documentElement;
@@ -292,11 +302,15 @@
   // The only wide-screen change is the actual window and its right-hand list column.
   const CSS = `
 html[data-dfo-pack] .pack-shell:not(.paired) .pack-win {
-  box-sizing:border-box; width:min(1460px,calc(100vw - 32px)) !important; max-width:none;
+  box-sizing:border-box;
+  width:calc(100vw - 24px) !important;
+  max-width:1600px !important;
+  min-width:0;
 }
 @media (min-width:1000px) {
   html[data-dfo-pack] .pack-shell:not(.paired) .pack {
-    grid-template-columns:minmax(490px,540px) minmax(0,1fr);
+    /* Keep the character/equipment area unchanged; all extra width goes to the item dock. */
+    grid-template-columns:540px minmax(0,1fr);
   }
   /* Nine equal category cells, confined to the right pane, never spanning the paper doll. */
   html[data-dfo-pack] .pack-shell:not(.paired) .pack-dock .packcats {
@@ -358,7 +372,8 @@ html[data-dfo-pack-view="rows"] .pack-shell .pack-dock .packcol:not(.packcats) {
   align-content:start; padding:6px 8px;
 }
 html[data-dfo-pack-view="rows"] .pack-shell:not(.paired) .pack-dock .packcol:not(.packcats) {
-  grid-template-columns:repeat(2,minmax(0,360px)); justify-content:center;
+  /* Each card takes half the widened dock, with the same gap as container rows. */
+  grid-template-columns:repeat(2,minmax(0,1fr)); justify-content:stretch;
 }
 html[data-dfo-pack-view="rows"] .pack-shell.paired .pack-dock .packcol:not(.packcats) {
   grid-template-columns:minmax(0,1fr);

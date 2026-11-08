@@ -16,6 +16,9 @@ test('standalone inventory expands the actual frame, not a fake row across equip
   assert.match(css, /max-width:1600px !important/);
   assert.match(source, /win\.style\.setProperty\('width', 'calc\(100vw - 24px\)', 'important'\)/);
   assert.match(source, /win\.style\.setProperty\('max-width', '1600px', 'important'\)/);
+  assert.match(source, /grid\.style\.setProperty\('grid-template-columns', '540px minmax\(0,1fr\)', 'important'\)/);
+  assert.match(source, /dock\.style\.setProperty\('min-width', '0'\)/);
+  assert.match(source, /tabs\.style\.setProperty\('grid-template-columns', 'repeat\(9,minmax\(0,1fr\)\)', 'important'\)/);
 });
 test('nine categories stay on one row INSIDE the right inventory pane', () => {
   assert.match(css, /\.pack-shell:not\(\.paired\) \.pack-dock \.packcats \.packtabs\s*\{[^}]*display:grid; grid-template-columns:repeat\(9,minmax\(0,1fr\)\)/s);

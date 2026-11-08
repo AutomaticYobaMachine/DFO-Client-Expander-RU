@@ -191,10 +191,12 @@
     shown = { header, repaint };
     // The game creates the .pack, tabs and item columns AFTER this header hook.
     // Apply geometry once the synchronous native render is finished. In 1.29.2 we
-    // only forced the OUTER .pack-win, leaving the native grid's fluid LEFT pane
-    // and its narrow right dock intact. Force BOTH the frame and the actual grid.
-    // Inline important also survives late-injected native/skin styles. Paired and
-    // narrow/phone windows retain the native layout unmodified.
+    // only forced the OUTER .pack-win. Preserve the NATIVE paired inventory's
+    // equipment width in standalone mode: paired .pack-win is 1040px wide
+    // (or 100vw-390px when smaller); its right dock has a 380px track.
+    // Therefore its left track is min(660px,100vw-770px), NOT 540px.
+    // Force the two-column grid after native render to survive late CSS.
+    // Paired and narrow/phone windows retain native behavior.
     Promise.resolve().then(() => {
       if (root.matchMedia && !root.matchMedia('(min-width: 1000px)').matches) return;
       const win = doc.querySelector('.pack-shell:not(.paired) > .pack-win');
@@ -206,7 +208,7 @@
       win.style.setProperty('width', 'calc(100vw - 24px)', 'important');
       win.style.setProperty('max-width', '1600px', 'important');
       grid.style.setProperty('display', 'grid', 'important');
-      grid.style.setProperty('grid-template-columns', '540px minmax(0,1fr)', 'important');
+      grid.style.setProperty('grid-template-columns', 'min(660px, calc(100vw - 770px)) minmax(0,1fr)', 'important');
       main.style.setProperty('min-width', '0');
       dock.style.setProperty('min-width', '0');
       // All nine named categories AND counts occupy the entire RIGHT dock,
@@ -339,8 +341,9 @@ html[data-dfo-pack] .pack-shell:not(.paired) .pack-win {
 }
 @media (min-width:1000px) {
   html[data-dfo-pack] .pack-shell:not(.paired) .pack {
-    /* Keep the character/equipment area unchanged; all extra width goes to the item dock. */
-    grid-template-columns:540px minmax(0,1fr) !important;
+    /* Match the EQUIPMENT track of the paired native window exactly:
+       paired width=min(1040px,100vw - 390px), right track=380px. */
+    grid-template-columns:min(660px, calc(100vw - 770px)) minmax(0,1fr) !important;
   }
   /* Nine equal category cells, confined to the right pane, never spanning the paper doll. */
   html[data-dfo-pack] .pack-shell:not(.paired) .pack-dock .packcats {

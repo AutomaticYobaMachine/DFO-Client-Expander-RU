@@ -25,6 +25,37 @@ function pages(text) {
     + 'function __dfoPackPage$(e){try{const p=globalThis.__dfoPack?.page;return p?p(e,__dfoPageBase$,__dfoPageNative$):__dfoPageNative$(e)}catch{return __dfoPageNative$(e)}}\n';
 }
 
+
+// F-33: the game's fpArm.itemIcon() can synchronously notify its listeners from
+// preloadIcon() when no await is reached. The subscribed inventory render then
+// recurses into itself before its outer DOM build appends its shell. Do not change
+// the native render's other timing: defer ONLY reentrant requests, coalesced to
+// one animation frame. A stale frame is not allowed to redraw a closed host.
+function guardRender(text, render) {
+  if (!/^[A-Za-z_$][\w$]*$/.test(render)) throw new Error('invalid inventory render name');
+  return text + `
+;const __dfoInventoryOriginalRender$=${render};
+let __dfoInventoryRenderBusy$=false,__dfoInventoryRenderQueued$=false;
+${render}=function(...args){
+  if(__dfoInventoryRenderBusy$){
+    if(!__dfoInventoryRenderQueued$){
+      __dfoInventoryRenderQueued$=true;
+      const owner=typeof document!=='undefined'?document.getElementById('enhanced-inventory'):null;
+      const later=globalThis.requestAnimationFrame??((cb)=>setTimeout(cb,0));
+      later(()=>{
+        __dfoInventoryRenderQueued$=false;
+        if(owner&&!owner.isConnected)return;
+        ${render}();
+      });
+    }
+    return;
+  }
+  __dfoInventoryRenderBusy$=true;
+  try{return __dfoInventoryOriginalRender$(...args)}
+  finally{__dfoInventoryRenderBusy$=false}
+};
+`;
+}
 // enhancedInventory-*.js: the dock's list (listCol), its rows' picture box (itemRow), the header's buttons (render) and
 // the refresh every act and every open runs (refresh) - where the sort stands, by the native Sort's own call.
 function inventory(text) {
@@ -52,7 +83,7 @@ function inventory(text) {
   if (deps !== refresh[3]) throw new Error('pack refresh: another deps');
   out = put(out, close[0], `__dfoPackHead$(${close[4]},()=>{${refresh[1]}();${render}()});${close[0]}`);
   out = put(out, refresh[0], `${refresh[1]}=()=>{__dfoPackRefresh$(${deps},()=>!!${salvage}||!!${chestRefusal}(${deps}),()=>${sortInPlace}(${deps}.entity?.items,{nameOf:${nameOf}}));${refresh[2]}=${pm}(${refresh[3]}),`);
-  return out + '\n;function __dfoPackList$(t,p){try{return globalThis.__dfoPack?.list?.(t,p)??t}catch{return t}}'
+  return guardRender(out, render) + '\n;function __dfoPackList$(t,p){try{return globalThis.__dfoPack?.list?.(t,p)??t}catch{return t}}'
     + 'function __dfoPackBuild$(f,e){const p=globalThis.__dfoPack;return typeof p?.build===\'function\'?p.build(f,e):f(e)}'
     + 'function __dfoPackMode$(){try{return globalThis.__dfoPack?.mode?.()??\'\'}catch{return\'\'}}'
     + 'function __dfoPackListRow$(){try{return globalThis.__dfoPack?.listRow?.()===!0}catch{return!1}}'
@@ -84,4 +115,4 @@ function transformInventory(rel, text, log) {
   return out;
 }
 
-module.exports = { transformInventory, pages, inventory, receipt };
+module.exports = { transformInventory, pages, inventory, receipt, guardRender };

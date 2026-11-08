@@ -2,7 +2,7 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const vm = require('node:vm');
-const { guardRender, inventory } = require('../src/mod/inventory-transform.cjs');
+const { guardRender, reentrant, transformInventory } = require('../src/mod/inventory-transform.cjs');
 
 // The user's real Electron trace recorded 46 .pack-shell nodes in one host.
 // fpArm.preloadIcon() can invoke its subscribers synchronously when the
@@ -61,6 +61,11 @@ test('ordinary non-reentrant inventory actions still repaint synchronously', () 
   assert.equal(frames.length, 0);
 });
 
-test('inventory transform attaches the guarded renderer to its actual minified render symbol', () => {
-  assert.match(inventory.toString(), /guardRender\(out, render\)/);
+test('standalone native hook discovers the minified render symbol even if unrelated view hooks fail', () => {
+  const minified = "function R(){};const b=()=>{a(\x60packPhoneDoll\x60,!c),R()};";
+  const log = [];
+  const out = transformInventory('assets/enhancedInventory-demo.js', minified, log);
+  assert.ok(out.includes('__dfoInventoryOriginalRender$=R'), 'the actual render binding must be wrapped');
+  assert.deepEqual(log, [['inventory.reentrant', 1]]);
+  assert.match(reentrant.toString(), /guardRender\(text, callers\[0\]\[1\]\)/);
 });

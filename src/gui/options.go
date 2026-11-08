@@ -9,7 +9,7 @@ import (
 
 const (
 	appName    = "DFO-Client-Expander-RU"
-	appVersion = "1.28.0"
+	appVersion = "1.29.0"
 	appAuthor  = "AutomaticYobaMachine"
 )
 
@@ -40,6 +40,7 @@ const (
 	idInstallerLog
 	idCheckUpdates
 	idLang
+	idInventory
 )
 
 type feature struct {
@@ -58,6 +59,7 @@ var features = []feature{
 	{idLoot, "nearbyLoot"},
 	{idDungeons, "dungeons"},
 	{idItemCards, "itemCards"},
+	{idInventory, "inventory"},
 	{idFonts, "fonts"},
 }
 
@@ -77,7 +79,7 @@ type gameStatus struct {
 }
 
 func defaults() map[int]bool {
-	return map[int]bool{idRu: true, idMarks: true, idLoot: true, idDungeons: true, idItemCards: true, idFonts: true, idVisited: true}
+	return map[int]bool{idRu: true, idMarks: true, idLoot: true, idDungeons: true, idItemCards: true, idInventory: true, idFonts: true, idVisited: true}
 }
 
 // Missing options in an older install keep their defaults; explicit false survives.

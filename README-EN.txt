@@ -1,13 +1,13 @@
-DFO-Client-Expander-RU 1.28.0
+DFO-Client-Expander-RU 1.29.0
 =============================
 Author: AutomaticYobaMachine
 Made especially for the Russian-speaking DFO Online community.
 Русская инструкция: README.txt.
 
-An unofficial extension of the Daggerfall Online client: item cards, nearby
-loot with a loot filter, dungeon cards with a live summary and a route line,
-venue marks and a detailed town map, community fonts and an optional Russian
-translation. It is not the game itself; the original is
+An unofficial extension of the Daggerfall Online client: item cards, the pack
+as a list with a Junk page, nearby loot with a loot filter, dungeon cards with
+a live summary and a route line, venue marks and a detailed town map, community
+fonts and an optional Russian translation. It is not the game itself; the original is
 https://github.com/Lattymoy/daggerfall-js-source
 
 LANGUAGES
@@ -38,6 +38,15 @@ FEATURES
   at the crosshair shows a compact card of the lit item beside it, and the
   rows of a chest, the wagon, the bag or a body say the armor type and metal
   ("Chain Ebony"), the weight ("2.0 kg") and the price.
+- Inventory: the pack as item rows (two columns when opened alone, one beside
+  a chest, the wagon or a body) or as the square icons ("List"/"Icons" in the
+  header). The Magic page is gone: an enchanted piece lives on its base's page.
+  Ingredients hold only what the game's recipes spend; the rest goes to the new
+  Junk page, set up with "Junk…" by the loot filter's marks (by default the
+  things to sell and what the game marks as junk). Notes and quest letters are
+  on the Books page, and a quest letter is locked when you receive it. Identical
+  pieces share one cell. Sorted by quality when the pack opens and after your
+  actions in it ("Auto-sort" turns it off).
 - Russian translation: the interface, items, quests and books in Russian.
 - Marks and town map: venues on the Overworld and a detailed town map.
   "Only visited" hides the buildings you have not been to yet.

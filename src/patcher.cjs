@@ -100,7 +100,7 @@ function writeConfig(ud, withRu) {
   fs.mkdirSync(ud, { recursive: true });
   const file = path.join(ud, 'dfo-mod.json');
   const store = createLootStore(ud);
-  let cfg = { enabled: true, ru: withRu, marks: true, nearbyLoot: true, dungeons: true, itemCards: true, fonts: true, nearbyLootOptions: { keyCode: 'KeyJ' }, marksOptions: { onlyVisited: true, markRadiusM: 1200, nameRadiusM: 300, maxMarks: 60 } };
+  let cfg = { enabled: true, ru: withRu, marks: true, nearbyLoot: true, dungeons: true, itemCards: true, inventory: true, fonts: true, nearbyLootOptions: { keyCode: 'KeyJ' }, marksOptions: { onlyVisited: true, markRadiusM: 1200, nameRadiusM: 300, maxMarks: 60 } };
   try { if (fs.existsSync(file)) cfg = { ...cfg, ...JSON.parse(fs.readFileSync(file, 'utf8')) }; } catch { /* a broken file is written again */ }
   cfg.marksOptions = { onlyVisited: true, markRadiusM: 1200, nameRadiusM: 300, maxMarks: 60, ...(cfg.marksOptions ?? {}) };
 
@@ -125,7 +125,7 @@ function writeConfig(ud, withRu) {
     const [k, v] = String(args[i + 1] ?? '').split('=');
     const on = v === '1' || v === 'true';
     if (k === 'ru') cfg.ru = on && withRu;
-    else if (k === 'marks' || k === 'nearbyLoot' || k === 'dungeons' || k === 'itemCards' || k === 'fonts' || k === 'enabled') cfg[k] = on;
+    else if (k === 'marks' || k === 'nearbyLoot' || k === 'dungeons' || k === 'itemCards' || k === 'inventory' || k === 'fonts' || k === 'enabled') cfg[k] = on;
     else if (k === 'onlyVisited') cfg.marksOptions.onlyVisited = on;
   }
   if (!withRu) cfg.ru = false;
@@ -232,7 +232,7 @@ function install() {
   put.set('main.cjs', Buffer.from(hooked));
 
   // the mod itself
-  for (const rel of ['hook.cjs', 'transforms.cjs', 'item-cards-transform.cjs', 'page/dfo_item_cards.js', 'item-text.cjs', 'page/dfo_item_text.js', 'page/dfo_ui_text.js', 'nearby-loot-transform.cjs', 'loot-tags-transform.cjs', 'dungeon-transform.cjs', 'dungeon-live-transform.cjs', 'dungeon-nav-transform.cjs', 'page/dfo_dungeon_model.js', 'page/dfo_dungeons.js', 'page/dfo_dungeon_live_model.js', 'page/dfo_dungeon_live.js', 'page/dfo_dungeon_graph.js', 'page/dfo_dungeon_nav_model.js', 'page/dfo_dungeon_nav.js', 'loot-store.cjs', 'page/dfo_loot_rules.js', 'page/dfo_loot_ui.js', 'page/dfo_loot.js', 'version.json', 'page/dfo_marks.js', 'page/dfo_town.js', 'page/ru_locale.js', 'page/ru_items.js']) put.set(`dfo-mod/${rel}`, fs.readFileSync(path.join(MOD, ...rel.split('/'))));
+  for (const rel of ['hook.cjs', 'transforms.cjs', 'item-cards-transform.cjs', 'page/dfo_item_cards.js', 'item-text.cjs', 'page/dfo_item_text.js', 'page/dfo_ui_text.js', 'nearby-loot-transform.cjs', 'loot-tags-transform.cjs', 'dungeon-transform.cjs', 'dungeon-live-transform.cjs', 'dungeon-nav-transform.cjs', 'page/dfo_dungeon_model.js', 'page/dfo_dungeons.js', 'page/dfo_dungeon_live_model.js', 'page/dfo_dungeon_live.js', 'page/dfo_dungeon_graph.js', 'page/dfo_dungeon_nav_model.js', 'page/dfo_dungeon_nav.js', 'loot-store.cjs', 'page/dfo_loot_rules.js', 'page/dfo_loot_ui.js', 'page/dfo_loot.js', 'inventory-transform.cjs', 'page/dfo_pack_data.js', 'page/dfo_pack_rules.js', 'page/dfo_pack.js', 'version.json', 'page/dfo_marks.js', 'page/dfo_town.js', 'page/ru_locale.js', 'page/ru_items.js']) put.set(`dfo-mod/${rel}`, fs.readFileSync(path.join(MOD, ...rel.split('/'))));
 
   // item descriptions: English always (the language without the translation), Russian only with the translation
   const { installFiles } = require(path.join(MOD, 'item-text.cjs'));

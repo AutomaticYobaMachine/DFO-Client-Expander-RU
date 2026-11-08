@@ -135,7 +135,7 @@
       ? estimate / line.weight : null;
     const power = known && typeof native.power === 'function' ? native.power(item) : null;
     const { slot, skill } = wornIn(item, ammo, native);
-    return { known, facts, count, material, materialKey, construction, slot, skill, unitValue, total, source, power, price, approximate,
+    return { known, facts, count, material, materialKey, construction, slot, skill, unitValue, total, source, power, price, approximate, estimate,
       perKg: finite(perKg) && perKg <= Number.MAX_SAFE_INTEGER ? perKg : null };
   }
 
@@ -248,25 +248,25 @@ body .card.dfo-item-card[data-rarity=gilded] { border-width:4px!important; borde
 /* THE LOOT WINDOW'S ROWS (a chest's, a wagon's, the bag's, a body's): the card's ink and brass, the tier on the left edge,
    the name as the card's title, the sub-line's metal in its colour, the price with its coin. Borders, never margins:
    the list measures each row's own box (ui/virtualRows.js). */
-.loot-win .itemrow.dfo-item-row { --dfo-row-rar:#827a68; gap:10px; padding:7px 12px 7px 9px; background:var(--ink,#0e1013); border:0; border-left:3px solid var(--dfo-row-rar); border-bottom:1px solid #2c2820; box-shadow:inset 0 -1px 0 #000; font-family:'DFO Gabin',var(--data,serif); text-shadow:none; }
-.loot-win .itemrow.dfo-item-row[data-rarity="magic"] { --dfo-row-rar:#6f9ee8; }
-.loot-win .itemrow.dfo-item-row[data-rarity="rare"] { --dfo-row-rar:#e4c34f; }
-.loot-win .itemrow.dfo-item-row[data-rarity="legendary"] { --dfo-row-rar:#e07a2e; }
-.loot-win .itemrow.dfo-item-row[data-rarity="aetheric"] { --dfo-row-rar:#bfe8ff; }
-.loot-win .itemrow.dfo-item-row[data-rarity="artifact"] { --dfo-row-rar:#b57bee; }
-.loot-win .itemrow.dfo-item-row[data-rarity="gilded"] { --dfo-row-rar:#ff3b4a; }
-.loot-win .itemrow.dfo-item-row:hover, .loot-win .itemrow.dfo-item-row:focus-visible { background:#141920; }
-.loot-win .itemrow.dfo-item-row.on { background:rgba(183,160,113,.15); box-shadow:inset 0 -1px 0 #000,inset 0 0 0 1px rgba(213,178,110,.55); }
-.loot-win .itemrow.dfo-item-row .tile { box-shadow:inset 0 0 0 1px #3a3428; background:#0a0c10; }
-.loot-win .itemrow.dfo-item-row .itemname { gap:3px; }
-.loot-win .itemrow.dfo-item-row .itemname > span:first-child { font-family:'DFO Greengoth',var(--display,Georgia,serif); font-size:15px; line-height:1.2; }
-.loot-win .itemrow.dfo-item-row .itemname > small.dfo-row-sub { display:flex; align-items:baseline; gap:0 7px; min-width:0; overflow:hidden; white-space:nowrap; font:11px/1.25 'DFO Gabin',var(--data,serif); letter-spacing:.06em; text-transform:uppercase; color:#b7a071; }
+:is(.loot-win,.pack-dock) .itemrow.dfo-item-row { --dfo-row-rar:#827a68; gap:10px; padding:7px 12px 7px 9px; background:var(--ink,#0e1013); border:0; border-left:3px solid var(--dfo-row-rar); border-bottom:1px solid #2c2820; box-shadow:inset 0 -1px 0 #000; font-family:'DFO Gabin',var(--data,serif); text-shadow:none; }
+:is(.loot-win,.pack-dock) .itemrow.dfo-item-row[data-rarity="magic"] { --dfo-row-rar:#6f9ee8; }
+:is(.loot-win,.pack-dock) .itemrow.dfo-item-row[data-rarity="rare"] { --dfo-row-rar:#e4c34f; }
+:is(.loot-win,.pack-dock) .itemrow.dfo-item-row[data-rarity="legendary"] { --dfo-row-rar:#e07a2e; }
+:is(.loot-win,.pack-dock) .itemrow.dfo-item-row[data-rarity="aetheric"] { --dfo-row-rar:#bfe8ff; }
+:is(.loot-win,.pack-dock) .itemrow.dfo-item-row[data-rarity="artifact"] { --dfo-row-rar:#b57bee; }
+:is(.loot-win,.pack-dock) .itemrow.dfo-item-row[data-rarity="gilded"] { --dfo-row-rar:#ff3b4a; }
+:is(.loot-win,.pack-dock) .itemrow.dfo-item-row:hover, :is(.loot-win,.pack-dock) .itemrow.dfo-item-row:focus-visible { background:#141920; }
+:is(.loot-win,.pack-dock) .itemrow.dfo-item-row.on { background:rgba(183,160,113,.15); box-shadow:inset 0 -1px 0 #000,inset 0 0 0 1px rgba(213,178,110,.55); }
+:is(.loot-win,.pack-dock) .itemrow.dfo-item-row .tile { box-shadow:inset 0 0 0 1px #3a3428; background:#0a0c10; }
+:is(.loot-win,.pack-dock) .itemrow.dfo-item-row .itemname { gap:3px; }
+:is(.loot-win,.pack-dock) .itemrow.dfo-item-row .itemname > span:first-child { font-family:'DFO Greengoth',var(--display,Georgia,serif); font-size:15px; line-height:1.2; }
+:is(.loot-win,.pack-dock) .itemrow.dfo-item-row .itemname > small.dfo-row-sub { display:flex; align-items:baseline; gap:0 7px; min-width:0; overflow:hidden; white-space:nowrap; font:11px/1.25 'DFO Gabin',var(--data,serif); letter-spacing:.06em; text-transform:uppercase; color:#b7a071; }
 .dfo-row-sub>*+*::before { content:'·'; margin-right:7px; color:#5f5643; }
 .dfo-row-mat { display:inline-flex; gap:0 5px; flex:0 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; }
 .dfo-row-mat>.dfo-item-metal { font:inherit; color:var(--dfo-metal-color,#e9e4d9); -webkit-text-stroke:var(--dfo-metal-stroke,0 transparent); text-shadow:var(--dfo-metal-shadow,none); }
 .dfo-row-kg { flex:none; font-family:'DFO Flexi',var(--data,monospace); letter-spacing:0; text-transform:none; color:#d8cfae; }
 .dfo-row-extra { flex:none; color:#a89f88; }
-.loot-win .itemrow.dfo-item-row .itemwt.dfo-row-price { display:flex; align-items:center; gap:5px; flex:0 0 auto; color:#f5d451; font-size:inherit; }
+:is(.loot-win,.pack-dock) .itemrow.dfo-item-row .itemwt.dfo-row-price { display:flex; align-items:center; gap:5px; flex:0 0 auto; color:#f5d451; font-size:inherit; }
 .dfo-row-price>.dfo-item-price-value { font-size:15px; }
 .dfo-row-price>.dfo-item-coin { width:14px; height:14px; }
 `;
@@ -469,15 +469,35 @@ body .card.dfo-item-card[data-rarity=gilded] { border-width:4px!important; borde
       }
       return box;
     }
+    // The inventory's list view (page/dfo_pack.js) dresses the pack's own rows too; its surrogate stack - records of one
+    // kind that differ in nothing - says the whole count, weight and price, read off the cell's first record.
+    const listRow = () => { try { return win.__dfoPack?.listRow?.() === true; } catch { return false; } };
+    function stackOf(item, data) {
+      let all = null;
+      try { all = win.__dfoPack?.members?.(item); } catch { all = null; }
+      if (!Array.isArray(all) || all.length < 2 || !data.count) return null;
+      const n = all.reduce((sum, it) => sum + (Number.isSafeInteger(it?.stackCount) && it.stackCount > 1 ? it.stackCount : 1), 0);
+      return { n, scale: n / data.count };
+    }
     function row(button, line, from, context, quest) {
       try {
-        if (from !== 'remote' || !button || !line?.item || typeof line.item !== 'object' || !ready()) return false;
+        if (!(from === 'remote' || (from === 'local' && listRow())) || !button || !line?.item || typeof line.item !== 'object' || !ready()) return false;
         const name = button.querySelector('.itemname'), weight = button.querySelector('.itemwt');
         if (!name || !weight) return false;
-        const data = derive(line.item, line, native, context && typeof context.known === 'function' ? context : { known: () => false });
+        let data = derive(line.item, line, native, context && typeof context.known === 'function' ? context : { known: () => false });
         if (!data) return false;
         ensureStyle();
-        const sub = node('small', 'dfo-row-sub'), what = rowMaterial(line, data), kg = weightText(Number(line.weight));
+        const stack = from === 'local' ? stackOf(line.item, data) : null;
+        let kgValue = Number(line.weight);
+        if (stack) {
+          kgValue *= stack.scale;
+          const sum = data.estimate == null ? null : data.estimate * stack.scale;
+          data = { ...data, price: sum == null ? null : data.approximate ? nearestTen(sum) : sum };
+          const title = name.querySelector(':scope > span');
+          // the name as the row printed it, its own count off: already in the player's language, so a text node
+          if (title) title.replaceChildren(doc.createTextNode(`${title.textContent.replace(/ ×\d+$/, '')} ×${stack.n}`));
+        }
+        const sub = node('small', 'dfo-row-sub'), what = rowMaterial(line, data), kg = weightText(kgValue);
         if (what) sub.append(what);
         if (kg) sub.append(node('span', 'dfo-row-kg', kg));
         if (line.lit) sub.append(node('span', 'dfo-row-extra', 'lit'));   // the native word, worded as the native row words it

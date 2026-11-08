@@ -9,6 +9,7 @@
 'use strict';
 const { transformNearby } = require('./nearby-loot-transform.cjs');
 const { transformTags } = require('./loot-tags-transform.cjs');
+const { transformInventory } = require('./inventory-transform.cjs');
 const { transformDungeons } = require('./dungeon-transform.cjs');
 const { transformItemCards } = require('./item-cards-transform.cjs');
 const { transformFonts, preparePage } = require('./fonts-transform.cjs');
@@ -444,8 +445,10 @@ function transformAsset(rel, text, ctx) {
     try { t = tr.run(t, log, ctx, rel); } catch (err) { log.push([`${tr.id}!error ${err?.message ?? err}`, 0]); }
   }
   if (ctx.nearbyLoot !== false) t = transformTags(rel, transformNearby(rel, t, log), log);
+  else if (ctx.inventory === true) t = transformTags(rel, t, log);   // the Junk page's tags, without the detector
   if (ctx.dungeons !== false) t = transformDungeons(rel, t, log);
   if (ctx.itemCards === true) t = transformItemCards(rel, t, log);
+  if (ctx.inventory === true) t = transformInventory(rel, t, log);
   if (ctx.fonts === true) t = transformFonts(rel, t, log);
   if (ctx.ru || ctx.fonts) t = transformServices(rel, t, log);
   return { text: t, log };
@@ -458,7 +461,7 @@ function injectPage(html, prefix, ctx) {
   tags.push(`<script>window.__DFO_MOD_CFG__=${JSON.stringify(ctx.pageCfg ?? {})};</script>`);
   // The mod's own strings first: every script after them speaks the install's language (English without the translation).
   tags.push(`<script src="${prefix}dfo-mod/dfo_ui_text_data.js"></script>`, `<script src="${prefix}dfo-mod/dfo_ui_text.js"></script>`);
-  if (ctx.fonts === true) tags.push(`<script src="${prefix}dfo-mod/dfo_font_data.js?dfo=1.28.0"></script>`,`<script src="${prefix}dfo-mod/dfo_fonts.js?dfo=1.28.0"></script>`);
+  if (ctx.fonts === true) tags.push(`<script src="${prefix}dfo-mod/dfo_font_data.js?dfo=1.29.0"></script>`,`<script src="${prefix}dfo-mod/dfo_fonts.js?dfo=1.29.0"></script>`);
   if (ctx.ru && !html.includes('ru_dict.js')) tags.push(`<script src="${prefix}dfo-mod/ru_dict.js"></script>`, `<script src="${prefix}dfo-mod/ru_i18n.js"></script>`);
   tags.push(`<script src="${prefix}dfo-mod/ru_locale.js"></script>`, `<script src="${prefix}dfo-mod/ru_items.js"></script>`);
   if (ctx.ru || ctx.fonts) tags.push(`<script src="${prefix}dfo-mod/dfo_service_details.js"></script>`, `<script src="${prefix}dfo-mod/dfo_services.js"></script>`);
@@ -466,6 +469,8 @@ function injectPage(html, prefix, ctx) {
   tags.push(`<script src="${prefix}dfo-mod/dfo_marks.js"></script>`, `<script src="${prefix}dfo-mod/dfo_town.js"></script>`);
   if (ctx.dungeons !== false) tags.push(...['dfo_dungeon_model.js', 'dfo_dungeons.js', 'dfo_dungeon_live_model.js', 'dfo_dungeon_graph.js', 'dfo_dungeon_nav_model.js', 'dfo_dungeon_nav.js', 'dfo_dungeon_live.js'].map(f => `<script src="${prefix}dfo-mod/${f}"></script>`));
   if (ctx.nearbyLoot !== false) tags.push(...['dfo_loot_rules.js', 'dfo_loot_ui.js', 'dfo_loot.js'].map(f => `<script src="${prefix}dfo-mod/${f}"></script>`));
+  // The inventory (docs/inventory.md): its tables and its script; the loot filter's rules give the Junk page its tags.
+  if (ctx.inventory === true) tags.push(...[...(ctx.nearbyLoot !== false ? [] : ['dfo_loot_rules.js']), 'dfo_pack_data.js', 'dfo_pack_rules.js', 'dfo_pack.js'].map(f => `<script src="${prefix}dfo-mod/${f}"></script>`));
   const at = html.indexOf('<script type="module"');
   const out=at<0?html.replace('</head>', `${tags.join('\n  ')}\n</head>`):`${html.slice(0, at)}${tags.join('\n  ')}\n  ${html.slice(at)}`;
   return ctx.fonts===true?preparePage(out):out;
@@ -475,6 +480,7 @@ function injectPage(html, prefix, ctx) {
  *  off in this version of the game (the log says which). The other ids are older shapes of the same places. */
 const EXPECTED = Object.freeze({
   fonts: ['fonts.classic','fonts.choices','fonts.network','fonts.bookClassic','fonts.bookCanvas','fonts.fnt','fonts.pixels','fonts.resources','fonts.worker','fonts.uiSizes','fonts.titleSizes','fonts.dial','fonts.statusLayout','fonts.mapHost','fonts.mapProject','fonts.mapHud'],
+  inventory: ['inventory.pages', 'inventory.view', 'inventory.receipt'],
   itemCards: ['itemCards.inventory', 'itemCards.values', 'itemCards.materials', 'itemCards.powers', 'itemCards.prices', 'itemCards.currency', 'itemCards.effectLabels', 'itemCards.slots', 'itemCards.skills', 'itemCards.quick', 'itemCards.letters', 'itemCards.rows'],
   dungeons: ['dungeon.world', 'dungeon.hud', 'dungeon.travelView', 'dungeon.bestiary', 'dungeon.tables', 'dungeon.scaling', 'dungeon.rewards', 'dungeon.runtime', 'dungeon.lifetime', 'dungeon.aurum', 'dungeon.ore', 'dungeon.renown', 'dungeon.respawn', 'dungeon.layout', 'dungeon.sizes', 'dungeon.elites', 'dungeon.live', 'dungeon.journalDoor', 'dungeon.journalClassic', 'dungeon.journalFocus', 'dungeon.traits', 'dungeon.navContext', 'dungeon.navDraw', 'dungeon.navQuests'],
   nearbyLoot: ['loot.tags', 'loot.types', 'loot.kinds', 'loot.identified', 'loot.bound', 'loot.bootstrap', 'loot.world', 'loot.exterior', 'loot.modes', 'loot.dungeon', 'loot.finds', 'loot.spoils', 'loot.inventory', 'loot.transfer', 'loot.arrows'],
@@ -485,6 +491,6 @@ const EXPECTED = Object.freeze({
 });
 
 function expectedHooks(ctx={}){
- return [...((ctx.ru||ctx.fonts)?["services.ports","services.spellRegistry","services.enchantCatalog","services.picker","services.trade"]:[]),...(ctx.fonts?EXPECTED.fonts:[]),...(ctx.itemCards?EXPECTED.itemCards:[]),...(ctx.marks?EXPECTED.marks:[]),...(ctx.nearbyLoot!==false?EXPECTED.nearbyLoot:[]),...(ctx.dungeons!==false?EXPECTED.dungeons:[]),...(ctx.ru?EXPECTED.ru.filter(id=>!(ctx.fonts&&id==='ru.font')):[])];
+ return [...((ctx.ru||ctx.fonts)?["services.ports","services.spellRegistry","services.enchantCatalog","services.picker","services.trade"]:[]),...(ctx.fonts?EXPECTED.fonts:[]),...(ctx.itemCards?EXPECTED.itemCards:[]),...(ctx.inventory?EXPECTED.inventory:[]),...(ctx.marks?EXPECTED.marks:[]),...(ctx.nearbyLoot!==false?EXPECTED.nearbyLoot:[]),...(ctx.dungeons!==false?EXPECTED.dungeons:[]),...(ctx.ru?EXPECTED.ru.filter(id=>!(ctx.fonts&&id==='ru.font')):[])];
 }
 module.exports = { EXPECTED, expectedHooks, transformAsset, injectPage, TRANSFORMS, MARK_GROUPS, CHARSET_OLD, CHARSET_NEW, QUEST_FILE, ruQuest };

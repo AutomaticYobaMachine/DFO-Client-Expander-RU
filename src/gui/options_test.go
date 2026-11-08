@@ -14,10 +14,10 @@ func TestOptionsSurviveOldInstallAndExplicitDisable(t *testing.T) {
 		t.Fatalf("lost older-install defaults or explicit false: %v", on)
 	}
 	next := loadChoices(json.RawMessage(`{"nearbyLoot":false,"dungeons":false,"itemCards":false}`), on)
-	if !next[idFonts] {
-		t.Fatal("older config disabled the new fonts default")
+	if !next[idFonts] || !next[idInventory] {
+		t.Fatal("older config disabled the new fonts or inventory default")
 	}
-	next = loadChoices(json.RawMessage(`{"fonts":false}`), next)
+	next = loadChoices(json.RawMessage(`{"fonts":false,"inventory":false}`), next)
 	if selectedCount(next) != 0 {
 		t.Fatalf("disabled features re-enabled: %v", next)
 	}

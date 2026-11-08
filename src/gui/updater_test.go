@@ -338,7 +338,7 @@ func TestUpdatePlanIsBoundToPrivateCacheAndKnownFiles(t *testing.T) {
 }
 
 func TestUpdateResumePreservesAllPendingChoices(t *testing.T) {
-	saved := map[string]bool{"ru": false, "marks": true, "nearbyLoot": false, "dungeons": true, "itemCards": false, "fonts": false, "onlyVisited": false}
+	saved := map[string]bool{"ru": false, "marks": true, "nearbyLoot": false, "dungeons": true, "itemCards": false, "inventory": false, "fonts": false, "onlyVisited": false}
 	choices := resumeChoices(saved, defaults())
 	for _, feature := range features {
 		if choices[feature.ID] != saved[feature.Key] {

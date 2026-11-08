@@ -18,7 +18,7 @@ const itemText = require('./item-text.cjs');
 
 const VERSION = (() => { try { return JSON.parse(fs.readFileSync(path.join(__dirname, 'version.json'), 'utf8')).version; } catch { return '?'; } })();
 const DEFAULTS = Object.freeze({
-  enabled: true, ru: true, marks: true, nearbyLoot: true, dungeons: true, itemCards: true, fonts: true,
+  enabled: true, ru: true, marks: true, nearbyLoot: true, dungeons: true, itemCards: true, inventory: true, fonts: true,
   nearbyLootOptions: { keyCode: 'KeyJ' },
   dungeonOptions: { keyCode: 'KeyK' },
   marksOptions: { onlyVisited: true, markRadiusM: 1200, nameRadiusM: 300, maxMarks: 60 },
@@ -39,6 +39,7 @@ const OWN = Object.freeze({   // served at dagger://game/dfo-mod/<name>
   'dfo_dungeon_live_model.js': 'page/dfo_dungeon_live_model.js',
   'dfo_dungeon_graph.js': 'page/dfo_dungeon_graph.js',
   'dfo_dungeon_nav_model.js': 'page/dfo_dungeon_nav_model.js', 'dfo_dungeon_nav.js': 'page/dfo_dungeon_nav.js', 'dfo_dungeon_live.js': 'page/dfo_dungeon_live.js',
+  'dfo_pack_data.js': 'page/dfo_pack_data.js', 'dfo_pack_rules.js': 'page/dfo_pack_rules.js', 'dfo_pack.js': 'page/dfo_pack.js',
   'dfo_loot_rules.js': 'page/dfo_loot_rules.js', 'dfo_loot_ui.js': 'page/dfo_loot_ui.js', 'dfo_loot.js': 'page/dfo_loot.js', 'dfo_marks.js': 'page/dfo_marks.js', 'dfo_town.js': 'page/dfo_town.js', 'ru_dict.js': 'page/ru_dict.js', 'ru_i18n.js': 'page/ru_i18n.js',
   'ru_locale.js': 'page/ru_locale.js', 'ru_items.js': 'page/ru_items.js',
 });
@@ -83,9 +84,9 @@ function wrap(handleDagger, { app = null } = {}) {
     // the pack the game's language system reads, as the page lists it (ru_locale.js): its credits and its files
     let pack = null;
     if (ru) { try { pack = JSON.parse(fs.readFileSync(path.join(__dirname, 'ru-pack', 'index.json'), 'utf8')); } catch { pack = null; } }
-    ctx = { ru, marks: !!cfg.marks, nearbyLoot: cfg.nearbyLoot !== false, dungeons: cfg.dungeons !== false, itemCards: cfg.itemCards !== false, fonts: cfg.fonts !== false, fontB64, quests, ql,
+    ctx = { ru, marks: !!cfg.marks, nearbyLoot: cfg.nearbyLoot !== false, dungeons: cfg.dungeons !== false, itemCards: cfg.itemCards !== false, inventory: cfg.inventory !== false, fonts: cfg.fonts !== false, fontB64, quests, ql,
       itemTextLocale: itemText.chooseLocale(ru), uiLocale: itemText.chooseLocale(ru),
-      pageCfg: { fonts: {enabled:cfg.fonts!==false,revision:VERSION}, itemCards: { enabled: cfg.itemCards !== false }, itemText: { locale: itemText.chooseLocale(ru) }, ui: { locale: itemText.chooseLocale(ru) }, dungeons: { ...cfg.dungeonOptions, enabled: cfg.dungeons !== false }, nearbyLoot: { ...cfg.nearbyLootOptions, enabled: cfg.nearbyLoot !== false }, marks: { marks: !!cfg.marks, ...cfg.marksOptions }, ru: { on: ru, pack, gameLanguage: cfg.gameLanguage !== false } } };
+      pageCfg: { fonts: {enabled:cfg.fonts!==false,revision:VERSION}, itemCards: { enabled: cfg.itemCards !== false }, inventory: { enabled: cfg.inventory !== false }, itemText: { locale: itemText.chooseLocale(ru) }, ui: { locale: itemText.chooseLocale(ru) }, dungeons: { ...cfg.dungeonOptions, enabled: cfg.dungeons !== false }, nearbyLoot: { ...cfg.nearbyLootOptions, enabled: cfg.nearbyLoot !== false }, marks: { marks: !!cfg.marks, ...cfg.marksOptions }, ru: { on: ru, pack, gameLanguage: cfg.gameLanguage !== false } } };
     return ctx;
   };
   const cache = new Map();   // rel -> { key, text }
@@ -179,7 +180,7 @@ function wrap(handleDagger, { app = null } = {}) {
         if(/\.html$/i.test(rel)||!rel){
           const res=await handleDagger(req);if(!res?.ok)return res;
           const {preparePage}=require('./fonts-transform.cjs');
-          const scripts='<script src="/dfo-mod/dfo_font_data.js?dfo=1.27.0"></script><script src="/dfo-mod/dfo_fonts.js?dfo=1.27.0"></script>';
+          const scripts='<script src="/dfo-mod/dfo_font_data.js?dfo=1.29.0"></script><script src="/dfo-mod/dfo_fonts.js?dfo=1.29.0"></script>';
           const html=await res.text();return new Response(preparePage(html.replace('</head>',scripts+'</head>')),{headers:res.headers,status:res.status});
         }
       }
@@ -193,18 +194,18 @@ function wrap(handleDagger, { app = null } = {}) {
       if (req.method === 'POST') return new Response(null, { status: writeCache(await req.text()) });
       return new Response(readCache(), { headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' } });
     }
-    if (rel === 'dfo-mod/loot-settings' || rel === 'dfo-mod/loot-presets' || rel === 'dfo-mod/dungeon-notes') {
+    if (rel === 'dfo-mod/loot-settings' || rel === 'dfo-mod/loot-presets' || rel === 'dfo-mod/dungeon-notes' || rel === 'dfo-mod/pack-settings') {
       const json = (body, status = 200) => new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' } });
       // An error carries its words in the install's language and its key, so the page says it in its own pack's words.
       const fail = (key, status) => json({ error: T(key), ...(/^[a-z][A-Za-z0-9]*(?:\.[A-Za-z0-9-]+)+$/.test(key) ? { code: key } : {}) }, status);
       try {
-        if (req.method === 'GET') return json(rel.endsWith('dungeon-notes') ? { notes: lootStore.dungeonNotes() } : lootStore.state());
+        if (req.method === 'GET') return json(rel.endsWith('dungeon-notes') ? { notes: lootStore.dungeonNotes() } : rel.endsWith('pack-settings') ? lootStore.packState() : lootStore.state());
         if (req.method !== 'POST') return fail('store.method', 405);
         const body = await req.text();
         if (Buffer.byteLength(body) > 2 * 1024 * 1024) return fail('store.tooLarge', 413);
         let data; try { data = JSON.parse(body); } catch { return fail('store.badJson', 400); }
         if (!data || typeof data !== 'object' || Array.isArray(data)) return fail('store.badSettings', 400);
-        return json(rel.endsWith('dungeon-notes') ? lootStore.saveDungeonNote(data) : rel.endsWith('loot-presets') ? lootStore.savePreset(data) : lootStore.saveSettings(data));
+        return json(rel.endsWith('dungeon-notes') ? lootStore.saveDungeonNote(data) : rel.endsWith('loot-presets') ? lootStore.savePreset(data) : rel.endsWith('pack-settings') ? lootStore.savePack(data) : lootStore.saveSettings(data));
       } catch (e) { log(`${rel}: ${e?.message ?? e}`); return fail(e.message || 'loot.saveFailed', e.status || 500); }
     }
     const packFile = /^(?:play\/)?dfo-mod\/ru-pack\/((?:Text\/(?:(?:Quests|Books)\/)?)?[\w$.-]+\.(?:csv|txt|json))$/.exec(rel);

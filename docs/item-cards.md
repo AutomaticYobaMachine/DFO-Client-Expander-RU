@@ -120,6 +120,31 @@ Greengoth, строки Gabin, количество Flexi, подсветка с
 английском и русском, сверяет строки с пакетами, сторону, цвета редкости, цену и
 отсутствие картинки; `DFO_SCREENSHOT_DIR` сохраняет снимки «было/стало».
 
+### Строки окна лута (1.28.0)
+
+Строки-«кнопки» окна лута (`.loot-win .itemrow` — сундук, повозка, сумка ингредиентов,
+тело, окно масс-лутера; родной `enhancedInventory.js itemRow`, хук `itemCards.rows`)
+одеты как карточка: фон `--ink`, слева полоса цвета редкости, имя Greengoth, подпись Gabin.
+
+- Подпись под именем: **тип брони + металл** («Кольчуга Эбонит», «Латы Сталь»), затем
+  **вес стопки** с одним знаком («2.0 кг»). Слово состояния ремонта убрано. Тип брони —
+  родной `line.armorType` словами пакета (`cards.armor.*`), только у брони. Металл — как его
+  показывает карточка (`derive`), окрашен по металлу. «Не указан», «Нет данных» и «Металл
+  не указан» не пишутся: без материала и типа остаётся только вес. Кожаная броня — просто
+  «Кожа», мех — «Мех». После веса сохраняются родные «горит» и отметка квеста.
+- Правая колонка вместо веса — **ценник** карточки: жёлтая сумма Flexi с монетой, та же
+  оценка (40% базы продажи, аккредитив — точный номинал).
+- Рюкзак (сетка плашек) не меняется. Строки остаются одной высоты: рамки, а не внешние
+  поля, потому что виртуальный список меряет каждую строку.
+- С 1.29.0 функция «Инвентарь» в виде «Список» одевает так же строки самого рюкзака
+  (`__dfoPack.listRow()` во время построения строки списка раздела). Суррогатная стопка
+  (`__dfoPack.members`) показывает общее количество «×N», общий вес и ценник, пересчитанные
+  от первой записи ячейки: записи стопки равны во всём, кроме количества. [Инвентарь](inventory.md).
+
+Проверка: `tools/test-loot-rows-browser.cjs` монтирует опубликованный расширенный
+инвентарь с сундуком на английском и русском и сверяет подпись, вес, ценник, отсутствие
+слова состояния, полосу редкости и одинаковую высоту строк.
+
 ### Легендарный блок на обоих языках
 
 Строку легендарного свойства (`Имя: краткое описание`, у отпечатка
@@ -187,6 +212,7 @@ DFO_PLAYWRIGHT_MODULE=/path/to/playwright node tools/test-item-cards-browser.cjs
 DFO_PLAYWRIGHT_MODULE=/path/to/playwright node tools/audit-item-cards-browser.cjs /path/to/published-build
 DFO_PLAYWRIGHT_MODULE=/path/to/playwright node tools/test-item-card-groups.cjs /path/to/published-build
 DFO_PLAYWRIGHT_MODULE=/path/to/playwright node tools/test-quick-card-browser.cjs /path/to/published-build
+DFO_PLAYWRIGHT_MODULE=/path/to/playwright node tools/test-loot-rows-browser.cjs /path/to/published-build
 DFO_PLAYWRIGHT_MODULE=/path/to/playwright DFO_ARENA2_DIR=/path/to/ARENA2 DFO_CARD_AUDIT_FULL_RU=1 node tools/test-item-card-states.cjs /path/to/published-build
 node tools/check-build.cjs /path/to/published-build
 sh tools/build.sh

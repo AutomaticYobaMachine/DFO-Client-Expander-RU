@@ -29,6 +29,8 @@
     const out = [`group:${it.group}`, typeKey(it), `type:*:${it.templateIndex}`, `page:${native.page}`, `rarity:${native.rarity}`, `kind:${native.kind}`];
     if (native.material) out.push(`material:${native.material}`);
     if (native.materialItem) out.push('page:materials');
+    // With the inventory's pages (page/dfo_pack.js) Magic is no page: a filter saved with it still finds the enchanted.
+    if (native.enchanted && native.page !== 'magic') out.push('page:magic');
     if (native.identified) for (const a of it.affixes ?? []) {
       if (typeof a.id !== 'string') continue;
       out.push(`affix:${a.id}`); if (a.param != null) out.push(`affix:${a.id}:${a.param}`);

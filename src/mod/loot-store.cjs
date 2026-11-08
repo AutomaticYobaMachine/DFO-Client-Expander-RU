@@ -3,6 +3,7 @@
 const fs = require('node:fs'), path = require('node:path'), crypto = require('node:crypto');
 const Rules = require('./page/dfo_loot_rules.js');
 const Dungeon = require('./page/dfo_dungeon_model.js');
+const Pack = require('./page/dfo_pack_rules.js');
 const MAX = 16 * 1024 * 1024;
 // Errors carry the ui table's key (ui/store.csv): the hook and the patcher say it in the install's language.
 const T = key => key;
@@ -34,6 +35,7 @@ function createLootStore(userData) {
     if (current.loot) merged.loot = current.loot; else delete merged.loot;
     if (current.dungeons) merged.dungeons = current.dungeons; else delete merged.dungeons;
     if (current.hotkeys) merged.hotkeys = current.hotkeys; else delete merged.hotkeys;
+    if (current.pack) merged.pack = current.pack; else delete merged.pack;
     write(merged);
   }
   const hotkeys = () => {
@@ -71,6 +73,14 @@ function createLootStore(userData) {
       write({ ...cache, loot: next }); return { state: next, preset: p, file: `dfo-mod-loot-presets/${p.id}.json` };
     } catch (e) { fs.unlinkSync(dest); throw e; }
   }
+  // The inventory's view, sort and Junk rule (page/dfo_pack_rules.js): words and ids only, never an item.
+  const packState = () => Pack.cleanState(read().pack);
+  function savePack(payload) {
+    const cache = read(), old = Pack.cleanState(cache.pack);
+    if (payload.revision !== old.revision) throw fail(T('store.changedElsewhere'), 409);
+    const next = { ...Pack.cleanSettings(payload), revision: old.revision + 1 };
+    write({ ...cache, pack: next }); return next;
+  }
   const dungeonNotes = () => Object.values(read().dungeons || {}).map(Dungeon.cleanNote).filter(Boolean);
   function saveDungeonNote(payload) {
     const note = Dungeon.cleanNote(payload); if (!note) throw fail(T('store.badNote'));
@@ -81,6 +91,6 @@ function createLootStore(userData) {
     const kept = Object.fromEntries(Object.values(notes).sort((a, b) => b.at - a.at).slice(0, 200).map(n => [n.id, n]));
     write({ ...cache, dungeons: kept }); return note;
   }
-  return { read, state, replaceCityCache, saveSettings, savePreset, dungeonNotes, saveDungeonNote, hotkeys, saveHotkeys, lootKey: () => cachedLootKey(read()), dungeonKey: () => cachedDungeonKey(read()) };
+  return { read, state, replaceCityCache, saveSettings, savePreset, packState, savePack, dungeonNotes, saveDungeonNote, hotkeys, saveHotkeys, lootKey: () => cachedLootKey(read()), dungeonKey: () => cachedDungeonKey(read()) };
 }
 module.exports = { createLootStore, validLootKey, cachedLootKey, cachedDungeonKey };

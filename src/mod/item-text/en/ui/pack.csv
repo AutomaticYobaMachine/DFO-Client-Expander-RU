@@ -1,0 +1,19 @@
+key,text,note
+pack.page.junk,Junk,the inventory page of the player's junk (page/dfo_pack_rules.js)
+pack.view.label,How the pack shows items,page/dfo_pack.js header
+pack.view.rows,List,page/dfo_pack.js header
+pack.view.rows.how,"Items as rows with their material, weight and price",page/dfo_pack.js header
+pack.view.grid,Icons,page/dfo_pack.js header
+pack.view.grid.how,Items as the square icons,page/dfo_pack.js header
+pack.sort.auto,Auto-sort,page/dfo_pack.js header
+pack.sort.how,Sort by quality when the pack opens and after your actions in it,page/dfo_pack.js header
+pack.junk.button,Junk…,page/dfo_pack.js header
+pack.junk.how,Choose what goes to the Junk page,page/dfo_pack.js header
+pack.junk.title,Junk,page/dfo_pack.js junk window
+pack.junk.close,Close the Junk window,page/dfo_pack.js junk window
+pack.junk.intro,An item matching any ticked mark lies on the Junk page. Quest items never go there.,page/dfo_pack.js junk window
+pack.junk.axis,Purpose,page/dfo_pack.js junk window
+pack.junk.sale,"For sale: trinkets, temple goods, unused reagents",page/dfo_pack.js junk window
+pack.junk.defaults,Defaults,page/dfo_pack.js junk window
+pack.junk.done,Done,page/dfo_pack.js junk window
+pack.saveFailed,Could not save the inventory settings.,page/dfo_pack.js

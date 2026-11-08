@@ -298,7 +298,7 @@ async function main() {
       for(const power of await original.locator('.inv-tip ul.rarity>li').allTextContents())assert.ok(powers.includes(power),id+' preserves native power: '+power);
     }
     assert.deepEqual(errors,[],'No browser exceptions');
-    for(const key of ['itemCards.inventory','itemCards.values','itemCards.materials','itemCards.powers','itemCards.prices','itemCards.currency','itemCards.effectLabels','itemCards.slots','itemCards.skills','itemCards.letters'])assert.ok(logs.some(x=>x[0]===key&&x[1]===1),key);
+    for(const key of ['itemCards.inventory','itemCards.values','itemCards.materials','itemCards.powers','itemCards.prices','itemCards.currency','itemCards.effectLabels','itemCards.slots','itemCards.skills','itemCards.letters','itemCards.rows'])assert.ok(logs.some(x=>x[0]===key&&x[1]===1),key);
     await page.evaluate(()=>probe.show('ruhn'));await page.evaluate(()=>new Promise(r=>requestAnimationFrame(r)));
     if(process.env.DFO_SCREENSHOT_DIR){fs.mkdirSync(process.env.DFO_SCREENSHOT_DIR,{recursive:true});await page.screenshot({path:path.join(process.env.DFO_SCREENSHOT_DIR,'item-card-game.png')});}
     const ru=await browser.newPage({viewport:{width:1920,height:1080}});ru.on('pageerror',e=>errors.push(e.stack));

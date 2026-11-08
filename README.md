@@ -4,18 +4,18 @@
 DFO Online.
 
 Неофициальное расширение пользовательского клиента **Daggerfall Online**:
-русификация, метки заведений, карта города, детектор лута, карточки данжей и предметов. Здесь хранятся исходники
+русификация, метки заведений, карта города, детектор лута, карточки данжей и предметов, инвентарь. Здесь хранятся исходники
 расширения, а не исходники самой игры.
 
 ## Скачать готовую программу
 
-Готовый релиз **1.27.0**. Версии 1.22.0–1.26.0 предложат обновление диалогом «Да/Нет».
+Готовый релиз **1.29.0**. Версии 1.22.0–1.28.0 предложат обновление диалогом «Да/Нет».
 При переходе с более ранних версий скачайте и запустите новый EXE вручную.
 
-**[Скачать установщик EXE для Windows 10/11 x64](https://github.com/AutomaticYobaMachine/DFO-Client-Expander-RU/releases/download/v1.27.0/DFO-Client-Expander-RU-1.27.0.exe)**
+**[Скачать установщик EXE для Windows 10/11 x64](https://github.com/AutomaticYobaMachine/DFO-Client-Expander-RU/releases/download/v1.29.0/DFO-Client-Expander-RU-1.29.0.exe)**
 
-[ZIP с программой, инструкцией и лицензиями](https://github.com/AutomaticYobaMachine/DFO-Client-Expander-RU/releases/download/v1.27.0/DFO-Client-Expander-RU-1.27.0.zip)
-· [Страница релиза](https://github.com/AutomaticYobaMachine/DFO-Client-Expander-RU/releases/tag/v1.27.0)
+[ZIP с программой, инструкцией и лицензиями](https://github.com/AutomaticYobaMachine/DFO-Client-Expander-RU/releases/download/v1.29.0/DFO-Client-Expander-RU-1.29.0.zip)
+· [Страница релиза](https://github.com/AutomaticYobaMachine/DFO-Client-Expander-RU/releases/tag/v1.29.0)
 
 EXE уже содержит все компоненты. В ZIP находятся только EXE, инструкция и лицензии.
 
@@ -32,13 +32,13 @@ EXE уже содержит все компоненты. В ZIP находятс
 ## English
 
 An unofficial extension of the **Daggerfall Online** client: item cards with
-descriptions, nearby loot with a loot filter, dungeon cards with a live summary
+descriptions, the pack as a list with a Junk page, nearby loot with a loot filter, dungeon cards with a live summary
 and a route line, venue marks and a detailed town map, community fonts and an
 optional Russian translation. Since **1.25.1** everything the extension adds
 speaks English without the translation (and Russian with it); the installer
 opens in your Windows language and has an English/Русский switch.
 
-Download the **[Windows 10/11 x64 installer](https://github.com/AutomaticYobaMachine/DFO-Client-Expander-RU/releases/download/v1.27.0/DFO-Client-Expander-RU-1.27.0.exe)**,
+Download the **[Windows 10/11 x64 installer](https://github.com/AutomaticYobaMachine/DFO-Client-Expander-RU/releases/download/v1.29.0/DFO-Client-Expander-RU-1.29.0.exe)**,
 close the game, run it, tick the features you want and press **Install selected**.
 The English guide is README-EN.txt in the ZIP (the **Guide** button opens it).
 The rest of this page and docs/ are in Russian; the original game is
@@ -59,6 +59,23 @@ The rest of this page and docs/ are in Russian; the original game is
 с последним релизом игры.
 
 ## Установщик и рабочая ветка
+
+В **1.29.0** переработан инвентарь. Открытый сам по себе рюкзак шире и показывает вещи
+строками-карточками в два столбца, рядом с сундуком, повозкой или телом — прежней ширины
+и в один столбец; кнопки **«Список»/«Значки»** в шапке возвращают квадратные значки, не меняя
+размер окна. Раздела «Магия» больше нет: зачарованные вещи лежат в разделе своей основы.
+В «Ингредиентах» — только то, что тратят рецепты игры (алхимия, кулинария, кузнечное,
+плотницкое, кожевенное, портняжное, ювелирное и каменное дело); остальное — в новом разделе
+**«Хлам»**, который настраивается кнопкой **«Хлам…»** по меткам лутфильтра (по умолчанию —
+вещи «на продажу» и помеченные игрой как хлам). Записки и квестовые письма — в «Книгах»,
+а письма закрепляются при получении. Одинаковые вещи в «Разном», «Ингредиентах» и «Хламе»
+складываются в одну ячейку. Сортировка по качеству — при открытии и после ваших действий,
+кнопка **«Автосортировка»** её выключает. Отдельная галочка установщика «Инвентарь».
+[Инвентарь](docs/inventory.md).
+
+В **1.28.0** (выпущена вместе с 1.29.0) строки предметов в окнах сундуков, повозки, сумки ингредиентов и тел оформлены
+как карточки: под именем — тип брони и металл («Кольчуга Эбонит») и вес («2.0 кг») вместо
+слова состояния, справа — ценник с монетой. [Карточка предмета](docs/item-cards.md).
 
 В **1.27.0** масс-лутер («Лут рядом») видит то, что пропускал: вещи ниже и выше по склону,
 вещи с тела, упавшие с обрыва, стрелы, застрявшие в стенах и земле, награды Небесной шхуны

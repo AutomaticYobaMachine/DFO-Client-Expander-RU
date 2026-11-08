@@ -1,0 +1,19 @@
+key,text,note
+pack.page.junk,Хлам,the inventory page of the player's junk (page/dfo_pack_rules.js)
+pack.view.label,Как показывать вещи рюкзака,page/dfo_pack.js header
+pack.view.rows,Список,page/dfo_pack.js header
+pack.view.rows.how,"Вещи строками: материал, вес и цена",page/dfo_pack.js header
+pack.view.grid,Значки,page/dfo_pack.js header
+pack.view.grid.how,Вещи квадратными значками,page/dfo_pack.js header
+pack.sort.auto,Автосортировка,page/dfo_pack.js header
+pack.sort.how,Сортировать по качеству при открытии рюкзака и после ваших действий в нём,page/dfo_pack.js header
+pack.junk.button,Хлам…,page/dfo_pack.js header
+pack.junk.how,"Выбрать, что попадает в раздел «Хлам»",page/dfo_pack.js header
+pack.junk.title,Хлам,page/dfo_pack.js junk window
+pack.junk.close,Закрыть окно «Хлам»,page/dfo_pack.js junk window
+pack.junk.intro,"Вещь, подходящая под любую отмеченную метку, лежит в разделе «Хлам». Квестовые предметы туда не попадают.",page/dfo_pack.js junk window
+pack.junk.axis,Назначение,page/dfo_pack.js junk window
+pack.junk.sale,"На продажу: безделушки, храмовые вещи, ненужные реагенты",page/dfo_pack.js junk window
+pack.junk.defaults,По умолчанию,page/dfo_pack.js junk window
+pack.junk.done,Готово,page/dfo_pack.js junk window
+pack.saveFailed,Не удалось сохранить настройки инвентаря.,page/dfo_pack.js

@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write # required to commit the verified installer to this fix branch
 
 concurrency:
   group: build-${{ github.ref }}
@@ -60,3 +60,21 @@ jobs:
           if-no-files-found: error
           compression-level: 9
           retention-days: 30
+
+      # The user explicitly requested a committed EXE in this branch (not just a 30-day Actions artifact).
+      # This step is never executed for main or any other branch.
+      - name: Commit checked Windows EXE and SHA-256 into the fix branch
+        if: ${{ github.ref == 'refs/heads/fix/inventory-window-single-row-2026-11-08' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          target="releases/$BUILD_VERSION"
+          mkdir -p "$target"
+          cp "dist/DFO-Client-Expander-RU-$BUILD_VERSION.exe" "$target/"
+          cp "dist/DFO-Client-Expander-RU-$BUILD_VERSION.exe.sha256" "$target/"
+          (cd "$target" && sha256sum --check "DFO-Client-Expander-RU-$BUILD_VERSION.exe.sha256")
+          git add "$target/DFO-Client-Expander-RU-$BUILD_VERSION.exe" "$target/DFO-Client-Expander-RU-$BUILD_VERSION.exe.sha256"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git diff --cached --quiet || git commit -m "build: include verified DFO installer $BUILD_VERSION in fix branch"
+          git push origin "HEAD:$GITHUB_REF_NAME"

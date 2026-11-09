@@ -86,7 +86,7 @@ function lifecycle(out, render) {
 ;let __dfoRenderBusy$=false,__dfoRenderDirty$=false,__dfoRenderQueued$=false,__dfoRenderOwner$=null;
 function __dfoRequestRender$(owner){
   if(!owner)return;
-  if(__dfoRenderQueued// equip-*.js: ItemCollection.AddItem&__dfoRenderOwner$===owner)return;
+  if(__dfoRenderQueued__dfoRenderQueued// equip-*.js: ItemCollection.AddItem&&__dfoRenderOwner$===owner)return;
   __dfoRenderQueued$=true;__dfoRenderOwner$=owner;
   Promise.resolve().then(()=>{
     if(__dfoRenderOwner$!==owner)return;

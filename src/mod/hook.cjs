@@ -13,6 +13,7 @@ const fs = require('node:fs');          // Electron's: reads inside app.asar, wh
 const path = require('node:path');
 const { transformAsset, injectPage, expectedHooks } = require('./transforms.cjs');
 const { createLootStore } = require('./loot-store.cjs');
+const { createInventoryTraceStore } = require('./inventory-trace-store.cjs');
 const {replacement,stripFaces}=require('./font-assets.cjs');
 const itemText = require('./item-text.cjs');
 
@@ -52,6 +53,7 @@ function wrap(handleDagger, { app = null } = {}) {
   const cfgFile = userData && path.join(userData, 'dfo-mod.json');
   const logFile = userData && path.join(userData, 'dfo-mod.log');
   const lootStore = createLootStore(userData);
+  const inventoryTrace = createInventoryTraceStore(userData);
   let cfg = { ...DEFAULTS };
   try { if (cfgFile && fs.existsSync(cfgFile)) cfg = { ...DEFAULTS, ...JSON.parse(fs.readFileSync(cfgFile, 'utf8')) }; } catch (e) { cfg = { ...DEFAULTS }; }
   cfg.marksOptions = { ...DEFAULTS.marksOptions, ...(cfg.marksOptions ?? {}) };
@@ -71,6 +73,7 @@ function wrap(handleDagger, { app = null } = {}) {
     try { fs.writeFileSync(logFile, `${lines.join('\n')}\n`); } catch { /* a log we cannot write is no reason to stop */ }
   };
   log(`DFO Mod ${VERSION}: ${cfg.enabled ? 'on' : 'off'} - ru ${ru ? 'on' : 'off'}, marks ${cfg.marks ? 'on' : 'off'}`);
+  if (cfg.enabled && cfg.inventory !== false) log(`inventory diagnostic trace: ${inventoryTrace.file ?? 'userData unavailable'}`);
 
   let ctx = null;
   const context = () => {
@@ -189,6 +192,11 @@ function wrap(handleDagger, { app = null } = {}) {
     if (!cfg.enabled) return handleDagger(req);
     if (url.host !== 'game') return handleDagger(req);
     let rel;try{rel=decodeURIComponent(url.pathname).replace(/^\/+/, '')}catch{return new Response('bad request',{status:400})}
+    if (rel === 'dfo-mod/inventory-trace') {
+      if (cfg.inventory === false) return new Response(null, { status: 404 });
+      if (req.method !== 'POST') return new Response(null, { status: 405 });
+      return new Response(null, { status: inventoryTrace.write(await req.text()) });
+    }
     if (rel === 'dfo-mod/report' && req.method === 'POST') { writeReport(await req.text()); return new Response(null, { status: 204 }); }
     if (rel === 'dfo-mod/cache') {
       if (req.method === 'POST') return new Response(null, { status: writeCache(await req.text()) });

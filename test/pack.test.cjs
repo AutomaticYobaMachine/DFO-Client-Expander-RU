@@ -97,7 +97,7 @@ test('the page scripts and the expected hooks follow the inventory switch', () =
   for (const f of ['dfo_loot_rules.js', 'dfo_pack_data.js', 'dfo_pack_rules.js', 'dfo_pack.js']) assert.ok(on.includes(`dfo-mod/${f}`), f);
   assert.ok(on.indexOf('dfo_pack.js') < on.indexOf('type="module"'), 'before the game\'s modules: the page list is read as they evaluate');
   assert.equal(injectPage(html, './', { inventory: false, nearbyLoot: false, pageCfg: {} }).includes('dfo_pack'), false);
-  assert.deepEqual(EXPECTED.inventory, ['inventory.pages', 'inventory.view', 'inventory.receipt']);
+  assert.deepEqual(EXPECTED.inventory, ['inventory.pages', 'inventory.view', 'inventory.lifecycle', 'inventory.receipt']);
   assert.ok(expectedHooks({ inventory: true }).includes('inventory.view'));
   assert.equal(expectedHooks({ inventory: false }).includes('inventory.view'), false);
 });
@@ -115,7 +115,7 @@ test('the hooks find their places on the published game and keep the native path
     assert.equal(transformInventory('assets/' + f, out, []), out, `${f}: a second pass changes nothing`);
     if (/Worker-/.test(f)) assert.fail(`${f}: no hook in a Worker`);
   }
-  assert.deepEqual([...found.entries()].sort(), [['inventory.pages', 1], ['inventory.receipt', 1], ['inventory.view', 1]]);
+  assert.deepEqual([...found.entries()].sort(), [['inventory.lifecycle', 1], ['inventory.pages', 1], ['inventory.receipt', 1], ['inventory.view', 1]]);
 });
 
 test('the native pageOf answers as before without the page script; with it, as the page script says', { skip: !process.env.DFO_BUILD_DIR }, () => {

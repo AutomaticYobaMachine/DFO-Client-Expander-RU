@@ -52,6 +52,7 @@ function inventory(text) {
   if (deps !== refresh[3]) throw new Error('pack refresh: another deps');
   out = put(out, close[0], `__dfoPackHead$(${close[4]},()=>{${refresh[1]}();${render}()});${close[0]}`);
   out = put(out, refresh[0], `${refresh[1]}=()=>{__dfoPackRefresh$(${deps},()=>!!${salvage}||!!${chestRefusal}(${deps}),()=>${sortInPlace}(${deps}.entity?.items,{nameOf:${nameOf}}));${refresh[2]}=${pm}(${refresh[3]}),`);
+  out = sessionHandle(out);
   out = lifecycle(out, render, deps);
   return out + '\n;function __dfoPackList$(t,p){try{return globalThis.__dfoPack?.list?.(t,p)??t}catch{return t}}'
     + 'function __dfoPackBuild$(f,e){const p=globalThis.__dfoPack;return typeof p?.build===\'function\'?p.build(f,e):f(e)}'
@@ -94,6 +95,18 @@ function lifecycle(out, render, deps = null) {
     (syncName ? syncCode.replaceAll('@@OWNER@@',owner).replaceAll('@@SYNC@@',syncName) : '');
 }
 
+// The view is an ESM singleton; an old A handle may close after a B mount.
+// Preserve the native close law but bind dropped/repaint/unmount to their owner.
+function sessionHandle(out) {
+  const view = once(out, /([\w$]+)=\{repaint\(\)\{[^{}]*\},dropped:\(\)=>([\w$]+),unmount\(\)\{/, 'inventory per-session view handle');
+  const [whole, current, dropped] = view;
+  const patched = whole
+    .replace('repaint(){', 'repaint(){if(' + current + '!==this)return;')
+    .replace('dropped:()=>'+dropped, 'dropped:__dfoDroppedForSession$('+dropped+')')
+    .replace('unmount(){', 'unmount(){if(' + current + '!==this)return;');
+  return put(out, whole, patched) + '\n;function __dfoDroppedForSession$(items){return ()=>items}\n';
+}
+
 // equip-*.js: ItemCollection.AddItem (systems/inventory.js addItem). A quest item lands at the FRONT exactly when the
 // player receives it - GivePc/GetItem's giveItemToPlayer and a take off a body or a chest (itemTransfer.js) - and the page
 // script locks a quest letter there, once, by the native lock's own field.
@@ -118,4 +131,4 @@ function transformInventory(rel, text, log) {
   return out;
 }
 
-module.exports = { transformInventory, pages, inventory, lifecycle, receipt };
+module.exports = { transformInventory, pages, inventory, lifecycle, sessionHandle, receipt };

@@ -3,7 +3,7 @@
 // bundle or its minified signatures have passed validation. See docs/inventory-window-render-stabilization-plan.md.
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const { lifecycle, transformInventory } = require('../src/mod/inventory-transform.cjs');
+const { lifecycle, sessionHandle, transformInventory } = require('../src/mod/inventory-transform.cjs');
 
 function fixture(count = 45) {
   const src = [
@@ -241,4 +241,26 @@ test('published-style var sync binding with for(let ...) exposes the same remeas
   const app = new Function(lifecycle(src, 'r', 'd') + '\nreturn {calls:()=>calls,fn:globalThis.__dfoInventoryRemeasure$}')();
   assert.equal(app.fn({isConnected:true}), true);
   assert.equal(app.calls(), 1);
+});
+
+test('view handle retains its dropped items and stale unmount is idempotent', () => {
+  const raw = [
+    'let H=null,dropped=[],closes=0,repaints=0;',
+    'function mount(){dropped=[];H={repaint(){repaints++},dropped:()=>dropped,unmount(){closes++;H=null}};return H}',
+    'function put(it){dropped.push(it)}',
+    'function state(){return {closes,repaints}}',
+  ].join('\n');
+  const app = new Function(sessionHandle(raw) + '\nreturn {mount,put,state}')();
+  const a = app.mount();
+  app.put('A');
+  const b = app.mount();
+  app.put('B');
+  assert.deepEqual(a.dropped(), ['A'], 'A must not see B drop pile');
+  assert.deepEqual(b.dropped(), ['B']);
+  a.repaint();a.unmount();
+  assert.equal(app.state().closes, 0, 'A must not unmount B');
+  b.repaint();
+  assert.equal(app.state().repaints, 1);
+  b.unmount();b.unmount();
+  assert.equal(app.state().closes, 1, 'unmount is idempotent');
 });

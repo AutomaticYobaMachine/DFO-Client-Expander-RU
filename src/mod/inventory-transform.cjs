@@ -138,7 +138,7 @@ function receipt(text) {
 const JOBS = [
   ['inventory.pages', (rel, text) => /\/storeFilter-[^/]+\.js$/.test(rel) && text.includes('[`weapons`,`Weapons`]'), pages],
   ['inventory.view', (rel, text) => text.includes('`packPhoneDoll`') && text.includes('`packempty`'), inventory],
-  ['inventory.door', (rel, text) => /\/inventoryDoor-[^/]+\.js$/.test(rel), doorOwnership],
+  ['inventory.door', (rel, text) => text.includes('enhanced-inventory') && text.includes('onDismiss') && text.includes('alive:'), doorOwnership],
   ['inventory.receipt', (rel, text) => !/Worker-/.test(rel) && text.includes('AddItem() encountered a duplicate item'), receipt],
 ];
 

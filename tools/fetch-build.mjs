@@ -37,7 +37,7 @@ const want = new Set(['play/index.html']);
 for (const f of man.files) {
   const m = /^assets\/(.+)-[A-Za-z0-9_-]{8}\.js$/.exec(f.path);
   if (!m) continue;
-  if (/^(world|exterior|enhancedInventory|itemTransfer|pixelifyFive|notify|enhancedChargen|tutorials|deepWaterRuntime|localeData)$/.test(m[1]) || quests.has(m[1].toUpperCase())) want.add(f.path);
+  if (/^(world|exterior|enhancedInventory|inventoryDoor|itemTransfer|pixelifyFive|notify|enhancedChargen|tutorials|deepWaterRuntime|localeData)$/.test(m[1]) || quests.has(m[1].toUpperCase())) want.add(f.path);
 }
 // Follow the chosen chunks' own imports too: the inventory is lazy-loaded, and its
 // dependencies are not necessarily direct imports of the world chunk.

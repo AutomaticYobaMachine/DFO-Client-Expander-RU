@@ -292,7 +292,7 @@ test('asynchronous paperdoll completion from A cannot repaint B', async () => {
     'function next(){h={id:2};d={entity:2}}',
   ].join('\n');
   const patched = lifecycle(src, 'r', 'd', true);
-  assert.match(patched, /h===__dfoFigureHost\assert.match(patched, /h===__dfoFigureHost\$&&d===__dfoFigureSession\$&&r\(\)/, 'do not expand $& replacement tokens');&d===__dfoFigureSession\assert.match(patched, /h===__dfoFigureHost\$&&d===__dfoFigureSession\$&&r\(\)/, 'do not expand $& replacement tokens');&__dfoFigureGen\$===__dfoFigureGeneration\assert.match(patched, /h===__dfoFigureHost\$&&d===__dfoFigureSession\$&&r\(\)/, 'do not expand $& replacement tokens');&r\(\)/, 'do not expand assert.match(patched, /h===__dfoFigureHost\$&&d===__dfoFigureSession\$&&r\(\)/, 'do not expand $& replacement tokens'); replacement tokens or omit the mount generation');
+  assert.match(patched, /h===__dfoFigureHost\$&&d===__dfoFigureSession\$&&__dfoFigureGen\$===__dfoFigureGeneration\$&&r\(\)/, 'do not expand $& replacement tokens or omit the mount generation');
   const app = new Function(patched + '\nreturn {figure,next,finish,paints}')();
   app.figure();
   app.next();

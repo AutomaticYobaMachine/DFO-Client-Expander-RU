@@ -1,8 +1,12 @@
-DFO-Client-Expander-RU 1.29.0
+DFO-Client-Expander-RU 1.29.6
 ===========================
 Автор: AutomaticYobaMachine
 Создано специально для русского сообщества DFO Online.
 English guide: README-EN.txt (the "Guide" button of the English window).
+
+Тестовая версия 1.29.6: трассировка зависаний и «зомби»-окон инвентаря.
+События автоматически сохраняются в dfo-mod-inventory-trace.ndjson в профиле DFO Online.
+Инструкция: docs/inventory-diagnostic-trace.md в исходниках тестовой ветки.
 
 Версия 1.29.0: новый инвентарь. Отдельно открытый рюкзак шире и показывает
 вещи строками в два столбца, рядом с сундуком, повозкой или телом — в один;

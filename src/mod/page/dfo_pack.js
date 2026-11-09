@@ -17,7 +17,8 @@
   try { state = Rules.cleanState(JSON.parse(root.localStorage?.getItem(STATE_KEY) || 'null')); } catch { /* defaults */ }
   const mirror = () => { try { root.localStorage?.setItem(STATE_KEY, JSON.stringify(state)); } catch { /* the disk cache stays authoritative */ } };
   const listeners = new Set();
-  const scaledShells = new WeakSet();  // idempotent per native DOM shell; each full render makes a new one
+  const scaledShells = new WeakMap();  // native baseline and last viewport per shell; never scale an already scaled rectangle
+  let geometryListenerBound = false;
   let shown = null;   // the open pack's header and its repaint (render's own), for a cache answer that changes the look
   const changed = (why) => {
     epoch++; showView();
@@ -153,55 +154,46 @@
     b.onclick = (e) => { e.stopPropagation(); onclick(); };
     return b;
   }
-  function head(header, repaint) {
-    styles();
-    showView();
-    const view = el('span', 'dfo-pack-view');
-    view.setAttribute('role', 'group');
-    view.setAttribute('aria-label', T('pack.view.label'));
-    for (const [v, key] of [['rows', 'pack.view.rows'], ['grid', 'pack.view.grid']]) {
-      view.append(toggle(T(key), state.view === v, () => { if (state.view === v) return; save({ view: v }); repaint(); }, T(key + '.how')));
-    }
-    const auto = toggle(T('pack.sort.auto'), state.autoSort, () => { const on = !state.autoSort; save({ autoSort: on }); if (on) pending = true; repaint(); }, T('pack.sort.how'));
-    const junk = toggle(T('pack.junk.button'), false, () => junkDialog(repaint), T('pack.junk.how'));
-    junk.removeAttribute('aria-pressed');
-    junk.setAttribute('aria-haspopup', 'dialog');
-    // The native header title is "Pack" plus .pack-who. Keep the character name and
-    // native actions; only replace that redundant word with an accessible bag glyph.
-    const title = header.querySelector('h2');
-    if (title) {
-      const who = title.querySelector('.pack-who');
-      const ns = 'http://www.w3.org/2000/svg';
-      const bag = doc.createElementNS(ns, 'svg');
-      bag.classList.add('dfo-pack-bag');
-      bag.setAttribute('viewBox', '0 0 24 24');
-      bag.setAttribute('fill', 'none');
-      bag.setAttribute('stroke', 'currentColor');
-      bag.setAttribute('stroke-width', '1.8');
-      bag.setAttribute('stroke-linecap', 'round');
-      bag.setAttribute('stroke-linejoin', 'round');
-      bag.setAttribute('role', 'img');
-      bag.setAttribute('aria-label', 'Рюкзак');
-      const outline = doc.createElementNS(ns, 'path');
-      outline.setAttribute('d', 'M5 8h14l-1 12H6L5 8Zm4 0V6a3 3 0 0 1 6 0v2');
-      bag.append(outline);
-      title.replaceChildren(bag, ...(who ? [who] : []));
-    }
-    header.classList.add('dfo-pack-head');
-    header.append(view, auto, junk);
-    shown = { header, repaint };
-    // Uniform 120% enlargement of the EQUIPMENT REGION, not just its grid track.
-    // A native paired pack is 1040px overall with 656px of equipment and a 380px
-    // item dock (4px of frame). Standalone takes the extra 131.2px from its right
-    // dock; paired grows the whole pack by 131.2px, preserving the 380px item dock.
-    // The header hook runs before the native pack is appended; the microtask runs
-    // after the native render finishes. Repaints get fresh DOM and fresh geometry.
-    Promise.resolve().then(() => {
-      if (root.matchMedia && !root.matchMedia('(min-width: 1000px)').matches) return;
+  function resetGeometry(shell) {
+    const win = shell.querySelector(':scope > .pack-win');
+    const grid = win?.querySelector('.pack');
+    const main = grid?.querySelector('.pack-main');
+    const dock = grid?.querySelector('.pack-dock');
+    const character = main?.querySelector(':scope > .charcol');
+    for (const [node, properties] of [
+      [win, ['width', 'max-width', 'height']],
+      [grid, ['display', 'grid-template-columns']],
+      [main, ['min-width']], [dock, ['min-width', 'width']],
+      [character, ['zoom']],
+    ]) for (const property of properties) node?.style.removeProperty(property);
+    const shelf = dock?.querySelector('.packcats');
+    const tabs = shelf?.querySelector('.packtabs');
+    for (const property of ['width', 'min-width']) shelf?.style.removeProperty(property);
+    for (const property of ['display', 'grid-template-columns', 'width', 'min-width']) tabs?.style.removeProperty(property);
+    for (const tab of tabs?.children ?? []) tab.style.removeProperty('font-size');
+    const items = dock?.querySelector('.packlists > .packcol');
+    for (const property of ['display', 'grid-template-columns']) items?.style.removeProperty(property);
+  }
+  function scheduleGeometry(header) {
+    Promise.resolve().then(() => applyGeometry(header))
+      .catch(e => console.warn('[dfo-mod inventory] geometry update failed', e));
+  }
+  function applyGeometry(header) {
       // The header belongs to one particular shell; a previous sibling or a newer
       // session must never receive this header's geometry during a delayed callback.
       const shell = header.closest('.pack-shell');
-      if (!shell?.isConnected || scaledShells.has(shell)) return;
+      if (!shell?.isConnected) return;
+      const signature = [root.innerWidth, root.innerHeight, root.devicePixelRatio, state.view].join('|');
+      const previous = scaledShells.get(shell);
+      if (previous?.signature === signature) return;
+      if (root.matchMedia && !root.matchMedia('(min-width: 1000px)').matches) {
+        if (previous) {
+          resetGeometry(shell);
+          scaledShells.delete(shell);
+          root.__dfoInventoryRemeasure$?.(shell);
+        }
+        return;
+      }
       const win = shell.querySelector(':scope > .pack-win');
       if (!win || !win.isConnected) return;
       const grid = win.querySelector('.pack');
@@ -210,9 +202,9 @@
       const character = main?.querySelector(':scope > .charcol');
       if (!grid || !main || !dock || !character) return;
       const paired = shell.classList.contains('paired');
-      const baseFrame = win.getBoundingClientRect();
-      const baseMain = main.getBoundingClientRect();
-      const baseDock = dock.getBoundingClientRect();
+      const baseFrame = previous?.baseFrame ?? win.getBoundingClientRect();
+      const baseMain = previous?.baseMain ?? main.getBoundingClientRect();
+      const baseDock = previous?.baseDock ?? dock.getBoundingClientRect();
       // In standalone mode the NATIVE grid allocates everything except the 380px
       // dock to the character (1216px at 1600px outer width!). That pre-mod width
       // is NOT the paired reference. Use the paired track's 656px instead, as in
@@ -284,8 +276,61 @@
         // Enlarging height goes to the ordinary scrolling item viewport.
         dock.style.setProperty('width', baseDock.width + 'px', 'important');
       }
-      scaledShells.add(shell);
-    });
+      scaledShells.set(shell, { signature, baseFrame, baseMain, baseDock });
+      // Native virtualRows measured the pre-zoom shell. Invalidate its cached
+      // columns and heights once, AFTER the new track sizes have been applied.
+      root.__dfoInventoryRemeasure$?.(shell);
+  }
+  function head(header, repaint) {
+    styles();
+    showView();
+    const view = el('span', 'dfo-pack-view');
+    view.setAttribute('role', 'group');
+    view.setAttribute('aria-label', T('pack.view.label'));
+    for (const [v, key] of [['rows', 'pack.view.rows'], ['grid', 'pack.view.grid']]) {
+      view.append(toggle(T(key), state.view === v, () => { if (state.view === v) return; save({ view: v }); repaint(); }, T(key + '.how')));
+    }
+    const auto = toggle(T('pack.sort.auto'), state.autoSort, () => { const on = !state.autoSort; save({ autoSort: on }); if (on) pending = true; repaint(); }, T('pack.sort.how'));
+    const junk = toggle(T('pack.junk.button'), false, () => junkDialog(repaint), T('pack.junk.how'));
+    junk.removeAttribute('aria-pressed');
+    junk.setAttribute('aria-haspopup', 'dialog');
+    // The native header title is "Pack" plus .pack-who. Keep the character name and
+    // native actions; only replace that redundant word with an accessible bag glyph.
+    const title = header.querySelector('h2');
+    if (title) {
+      const who = title.querySelector('.pack-who');
+      const ns = 'http://www.w3.org/2000/svg';
+      const bag = doc.createElementNS(ns, 'svg');
+      bag.classList.add('dfo-pack-bag');
+      bag.setAttribute('viewBox', '0 0 24 24');
+      bag.setAttribute('fill', 'none');
+      bag.setAttribute('stroke', 'currentColor');
+      bag.setAttribute('stroke-width', '1.8');
+      bag.setAttribute('stroke-linecap', 'round');
+      bag.setAttribute('stroke-linejoin', 'round');
+      bag.setAttribute('role', 'img');
+      bag.setAttribute('aria-label', 'Рюкзак');
+      const outline = doc.createElementNS(ns, 'path');
+      outline.setAttribute('d', 'M5 8h14l-1 12H6L5 8Zm4 0V6a3 3 0 0 1 6 0v2');
+      bag.append(outline);
+      title.replaceChildren(bag, ...(who ? [who] : []));
+    }
+    header.classList.add('dfo-pack-head');
+    header.append(view, auto, junk);
+    shown = { header, repaint };
+    if (!geometryListenerBound) {
+      geometryListenerBound = true;
+      root.addEventListener?.('resize', () => {
+        if (shown?.header?.isConnected) scheduleGeometry(shown.header);
+      });
+    }
+    // Uniform 120% enlargement of the EQUIPMENT REGION, not just its grid track.
+    // A native paired pack is 1040px overall with 656px of equipment and a 380px
+    // item dock (4px of frame). Standalone takes the extra 131.2px from its right
+    // dock; paired grows the whole pack by 131.2px, preserving the 380px item dock.
+    // The header hook runs before the native pack is appended; the microtask runs
+    // after the native render finishes. Repaints get fresh DOM and fresh geometry.
+    scheduleGeometry(header);
   }
   function showView() {
     const html = doc.documentElement;

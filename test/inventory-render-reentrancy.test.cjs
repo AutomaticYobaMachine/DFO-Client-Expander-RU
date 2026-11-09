@@ -43,7 +43,7 @@ test('45 cold icon keys cause no recursive render or sibling shells', async () =
   assert.equal(app.inspect().shells, 1);
   assert.equal(app.inspect().maxDepth, 1);
   assert.match(result, /function __dfoNativeRender\$\(\)/);
-  assert.match(result, /__dfoRequestRender\$\(h\)/);
+  assert.match(result, /__dfoFigureNotice\$\(h\)/);
 });
 
 test('storecat-style in-place refill completes before an icon wake can repaint', async () => {
@@ -160,4 +160,65 @@ test('unsupported or duplicated fpArm callback is rejected without a partial pat
   assert.throws(() => lifecycle(src, 'r'), /inventory fpArm callback: 0 places/);
   const duplicate = src.replace('if(h)r()', 'c={key:null,img:null};if(h)r()');
   assert.throws(() => lifecycle(duplicate + duplicate, 'r'), /(inventory native render|inventory fpArm callback)/);
+});
+
+test('a synchronous A-to-B mount during native paint still paints B after unwinding', async () => {
+  const src = [
+    'let h=null,d={},c={key:1,img:1},a={shells:0},b={shells:0},swap=true;',
+    'const arm={subscribe(fn){this.fn=fn}};',
+    'function r(){const active=h;if(active===a&&swap){swap=false;mount(b)}active.shells++}',
+    'function mount(next){h=next;d={};arm.subscribe(()=>{c={key:null,img:null};if(h)r()});r()}',
+  ].join('\n');
+  const app = new Function(lifecycle(src, 'r', 'd') + '\nreturn {mount,a,b}')();
+  app.mount(app.a);
+  assert.equal(app.b.shells, 0, 'B is not rendered recursively within A');
+  await Promise.resolve();
+  assert.equal(app.b.shells, 1, 'B receives the suppressed initial repaint');
+});
+
+test('a pending notification from A cannot paint B reusing the same host without fpArm', async () => {
+  const src = [
+    'let h={},d={id:0},c={key:1,img:1},paints=0;',
+    'const arm={subscribe(fn){this.fn=fn},notify(){this.fn()}};',
+    'function r(){paints++}',
+    'function mount(withArm){d={id:d.id+1};if(withArm)arm.subscribe(()=>{c={key:null,img:null};if(h)r()});r()}',
+  ].join('\n');
+  const app = new Function(lifecycle(src, 'r', 'd') + '\nreturn {mount,arm,paints:()=>paints}')();
+  app.mount(true);
+  app.arm.notify();
+  app.mount(false);
+  await Promise.resolve();
+  assert.equal(app.paints(), 2);
+  app.arm.notify();
+  await Promise.resolve();
+  assert.equal(app.paints(), 2, 'old subscriber must not repaint B');
+});
+
+test('an ordinary render after the figure notification consumes pending repaint', async () => {
+  const src = [
+    'let h={},d={},c={key:1,img:1},paints=0;',
+    'const arm={subscribe(fn){this.fn=fn},notify(){this.fn()}};',
+    'function r(){paints++}',
+    'function mount(){arm.subscribe(()=>{c={key:null,img:null};if(h)r()});r()}',
+  ].join('\n');
+  const app = new Function(lifecycle(src, 'r', 'd') + '\nreturn {mount,arm,r,paints:()=>paints}')();
+  app.mount();
+  app.arm.notify();
+  app.r();
+  await Promise.resolve();
+  assert.equal(app.paints(), 2, 'no redundant third render');
+});
+
+test('the optional native remeasure callback has host ownership and invokes private sync', () => {
+  const src = [
+    'let h={contains(s){return s.good}},d={},c={key:1,img:1},calls=0;',
+    'const arm={subscribe(fn){this.fn=fn}},L=[{sync(opts){if(opts.remeasure)calls++}}];',
+    'const measure=e=>{for(const v of L)v.sync(e)};',
+    'function r(){}',
+    'function mount(){arm.subscribe(()=>{c={key:null,img:null};if(h)r()});r()}',
+  ].join('\n');
+  const app = new Function(lifecycle(src, 'r', 'd') + '\nreturn {mount,calls:()=>calls,remeasure:globalThis.__dfoInventoryRemeasure$}')();
+  assert.equal(app.remeasure({isConnected:true,good:true}), true);
+  assert.equal(app.remeasure({isConnected:true,good:false}), false);
+  assert.equal(app.calls(), 1);
 });

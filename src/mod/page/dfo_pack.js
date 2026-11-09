@@ -183,11 +183,11 @@
       // The header belongs to one particular shell; a previous sibling or a newer
       // session must never receive this header's geometry during a delayed callback.
       const shell = header.closest('.pack-shell');
-      if (!shell?.isConnected) { trace('pack.geometry.detached', {}); return; }
+      if (!shell?.isConnected) { root.__dfoInventoryTrace?.record?.('pack.geometry.detached', {}); return; }
       const signature = [root.innerWidth, root.innerHeight, root.devicePixelRatio, state.view].join('|');
       const previous = scaledShells.get(shell);
       if (previous?.signature === signature) return;
-      trace('pack.geometry.begin', { signature, paired: shell.classList.contains('paired'), previous: !!previous }, shell);
+      root.__dfoInventoryTrace?.record?.('pack.geometry.begin', { signature, paired: shell.classList.contains('paired'), previous: !!previous }, shell);
       if (root.matchMedia && !root.matchMedia('(min-width: 1000px)').matches) {
         if (previous) {
           resetGeometry(shell);
@@ -286,7 +286,7 @@
         dock.style.setProperty('width', baseDock.width + 'px', 'important');
       }
       scaledShells.set(shell, { signature, baseFrame, baseMain, baseDock });
-      trace('pack.geometry.end', { signature, paired: shell.classList.contains('paired') }, shell);
+      root.__dfoInventoryTrace?.record?.('pack.geometry.end', { signature, paired: shell.classList.contains('paired') }, shell);
       // Native virtualRows measured the pre-zoom shell. Invalidate its cached
       // columns and heights once, AFTER the new track sizes have been applied.
       root.__dfoInventoryRemeasure$?.(shell);

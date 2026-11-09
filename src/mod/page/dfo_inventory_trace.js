@@ -30,7 +30,7 @@
         doc.body.append(indicator);
       }
       if (indicator) {
-        indicator.textContent = 'DFO TRACE 1.29.9 | ' + indicatorState
+        indicator.textContent = 'DFO TRACE 1.29.10 | ' + indicatorState
           + (snapshot().doors || (lastDoorSeenAt && clock() - lastDoorSeenAt <= AFTER_CLOSE_MS)
             ? ' | LIVE ' + new Date().toLocaleTimeString() + ' F' + frameCount : '');
         indicator.title = indicatorDetail;
@@ -239,6 +239,7 @@
   for (const kind of ['change','input','focusin','focusout']) {
     doc.addEventListener(kind, e => {
       if (!pertinent(e)) return;
+      if (kind === 'change' || kind === 'input') watchFilterChange(e);
       record('control.' + kind, eventData(e, 'document-capture'));
       root.setTimeout(() => record('control.after', {
         ...eventData(e, 'next-task'), ...uiState(), eventType: kind
@@ -291,6 +292,70 @@
       });
       observer.observe({ entryTypes: ['longtask'] });
     } catch { /* unsupported browser; heartbeat still works */ }
+  }
+  // Correlate a native filter CHANGE with its actual list DOM mutations.
+  // This is passive: it never calls the control handler or the game's renderer.
+  let liveFilterProbes = 0;
+  function listState(el) {
+    try {
+      return { exists: !!el, connected: !!el?.isConnected,
+        nodes: el?.childElementCount ?? null,
+        rowElements: el?.querySelectorAll?.('.itemrow,.packrow,[role="row"]')?.length ?? null,
+        scrollHeight: el?.scrollHeight ?? null,
+        textLength: el?.textContent?.length ?? null };
+    } catch { return { failed: true }; }
+  }
+  function watchFilterChange(e) {
+    try {
+      const el = e.target;
+      if (!el?.matches?.('.storecat,.storerarity,.storemat,.storesearch')) return;
+      const door = el.closest?.('#enhanced-inventory');
+      const list = door?.querySelector?.('.remotelist') ?? null;
+      const id = eventIds.get(e) ?? null;
+      const before = listState(list);
+      if (liveFilterProbes >= 4) {
+        record('filter.watch.overlap', { eventId: id, active: liveFilterProbes });
+        return;
+      }
+      liveFilterProbes++;
+      let mutationRecords = 0, addedNodes = 0, removedNodes = 0, mutationError = false;
+      let observer = null;
+      if (list && typeof root.MutationObserver === 'function') {
+        try {
+          observer = new root.MutationObserver(records => {
+            for (const m of records) {
+              mutationRecords++;
+              addedNodes += m.addedNodes?.length || 0;
+              removedNodes += m.removedNodes?.length || 0;
+            }
+          });
+          observer.observe(list, { childList: true, subtree: true });
+        } catch { mutationError = true; }
+      }
+      root.setTimeout(() => {
+        try {
+          observer?.disconnect?.();
+          const current = door?.querySelector?.('.remotelist') ?? null;
+          const after = listState(current);
+          record('filter.dom.result', {
+            eventId: id,
+            controlClass: [...(el.classList || [])].slice(0, 2).join('.'),
+            controlConnected: !!el.isConnected,
+            controlIndex: typeof el.selectedIndex === 'number' ? el.selectedIndex : null,
+            doorConnected: !!door?.isConnected,
+            listReplaced: !!list && !!current && list !== current,
+            listConnected: !!list?.isConnected,
+            observed: !!observer, mutationError, mutationRecords, addedNodes, removedNodes,
+            beforeNodes: before.nodes ?? null, afterNodes: after.nodes ?? null,
+            beforeRows: before.rowElements ?? null, afterRows: after.rowElements ?? null,
+            beforeScrollHeight: before.scrollHeight ?? null,
+            afterScrollHeight: after.scrollHeight ?? null,
+            beforeTextLength: before.textLength ?? null,
+            afterTextLength: after.textLength ?? null,
+          }, door);
+        } catch {} finally { liveFilterProbes--; }
+      }, 350);
+    } catch { /* probes must never modify the game */ }
   }
   function control(el) {
     const target = el?.closest?.('button,.packtab,.itemrow,[role="button"]') || el;
@@ -355,6 +420,6 @@
     // For local console troubleshooting only; nothing beyond the bounded tail is held in memory.
     tail: () => tail.slice(),
   });
-  record('trace.started', { diagnostic: true, build: '1.29.9', probes: 'input-failure-and-renderer-liveness' });
+  record('trace.started', { diagnostic: true, build: '1.29.10', probes: 'input-failure-and-renderer-liveness' });
   void flush(); // a startup acknowledgement must not depend on the player clicking inventory
 })(globalThis);

@@ -137,6 +137,83 @@ test('renderer startup survives blocked POST and reaches real Electron GET fallb
   } finally { fs.rmSync(dir, { recursive: true, force: true }); }
 });
 
+test('freeze probe captures DOM input path, handler presence, owner status and frame heartbeat without altering events', async () => {
+  const docListeners = new Map(), winListeners = new Map(), batches = [], timers = [];
+  const indicators = [];
+  let frame = null, heartbeat = null;
+  const owner = { isConnected: true, __dfoGeneration$: 3, __dfoRetired$: false,
+    querySelectorAll: () => [], querySelector() { return null; }, childElementCount: 1 };
+  const target = { tagName: 'SELECT', classList: ['storecat'], disabled: false, selectedIndex: 3,
+    isConnected: true, onchange() {}, onclick: null, getAttribute() { return null; },
+    closest() { return owner; } };
+  const document = {
+    readyState: 'complete', visibilityState: 'visible', activeElement: target,
+    querySelectorAll(sel) { return sel === '#enhanced-inventory' ? [owner] : []; },
+    querySelector(sel) { return sel === '#enhanced-inventory' ? owner : null; },
+    elementFromPoint() { return target; }, hasFocus() { return true; },
+    createElement() { return { style: {}, textContent: '', title: '' }; },
+    body: { append(el) { indicators.push(el); } },
+    addEventListener(type, fn, capture) { docListeners.set(type + ':' + !!capture, fn); },
+  };
+  const sandbox = {
+    document, __dfoInventoryDoorActive$: {
+      host: owner, state() { return { done: false, connected: true, retired: false }; }
+    },
+    fetch: async (_url, options) => { batches.push(...JSON.parse(options.body)); return { ok: true, status: 204 }; },
+    addEventListener(type, fn, capture) { winListeners.set(type + ':' + !!capture, fn); },
+    requestAnimationFrame(fn) { frame = fn; },
+    setInterval(fn) { heartbeat = fn; },
+    setTimeout(fn) { timers.push(fn); },
+    console: { warn() {} },
+  };
+  vm.runInNewContext(fs.readFileSync(path.join(__dirname, '../src/mod/page/dfo_inventory_trace.js'), 'utf8'), sandbox);
+  const api = sandbox.__dfoInventoryTrace;
+  await new Promise(resolve => setImmediate(resolve)); // startup flush
+  const ev = { type: 'change', target, defaultPrevented: false, cancelBubble: false };
+  winListeners.get('change:true')(ev);
+  docListeners.get('change:true')(ev);
+  winListeners.get('change:false')(ev);
+  frame(0); heartbeat();
+  await api.flush();
+  assert.ok(batches.some(x => x.type === 'dispatch.capture' && x.data.onchange === true));
+  assert.ok(batches.some(x => x.type === 'dispatch.bubble'));
+  assert.ok(batches.some(x => x.type === 'control.change'));
+  assert.ok(batches.some(x => x.type === 'renderer.heartbeat'));
+  const beat = batches.find(x => x.type === 'renderer.heartbeat').data;
+  assert.equal(beat.ownerDone, false);
+  assert.equal(beat.focus, true);
+  assert.equal(beat.frameCount, 1);
+  assert.equal(beat.category, null); // mock host has no storecat; no invented state
+  assert.match(indicators[0].textContent, /LIVE.*F1/);
+  assert.equal(ev.defaultPrevented, false);
+  assert.equal(ev.cancelBubble, false);
+  assert.ok(!batches.some(x => x.type === 'view.render.start'));
+});
+
+test('normal render breadcrumbs do not bury the diagnostic input and liveness events', async () => {
+  const batches = [];
+  const document = { readyState: 'complete', querySelectorAll: () => [],
+    addEventListener() {}, body: null };
+  const sandbox = { document, fetch: async (_url, options) => {
+    batches.push(...JSON.parse(options.body)); return { ok: true, status: 204 };
+  }, setTimeout() {}, addEventListener() {} };
+  vm.runInNewContext(fs.readFileSync(path.join(__dirname, '../src/mod/page/dfo_inventory_trace.js'), 'utf8'), sandbox);
+  const api = sandbox.__dfoInventoryTrace;
+  await new Promise(resolve => setImmediate(resolve));
+  for (let i = 0; i < 200; i++) {
+    api.record('view.render.start', { count: i });
+    api.record('view.render.end', { completed: true, stillOwns: true });
+    api.record('pack.geometry.end', { done: true });
+  }
+  api.record('view.render.error', { message: 'fixture failure' });
+  api.record('view.render.end', { completed: false });
+  await api.flush();
+  assert.ok(batches.some(x => x.type === 'view.render.error'));
+  assert.ok(batches.some(x => x.type === 'view.render.end' && x.data.completed === false));
+  assert.ok(!batches.some(x => x.type === 'view.render.start'));
+  assert.ok(!batches.some(x => x.type === 'pack.geometry.end'));
+});
+
 test('passive client tracer observes and flushes events without intercepting clicks', async () => {
   const handlers = new Map(), timers = [], posts = [];
   const document = {

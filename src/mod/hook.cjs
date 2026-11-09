@@ -78,6 +78,19 @@ function wrap(handleDagger, { app = null } = {}) {
   const traceStartup = inventoryTrace.serverEvent('bridge.ready',
     { version: VERSION, inventoryEnabled: cfg.inventory !== false, modEnabled: !!cfg.enabled });
   log(`inventory trace bootstrap: ${inventoryTrace.file}; status=${traceStartup}`);
+  // Main-process liveness is independent from browser JS/rAF and remains
+  // observable if the renderer or the inventory event handlers stall.
+  const traceStart = Date.now();
+  let lastRendererBatch = null;
+  if (cfg.enabled && cfg.inventory !== false) {
+    const monitor = setInterval(() => {
+      inventoryTrace.serverEvent('bridge.heartbeat', {
+        uptimeMs: Date.now() - traceStart,
+        rendererBatchAgeMs: lastRendererBatch === null ? null : Date.now() - lastRendererBatch,
+      });
+    }, 10000);
+    monitor.unref?.();
+  }
 
   let ctx = null;
   const context = () => {
@@ -207,6 +220,7 @@ function wrap(handleDagger, { app = null } = {}) {
       const input = url.searchParams.get('event') || '';
       if (input.length > 3900) return new Response(null, { status: 413 });
       const result = inventoryTrace.write('[' + input + ']');
+      if (result === 204) lastRendererBatch = Date.now();
       const gif = Buffer.from('R0lGODlhAQABAAD/ACwAAAAAAQABAAACAUwAOw==', 'base64');
       return new Response(gif, { status: result === 204 ? 200 : result,
         headers: { 'Content-Type': 'image/gif', 'Cache-Control': 'no-store' } });
@@ -214,7 +228,9 @@ function wrap(handleDagger, { app = null } = {}) {
     if (rel === 'dfo-mod/inventory-trace') {
       if (cfg.inventory === false) return new Response(null, { status: 404 });
       if (req.method !== 'POST') return new Response(null, { status: 405 });
-      return new Response(null, { status: inventoryTrace.write(await req.text()) });
+      const written = inventoryTrace.write(await req.text());
+      if (written === 204) lastRendererBatch = Date.now();
+      return new Response(null, { status: written });
     }
     if (rel === 'dfo-mod/report' && req.method === 'POST') { writeReport(await req.text()); return new Response(null, { status: 204 }); }
     if (rel === 'dfo-mod/cache') {

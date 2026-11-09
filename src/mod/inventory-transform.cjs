@@ -221,7 +221,7 @@ function doorOwnership(out) {
     '.__dfoRetired$&&'+host+'.__dfoGeneration$===globalThis.__dfoInventoryDoorGeneration$})()';
   t=put(t,alive[0],alive[0].replace('alive:()=>!'+fired,()=>activation));
   t=put(t,original,original.replace('dispose(){'+close+'()}',
-    'dispose(){__dfoTraceDoor$("overlay.dispose",'+host+',{});'+host+'.__dfoRetired$=true;'+close+'();__dfoTraceDoor$("overlay.dispose.return",'+host+',{}}'));
+    'dispose(){__dfoTraceDoor$("overlay.dispose",'+host+',{});'+host+'.__dfoRetired$=true;'+close+'();__dfoTraceDoor$("overlay.dispose.return",'+host+',{})}'));
   t=put(t,dismiss[0][0],'onDismiss:()=>{__dfoTraceDoor$("overlay.dismiss",'+host+',{});const result='+close+'();__dfoTraceDoor$("overlay.dismiss.return",'+host+',{});return result}');
   return t + '\n;function __dfoTraceDoor$(type,host,info){try{globalThis.__dfoInventoryTrace?.record?.(type,info,host)}catch{}}\n';
 }

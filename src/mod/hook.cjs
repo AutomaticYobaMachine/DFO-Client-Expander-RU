@@ -74,7 +74,10 @@ function wrap(handleDagger, { app = null } = {}) {
     try { fs.writeFileSync(logFile, `${lines.join('\n')}\n`); } catch { /* a log we cannot write is no reason to stop */ }
   };
   log(`DFO Mod ${VERSION}: ${cfg.enabled ? 'on' : 'off'} - ru ${ru ? 'on' : 'off'}, marks ${cfg.marks ? 'on' : 'off'}`);
-  if (cfg.enabled && cfg.inventory !== false) log(`inventory diagnostic trace: ${inventoryTrace.file ?? 'userData unavailable'}`);
+  // Record the bridge before any webview loads: this diagnoses a missing renderer.
+  const traceStartup = inventoryTrace.serverEvent('bridge.ready',
+    { version: VERSION, inventoryEnabled: cfg.inventory !== false, modEnabled: !!cfg.enabled });
+  log(`inventory trace bootstrap: ${inventoryTrace.file}; status=${traceStartup}`);
 
   let ctx = null;
   const context = () => {
@@ -193,6 +196,21 @@ function wrap(handleDagger, { app = null } = {}) {
     if (!cfg.enabled) return handleDagger(req);
     if (url.host !== 'game') return handleDagger(req);
     let rel;try{rel=decodeURIComponent(url.pathname).replace(/^\/+/, '')}catch{return new Response('bad request',{status:400})}
+    if (rel === 'dfo-mod/inventory-trace-status') {
+      if (req.method !== 'GET') return new Response(null, { status: 405 });
+      return new Response(JSON.stringify(inventoryTrace.status()), { status: 200,
+        headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' } });
+    }
+    if (rel === 'dfo-mod/inventory-trace-fallback') {
+      if (cfg.inventory === false) return new Response(null, { status: 404 });
+      if (req.method !== 'GET') return new Response(null, { status: 405 });
+      const input = url.searchParams.get('event') || '';
+      if (input.length > 3900) return new Response(null, { status: 413 });
+      const result = inventoryTrace.write('[' + input + ']');
+      const gif = Buffer.from('R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=', 'base64');
+      return new Response(gif, { status: result === 204 ? 200 : result,
+        headers: { 'Content-Type': 'image/gif', 'Cache-Control': 'no-store' } });
+    }
     if (rel === 'dfo-mod/inventory-trace') {
       if (cfg.inventory === false) return new Response(null, { status: 404 });
       if (req.method !== 'POST') return new Response(null, { status: 405 });
@@ -235,7 +253,10 @@ function wrap(handleDagger, { app = null } = {}) {
       return new Response(itemTextData, { headers: { 'Content-Type': 'text/javascript; charset=utf-8', 'Cache-Control': 'no-store' } });
     }
     const own1 = /^(?:play\/)?dfo-mod\/(?:fonts\/)?([\w.-]+)$/.exec(rel);
-    if (own1) { try { return serveOwn(own1[1],url.searchParams.get('dfo')===VERSION); } catch (e) { log(`own ${rel}: ${e?.message}`); return new Response('not found', { status: 404 }); } }
+    if (own1) { try {
+      if (own1[1] === 'dfo_inventory_trace.js') inventoryTrace.serverEvent('bridge.script.served', { asset: rel });
+      return serveOwn(own1[1],url.searchParams.get('dfo')===VERSION);
+    } catch (e) { log(`own ${rel}: ${e?.message}`); return new Response('not found', { status: 404 }); } }
     if(cfg.fonts!==false){
       const asset=replacement(rel);if(asset)return asset.file?serveOwn(asset.file):new Response(asset.body,{headers:{'Content-Type':asset.type,'Cache-Control':'no-store'}});
       if(/\.css$/i.test(rel)){
@@ -251,7 +272,12 @@ function wrap(handleDagger, { app = null } = {}) {
     try {
       const text = await res.text();
       let out;
-      if (page) out = injectPage(text, '../'.repeat(Math.max(0,rel.split('/').length-1))||'./', context());
+      if (page) {
+         out = injectPage(text, '../'.repeat(Math.max(0,rel.split('/').length-1))||'./', context());
+         if (cfg.inventory !== false) inventoryTrace.serverEvent('bridge.page', {
+           asset: rel.slice(0, 120), scriptInjected: out.includes('dfo_inventory_trace.js'),
+         });
+       }
       else {
         const key = `${text.length}:${text.slice(0, 64)}:${text.slice(-64)}`;
         const hit = cache.get(rel);

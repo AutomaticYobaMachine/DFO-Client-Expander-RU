@@ -133,4 +133,4 @@ function transformInventory(rel, text, log) {
   return out;
 }
 
-module.exports = { transformInventory, pages, inventory, receipt };
+module.exports = { transformInventory, pages, inventory, lifecycle, receipt };

@@ -52,6 +52,7 @@ function inventory(text) {
   if (deps !== refresh[3]) throw new Error('pack refresh: another deps');
   out = put(out, close[0], `__dfoPackHead$(${close[4]},()=>{${refresh[1]}();${render}()});${close[0]}`);
   out = put(out, refresh[0], `${refresh[1]}=()=>{__dfoPackRefresh$(${deps},()=>!!${salvage}||!!${chestRefusal}(${deps}),()=>${sortInPlace}(${deps}.entity?.items,{nameOf:${nameOf}}));${refresh[2]}=${pm}(${refresh[3]}),`);
+  out = cleanSameHostRemount(out);
   out = sessionHandle(out);
   out = lifecycle(out, render, deps, true);
   return out + '\n;function __dfoPackList$(t,p){try{return globalThis.__dfoPack?.list?.(t,p)??t}catch{return t}}'
@@ -115,6 +116,18 @@ function lifecycle(out, render, deps = null, requireFigure = false) {
 
 // The view is an ESM singleton; an old A handle may close after a B mount.
 // Preserve the native close law but bind dropped/repaint/unmount to their owner.
+// A lazy-chunk retry can mount the *same* host again. Native JAN2 only
+// disposes when the host changes, so retrying leaks the previous view's
+// virtual-list listeners, figure subscription, key handler and hotbar scope.
+// Retire that live view first, but do not remove the host being reused.
+function cleanSameHostRemount(out) {
+  const pattern = /if\(([\w$]+)&&\1!==([\w$]+)\)\{(let|const|var) ([\w$]+)=\1;([\w$]+)\?\.unmount\(\)[;,]\4\.remove\?\.\(\)\}/g;
+  const hits = [...out.matchAll(pattern)];
+  if (hits.length !== 1) throw new Error('inventory same-host cleanup: ' + hits.length + ' places');
+  const [whole, currentHost, incomingHost, declaration, previousHost, view] = hits[0];
+  return put(out, whole, 'if(' + currentHost + '){' + declaration + ' ' + previousHost + '=' + currentHost + ';' + view + '?.unmount();if(' + previousHost + '!==' + incomingHost + ')' + previousHost + '.remove?.()}');
+}
+
 function sessionHandle(out) {
   const view = once(out, /([\w$]+)=\{repaint\(\)\{[^{}]*\},dropped:\(\)=>([\w$]+),unmount\(\)\{/, 'inventory per-session view handle');
   const [whole, current, dropped] = view;
@@ -192,4 +205,4 @@ function transformInventory(rel, text, log) {
   return out;
 }
 
-module.exports = { transformInventory, pages, inventory, lifecycle, guardFigureAsync, sessionHandle, doorOwnership, receipt };
+module.exports = { transformInventory, pages, inventory, lifecycle, guardFigureAsync, cleanSameHostRemount, sessionHandle, doorOwnership, receipt };

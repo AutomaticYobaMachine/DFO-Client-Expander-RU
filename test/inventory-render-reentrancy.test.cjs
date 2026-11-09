@@ -3,7 +3,7 @@
 // bundle or its minified signatures have passed validation. See docs/inventory-window-render-stabilization-plan.md.
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const { lifecycle, sessionHandle, doorOwnership, transformInventory } = require('../src/mod/inventory-transform.cjs');
+const { lifecycle, cleanSameHostRemount, sessionHandle, doorOwnership, transformInventory } = require('../src/mod/inventory-transform.cjs');
 
 function fixture(count = 45) {
   const src = [
@@ -351,4 +351,32 @@ test('lazy load failure respects deferred chest save instead of bypassing closeS
   app.finish();
   assert.equal(app.completed(),1);
   assert.equal(app.request.host.isConnected,false);
+});
+
+test('same-host lazy retry retires the previous view but retains its host', () => {
+  const raw = [
+    'let host=null,_view=null,live=0,disposed=0;',
+    'function mount(hostEl){',
+    '  if(host&&host!==hostEl){let prev=host;_view?.unmount(),prev.remove?.()}',
+    '  host=hostEl;live++;let closed=false;',
+    '  _view={unmount(){if(closed)return;closed=true;live--;disposed++}};',
+    '  return _view;',
+    '}',
+    'function state(){return {live,disposed}}',
+  ].join('\n');
+  const patched=cleanSameHostRemount(raw);
+  const app=new Function(patched+'\nreturn {mount,state}')();
+  const a={removed:0,remove(){this.removed++}},b={removed:0,remove(){this.removed++}};
+  const viewA=app.mount(a);
+  const viewA2=app.mount(a);
+  assert.notEqual(viewA,viewA2);
+  assert.deepEqual(app.state(),{live:1,disposed:1},'retry must release previous view allocations');
+  assert.equal(a.removed,0,'reuse must not detach the incoming DOM host');
+  app.mount(b);
+  assert.deepEqual(app.state(),{live:1,disposed:2});
+  assert.equal(a.removed,1,'handoff to a distinct host still detaches A');
+  assert.equal(b.removed,0);
+});
+test('same-host native cleanup signature is a strict compatibility gate', () => {
+  assert.throws(() => cleanSameHostRemount('function mount(){}'), /same-host cleanup: 0 places/);
 });

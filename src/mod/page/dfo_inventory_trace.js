@@ -88,8 +88,10 @@
           type === 'pack.head' || type === 'pack.geometry.begin' ||
           type === 'pack.geometry.end') return;
       if (type === 'view.render.end' && info?.completed !== false && info?.stillOwns !== false) return;
+      const state = snapshot(host);
+      if (state.doors > 0) lastDoorSeenAt = clock();
       const event = { session, seq: ++seq, at: Date.now(), type,
-        data: { ...snapshot(host), ...cleanData(info) } };
+        data: { ...state, ...cleanData(info) } };
       tail.push(event);
       if (tail.length > 100) tail.shift();
       queue.push(event);

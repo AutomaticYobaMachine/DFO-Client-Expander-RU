@@ -46,7 +46,8 @@ test('geometry follows its own header and cannot repeatedly scale a foreign shel
   assert.doesNotMatch(source, /doc\.querySelector\('\.pack-shell'\)/, 'never scale the first unrelated shell');
   assert.match(source, /scaledShells\.get\(shell\)/);
   assert.match(source, /scaledShells\.set\(shell/);
-  assert.match(source, /previous\?\.baseFrame \?\? win\.getBoundingClientRect\(\)/);
+  assert.match(source, /if \(previous\) \{\s*resetGeometry\(shell\);\s*scaledShells\.delete\(shell\);/);
+  assert.match(source, /const baseFrame = win\.getBoundingClientRect\(\)/);
   assert.match(source, /root\.__dfoInventoryRemeasure\$\?\.\(shell\)/);
   assert.match(source, /root\.addEventListener\?\.\('resize'/);
 });

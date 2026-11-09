@@ -123,7 +123,12 @@ function lifecycle(out, render, deps = null, requireFigure = false) {
 function cleanSameHostRemount(out) {
   const pattern = /if\(([\w$]+)&&\1!==([\w$]+)\)\{(let|const|var) ([\w$]+)=\1;([\w$]+)\?\.unmount\(\)[;,]\4\.remove\?\.\(\)\}/g;
   const hits = [...out.matchAll(pattern)];
-  if (hits.length !== 1) throw new Error('inventory same-host cleanup: ' + hits.length + ' places');
+  if (hits.length !== 1) {
+    const clues = [...out.matchAll(/\.unmount\(\)/g)]
+      .map(m => out.slice(Math.max(0, m.index - 180), m.index + 180))
+      .filter(span => span.includes('.remove')).slice(0, 4);
+    throw new Error('inventory same-host cleanup: ' + hits.length + ' places; near native unmount: ' + clues.join(' | ').slice(0, 1500));
+  }
   const [whole, currentHost, incomingHost, declaration, previousHost, view] = hits[0];
   return put(out, whole, 'if(' + currentHost + '){' + declaration + ' ' + previousHost + '=' + currentHost + ';' + view + '?.unmount();if(' + previousHost + '!==' + incomingHost + ')' + previousHost + '.remove?.()}');
 }

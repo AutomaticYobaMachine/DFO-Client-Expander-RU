@@ -480,7 +480,7 @@ function injectPage(html, prefix, ctx) {
  *  off in this version of the game (the log says which). The other ids are older shapes of the same places. */
 const EXPECTED = Object.freeze({
   fonts: ['fonts.classic','fonts.choices','fonts.network','fonts.bookClassic','fonts.bookCanvas','fonts.fnt','fonts.pixels','fonts.resources','fonts.worker','fonts.uiSizes','fonts.titleSizes','fonts.dial','fonts.statusLayout','fonts.mapHost','fonts.mapProject','fonts.mapHud'],
-  inventory: ['inventory.pages', 'inventory.view', 'inventory.lifecycle', 'inventory.receipt'],
+  inventory: ['inventory.pages', 'inventory.view', 'inventory.lifecycle', 'inventory.door', 'inventory.receipt'],
   itemCards: ['itemCards.inventory', 'itemCards.values', 'itemCards.materials', 'itemCards.powers', 'itemCards.prices', 'itemCards.currency', 'itemCards.effectLabels', 'itemCards.slots', 'itemCards.skills', 'itemCards.quick', 'itemCards.letters', 'itemCards.rows'],
   dungeons: ['dungeon.world', 'dungeon.hud', 'dungeon.travelView', 'dungeon.bestiary', 'dungeon.tables', 'dungeon.scaling', 'dungeon.rewards', 'dungeon.runtime', 'dungeon.lifetime', 'dungeon.aurum', 'dungeon.ore', 'dungeon.renown', 'dungeon.respawn', 'dungeon.layout', 'dungeon.sizes', 'dungeon.elites', 'dungeon.live', 'dungeon.journalDoor', 'dungeon.journalClassic', 'dungeon.journalFocus', 'dungeon.traits', 'dungeon.navContext', 'dungeon.navDraw', 'dungeon.navQuests'],
   nearbyLoot: ['loot.tags', 'loot.types', 'loot.kinds', 'loot.identified', 'loot.bound', 'loot.bootstrap', 'loot.world', 'loot.exterior', 'loot.modes', 'loot.dungeon', 'loot.finds', 'loot.spoils', 'loot.inventory', 'loot.transfer', 'loot.arrows'],

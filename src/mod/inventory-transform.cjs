@@ -107,6 +107,25 @@ function sessionHandle(out) {
   return put(out, whole, patched) + '\n;function __dfoDroppedForSession$(items){return ()=>items}\n';
 }
 
+// inventoryDoor: pending chest save leaves 'fired' false while a replacement
+// overlay B can take ownership. Retire A at dispose() ENTRY, before the save
+// promise settles. The late lazy-loader must never mount A over B.
+function doorOwnership(out) {
+  const alive = once(out,
+    /alive:\(\)=>!([\w$]+),(?:host:([\w$]+)|([\w$]+)),onDismiss:/,
+    'inventory overlay alive owner');
+  const fired = alive[1], host = alive[2] || alive[3];
+  const owner = new RegExp('get done\\(\\)\\{return '+esc(fired)+'\\}[\\s\\S]{0,700}?dispose\\(\\)\\{([\\w$]+)\\(\\)\\}', 'g');
+  const handles = [...out.matchAll(owner)];
+  if (handles.length !== 1) throw new Error('inventory overlay dispose ownership: '+handles.length+' places');
+  const original = handles[0][0], close = handles[0][1];
+  let t = put(out, alive[0], alive[0].replace('alive:()=>!'+fired,
+    'alive:()=>!'+fired+'&&'+host+'.isConnected&&!'+host+'.__dfoRetired$'));
+  t = put(t, original, original.replace('dispose(){'+close+'()}',
+    'dispose(){'+host+'.__dfoRetired$=true;'+close+'()}'));
+  return t;
+}
+
 // equip-*.js: ItemCollection.AddItem (systems/inventory.js addItem). A quest item lands at the FRONT exactly when the
 // player receives it - GivePc/GetItem's giveItemToPlayer and a take off a body or a chest (itemTransfer.js) - and the page
 // script locks a quest letter there, once, by the native lock's own field.
@@ -119,6 +138,7 @@ function receipt(text) {
 const JOBS = [
   ['inventory.pages', (rel, text) => /\/storeFilter-[^/]+\.js$/.test(rel) && text.includes('[`weapons`,`Weapons`]'), pages],
   ['inventory.view', (rel, text) => text.includes('`packPhoneDoll`') && text.includes('`packempty`'), inventory],
+  ['inventory.door', (rel, text) => /\/inventoryDoor-[^/]+\.js$/.test(rel), doorOwnership],
   ['inventory.receipt', (rel, text) => !/Worker-/.test(rel) && text.includes('AddItem() encountered a duplicate item'), receipt],
 ];
 
@@ -126,9 +146,9 @@ function transformInventory(rel, text, log) {
   let out = text;
   for (const [id, on, run] of JOBS) {
     if (!on(rel, out) || out.includes(`/*${id}*/`)) continue;
-    try { out = run(out) + `\n/*${id}*/\n`; log.push([id, 1]); if (id === 'inventory.view') log.push(['inventory.lifecycle', 1]); } catch (e) { log.push([`${id}!error ${e.message}`, 0]); if (id === 'inventory.view') throw new Error(`inventory lifecycle compatibility failure: ${e.message}`); }
+    try { out = run(out) + `\n/*${id}*/\n`; log.push([id, 1]); if (id === 'inventory.view') log.push(['inventory.lifecycle', 1]); } catch (e) { log.push([`${id}!error ${e.message}`, 0]); if (id === 'inventory.view' || id === 'inventory.door') throw new Error(`inventory lifecycle compatibility failure: ${e.message}`); }
   }
   return out;
 }
 
-module.exports = { transformInventory, pages, inventory, lifecycle, sessionHandle, receipt };
+module.exports = { transformInventory, pages, inventory, lifecycle, sessionHandle, doorOwnership, receipt };

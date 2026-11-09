@@ -3,7 +3,7 @@
 // bundle or its minified signatures have passed validation. See docs/inventory-window-render-stabilization-plan.md.
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const { lifecycle, sessionHandle, transformInventory } = require('../src/mod/inventory-transform.cjs');
+const { lifecycle, sessionHandle, doorOwnership, transformInventory } = require('../src/mod/inventory-transform.cjs');
 
 function fixture(count = 45) {
   const src = [
@@ -263,4 +263,20 @@ test('view handle retains its dropped items and stale unmount is idempotent', ()
   assert.equal(app.state().repaints, 1);
   b.unmount();b.unmount();
   assert.equal(app.state().closes, 1, 'unmount is idempotent');
+});
+
+test('disposed overlay rejects late A load during pending save even before fired becomes true', () => {
+  const raw = [
+    'let fired=false,host={isConnected:true},onSavePending=true,live=null;',
+    'function close(){if(onSavePending)return;fired=true}',
+    'const overlay={get done(){return fired},input(){},click(){},dispose(){close()}};',
+    'function mountEnhancedChunk(o){live=o}',
+    'mountEnhancedChunk({alive:()=>!fired,host,onDismiss:()=>{}})',
+  ].join('\n');
+  const app=new Function(doorOwnership(raw)+'\nreturn {overlay,host,alive:()=>live.alive(),finish:()=>onSavePending=false}')();
+  assert.equal(app.alive(),true);
+  app.overlay.dispose();
+  assert.equal(app.alive(),false,'A must be retired before async save resolves');
+  app.finish();
+  assert.equal(app.alive(),false);
 });

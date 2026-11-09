@@ -1,11 +1,11 @@
-DFO-Client-Expander-RU 1.29.7
+DFO-Client-Expander-RU 1.29.8
 =============================
 Author: AutomaticYobaMachine
 Made especially for the Russian-speaking DFO Online community.
 Русская инструкция: README.txt.
 
 Diagnostic build 1.29.6: inventory lifecycle and unresponsive overlay trace.
-The log is written to dfo-mod-inventory-trace.ndjson in the DFO Online profile.
+The log is written to %APPDATA%\\DFO-Client-Expander-RU\\dfo-mod-inventory-trace.ndjson.
 Instructions: docs/inventory-diagnostic-trace.md in the test branch.
 
 An unofficial extension of the Daggerfall Online client: item cards, the pack

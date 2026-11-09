@@ -194,6 +194,13 @@
         }
         return;
       }
+      // The native frame is responsive. A baseline measured at another
+      // viewport is not valid after resize; first restore native styles,
+      // then measure the actual connected layout at this viewport.
+      if (previous) {
+        resetGeometry(shell);
+        scaledShells.delete(shell);
+      }
       const win = shell.querySelector(':scope > .pack-win');
       if (!win || !win.isConnected) return;
       const grid = win.querySelector('.pack');
@@ -202,9 +209,9 @@
       const character = main?.querySelector(':scope > .charcol');
       if (!grid || !main || !dock || !character) return;
       const paired = shell.classList.contains('paired');
-      const baseFrame = previous?.baseFrame ?? win.getBoundingClientRect();
-      const baseMain = previous?.baseMain ?? main.getBoundingClientRect();
-      const baseDock = previous?.baseDock ?? dock.getBoundingClientRect();
+      const baseFrame = win.getBoundingClientRect();
+      const baseMain = main.getBoundingClientRect();
+      const baseDock = dock.getBoundingClientRect();
       // In standalone mode the NATIVE grid allocates everything except the 380px
       // dock to the character (1216px at 1600px outer width!). That pre-mod width
       // is NOT the paired reference. Use the paired track's 656px instead, as in

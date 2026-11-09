@@ -61,7 +61,7 @@
   async function flush() {
     if (posting || !queue.length) return;
     posting = true;
-    let batch = queue.splice(0, Math.min(queue.length, 48));
+    let batch = queue.splice(0, Math.min(queue.length, 12));
     if (missingBatches) {
       batch.unshift({ session, seq: ++seq, at: Date.now(), type: 'trace.dropped',
         data: { count: missingBatches } });
@@ -97,11 +97,13 @@
     catch { return false; }
   }
   doc.addEventListener('pointerdown', e => {
-    if (relevant(e.target)) record('ui.pointerdown', { ...control(e.target), button: e.button });
+    const inside = relevant(e.target);
+    if (inside || snapshot().doors) record('ui.pointerdown', { ...control(e.target), button: e.button, inside });
   }, true);
   doc.addEventListener('click', e => {
-    if (!relevant(e.target)) return;
-    const data = control(e.target);
+    const inside = relevant(e.target);
+    if (!inside && !snapshot().doors) return;
+    const data = { ...control(e.target), inside };
     record('ui.click', { ...data, button: e.button });
     // A click may schedule a promise-driven close; look both after the immediate
     // native handler and after a later task. No observer over the whole HUD.
@@ -112,7 +114,7 @@
     if (e.ctrlKey && e.altKey && e.shiftKey && e.code === 'F10') {
       record('trace.manual', { key: 'Ctrl+Alt+Shift+F10' });
       void flush(); // diagnostic shortcut, never intercept or cancel the native key
-    } else if (relevant(e.target) && (e.key === 'Escape' || e.code === 'KeyI')) {
+    } else if ((relevant(e.target) || snapshot().doors) && (e.key === 'Escape' || e.code === 'KeyI')) {
       record('ui.keydown', { code: e.code || '', key: e.key || '' });
     }
   }, true);

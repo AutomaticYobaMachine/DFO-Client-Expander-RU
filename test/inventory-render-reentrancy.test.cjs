@@ -292,7 +292,7 @@ test('asynchronous paperdoll completion from A cannot repaint B', async () => {
     'function next(){h={id:2};d={entity:2}}',
   ].join('\n');
   const patched = lifecycle(src, 'r', 'd', true);
-  assert.match(patched, /h===__dfoFigureHost\$&&d===__dfoFigureSession\$&&r\(\)/, 'do not expand $& replacement tokens');
+  assert.match(patched, /h===__dfoFigureHost\assert.match(patched, /h===__dfoFigureHost\$&&d===__dfoFigureSession\$&&r\(\)/, 'do not expand $& replacement tokens');&d===__dfoFigureSession\assert.match(patched, /h===__dfoFigureHost\$&&d===__dfoFigureSession\$&&r\(\)/, 'do not expand $& replacement tokens');&__dfoFigureGen\$===__dfoFigureGeneration\assert.match(patched, /h===__dfoFigureHost\$&&d===__dfoFigureSession\$&&r\(\)/, 'do not expand $& replacement tokens');&r\(\)/, 'do not expand assert.match(patched, /h===__dfoFigureHost\$&&d===__dfoFigureSession\$&&r\(\)/, 'do not expand $& replacement tokens'); replacement tokens or omit the mount generation');
   const app = new Function(patched + '\nreturn {figure,next,finish,paints}')();
   app.figure();
   app.next();
@@ -465,4 +465,27 @@ test('handoff inerts A during a deferred save without bypassing its closeSession
   assert.equal(b.request.alive(), true, 'the late completion cannot close B');
   b.overlay.dispose();
   assert.deepEqual(app.state(), {closed:2,unregistered:2});
+});
+
+test('old figure promise cannot repaint a same-host same-deps remount', async () => {
+  const src = [
+    'let h={id:1},d={entity:1},c={key:1,img:1},paints=[],finish=[];',
+    'const arm={subscribe(fn){this.fn=fn}};',
+    'function recompose(e){return new Promise(resolve=>finish.push(resolve))}',
+    'function figure(){Promise.resolve(recompose(d.entity)).then(()=>{h&&r()}).catch(()=>{})}',
+    'function r(){paints.push(d.entity)}',
+    'function mount(){arm.subscribe(()=>{c={key:null,img:null};if(h)r()})}',
+  ].join('\n');
+  const patched=lifecycle(src,'r','d',true);
+  const app=new Function(patched+'\nreturn {figure,mount,finish,paints}')();
+  app.mount();
+  app.figure(); // A starts with the same host and deps objects that B will reuse
+  app.mount();  // B has a new subscription generation, but no change of identity
+  app.finish.shift()();
+  await Promise.resolve();await Promise.resolve();
+  assert.deepEqual(app.paints,[],'stale figure completion from A must not repaint B');
+  app.figure();
+  app.finish.shift()();
+  await Promise.resolve();await Promise.resolve();
+  assert.deepEqual(app.paints,[1],'current B figure completion must still repaint');
 });

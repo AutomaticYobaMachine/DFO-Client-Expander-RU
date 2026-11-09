@@ -239,7 +239,7 @@
   for (const kind of ['change','input','focusin','focusout']) {
     doc.addEventListener(kind, e => {
       if (!pertinent(e)) return;
-      if (kind === 'change' || kind === 'input') watchFilterChange(e);
+      if (kind === 'change' || (kind === 'input' && e.target?.matches?.('.storesearch'))) watchFilterChange(e);
       record('control.' + kind, eventData(e, 'document-capture'));
       root.setTimeout(() => record('control.after', {
         ...eventData(e, 'next-task'), ...uiState(), eventType: kind

@@ -404,3 +404,65 @@ test('published-style comma-prelude and shadowed incoming name preserve cleanup'
   assert.deepEqual(app.state(),{prelude:6,disposals:2,host:b});
   assert.equal(a.removed,1,'new incoming argument must not be shadowed by block-local variable');
 });
+
+test('new lazy opening closes the abandoned old overlay and removes its host', () => {
+  const raw = [
+    'let closed=0,unregistered=0;',
+    'function create(){',
+    '  let fired=false,host={isConnected:true,style:{},remove(){this.isConnected=false}};',
+    '  host.id="enhanced-inventory";',
+    '  function close(){if(fired)return;unregistered++;host.remove();fired=true;closed++}',
+    '  const overlay={get done(){return fired},dispose(){close()}};',
+    '  const request={alive:()=>!fired,host,onDismiss:()=>{host.remove();fired=true},label:"inventory"};',
+    '  return {overlay,request,host}',
+    '}',
+    'function state(){return {closed,unregistered}}',
+  ].join('\n');
+  const app = new Function(doorOwnership(raw)+'\nreturn {create,state}')();
+  const a = app.create(), b = app.create();
+  assert.equal(a.request.alive(), false);
+  assert.equal(a.host.isConnected, false, 'old host cannot intercept the new overlay');
+  assert.equal(a.overlay.done, true, 'old native close() must have executed');
+  assert.deepEqual(app.state(), {closed:1,unregistered:1});
+  assert.equal(b.request.alive(), true);
+  a.request.onDismiss();a.overlay.dispose();
+  assert.equal(b.request.alive(), true, 'late A callbacks cannot dismiss B');
+  b.request.onDismiss();
+  assert.deepEqual(app.state(), {closed:2,unregistered:2});
+});
+
+test('handoff inerts A during a deferred save without bypassing its closeSession', () => {
+  const raw = [
+    'let closed=0,unregistered=0,finishA=null;',
+    'function create(pending=false){',
+    '  let fired=false,queued=false,host={isConnected:true,style:{},remove(){this.isConnected=false}};',
+    '  host.id="enhanced-inventory";',
+    '  function close(){',
+    '    if(fired)return;',
+    '    if(pending){if(!queued){queued=true;finishA=()=>{pending=false;close()}}return}',
+    '    unregistered++;host.remove();fired=true;closed++',
+    '  }',
+    '  const overlay={get done(){return fired},dispose(){close()}};',
+    '  const request={alive:()=>!fired,host,onDismiss:()=>{host.remove();fired=true},label:"inventory"};',
+    '  return {overlay,request,host}',
+    '}',
+    'function finish(){finishA?.()}',
+    'function state(){return {closed,unregistered}}',
+  ].join('\n');
+  const app = new Function(doorOwnership(raw)+'\nreturn {create,finish,state}')();
+  const a = app.create(true);
+  a.overlay.dispose();
+  assert.equal(a.host.isConnected, true, 'native pending save retains A until completion');
+  const b = app.create(false);
+  assert.equal(a.request.alive(), false);
+  assert.equal(a.host.isConnected, true);
+  assert.equal(a.host.style.pointerEvents, 'none');
+  assert.equal(a.host.style.visibility, 'hidden');
+  assert.equal(b.request.alive(), true);
+  app.finish();
+  assert.equal(a.host.isConnected, false);
+  assert.deepEqual(app.state(), {closed:1,unregistered:1});
+  assert.equal(b.request.alive(), true, 'the late completion cannot close B');
+  b.overlay.dispose();
+  assert.deepEqual(app.state(), {closed:2,unregistered:2});
+});

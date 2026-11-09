@@ -182,9 +182,19 @@ function doorOwnership(out) {
 
   let t=put(out,ids[0][0],ids[0][0]+','+host+
     '.__dfoGeneration$=(globalThis.__dfoInventoryDoorGeneration$=(globalThis.__dfoInventoryDoorGeneration$||0)+1)');
-  t=put(t,alive[0],alive[0].replace('alive:()=>!'+fired,
-    ()=>'alive:()=>!'+fired+'&&'+host+'.isConnected&&!'+host+
-    '.__dfoRetired$&&'+host+'.__dfoGeneration$===globalThis.__dfoInventoryDoorGeneration$'));
+  // Generation checks cancel stale imports but do not close the stale
+  // full-screen host or unregister its overlay. Hand A to native close()
+  // as soon as B claims ownership; let a pending chest save finish safely.
+  const activation='alive:(()=>{'+
+    'const previous=globalThis.__dfoInventoryDoorActive$;'+
+    'if(previous&&previous.host!=='+host+'){try{previous.retire()}catch(e){console.warn("[dfo-mod inventory] old overlay cleanup failed",e)}}'+
+    'globalThis.__dfoInventoryDoorActive$={host:'+host+',retire:()=>{'+
+    'const wasRetired=!!'+host+'.__dfoRetired$;'+host+'.__dfoRetired$=true;'+
+    'if('+host+'.style){'+host+'.style.visibility="hidden";'+host+'.style.pointerEvents="none"}'+
+    'if(!wasRetired)'+close+'()}};'+
+    'return ()=>!'+fired+'&&'+host+'.isConnected&&!'+host+
+    '.__dfoRetired$&&'+host+'.__dfoGeneration$===globalThis.__dfoInventoryDoorGeneration$})()';
+  t=put(t,alive[0],alive[0].replace('alive:()=>!'+fired,()=>activation));
   t=put(t,original,original.replace('dispose(){'+close+'()}',
     'dispose(){'+host+'.__dfoRetired$=true;'+close+'()}'));
   t=put(t,dismiss[0][0],'onDismiss:'+close);

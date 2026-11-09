@@ -80,7 +80,7 @@ function guardFigureAsync(out, owner, deps, render, required) {
   const whole = found[0][0];
   const patched = whole
     .replace('(){Promise.resolve(', '(){const __dfoFigureHost$='+owner+',__dfoFigureSession$='+deps+';Promise.resolve(')
-    .replace(owner+'&&'+render+'()',owner+'===__dfoFigureHost$&&'+deps+'===__dfoFigureSession$&&'+render+'()');
+    .replace(owner+'&&'+render+'()', () => owner+'===__dfoFigureHost$&&'+deps+'===__dfoFigureSession$&&'+render+'()');
   return put(out, whole, patched);
 }
 function lifecycle(out, render, deps = null, requireFigure = false) {

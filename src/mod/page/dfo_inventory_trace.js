@@ -6,9 +6,17 @@
   if (!doc || typeof root.fetch !== 'function' || root.__dfoInventoryTrace) return;
   const session = 'i' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10);
   const endpoint = '/dfo-mod/inventory-trace';
-  const MAX_QUEUE = 256, MAX_DATA_KEYS = 32;
+  const MAX_QUEUE = 256, MAX_DATA_KEYS = 48;
   let seq = 0, queue = [], tail = [], scheduled = false, posting = false;
   let missingBatches = 0;
+  // These measurements distinguish a living renderer from an inert interface
+  // and a stalled renderer from an Electron process that is still alive.
+  let frameCount = 0, lastFrameAt = 0, maxFrameGap = 0, beatCount = 0;
+  let lastBeatAt = Date.now(), lastInputAt = 0, lastInputKind = '', lastPointer = null;
+  let lastTarget = null, lastEventId = 0;
+  const eventIds = new WeakMap();
+  const clock = () => Date.now();
+
   // Diagnostic build only. An on-screen acknowledgement prevents a silent "tracer works" claim.
   let indicator = null, indicatorState = 'loading', indicatorDetail = '';
   const beacons = new Set();
@@ -21,7 +29,8 @@
         doc.body.append(indicator);
       }
       if (indicator) {
-        indicator.textContent = 'DFO TRACE 1.29.8 | ' + indicatorState;
+        indicator.textContent = 'DFO TRACE 1.29.9 | ' + indicatorState
+          + (snapshot().doors ? ' | LIVE ' + new Date().toLocaleTimeString() + ' F' + frameCount : '');
         indicator.title = indicatorDetail;
       }
     } catch { /* status must not affect the game */ }
@@ -49,6 +58,10 @@
         hostGeneration: host?.__dfoGeneration$ ?? null,
         hostRetired: host ? !!host.__dfoRetired$ : null,
         hostShells: host?.querySelectorAll?.('.pack-shell')?.length ?? null,
+        ownerDone: typeof root.__dfoInventoryDoorActive$?.state === 'function'
+          ? !!root.__dfoInventoryDoorActive$.state().done : null,
+        focus: typeof doc.hasFocus === 'function' ? !!doc.hasFocus() : null,
+        visibility: doc.visibilityState ?? null,
       };
     } catch { return { snapshotFailed: true }; }
   }
@@ -144,6 +157,127 @@
       if (queue.length) schedule();
     }
   }
+  function probeElement(el) {
+    if (!el) return { tag: null, cls: null };
+    try {
+      const classes = [...(el.classList || [])].filter(x => /^[a-zA-Z0-9_-]{1,40}$/.test(x)).slice(0, 5).join('.');
+      return { tag: el.tagName?.toLowerCase?.() || '?', cls: classes,
+        connected: el.isConnected !== false, disabled: !!el.disabled,
+        onclick: typeof el.onclick === 'function',
+        onchange: typeof el.onchange === 'function',
+        oninput: typeof el.oninput === 'function',
+        ariaSelected: el.getAttribute?.('aria-selected') ?? null,
+        ariaPressed: el.getAttribute?.('aria-pressed') ?? null,
+        index: typeof el.selectedIndex === 'number' ? el.selectedIndex : null,
+        inputLength: typeof el.value === 'string' && el.tagName === 'INPUT' ? el.value.length : null };
+    } catch { return { tag: '?' }; }
+  }
+  // Compact fingerprint of meaningful UI state. Compare after actual input
+  // instead of pretending that every repaint is a separate window.
+  function uiState() {
+    try {
+      const door = doc.querySelector('#enhanced-inventory');
+      const tabs = door?.querySelectorAll?.('.packtab') ?? [];
+      const selected = [...tabs].findIndex(el => el.classList?.contains('active')
+        || el.classList?.contains('on') || el.getAttribute?.('aria-selected') === 'true');
+      const category = door?.querySelector?.('.storecat');
+      const search = door?.querySelector?.('.storesearch');
+      return { selectedTab: selected, tabCount: tabs.length,
+        category: typeof category?.selectedIndex === 'number' ? category.selectedIndex : null,
+        searchLength: typeof search?.value === 'string' ? search.value.length : null,
+        rootNodes: door?.childElementCount ?? null,
+        activeTag: doc.activeElement?.tagName?.toLowerCase?.() ?? null };
+    } catch { return { stateFailed: true }; }
+  }
+  function hitTest(e) {
+    try {
+      if (typeof e.clientX !== 'number' || typeof e.clientY !== 'number') return {};
+      const top = doc.elementFromPoint?.(e.clientX, e.clientY);
+      return { hitTag: top?.tagName?.toLowerCase?.() ?? null,
+        hitClass: [...(top?.classList || [])].slice(0, 4).join('.'),
+        targetIsTop: !top || top === e.target || top.contains?.(e.target) === true };
+    } catch { return { hitFailed: true }; }
+  }
+  function eventData(e, stage) {
+    const el = e.target;
+    return { eventId: eventIds.get(e) || null, stage, kind: e.type,
+      ...probeElement(el), ...hitTest(e), ...uiState(),
+      defaultPrevented: !!e.defaultPrevented,
+      cancelBubble: !!e.cancelBubble,
+      button: typeof e.button === 'number' ? e.button : null,
+      repeat: !!e.repeat, code: e.type === 'keydown' ? (e.code || '') : null };
+  }
+  function pertinent(e) {
+    return relevant(e.target) || snapshot().doors > 0;
+  }
+  // Monitor the whole event dispatch path. Capture cannot prove that a native
+  // handler ran; target callback presence and final bubble/after-state narrow that down.
+  for (const kind of ['pointerdown','click','keydown','change','input']) {
+    root.addEventListener?.(kind, e => {
+      if (!pertinent(e) && !(kind === 'keydown' && e.ctrlKey && e.altKey && e.shiftKey && e.code === 'F10')) return;
+      eventIds.set(e, ++lastEventId);
+      lastInputAt = clock(); lastInputKind = kind; lastTarget = probeElement(e.target);
+      if (typeof e.clientX === 'number') lastPointer = { x: e.clientX, y: e.clientY };
+      record('dispatch.capture', eventData(e, 'window-capture'));
+    }, true);
+    root.addEventListener?.(kind, e => {
+      if (!pertinent(e)) return;
+      record('dispatch.bubble', eventData(e, 'window-bubble'));
+    }, false);
+  }
+  for (const kind of ['change','input','focusin','focusout']) {
+    doc.addEventListener(kind, e => {
+      if (!pertinent(e)) return;
+      record('control.' + kind, eventData(e, 'document-capture'));
+      root.setTimeout(() => record('control.after', {
+        ...eventData(e, 'next-task'), ...uiState(), eventType: kind
+      }), 0);
+    }, true);
+  }
+  // Read-only renderer heartbeat. Its on-screen clock tells the player whether
+  // the *visual* surface is advancing; its journal proves only JS/rAF activity.
+  if (typeof root.requestAnimationFrame === 'function') {
+    const frame = time => {
+      try {
+        const now = clock();
+        if (lastFrameAt) maxFrameGap = Math.max(maxFrameGap, now - lastFrameAt);
+        lastFrameAt = now;
+        frameCount++;
+      } catch {}
+      root.requestAnimationFrame(frame);
+    };
+    root.requestAnimationFrame(frame);
+  }
+  if (typeof root.setInterval === 'function') root.setInterval(() => {
+    try {
+      const now = clock(), gapMs = now - lastBeatAt;
+      lastBeatAt = now; beatCount++;
+      if (!snapshot().doors) return;
+      renderIndicator();
+      record('renderer.heartbeat', {
+        beatCount, frameCount, maxFrameGapMs: maxFrameGap,
+        intervalGapMs: gapMs, lastInputAgeMs: lastInputAt ? now - lastInputAt : null,
+        lastInputKind, ...uiState(),
+        lastPointerX: lastPointer?.x ?? null, lastPointerY: lastPointer?.y ?? null,
+      });
+      maxFrameGap = 0;
+    } catch {}
+  }, 2000);
+  if (typeof root.PerformanceObserver === 'function') {
+    try {
+      let lastSlowAt = 0;
+      const observer = new root.PerformanceObserver(list => {
+        for (const item of list.getEntries()) {
+          const now = clock();
+          if (item.duration >= 250 && now - lastSlowAt >= 1500 && snapshot().doors) {
+            lastSlowAt = now;
+            record('renderer.longtask', { durationMs: Math.round(item.duration) });
+          }
+        }
+      });
+      observer.observe({ entryTypes: ['longtask'] });
+    } catch { /* unsupported browser; heartbeat still works */ }
+  }
   function control(el) {
     const target = el?.closest?.('button,.packtab,.itemrow,[role="button"]') || el;
     const header = target?.closest?.('.pack-id');
@@ -153,7 +287,11 @@
     const classes = [...(target?.classList || [])].filter(x => /^[a-zA-Z0-9_-]{1,40}$/.test(x)).slice(0, 6).join('.');
     return { tag: target?.tagName?.toLowerCase?.() || '?',
       classes, headerButton: buttonIndex, headerButtons: buttons.length,
-      disabled: !!target?.disabled, pressed: target?.getAttribute?.('aria-pressed') || null };
+      disabled: !!target?.disabled, pressed: target?.getAttribute?.('aria-pressed') || null,
+      callback: typeof target?.onclick === 'function' ? 'onclick' :
+        typeof target?.onchange === 'function' ? 'onchange' :
+        typeof target?.oninput === 'function' ? 'oninput' : 'none',
+      targetConnected: target?.isConnected !== false, ...uiState() };
   }
   function relevant(el) {
     try { return !!el?.closest?.('.pack-shell,#enhanced-inventory,.dfo-pack-dialog'); }
@@ -167,15 +305,21 @@
     const inside = relevant(e.target);
     if (!inside && !snapshot().doors) return;
     const data = { ...control(e.target), inside };
-    record('ui.click', { ...data, button: e.button });
+    record('ui.click', { ...data, ...eventData(e, 'document-capture') });
     // A click may schedule a promise-driven close; look both after the immediate
     // native handler and after a later task. No observer over the whole HUD.
-    root.setTimeout(() => record('ui.after', { ...data, delayMs: 0 }), 0);
-    root.setTimeout(() => record('ui.after', { ...data, delayMs: 400 }), 400);
+    root.setTimeout(() => record('ui.after', { ...data, delayMs: 0, ...uiState(),
+      clickedConnected: e.target?.isConnected !== false }), 0);
+    root.setTimeout(() => record('ui.after', { ...data, delayMs: 400, ...uiState(),
+      clickedConnected: e.target?.isConnected !== false }), 400);
   }, true);
   doc.addEventListener('keydown', e => {
     if (e.ctrlKey && e.altKey && e.shiftKey && e.code === 'F10') {
-      record('trace.manual', { key: 'Ctrl+Alt+Shift+F10' });
+      record('trace.manual', { key: 'Ctrl+Alt+Shift+F10',
+        ...uiState(), ...snapshot(), ...lastTarget,
+        frameCount, maxFrameGapMs: maxFrameGap, beatCount,
+        lastInputKind, lastInputAgeMs: lastInputAt ? clock() - lastInputAt : null,
+        lastPointerX: lastPointer?.x ?? null, lastPointerY: lastPointer?.y ?? null });
       void flush(); // diagnostic shortcut, never intercept or cancel the native key
     } else if ((relevant(e.target) || snapshot().doors) && (e.key === 'Escape' || e.code === 'KeyI')) {
       record('ui.keydown', { code: e.code || '', key: e.key || '' });
@@ -196,6 +340,6 @@
     // For local console troubleshooting only; nothing beyond the bounded tail is held in memory.
     tail: () => tail.slice(),
   });
-  record('trace.started', { diagnostic: true, build: '1.29.8' });
+  record('trace.started', { diagnostic: true, build: '1.29.9', probes: 'input-failure-and-renderer-liveness' });
   void flush(); // a startup acknowledgement must not depend on the player clicking inventory
 })(globalThis);

@@ -17,6 +17,7 @@
   try { state = Rules.cleanState(JSON.parse(root.localStorage?.getItem(STATE_KEY) || 'null')); } catch { /* defaults */ }
   const mirror = () => { try { root.localStorage?.setItem(STATE_KEY, JSON.stringify(state)); } catch { /* the disk cache stays authoritative */ } };
   const listeners = new Set();
+  const scaledShells = new WeakSet();  // idempotent per native DOM shell; each full render makes a new one
   let shown = null;   // the open pack's header and its repaint (render's own), for a cache answer that changes the look
   const changed = (why) => {
     epoch++; showView();
@@ -197,8 +198,11 @@
     // after the native render finishes. Repaints get fresh DOM and fresh geometry.
     Promise.resolve().then(() => {
       if (root.matchMedia && !root.matchMedia('(min-width: 1000px)').matches) return;
-      const shell = doc.querySelector('.pack-shell');
-      const win = shell?.querySelector(':scope > .pack-win');
+      // The header belongs to one particular shell; a previous sibling or a newer
+      // session must never receive this header's geometry during a delayed callback.
+      const shell = header.closest('.pack-shell');
+      if (!shell?.isConnected || scaledShells.has(shell)) return;
+      const win = shell.querySelector(':scope > .pack-win');
       if (!win || !win.isConnected) return;
       const grid = win.querySelector('.pack');
       const main = grid?.querySelector('.pack-main');
@@ -280,6 +284,7 @@
         // Enlarging height goes to the ordinary scrolling item viewport.
         dock.style.setProperty('width', baseDock.width + 'px', 'important');
       }
+      scaledShells.add(shell);
     });
   }
   function showView() {

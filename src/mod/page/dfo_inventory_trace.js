@@ -84,7 +84,7 @@
   function control(el) {
     const target = el?.closest?.('button,.packtab,.itemrow,[role="button"]') || el;
     const header = target?.closest?.('.pack-id');
-    const buttons = header ? [...header.querySelectorAll('button')] : [];
+    const buttons = header?.querySelectorAll ? [...header.querySelectorAll('button')] : [];
     const button = target?.closest?.('button');
     const buttonIndex = button && header ? buttons.indexOf(button) : -1;
     const classes = [...(target?.classList || [])].filter(x => /^[a-zA-Z0-9_-]{1,40}$/.test(x)).slice(0, 6).join('.');

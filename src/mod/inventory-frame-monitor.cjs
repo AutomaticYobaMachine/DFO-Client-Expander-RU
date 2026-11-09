@@ -3,6 +3,32 @@
 // of the final Windows desktop scanout. Neither this code nor its callback
 // requests a repaint, opens DevTools, or changes the inventory implementation.
 const crypto = require('node:crypto');
+function isFrameProbeEvent(e) {
+  if (!e || typeof e !== 'object') return false;
+  return e.type === 'overlay.claim' || e.type === 'trace.manual' ||
+    e.type === 'filter.dom.result' ||
+    (e.type === 'renderer.heartbeat' &&
+      (e.data?.doorsPresent === true ||
+        (typeof e.data?.msSinceDoor === 'number' &&
+         e.data.msSinceDoor >= 0 && e.data.msSinceDoor <= 60000))) ||
+    (e.type === 'control.change' && Number(e.data?.doors) > 0);
+}
+// Fingerprints from 8 regions. Exclude lower-right animated trace indicator.
+// Hashes between Electron and Windows GDI must NOT be compared by equality.
+function fingerprints(bitmap,w,h) {
+  if (!Buffer.isBuffer(bitmap) || !Number.isInteger(w) || !Number.isInteger(h) ||
+      w < 3 || h < 3 || bitmap.length !== w*h*4) return null;
+  const out=[];
+  for(let y=0;y<3;y++) for(let x=0;x<3;x++){
+    if (x===2 && y===2) continue;
+    const hasher=crypto.createHash('sha256');
+    const from=Math.floor(w*x/3),to=Math.floor(w*(x+1)/3);
+    for(let row=Math.floor(h*y/3);row<Math.floor(h*(y+1)/3);row++)
+      hasher.update(bitmap.subarray(4*(row*w+from),4*(row*w+to)));
+    out.push(hasher.digest('hex').slice(0,16));
+  }
+  return out;
+}
 function createPresentationMonitor(trace, options = {}) {
   const now = options.now || Date.now;
   const makeInterval = options.setInterval || setInterval;
@@ -40,6 +66,11 @@ function createPresentationMonitor(trace, options = {}) {
     state.sampleCount = 0;
     state.digest = '';
     state.bitmapBytes = 0;
+    state.regions = '';
+    state.regionChanged = -1;
+    state.centerChanged = false;
+    state.centerChangedAt = 0;
+    state.sampleError = false;
     try {
       // onlyDirty=true: receive the actual repainted area instead of copying
       // an entire full-resolution frame on every presentation callback.
@@ -63,7 +94,22 @@ function createPresentationMonitor(trace, options = {}) {
             if (Buffer.isBuffer(pixels) && pixels.length) {
               state.sampleCount++;
               state.bitmapBytes = pixels.length;
-              state.digest = crypto.createHash('sha256').update(pixels).digest('hex').slice(0, 16);
+              const dims = image.getSize?.() || {};
+              const regions = fingerprints(pixels, dims.width, dims.height);
+              if (regions) {
+                const old = state.regions.split(',');
+                state.regionChanged = state.regions ?
+                  regions.filter((v,i) => v !== old[i]).length : -1;
+                state.centerChanged = !!state.regions && regions[4] !== old[4];
+                if (!state.regions || state.centerChanged) state.centerChangedAt = stamp;
+                state.regions = regions.join(',');
+                state.digest = crypto.createHash('sha256')
+                  .update(state.regions).digest('hex').slice(0,16);
+              } else if (!state.sampleError) {
+                state.sampleError = true;
+                log('frame.present.sample.error',{webContentsId:state.id,
+                  message:'bitmap dimensions unavailable or inconsistent'});
+              }
             }
           }
         } catch (err) {
@@ -105,6 +151,10 @@ function createPresentationMonitor(trace, options = {}) {
         sampledFrames: state.sampleCount,
         lastSampleHash: state.digest,
         lastSampleBytes: state.bitmapBytes,
+        sampledRegions: state.regions,
+        changedRegions: state.regionChanged,
+        centerChanged: state.centerChanged,
+        centerAgeMs: state.centerChangedAt ? stamp-state.centerChangedAt : -1,
         ...visibility(state.contents),
       });
       state.intervalFrames = 0;
@@ -115,6 +165,7 @@ function createPresentationMonitor(trace, options = {}) {
     if (stamp >= until && interval) { cancelInterval(interval); interval = null; }
   }
   function activate() {
+    if (until <= now()) return;
     for (const state of watched.values()) start(state);
     if (until > now() && !interval) {
       interval = makeInterval(pulse, 2000);
@@ -135,20 +186,7 @@ function createPresentationMonitor(trace, options = {}) {
   }
   function feed(events) {
     if (!Array.isArray(events)) return;
-    let eventOfInterest = false;
-    for (const event of events) {
-      if (!event || typeof event !== 'object') continue;
-      if (event.type === 'overlay.claim' || event.type === 'trace.manual' ||
-          event.type === 'filter.dom.result' ||
-          (event.type === 'renderer.heartbeat' &&
-           (event.data?.doorsPresent === true ||
-            (typeof event.data?.msSinceDoor === 'number' && event.data.msSinceDoor >= 0 &&
-             event.data.msSinceDoor <= 60000))) ||
-          (event.type === 'control.change' && Number(event.data?.doors) > 0)) {
-        eventOfInterest = true;
-      }
-    }
-    if (!eventOfInterest) return;
+    if (!events.some(isFrameProbeEvent)) return;
     const wasInactive = until <= now();
     until = now() + 65000; // preserve evidence well after the visible freeze
     if (wasInactive) log('frame.present.armed', { watchMs: 65000 });
@@ -156,4 +194,4 @@ function createPresentationMonitor(trace, options = {}) {
   }
   return { track, feed, pulse };
 }
-module.exports = { createPresentationMonitor };
+module.exports = { createPresentationMonitor, isFrameProbeEvent, fingerprints };

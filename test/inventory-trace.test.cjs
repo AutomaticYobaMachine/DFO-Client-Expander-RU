@@ -359,7 +359,7 @@ test('Electron frame presentation probe identifies no new frames despite a live 
   monitor.feed([{ type: 'renderer.heartbeat', data: { doorsPresent: true } }]);
   assert.equal(typeof captured, 'function', 'probe must subscribe to frame presentation');
   assert.ok(recorded.some(x => x.type === 'frame.present.start'));
-  const image = { toBitmap: () => Buffer.from('pixel-data') };
+  const image = { toBitmap: () => Buffer.alloc(4 * 4 * 6), getSize: () => ({ width: 4, height: 6 }) };
   captured(image, { x: 0, y: 0, width: 4, height: 6 });
   time += 2000; timer();
   let summaries = recorded.filter(x => x.type === 'frame.present.summary');
@@ -394,4 +394,79 @@ test('frame presentation probe never subscribes to the launcher and fails open i
   monitor.feed([{ type: 'overlay.claim', data: {} }]);
   assert.ok(recorded.some(x => x.type === 'frame.present.unavailable'));
   assert.ok(!recorded.some(x => x.type === 'frame.present.start'));
+});
+
+test('Electron frame sampler does not begin before the inventory watch is armed',()=>{
+  const {createPresentationMonitor,fingerprints}=require('../src/mod/inventory-frame-monitor.cjs');
+  const {EventEmitter}=require('node:events');
+  const contents=new EventEmitter();
+  let subscribed=0;
+  contents.id=16;contents.getURL=()=> 'dagger://game/play/index.html';
+  contents.beginFrameSubscription=()=>{subscribed++};
+  const monitor=createPresentationMonitor({serverEvent(){}},{
+    now:()=>1000,setInterval:()=>({unref(){}})});
+  monitor.track(contents);
+  contents.emit('did-finish-load');
+  assert.equal(subscribed,0,'no unarmed subscription before the inventory');
+  monitor.feed([{type:'filter.dom.result'}]);
+  assert.equal(subscribed,1);
+  const bitmap=Buffer.alloc(9*9*4);
+  const a=fingerprints(bitmap,9,9);
+  bitmap[4*(8*9+8)]=42;
+  assert.deepEqual(fingerprints(bitmap,9,9),a,'exclude the moving diagnostics clock');
+  bitmap[4*(4*9+4)]=10;
+  assert.notEqual(fingerprints(bitmap,9,9)[4],a[4],'detect center of game window');
+});
+
+test('independent Windows desktop probe logs real screen sample and stops after watch',()=>{
+  const {EventEmitter}=require('node:events');
+  const {createDesktopMonitor}=require('../src/mod/inventory-desktop-monitor.cjs');
+  const recorded=[];
+  const trace={dir:'C:/test',serverEvent(type,data){recorded.push({type,data})}};
+  const fakeFs={readFileSync:()=>Buffer.from('native EXE'),mkdirSync(){},writeFileSync(){},
+    renameSync(){},unlinkSync(){}};
+  const processChild=new EventEmitter();
+  processChild.stdout=new EventEmitter();processChild.stderr=new EventEmitter();
+  processChild.kill=()=>processChild.emit('close',0,'SIGTERM');
+  const contents=new EventEmitter();contents.id=101;
+  contents.getURL=()=> 'dagger://game/play/index.html';
+  contents.getOwnerBrowserWindow=()=>({getNativeWindowHandle:()=>Buffer.from([7,0,0,0,0,0,0,0])});
+  let time=1000,spawned=0;
+  const monitor=createDesktopMonitor(trace,{
+    platform:'win32',fs:fakeFs,now:()=>time,
+    bundlePath:'mock-bundle.exe',destination:'mock-extracted.exe',
+    spawn(exe,args){spawned++;assert.equal(args[0],'7');return processChild;},
+    setInterval:()=>({unref(){}}),clearInterval(){}
+  });
+  monitor.track(contents);
+  assert.equal(spawned,0,'only when an inventory event activates');
+  monitor.feed([{type:'filter.dom.result'}]);
+  assert.equal(spawned,1);
+  assert.ok(recorded.some(x=>x.type==='desktop.start'));
+  const msg={type:'desktop.sample',at:1500,valid:true,reason:'',foreground:true,
+    visible:true,minimized:false,width:1920,height:991,colorBins:160,
+    regions:'11,22,33,44,55,66,77,88',changedRegions:2,centerChanged:true,
+    centerAgeMs:0,captureMs:9};
+  processChild.stdout.emit('data',Buffer.from(JSON.stringify(msg)+'\n'));
+  const sample=recorded.find(x=>x.type==='desktop.sample');
+  assert.ok(sample,'actual GDI sample reaches NDJSON writer');
+  assert.equal(sample.data.centerChanged,true);
+  assert.equal(sample.data.foreground,true);
+  assert.equal(sample.data.windowWidth,1920);
+  time=100000;monitor.pulse();
+  assert.ok(recorded.some(x=>x.type==='desktop.stop'));
+  assert.ok(recorded.some(x=>x.type==='desktop.process.exit'));
+});
+
+test('screen probe will not attempt to capture launcher WebContents',()=>{
+  const {EventEmitter}=require('node:events');
+  const {createDesktopMonitor}=require('../src/mod/inventory-desktop-monitor.cjs');
+  const c=new EventEmitter();c.getURL=()=> 'dagger://launcher/main.html';
+  const trace={dir:'C:/test',serverEvent(){}};
+  let attempts=0;
+  const m=createDesktopMonitor(trace,{platform:'win32',now:()=>1000,
+    spawn(){attempts++;throw Error('launcher should not start')},
+    setInterval:()=>({unref(){}}),clearInterval(){}});
+  m.track(c);m.feed([{type:'filter.dom.result'}]);
+  assert.equal(attempts,0);
 });

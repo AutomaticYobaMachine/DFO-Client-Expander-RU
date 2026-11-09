@@ -15,6 +15,7 @@ const { transformAsset, injectPage, expectedHooks } = require('./transforms.cjs'
 const { createLootStore } = require('./loot-store.cjs');
 const { createInventoryTraceStore } = require('./inventory-trace-store.cjs');
 const { createPresentationMonitor } = require('./inventory-frame-monitor.cjs');
+const { createDesktopMonitor } = require('./inventory-desktop-monitor.cjs');
 const {replacement,stripFaces}=require('./font-assets.cjs');
 const itemText = require('./item-text.cjs');
 
@@ -57,6 +58,7 @@ function wrap(handleDagger, { app = null } = {}) {
   const lootStore = createLootStore(userData);
   const inventoryTrace = createInventoryTraceStore(userData);
   const frameMonitor = createPresentationMonitor(inventoryTrace);
+  const desktopMonitor = createDesktopMonitor(inventoryTrace);
   let cfg = { ...DEFAULTS };
   try { if (cfgFile && fs.existsSync(cfgFile)) cfg = { ...DEFAULTS, ...JSON.parse(fs.readFileSync(cfgFile, 'utf8')) }; } catch (e) { cfg = { ...DEFAULTS }; }
   cfg.marksOptions = { ...DEFAULTS.marksOptions, ...(cfg.marksOptions ?? {}) };
@@ -105,6 +107,7 @@ function wrap(handleDagger, { app = null } = {}) {
         if (!contents || typeof contents.on !== 'function' || watchedContents.has(contents)) return;
         watchedContents.add(contents);
         frameMonitor.track(contents);
+        desktopMonitor.track(contents);
         let webContentsId = -1;
         try { if (Number.isInteger(contents.id)) webContentsId = contents.id; } catch {}
         contents.on('unresponsive', () => {
@@ -274,7 +277,7 @@ function wrap(handleDagger, { app = null } = {}) {
       const result = inventoryTrace.write('[' + input + ']');
       if (result === 204) {
         lastRendererBatch = Date.now();
-        try { frameMonitor.feed([JSON.parse(input)]); } catch {}
+        try { const events = [JSON.parse(input)]; frameMonitor.feed(events); desktopMonitor.feed(events); } catch {}
       }
       const gif = Buffer.from('R0lGODlhAQABAAD/ACwAAAAAAQABAAACAUwAOw==', 'base64');
       return new Response(gif, { status: result === 204 ? 200 : result,
@@ -287,7 +290,7 @@ function wrap(handleDagger, { app = null } = {}) {
       const written = inventoryTrace.write(body);
       if (written === 204) {
         lastRendererBatch = Date.now();
-        try { frameMonitor.feed(JSON.parse(body)); } catch {}
+        try { const events = JSON.parse(body); frameMonitor.feed(events); desktopMonitor.feed(events); } catch {}
       }
       return new Response(null, { status: written });
     }

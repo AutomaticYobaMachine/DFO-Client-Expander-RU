@@ -140,7 +140,7 @@ test('renderer startup survives blocked POST and reaches real Electron GET fallb
 test('freeze probe captures DOM input path, handler presence, owner status and frame heartbeat without altering events', async () => {
   const docListeners = new Map(), winListeners = new Map(), batches = [], timers = [];
   const indicators = [];
-  let frame = null, heartbeat = null;
+  let frame = null, heartbeat = null, showDoor = true;
   const owner = { isConnected: true, __dfoGeneration$: 3, __dfoRetired$: false,
     querySelectorAll: () => [], querySelector() { return null; }, childElementCount: 1 };
   const target = { tagName: 'SELECT', classList: ['storecat'], disabled: false, selectedIndex: 3,
@@ -148,8 +148,8 @@ test('freeze probe captures DOM input path, handler presence, owner status and f
     closest() { return owner; } };
   const document = {
     readyState: 'complete', visibilityState: 'visible', activeElement: target,
-    querySelectorAll(sel) { return sel === '#enhanced-inventory' ? [owner] : []; },
-    querySelector(sel) { return sel === '#enhanced-inventory' ? owner : null; },
+    querySelectorAll(sel) { return sel === '#enhanced-inventory' && showDoor ? [owner] : []; },
+    querySelector(sel) { return sel === '#enhanced-inventory' && showDoor ? owner : null; },
     elementFromPoint() { return target; }, hasFocus() { return true; },
     createElement() { return { style: {}, textContent: '', title: '' }; },
     body: { append(el) { indicators.push(el); } },
@@ -184,6 +184,12 @@ test('freeze probe captures DOM input path, handler presence, owner status and f
   assert.equal(beat.focus, true);
   assert.equal(beat.frameCount, 1);
   assert.equal(beat.category, null); // mock host has no storecat; no invented state
+  assert.match(indicators[0].textContent, /LIVE.*F1/);
+  showDoor = false; // the app has removed its DOM, but the pixels may be stuck on-screen
+  heartbeat();
+  await api.flush();
+  assert.ok(batches.some(x => x.type === 'renderer.heartbeat' && x.data.doorsPresent === false),
+    'continue tracing after teardown to distinguish a compositor ghost from a live DOM window');
   assert.match(indicators[0].textContent, /LIVE.*F1/);
   assert.equal(ev.defaultPrevented, false);
   assert.equal(ev.cancelBubble, false);

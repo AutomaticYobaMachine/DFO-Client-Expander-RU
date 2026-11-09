@@ -10,6 +10,7 @@
   if (!doc || !Rules || cfg?.enabled === false || root.__dfoPack) return;
   const T = (key, params) => (root.__dfoUi ? root.__dfoUi.t(key, params) : key);
   const STATE_KEY = 'dfoMod.pack';
+  const trace = (type, data, host) => { try { root.__dfoInventoryTrace?.record?.(type, data, host); } catch { /* optional diagnostic */ } };
 
   // ── THE SETTINGS: the mod's cache (`pack` in dfo-mod-cache.json, /dfo-mod/pack-settings), a local mirror for the
   // first paint, a revision against a second window's write. A failed write goes back to what the disk holds.
@@ -21,7 +22,7 @@
   let geometryListenerBound = false;
   let shown = null;   // the open pack's header and its repaint (render's own), for a cache answer that changes the look
   const changed = (why) => {
-    epoch++; showView();
+    epoch++; trace('pack.settings.changed', { why, epoch, shownConnected: !!shown?.header?.isConnected }); showView();
     for (const fn of listeners) { try { fn(why); } catch { /* a listener's fault is its own */ } }
     if ((why === 'read' || why === 'rollback') && shown?.header?.isConnected) { try { shown.repaint(); } catch { /* the pack repaints on its next act */ } }
   };
@@ -176,16 +177,17 @@
   }
   function scheduleGeometry(header) {
     Promise.resolve().then(() => applyGeometry(header))
-      .catch(e => console.warn('[dfo-mod inventory] geometry update failed', e));
+      .catch(e => { trace('pack.geometry.error', { message: String(e?.message || e), stack: String(e?.stack || '').slice(0, 1600) }); console.warn('[dfo-mod inventory] geometry update failed', e); });
   }
   function applyGeometry(header) {
       // The header belongs to one particular shell; a previous sibling or a newer
       // session must never receive this header's geometry during a delayed callback.
       const shell = header.closest('.pack-shell');
-      if (!shell?.isConnected) return;
+      if (!shell?.isConnected) { trace('pack.geometry.detached', {}); return; }
       const signature = [root.innerWidth, root.innerHeight, root.devicePixelRatio, state.view].join('|');
       const previous = scaledShells.get(shell);
       if (previous?.signature === signature) return;
+      trace('pack.geometry.begin', { signature, paired: shell.classList.contains('paired'), previous: !!previous }, shell);
       if (root.matchMedia && !root.matchMedia('(min-width: 1000px)').matches) {
         if (previous) {
           resetGeometry(shell);
@@ -284,20 +286,22 @@
         dock.style.setProperty('width', baseDock.width + 'px', 'important');
       }
       scaledShells.set(shell, { signature, baseFrame, baseMain, baseDock });
+      trace('pack.geometry.end', { signature, paired: shell.classList.contains('paired') }, shell);
       // Native virtualRows measured the pre-zoom shell. Invalidate its cached
       // columns and heights once, AFTER the new track sizes have been applied.
       root.__dfoInventoryRemeasure$?.(shell);
   }
   function head(header, repaint) {
+    trace('pack.head', { paired: !!header.closest('.pack-shell')?.classList.contains('paired') });
     styles();
     showView();
     const view = el('span', 'dfo-pack-view');
     view.setAttribute('role', 'group');
     view.setAttribute('aria-label', T('pack.view.label'));
     for (const [v, key] of [['rows', 'pack.view.rows'], ['grid', 'pack.view.grid']]) {
-      view.append(toggle(T(key), state.view === v, () => { if (state.view === v) return; save({ view: v }); repaint(); }, T(key + '.how')));
+      view.append(toggle(T(key), state.view === v, () => { trace('pack.view.click', { from: state.view, to: v }); if (state.view === v) return; save({ view: v }); repaint(); }, T(key + '.how')));
     }
-    const auto = toggle(T('pack.sort.auto'), state.autoSort, () => { const on = !state.autoSort; save({ autoSort: on }); if (on) pending = true; repaint(); }, T('pack.sort.how'));
+    const auto = toggle(T('pack.sort.auto'), state.autoSort, () => { const on = !state.autoSort; trace('pack.sort.click', { on }); save({ autoSort: on }); if (on) pending = true; repaint(); }, T('pack.sort.how'));
     const junk = toggle(T('pack.junk.button'), false, () => junkDialog(repaint), T('pack.junk.how'));
     junk.removeAttribute('aria-pressed');
     junk.setAttribute('aria-haspopup', 'dialog');

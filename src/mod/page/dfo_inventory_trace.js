@@ -9,6 +9,31 @@
   const MAX_QUEUE = 256, MAX_DATA_KEYS = 32;
   let seq = 0, queue = [], tail = [], scheduled = false, posting = false;
   let missingBatches = 0;
+  // Diagnostic build only. An on-screen acknowledgement prevents a silent "tracer works" claim.
+  let indicator = null, indicatorState = 'loading', indicatorDetail = '';
+  const beacons = new Set();
+  function renderIndicator() {
+    try {
+      if (!indicator && doc.body && typeof doc.createElement === 'function') {
+        indicator = doc.createElement('div');
+        indicator.id = 'dfo-inventory-trace-indicator';
+        indicator.style.cssText = 'position:fixed;right:10px;bottom:10px;z-index:2147483000;pointer-events:none;padding:5px 8px;background:#121d21ee;border:1px solid #8ba6ae;color:#f8e7c2;font:12px/1.3 monospace;opacity:.94;white-space:nowrap;';
+        doc.body.append(indicator);
+      }
+      if (indicator) {
+        indicator.textContent = 'DFO TRACE 1.29.8 | ' + indicatorState;
+        indicator.title = indicatorDetail;
+      }
+    } catch { /* status must not affect the game */ }
+  }
+  function status(state, detail) {
+    indicatorState = state;
+    indicatorDetail = String(detail || '').slice(0, 300);
+    renderIndicator();
+  }
+  if (doc.readyState === 'loading') doc.addEventListener('DOMContentLoaded', renderIndicator, { once: true });
+  else renderIndicator();
+
   function snapshot(host) {
     try {
       const shells = doc.querySelectorAll('.pack-shell');
@@ -58,10 +83,43 @@
     scheduled = true;
     root.setTimeout(() => { scheduled = false; void flush(); }, 180);
   }
+  async function backupBatch(batch) {
+    // Standard protocol fetch POST may be unavailable in some Electron deployments.
+    // GET (and finally image loading) uses the same established custom-scheme handler.
+    let written = 0;
+    for (const event of batch) {
+      const reduced = { session: event.session, seq: event.seq, at: event.at, type: event.type,
+        data: { ...event.data } };
+      if (typeof reduced.data.stack === 'string') reduced.data.stack = reduced.data.stack.slice(0, 600);
+      if (typeof reduced.data.message === 'string') reduced.data.message = reduced.data.message.slice(0, 300);
+      const encoded = JSON.stringify(reduced);
+      if (encoded.length > 2000) {
+        reduced.data = { fallback: true, originalType: event.type };
+      }
+      const url = endpoint + '-fallback?event=' + encodeURIComponent(JSON.stringify(reduced));
+      try {
+        const answer = await root.fetch(url, { cache: 'no-store' });
+        if (!answer.ok) throw new Error('HTTP ' + answer.status);
+        written++;
+      } catch {
+        if (typeof root.Image === 'function') {
+          try {
+            const img = new root.Image();
+            beacons.add(img);
+            img.onload = () => { beacons.delete(img); status('GET image OK'); };
+            img.onerror = () => { beacons.delete(img); status('NO TRANSPORT', url.split('?')[0]); };
+            img.src = url;
+            root.setTimeout(() => beacons.delete(img), 5000);
+          } catch { /* endpoint inaccessible */ }
+        }
+      }
+    }
+    return written;
+  }
   async function flush() {
     if (posting || !queue.length) return;
     posting = true;
-    let batch = queue.splice(0, Math.min(queue.length, 12));
+    const batch = queue.splice(0, Math.min(queue.length, 12));
     if (missingBatches) {
       batch.unshift({ session, seq: ++seq, at: Date.now(), type: 'trace.dropped',
         data: { count: missingBatches } });
@@ -71,11 +129,16 @@
       const response = await root.fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(batch), cache: 'no-store' });
       if (!response.ok) throw new Error('trace HTTP ' + response.status);
+      status('POST OK', 'Events saved to local diagnostics');
     } catch (e) {
-      // Never retry aggressively while the renderer is already in distress.
-      // The newest bounded in-memory tail remains available for a manual snapshot.
-      missingBatches += batch.length;
-      try { root.console?.warn?.('[dfo inventory trace] persistence unavailable:', String(e)); } catch {}
+      status('POST FAILED; trying GET', String(e));
+      const viaGet = await backupBatch(batch);
+      if (viaGet === batch.length) status('GET OK', 'Events saved to local diagnostics');
+      else if (viaGet === 0 && typeof root.Image !== 'function') status('NO TRANSPORT', String(e));
+      if (viaGet < batch.length) {
+        missingBatches += batch.length - viaGet;
+        try { root.console?.warn?.('[dfo inventory trace] delivery failed', String(e)); } catch {}
+      }
     } finally {
       posting = false;
       if (queue.length) schedule();
@@ -133,5 +196,6 @@
     // For local console troubleshooting only; nothing beyond the bounded tail is held in memory.
     tail: () => tail.slice(),
   });
-  record('trace.started', { diagnostic: true });
+  record('trace.started', { diagnostic: true, build: '1.29.8' });
+  void flush(); // a startup acknowledgement must not depend on the player clicking inventory
 })(globalThis);

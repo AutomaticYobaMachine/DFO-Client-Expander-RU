@@ -111,17 +111,24 @@ function sessionHandle(out) {
 // overlay B can take ownership. Retire A at dispose() ENTRY, before the save
 // promise settles. The late lazy-loader must never mount A over B.
 function doorOwnership(out) {
-  const alive = once(out,
-    /alive:\(\)=>!([\w$]+),(?:host:([\w$]+)|([\w$]+)),onDismiss:/,
-    'inventory overlay alive owner');
-  const fired = alive[1], host = alive[2] || alive[3];
+  // The bundle contains multiple overlay factories with identical alive shapes.
+  // Only the overlay that created the uniquely named enhanced inventory host
+  // may be modified. Fail closed if its layout is no longer recognizable.
+  const markers = [...out.matchAll(/enhanced-inventory/g)];
+  if(markers.length!==1)throw new Error('inventory host marker: '+markers.length+' places');
+  const mark = markers[0].index;
+  const candidates = [...out.matchAll(/alive:\(\)=>!([\w$]+),(?:host:([\w$]+)|([\w$]+)),onDismiss:/g)]
+    .filter(m=>m.index>mark);
+  if(!candidates.length||candidates[0].index-mark>7000)
+    throw new Error('inventory overlay alive owner not adjacent to host');
+  const alive=candidates[0],fired=alive[1],host=alive[2]||alive[3];
   const owner = new RegExp('get done\\(\\)\\{return '+esc(fired)+'\\}[\\s\\S]{0,700}?dispose\\(\\)\\{([\\w$]+)\\(\\)\\}', 'g');
-  const handles = [...out.matchAll(owner)];
-  if (handles.length !== 1) throw new Error('inventory overlay dispose ownership: '+handles.length+' places');
-  const original = handles[0][0], close = handles[0][1];
-  let t = put(out, alive[0], alive[0].replace('alive:()=>!'+fired,
+  const handles=[...out.slice(mark,alive.index).matchAll(owner)];
+  if(handles.length!==1)throw new Error('inventory overlay dispose ownership: '+handles.length+' places');
+  const original=handles[0][0],close=handles[0][1];
+  let t=put(out,alive[0],alive[0].replace('alive:()=>!'+fired,
     'alive:()=>!'+fired+'&&'+host+'.isConnected&&!'+host+'.__dfoRetired$'));
-  t = put(t, original, original.replace('dispose(){'+close+'()}',
+  t=put(t,original,original.replace('dispose(){'+close+'()}',
     'dispose(){'+host+'.__dfoRetired$=true;'+close+'()}'));
   return t;
 }

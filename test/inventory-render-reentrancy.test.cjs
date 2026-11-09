@@ -267,7 +267,7 @@ test('view handle retains its dropped items and stale unmount is idempotent', ()
 
 test('disposed overlay rejects late A load during pending save even before fired becomes true', () => {
   const raw = [
-    'let fired=false,host={isConnected:true},onSavePending=true,live=null;',
+    'let fired=false,host={isConnected:true},onSavePending=true,live=null;host.id="enhanced-inventory";',
     'function close(){if(onSavePending)return;fired=true}',
     'const overlay={get done(){return fired},input(){},click(){},dispose(){close()}};',
     'function mountEnhancedChunk(o){live=o}',

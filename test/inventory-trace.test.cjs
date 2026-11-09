@@ -49,6 +49,24 @@ test('trace script is injected before native modules only when inventory is on',
   assert.ok(!injectPage(html, './', { inventory: false, nearbyLoot: false, pageCfg: {} }).includes('dfo_inventory_trace'));
 });
 
+test('Electron dagger handler writes the trace locally and does not fall through to the game', async () => {
+  const { wrap } = require('../src/mod/hook.cjs');
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'dfo-inventory-trace-route-'));
+  try {
+    let forwarded = 0;
+    const handler = wrap(async () => { forwarded++; return new Response('native'); },
+      { app: { getPath: () => dir } });
+    const url = 'dagger://game/dfo-mod/inventory-trace';
+    const ok = await handler(new Request(url, { method: 'POST', body: JSON.stringify([event('overlay.dismiss')]) }));
+    assert.equal(ok.status, 204);
+    assert.equal(forwarded, 0);
+    assert.equal(JSON.parse(fs.readFileSync(path.join(dir, 'dfo-mod-inventory-trace.ndjson'), 'utf8').trim()).type, 'overlay.dismiss');
+    assert.equal((await handler(new Request(url))).status, 405);
+    assert.equal((await handler(new Request(url, { method: 'POST', body: '{bad' }))).status, 400);
+    assert.equal(forwarded, 0);
+  } finally { fs.rmSync(dir, { recursive: true, force: true }); }
+});
+
 test('passive client tracer observes and flushes events without intercepting clicks', async () => {
   const handlers = new Map(), timers = [], posts = [];
   const document = {

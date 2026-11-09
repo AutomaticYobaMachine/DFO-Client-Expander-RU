@@ -92,6 +92,55 @@ function wrap(handleDagger, { app = null } = {}) {
     monitor.unref?.();
   }
 
+
+  // Independent Electron-side process signals: JS/rAF may continue while pixels stop
+  // updating, so renderer event capture alone cannot establish GPU/process health.
+  // Listeners are observational and never invoke game rendering or DOM operations.
+  if (cfg.enabled && cfg.inventory !== false) {
+    try {
+      const watchedContents = new WeakSet();
+      const bindContents = (contents) => {
+        if (!contents || typeof contents.on !== 'function' || watchedContents.has(contents)) return;
+        watchedContents.add(contents);
+        let webContentsId = -1;
+        try { if (Number.isInteger(contents.id)) webContentsId = contents.id; } catch {}
+        contents.on('unresponsive', () => {
+          inventoryTrace.serverEvent('browser.unresponsive', { webContentsId });
+        });
+        contents.on('responsive', () => {
+          inventoryTrace.serverEvent('browser.responsive', { webContentsId });
+        });
+        contents.on('render-process-gone', (_event, details) => {
+          inventoryTrace.serverEvent('browser.renderer.gone', {
+            webContentsId, reason: String(details?.reason ?? 'unknown').slice(0, 80),
+            exitCode: Number.isFinite(details?.exitCode) ? details.exitCode : -1,
+          });
+        });
+        contents.on('destroyed', () => {
+          inventoryTrace.serverEvent('browser.contents.destroyed', { webContentsId });
+        });
+      };
+      app?.on?.('web-contents-created', (_event, contents) => bindContents(contents));
+      app?.on?.('child-process-gone', (_event, details) => {
+        inventoryTrace.serverEvent('browser.child.gone', {
+          kind: String(details?.type ?? 'unknown').slice(0, 80),
+          reason: String(details?.reason ?? 'unknown').slice(0, 80),
+          exitCode: Number.isFinite(details?.exitCode) ? details.exitCode : -1,
+        });
+      });
+      // A contents instance can predate installation of the dagger:// wrapper.
+      // Enumerate it when the real Electron module is available; tests run in Node.
+      try {
+        const electron = require('electron');
+        for (const contents of electron.webContents?.getAllWebContents?.() || []) bindContents(contents);
+      } catch { /* not running in Electron or API unavailable */ }
+    } catch (error) {
+      inventoryTrace.serverEvent('browser.monitor.error', {
+        message: String(error?.message ?? error).slice(0, 120),
+      });
+    }
+  }
+
   let ctx = null;
   const context = () => {
     if (ctx) return ctx;

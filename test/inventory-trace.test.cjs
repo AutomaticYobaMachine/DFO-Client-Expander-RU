@@ -304,3 +304,33 @@ test('passive client tracer observes and flushes events without intercepting cli
   assert.ok(observed.some(x => x.type === 'ui.click'));
   assert.ok(observed.every(x => x.session && x.seq && Number.isFinite(x.at)));
 });
+
+
+// Electron signals are independent of DOM callbacks: even when the visible frame
+// stops updating, a GPU or renderer process failure should reach disk.
+test('main Electron process persists renderer-unresponsive and GPU-failure signals', () => {
+  const { EventEmitter } = require('node:events');
+  const { wrap } = require('../src/mod/hook.cjs');
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'dfo-inventory-native-freeze-'));
+  try {
+    const app = new EventEmitter();
+    app.getPath = () => dir;
+    wrap(async () => new Response('native'), { app });
+    const contents = new EventEmitter();
+    contents.id = 27;
+    app.emit('web-contents-created', {}, contents);
+    contents.emit('unresponsive');
+    contents.emit('responsive');
+    contents.emit('render-process-gone', {}, { reason: 'crashed', exitCode: 7 });
+    app.emit('child-process-gone', {}, { type: 'GPU', reason: 'crashed', exitCode: 8 });
+    contents.emit('destroyed');
+    const file = path.join(dir, 'DFO-Client-Expander-RU', 'dfo-mod-inventory-trace.ndjson');
+    const events = fs.readFileSync(file, 'utf8').trim().split('\n').map(JSON.parse);
+    for (const type of ['bridge.ready','browser.unresponsive','browser.responsive',
+      'browser.renderer.gone','browser.child.gone','browser.contents.destroyed'])
+      assert.ok(events.some(x => x.type === type), 'missing ' + type);
+    assert.deepEqual(events.find(x => x.type === 'browser.renderer.gone').data,
+      { webContentsId: 27, reason: 'crashed', exitCode: 7 });
+    assert.equal(events.find(x => x.type === 'browser.child.gone').data.kind, 'GPU');
+  } finally { fs.rmSync(dir, { recursive: true, force: true }); }
+});

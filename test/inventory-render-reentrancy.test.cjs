@@ -8,7 +8,8 @@ const { lifecycle } = require('../src/mod/inventory-transform.cjs');
 function fixture(count = 45) {
   const src = [
     'let h={children:[],append(s){this.children.push(s)}},cache={key:1,img:1};',
-    'let paints=0,depth=0,maxDepth=0,filling=false,repaintDuringFill=false,fail=false;',
+    'let paints=0,depth=0,maxDepth=0,filling=false,repaintDuringFill=false,fail=false,warnings=0;',
+    'const console={warn(){warnings++}};',
     'const ready=new Set(),observers=[],arm={subscribe(fn){observers.push(fn)},notify(){for(const fn of observers)fn()}};',
     'const keys='+JSON.stringify(Array.from({ length: count }, (_, i) => i))+';',
     'function item(k){if(ready.has(k))return;ready.add(k);arm.notify()}',
@@ -24,7 +25,7 @@ function fixture(count = 45) {
     'function unmount(){h=null}',
     'function setFail(v){fail=v}',
     'function stale(){cache={key:1,img:1};arm.notify()}',
-    'function inspect(){return {paints,depth,maxDepth,shells:h?.children.length??0,cache:cache.key,repaintDuringFill}}',
+    'function inspect(){return {paints,depth,maxDepth,shells:h?.children.length??0,cache:cache.key,repaintDuringFill,warnings}}',
   ].join('\n');
   const result = lifecycle(src, 'r');
   const app = new Function(result + '\nreturn {mount,refill,newHost,unmount,setFail,stale,arm,inspect,r}')();
@@ -89,6 +90,20 @@ test('native exception releases the recursion guard without scheduling retries',
   app.r();
   assert.equal(app.inspect().paints, 3, 'one failed call and a later valid repaint');
   assert.equal(app.inspect().depth, 0);
+});
+
+test('deferred native error is reported and never becomes an unhandled retry loop', async () => {
+  const { app } = fixture(0);
+  app.mount();
+  app.setFail(true);
+  app.stale();
+  await Promise.resolve();
+  await Promise.resolve();
+  assert.equal(app.inspect().paints, 2);
+  assert.equal(app.inspect().warnings, 1);
+  app.setFail(false);
+  app.r();
+  assert.equal(app.inspect().paints, 3, 'manual repaint still works after a failed notification');
 });
 
 test('retry on the same host invalidates pending callbacks from the previous mount', async () => {

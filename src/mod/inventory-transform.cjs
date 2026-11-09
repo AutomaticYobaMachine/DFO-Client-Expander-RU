@@ -65,7 +65,7 @@ function inventory(text) {
 // During render() it can enter render() recursively before host.append(shell), leaving all the
 // suspended local shells to append as siblings when the stack unwinds. The callback's cache
 // invalidation stays synchronous; only its full repaint is coalesced after the current stack.
-function lifecycle(out, render) {
+function lifecycle(out, render, deps = null) {
   const decl = `function ${render}(){`;
   once(out, rx(`function ${esc(render)}\\(\\)\\{`), 'inventory native render');
   const callbacks = [...out.matchAll(/\.subscribe\(\(\)=>\{((?:[^{}]|\{[^{}]*\}){0,400})\}\)/g)]
@@ -77,46 +77,21 @@ function lifecycle(out, render) {
   const guard = /(?:if\(([\w$]+)\)|([\w$]+)&&)\s*$/.exec(body.slice(0, at));
   if (!guard) throw new Error('inventory figure callback has unsupported owner guard');
   const owner = guard[1] || guard[2];
-  const nextBody = body.slice(0, at) + `__dfoRequestRender$(${owner})` + body.slice(at + call.length);
+  const session = deps ?? 'null';
+  const nextBody = body.slice(0, at) + `__dfoFigureNotice$(${owner})` + body.slice(at + call.length);
   // Each mount receives a fresh generation even if enhancedChunk retries on the same host.
   const subscription = whole.replace(body, nextBody).replace('.subscribe(', '.subscribe(__dfoOwnFigure$(').replace(/\)$/, '))');
   out = put(out, whole, subscription);
   out = put(out, decl, 'function __dfoNativeRender$(){');
   // Separate function declarations preserve all native render call sites, including
   // user actions that must repaint synchronously. A stale microtask cannot paint another host.
-  return out + `
-;let __dfoRenderBusy$=false,__dfoRenderDirty$=false,__dfoRenderQueued$=false,__dfoRenderOwner$=null;
-let __dfoFigureGen$=0,__dfoRenderGeneration$=-1;
-function __dfoOwnFigure$(callback){
-  const generation=++__dfoFigureGen$;
-  return (...args)=>{if(generation===__dfoFigureGen$)callback(...args)};
-}
-function __dfoRequestRender$(owner){
-  if(!owner)return;
-  const generation=__dfoFigureGen$;
-  if(__dfoRenderQueued$&&__dfoRenderOwner$===owner&&__dfoRenderGeneration$===generation)return;
-  __dfoRenderQueued$=true;__dfoRenderOwner$=owner;__dfoRenderGeneration$=generation;
-  Promise.resolve().then(()=>{
-    if(__dfoRenderOwner$!==owner||__dfoRenderGeneration$!==generation)return;
-    __dfoRenderQueued$=false;__dfoRenderOwner$=null;__dfoRenderGeneration$=-1;
-    if(${owner}===owner&&__dfoFigureGen$===generation){
-      try{${render}()}catch(e){console.warn('[dfo-mod inventory] deferred repaint failed',e)}
-    }
-  });
-}
-function ${render}(){
-  if(!${owner})return;
-  if(__dfoRenderBusy$){__dfoRenderDirty$=true;return;}
-  const liveOwner=${owner};let completed=false;
-  __dfoRenderBusy$=true;
-  try{__dfoNativeRender$();completed=true}
-  finally{
-    __dfoRenderBusy$=false;
-    const dirty=__dfoRenderDirty$;__dfoRenderDirty$=false;
-    if(completed&&dirty&&${owner}===liveOwner)__dfoRequestRender$(liveOwner);
-  }
-}
-`;
+  // This hook is optional until its minified form is validated against the live bundle.
+  const syncs = [...out.matchAll(/(?:\b(?:const|let|var)\s+|,)([\w$]+)=\(?([\w$]+)\)?=>\{for\(const ([\w$]+) of ([\w$]+)\)\3\.sync\(\2\)\}/g)];
+  const syncName = syncs.length === 1 ? syncs[0][1] : null;
+  const runtime = "\n;let __dfoRenderBusy$=false,__dfoRenderActive$=null,__dfoRenderDirty$=false,__dfoRenderPending$=null;\nlet __dfoFigureGen$=0,__dfoNoticeSeq$=0,__dfoRenderedNoticeSeq$=0;\nfunction __dfoOwnFigure$(callback){\n  const generation=++__dfoFigureGen$,ownedHost=@@OWNER@@,ownedSession=@@SESSION@@;\n  return (...args)=>{\n    if(generation===__dfoFigureGen$&&ownedHost===@@OWNER@@&&ownedSession===@@SESSION@@)callback(...args);\n  };\n}\nfunction __dfoFigureNotice$(owner){\n  ++__dfoNoticeSeq$;\n  __dfoRequestRender$(owner,@@SESSION@@);\n}\nfunction __dfoRequestRender$(owner,session,force=false){\n  if(!owner||@@OWNER@@!==owner||@@SESSION@@!==session)return;\n  const generation=__dfoFigureGen$,seq=__dfoNoticeSeq$;\n  const previous=__dfoRenderPending$;\n  if(previous&&previous.owner===owner&&previous.session===session&&previous.generation===generation){\n    previous.seq=Math.max(previous.seq,seq);\n    previous.force=previous.force||force;\n    return;\n  }\n  const pending={owner,session,generation,seq,force};\n  __dfoRenderPending$=pending;\n  Promise.resolve().then(()=>{\n    if(__dfoRenderPending$!==pending)return;\n    __dfoRenderPending$=null;\n    if(@@OWNER@@!==owner||@@SESSION@@!==session||__dfoFigureGen$!==generation)return;\n    // A synchronous render after the event already consumed its data. Events\n    // issued DURING a render stay pending until another complete render.\n    if(!pending.force&&pending.seq<=__dfoRenderedNoticeSeq$)return;\n    try{@@RENDER@@()}catch(e){console.warn('[dfo-mod inventory] deferred repaint failed',e)}\n  });\n}\nfunction @@RENDER@@(){\n  if(!@@OWNER@@)return;\n  const live={owner:@@OWNER@@,session:@@SESSION@@,generation:__dfoFigureGen$};\n  if(__dfoRenderBusy$){\n    const active=__dfoRenderActive$;\n    if(active&&active.owner===live.owner&&active.session===live.session&&active.generation===live.generation)\n      __dfoRenderDirty$=true;\n    else __dfoRequestRender$(live.owner,live.session,true);\n    return;\n  }\n  const noticeAtStart=__dfoNoticeSeq$;\n  let completed=false;\n  __dfoRenderBusy$=true;__dfoRenderActive$=live;\n  try{__dfoNativeRender$();completed=true}\n  finally{\n    __dfoRenderBusy$=false;__dfoRenderActive$=null;\n    const dirty=__dfoRenderDirty$;__dfoRenderDirty$=false;\n    const stillOwns=@@OWNER@@===live.owner&&@@SESSION@@===live.session&&__dfoFigureGen$===live.generation;\n    if(completed){\n      if(stillOwns){\n        __dfoRenderedNoticeSeq$=Math.max(__dfoRenderedNoticeSeq$,noticeAtStart);\n        if(dirty)__dfoRequestRender$(live.owner,live.session,true);\n      }\n    }else if(__dfoRenderPending$&&__dfoRenderPending$.owner===live.owner&&__dfoRenderPending$.session===live.session){\n      // An exception does not start an automatic retry loop.\n      __dfoRenderPending$=null;\n    }\n  }\n}\n";
+  const syncCode = "\n;globalThis.__dfoInventoryRemeasure$=(shell)=>{\n  if(!shell?.isConnected||!@@OWNER@@?.contains?.(shell))return false;\n  try{@@SYNC@@({remeasure:true});return true}\n  catch(e){console.warn('[dfo-mod inventory] list remeasure failed',e);return false}\n};\n";
+  return out + runtime.replaceAll('@@OWNER@@',owner).replaceAll('@@SESSION@@',session).replaceAll('@@RENDER@@',render) +
+    (syncName ? syncCode.replaceAll('@@OWNER@@',owner).replaceAll('@@SYNC@@',syncName) : '');
 }
 
 // equip-*.js: ItemCollection.AddItem (systems/inventory.js addItem). A quest item lands at the FRONT exactly when the

@@ -3,7 +3,7 @@
 // bundle or its minified signatures have passed validation. See docs/inventory-window-render-stabilization-plan.md.
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const { lifecycle } = require('../src/mod/inventory-transform.cjs');
+const { lifecycle, transformInventory } = require('../src/mod/inventory-transform.cjs');
 
 function fixture(count = 45) {
   const src = [
@@ -221,4 +221,11 @@ test('the optional native remeasure callback has host ownership and invokes priv
   assert.equal(app.remeasure({isConnected:true,good:true}), true);
   assert.equal(app.remeasure({isConnected:true,good:false}), false);
   assert.equal(app.calls(), 1);
+});
+
+test('incompatible view fails closed, without partially publishing the inventory transform', () => {
+  const log = [];
+  const invalid = 'const a=' + String.fromCharCode(96) + 'packPhoneDoll' + String.fromCharCode(96) + ',b=' + String.fromCharCode(96) + 'packempty' + String.fromCharCode(96) + ';';
+  assert.throws(() => transformInventory('assets/enhancedInventory-test.js', invalid, log), /inventory lifecycle compatibility failure/);
+  assert.ok(log.some(([id]) => id.startsWith('inventory.view!error ')));
 });

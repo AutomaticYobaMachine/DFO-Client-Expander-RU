@@ -113,7 +113,7 @@ function transformInventory(rel, text, log) {
   let out = text;
   for (const [id, on, run] of JOBS) {
     if (!on(rel, out) || out.includes(`/*${id}*/`)) continue;
-    try { out = run(out) + `\n/*${id}*/\n`; log.push([id, 1]); if (id === 'inventory.view') log.push(['inventory.lifecycle', 1]); } catch (e) { log.push([`${id}!error ${e.message}`, 0]); }
+    try { out = run(out) + `\n/*${id}*/\n`; log.push([id, 1]); if (id === 'inventory.view') log.push(['inventory.lifecycle', 1]); } catch (e) { log.push([`${id}!error ${e.message}`, 0]); if (id === 'inventory.view') throw new Error(`inventory lifecycle compatibility failure: ${e.message}`); }
   }
   return out;
 }

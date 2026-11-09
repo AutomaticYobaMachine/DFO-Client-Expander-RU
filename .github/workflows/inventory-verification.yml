@@ -1,0 +1,28 @@
+name: Inventory lifecycle regression and published-bundle compatibility
+
+on:
+  push:
+    branches:
+      - fix/inventory-render-reentrancy-2026-11-09
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - name: Check out experimental branch
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - name: Verify local lifecycle and geometry regressions
+        run: |
+          node --version
+          node --test test/inventory-render-reentrancy.test.cjs test/inventory-geometry.test.cjs test/inventory-layout.test.cjs test/pack.test.cjs
+      - name: Fetch the published 0.1.14602 game assets
+        env:
+          DFO_FETCH_CONCURRENCY: '8'
+        run: node tools/fetch-build.mjs 0.1.14602 "$RUNNER_TEMP/dfo-game"
+      - name: Require every hook and valid modified JavaScript
+        run: node tools/check-build.cjs "$RUNNER_TEMP/dfo-game"

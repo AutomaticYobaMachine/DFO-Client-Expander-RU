@@ -91,6 +91,51 @@ test('native exception releases the recursion guard without scheduling retries',
   assert.equal(app.inspect().depth, 0);
 });
 
+test('retry on the same host invalidates pending callbacks from the previous mount', async () => {
+  const { app } = fixture(0);
+  app.mount();
+  app.stale();
+  app.mount(); // enhancedChunk can retry with the exact same host element
+  assert.equal(app.inspect().paints, 2);
+  await Promise.resolve();
+  assert.equal(app.inspect().paints, 2, 'the first generation cannot repaint the second');
+  app.stale(); // both callbacks are still in this fixture's Set
+  await Promise.resolve();
+  assert.equal(app.inspect().paints, 3, 'only the latest subscriber schedules a repaint');
+});
+
+test('minified short-circuit subscriber syntax is recognized', async () => {
+  const src = [
+    'let h={},c={key:1,img:1},paints=0;',
+    'const arm={subscribe(fn){this.fn=fn},notify(){this.fn()}};',
+    'function r(){paints++}',
+    'function mount(){arm.subscribe(()=>{c={key:null,img:null},h&&r()});r()}',
+  ].join('\n');
+  const code = lifecycle(src, 'r');
+  const app = new Function(code + '\nreturn {mount,arm,paint:()=>paints}')();
+  app.mount();app.arm.notify();app.arm.notify();
+  assert.equal(app.paint(), 1);
+  await Promise.resolve();
+  assert.equal(app.paint(), 2);
+});
+
+test('another synchronous render source is also held behind the active native render', async () => {
+  const src = [
+    'let h={},calls=0,depth=0,maxDepth=0,nested=true,c={key:null,img:null};',
+    'const arm={subscribe(fn){this.fn=fn}};',
+    'function r(){calls++;depth++;maxDepth=Math.max(maxDepth,depth);if(nested){nested=false;r()}depth--}',
+    'function mount(){arm.subscribe(()=>{c={key:null,img:null};if(h)r()});r()}',
+  ].join('\n');
+  const code = lifecycle(src, 'r');
+  const app = new Function(code + '\nreturn {mount,inspect:()=>({calls,maxDepth})}')();
+  app.mount();
+  assert.equal(app.inspect().calls, 1);
+  assert.equal(app.inspect().maxDepth, 1);
+  await Promise.resolve();
+  assert.equal(app.inspect().calls, 2);
+  assert.equal(app.inspect().maxDepth, 1);
+});
+
 test('unsupported or duplicated fpArm callback is rejected without a partial patch', () => {
   const src = [
     'let h={};function r(){}',

@@ -52,7 +52,7 @@ function createInventoryTraceStore(userData, io = fs, env = process.env) {
     return append(events);
   }
   function serverEvent(type, data = {}) {
-    return append([{ type, at: Date.now(), seq: ++recorded, session: 'main',
+    return append([{ type, at: Date.now(), seq: recorded + 1, session: 'main',
       data: Object.fromEntries(Object.entries(data).filter(([key, v]) =>
         /^[a-zA-Z][a-zA-Z0-9_]{0,40}$/.test(key) &&
         (typeof v === 'string' && v.length <= 200 || typeof v === 'number' || typeof v === 'boolean' || v === null))) }]);

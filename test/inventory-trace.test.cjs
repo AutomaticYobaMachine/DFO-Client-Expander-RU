@@ -2,7 +2,7 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs'), os = require('node:os'), path = require('node:path'), vm = require('node:vm');
-const { createInventoryTraceStore, MAX_BATCH, MAX_FILE } = require('../src/mod/inventory-trace-store.cjs');
+const { createInventoryTraceStore, traceDirectory, MAX_BATCH, MAX_FILE } = require('../src/mod/inventory-trace-store.cjs');
 const { injectPage } = require('../src/mod/transforms.cjs');
 
 const event = (type = 'view.render.end', seq = 1, data = { completed: true }) =>
@@ -38,7 +38,8 @@ test('trace endpoint rejects invalid, oversized and unstructured diagnostics', (
     assert.equal(r.write(JSON.stringify([event('runtime.error', 3, { stack: 'x'.repeat(6000) })])), 413);
     assert.equal(fs.existsSync(r.file), false, 'rejected events never reach the file');
   } finally { fs.rmSync(dir, { recursive: true, force: true }); }
-  assert.equal(createInventoryTraceStore(null).write(JSON.stringify([event()])), 503);
+  assert.equal(traceDirectory('/tmp/profile', { APPDATA: 'C:/AppData/Roaming' }),
+    path.join('C:/AppData/Roaming', 'DFO-Client-Expander-RU'));
 });
 
 test('trace script is injected before native modules only when inventory is on', () => {
@@ -60,10 +61,45 @@ test('Electron dagger handler writes the trace locally and does not fall through
     const ok = await handler(new Request(url, { method: 'POST', body: JSON.stringify([event('overlay.dismiss')]) }));
     assert.equal(ok.status, 204);
     assert.equal(forwarded, 0);
-    assert.equal(JSON.parse(fs.readFileSync(path.join(dir, 'dfo-mod-inventory-trace.ndjson'), 'utf8').trim()).type, 'overlay.dismiss');
+    const records = fs.readFileSync(path.join(dir, 'DFO-Client-Expander-RU', 'dfo-mod-inventory-trace.ndjson'), 'utf8')
+      .trim().split('\n').map(JSON.parse);
+    assert.equal(records[0].type, 'bridge.ready', 'the renderer is not required for the trace file to exist');
+    assert.ok(records.some(x => x.type === 'overlay.dismiss'));
     assert.equal((await handler(new Request(url))).status, 405);
     assert.equal((await handler(new Request(url, { method: 'POST', body: '{bad' }))).status, 400);
     assert.equal(forwarded, 0);
+  } finally { fs.rmSync(dir, { recursive: true, force: true }); }
+});
+
+test('main process creates a trace without any inventory renderer, and serves fallback/status', async () => {
+  const { wrap } = require('../src/mod/hook.cjs');
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'dfo-inventory-trace-main-'));
+  try {
+    const handler = wrap(async () => new Response('<html><head></head><body><script type="module"></script></body></html>'),
+      { app: { getPath: () => dir } });
+    const file = path.join(dir, 'DFO-Client-Expander-RU', 'dfo-mod-inventory-trace.ndjson');
+    assert.ok(fs.existsSync(file), 'bootstrap file must already exist before HTML/JS/POST');
+    const boot = JSON.parse(fs.readFileSync(file, 'utf8').trim());
+    assert.equal(boot.type, 'bridge.ready');
+    const base = 'dagger://game/dfo-mod/';
+    let status = await (await handler(new Request(base + 'inventory-trace-status'))).json();
+    assert.equal(status.exists, true);
+    assert.equal(status.path, file);
+    assert.ok(status.bytes > 0);
+    const src = 'assets/game.js';
+    const page = await (await handler(new Request('dagger://game/play/index.html'))).text();
+    assert.ok(page.includes('dfo_inventory_trace.js'));
+    const script = await handler(new Request(base + 'dfo_inventory_trace.js'));
+    assert.equal(script.status, 200);
+    assert.ok((await script.text()).includes('trace.started'));
+    const eventString = encodeURIComponent(JSON.stringify(event('trace.started', 200)));
+    const fallback = await handler(new Request(base + 'inventory-trace-fallback?event=' + eventString));
+    assert.equal(fallback.status, 200);
+    status = await (await handler(new Request(base + 'inventory-trace-status'))).json();
+    assert.ok(status.recorded >= 4, 'main boot, page, script and fallback are in one trace');
+    const events = fs.readFileSync(file, 'utf8').trim().split('\n').map(JSON.parse).map(x => x.type);
+    for (const expected of ['bridge.ready','bridge.page','bridge.script.served','trace.started'])
+      assert.ok(events.includes(expected), expected);
   } finally { fs.rmSync(dir, { recursive: true, force: true }); }
 });
 
@@ -92,6 +128,8 @@ test('passive client tracer observes and flushes events without intercepting cli
     stopPropagation() { throw Error('must not call'); } };
   handlers.get('click')(click);
   assert.ok(api.tail().some(x => x.type === 'ui.click'));
+  await Promise.resolve();
+  await Promise.resolve();
   await api.flush();
   const observed = posts.flatMap(p => JSON.parse(p.body));
   assert.ok(observed.some(x => x.type === 'trace.started'));

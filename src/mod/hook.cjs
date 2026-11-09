@@ -207,7 +207,7 @@ function wrap(handleDagger, { app = null } = {}) {
       const input = url.searchParams.get('event') || '';
       if (input.length > 3900) return new Response(null, { status: 413 });
       const result = inventoryTrace.write('[' + input + ']');
-      const gif = Buffer.from('R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=', 'base64');
+      const gif = Buffer.from('R0lGODlhAQABAAD/ACwAAAAAAQABAAACAUwAOw==', 'base64');
       return new Response(gif, { status: result === 204 ? 200 : result,
         headers: { 'Content-Type': 'image/gif', 'Cache-Control': 'no-store' } });
     }

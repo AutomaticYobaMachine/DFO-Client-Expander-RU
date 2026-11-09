@@ -40,3 +40,10 @@ test('header never wraps and replaces only the Pack word, retaining character na
   assert.match(source, /const who = title\.querySelector\('\.pack-who'\)/);
   assert.match(source, /title\.replaceChildren\(bag, \.\.\.\(who \? \[who\] : \[\]\)\)/);
 });
+
+test('geometry follows its own header and cannot repeatedly scale a foreign shell', () => {
+  assert.match(source, /header\.closest\('\.pack-shell'\)/, 'the header selects its own ancestor shell');
+  assert.doesNotMatch(source, /doc\.querySelector\('\.pack-shell'\)/, 'never scale the first unrelated shell');
+  assert.match(source, /scaledShells\.has\(shell\)/);
+  assert.match(source, /scaledShells\.add\(shell\)/);
+});

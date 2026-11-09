@@ -109,8 +109,32 @@ function lifecycle(out, render, deps = null, requireFigure = false) {
   const syncs = [...out.matchAll(/(?:\b(?:const|let|var)\s+|,)([\w$]+)=\(?([\w$]+)\)?=>\{for\((?:const|let|var) ([\w$]+) of ([\w$]+)\)\3\.sync\(\2\)\}/g)];
   const syncName = syncs.length === 1 ? syncs[0][1] : null;
   const runtime = "\n;let __dfoRenderBusy$=false,__dfoRenderActive$=null,__dfoRenderDirty$=false,__dfoRenderPending$=null;\nlet __dfoFigureGen$=0,__dfoNoticeSeq$=0,__dfoRenderedNoticeSeq$=0;\nfunction __dfoOwnFigure$(callback){\n  const generation=++__dfoFigureGen$,ownedHost=@@OWNER@@,ownedSession=@@SESSION@@;\n  return (...args)=>{\n    if(generation===__dfoFigureGen$&&ownedHost===@@OWNER@@&&ownedSession===@@SESSION@@)callback(...args);\n  };\n}\nfunction __dfoFigureNotice$(owner){\n  ++__dfoNoticeSeq$;\n  __dfoRequestRender$(owner,@@SESSION@@);\n}\nfunction __dfoRequestRender$(owner,session,force=false){\n  if(!owner||@@OWNER@@!==owner||@@SESSION@@!==session)return;\n  const generation=__dfoFigureGen$,seq=__dfoNoticeSeq$;\n  const previous=__dfoRenderPending$;\n  if(previous&&previous.owner===owner&&previous.session===session&&previous.generation===generation){\n    previous.seq=Math.max(previous.seq,seq);\n    previous.force=previous.force||force;\n    return;\n  }\n  const pending={owner,session,generation,seq,force};\n  __dfoRenderPending$=pending;\n  Promise.resolve().then(()=>{\n    if(__dfoRenderPending$!==pending)return;\n    __dfoRenderPending$=null;\n    if(@@OWNER@@!==owner||@@SESSION@@!==session||__dfoFigureGen$!==generation)return;\n    // A synchronous render after the event already consumed its data. Events\n    // issued DURING a render stay pending until another complete render.\n    if(!pending.force&&pending.seq<=__dfoRenderedNoticeSeq$)return;\n    try{@@RENDER@@()}catch(e){console.warn('[dfo-mod inventory] deferred repaint failed',e)}\n  });\n}\nfunction @@RENDER@@(){\n  if(!@@OWNER@@)return;\n  const live={owner:@@OWNER@@,session:@@SESSION@@,generation:__dfoFigureGen$};\n  if(__dfoRenderBusy$){\n    const active=__dfoRenderActive$;\n    if(active&&active.owner===live.owner&&active.session===live.session&&active.generation===live.generation)\n      __dfoRenderDirty$=true;\n    else __dfoRequestRender$(live.owner,live.session,true);\n    return;\n  }\n  const noticeAtStart=__dfoNoticeSeq$;\n  let completed=false;\n  __dfoRenderBusy$=true;__dfoRenderActive$=live;\n  try{__dfoNativeRender$();completed=true}\n  finally{\n    __dfoRenderBusy$=false;__dfoRenderActive$=null;\n    const dirty=__dfoRenderDirty$;__dfoRenderDirty$=false;\n    const stillOwns=@@OWNER@@===live.owner&&@@SESSION@@===live.session&&__dfoFigureGen$===live.generation;\n    if(completed){\n      if(stillOwns){\n        __dfoRenderedNoticeSeq$=Math.max(__dfoRenderedNoticeSeq$,noticeAtStart);\n        if(dirty)__dfoRequestRender$(live.owner,live.session,true);\n      }\n    }else if(__dfoRenderPending$&&__dfoRenderPending$.owner===live.owner&&__dfoRenderPending$.session===live.session){\n      // An exception does not start an automatic retry loop.\n      __dfoRenderPending$=null;\n    }\n  }\n}\n";
+  // Trace only at lifecycle boundaries; never wrap native DOM handlers or alter their return values.
+  const tracedRuntime = runtime
+    .replace('  ++__dfoNoticeSeq$;\n  __dfoRequestRender$(owner,@@SESSION@@);',
+      '  ++__dfoNoticeSeq$;\n  if(__dfoNoticeSeq$===1||__dfoNoticeSeq$%32===0)__dfoTraceRender$("view.figure.notice",{seq:__dfoNoticeSeq$,busy:__dfoRenderBusy$});\n  __dfoRequestRender$(owner,@@SESSION@@);')
+    .replace('  if(!owner||@@OWNER@@!==owner||@@SESSION@@!==session)return;',
+      '  if(!owner||@@OWNER@@!==owner||@@SESSION@@!==session){__dfoTraceRender$("view.request.stale",{generation});return;}')
+    .replace('  __dfoRenderPending$=pending;\n  Promise.resolve().then(()=>{',
+      '  __dfoRenderPending$=pending;\n  __dfoTraceRender$("view.render.queued",{generation,seq,force});\n  Promise.resolve().then(()=>{')
+    .replace('    if(@@OWNER@@!==owner||@@SESSION@@!==session||__dfoFigureGen$!==generation)return;',
+      '    if(@@OWNER@@!==owner||@@SESSION@@!==session||__dfoFigureGen$!==generation){__dfoTraceRender$("view.render.stale",{generation});return;}')
+    .replace('    if(!pending.force&&pending.seq<=__dfoRenderedNoticeSeq$)return;',
+      '    if(!pending.force&&pending.seq<=__dfoRenderedNoticeSeq$){__dfoTraceRender$("view.render.skip",{seq:pending.seq});return;}')
+    .replace('  if(!@@OWNER@@)return;\n  const live=',
+      '  if(!@@OWNER@@){__dfoTraceRender$("view.render.no-owner",{});return;}\n  const live=')
+    .replace('  if(__dfoRenderBusy$){\n    const active=',
+      '  if(__dfoRenderBusy$){__dfoTraceRender$("view.render.reentrant",{generation:live.generation});\n    const active=')
+    .replace('  const noticeAtStart=__dfoNoticeSeq$;\n  let completed=false;',
+      '  const noticeAtStart=__dfoNoticeSeq$,startedAt=Date.now();\n  __dfoTraceRender$("view.render.start",{generation:live.generation,noticeAtStart});\n  let completed=false;')
+    .replace('  try{__dfoNativeRender$();completed=true}\n  finally{',
+      '  try{__dfoNativeRender$();completed=true}\n  catch(e){__dfoTraceRender$("view.render.error",{message:String(e?.message||e),stack:String(e?.stack||"").slice(0,1600)});throw e}\n  finally{')
+    .replace('    if(completed){\n      if(stillOwns){',
+      '    __dfoTraceRender$("view.render.end",{completed,elapsedMs:Date.now()-startedAt,dirty,stillOwns,noticeAtStart});\n    if(completed){\n      if(stillOwns){');
+  const traceCode = "\n;function __dfoTraceRender$(type,info){try{globalThis.__dfoInventoryTrace?.record?.(type,info,@@OWNER@@)}catch{}}\n";
   const syncCode = "\n;globalThis.__dfoInventoryRemeasure$=(shell)=>{\n  if(!shell?.isConnected||!@@OWNER@@?.contains?.(shell))return false;\n  try{@@SYNC@@({remeasure:true});return true}\n  catch(e){console.warn('[dfo-mod inventory] list remeasure failed',e);return false}\n};\n";
-  return out + runtime.replaceAll('@@OWNER@@',owner).replaceAll('@@SESSION@@',session).replaceAll('@@RENDER@@',render) +
+  return out + tracedRuntime.replaceAll('@@OWNER@@',owner).replaceAll('@@SESSION@@',session).replaceAll('@@RENDER@@',render) +
+    traceCode.replaceAll('@@OWNER@@',owner) +
     (syncName ? syncCode.replaceAll('@@OWNER@@',owner).replaceAll('@@SYNC@@',syncName) : '');
 }
 

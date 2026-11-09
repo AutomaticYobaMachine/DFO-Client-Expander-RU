@@ -271,7 +271,7 @@ test('disposed overlay rejects late A load during pending save even before fired
     'function close(){if(onSavePending)return;fired=true}',
     'const overlay={get done(){return fired},input(){},click(){},dispose(){close()}};',
     'function mountEnhancedChunk(o){live=o}',
-    'mountEnhancedChunk({alive:()=>!fired,host,onDismiss:()=>{}})',
+    'mountEnhancedChunk({alive:()=>!fired,host,onDismiss:()=>{host.remove();fired=true}})',
   ].join('\n');
   const app=new Function(doorOwnership(raw)+'\nreturn {overlay,host,alive:()=>live.alive(),finish:()=>onSavePending=false}')();
   assert.equal(app.alive(),true);

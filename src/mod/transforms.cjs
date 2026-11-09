@@ -470,7 +470,7 @@ function injectPage(html, prefix, ctx) {
   if (ctx.dungeons !== false) tags.push(...['dfo_dungeon_model.js', 'dfo_dungeons.js', 'dfo_dungeon_live_model.js', 'dfo_dungeon_graph.js', 'dfo_dungeon_nav_model.js', 'dfo_dungeon_nav.js', 'dfo_dungeon_live.js'].map(f => `<script src="${prefix}dfo-mod/${f}"></script>`));
   if (ctx.nearbyLoot !== false) tags.push(...['dfo_loot_rules.js', 'dfo_loot_ui.js', 'dfo_loot.js'].map(f => `<script src="${prefix}dfo-mod/${f}"></script>`));
   // The inventory (docs/inventory.md): its tables and its script; the loot filter's rules give the Junk page its tags.
-  if (ctx.inventory === true) tags.push(...[...(ctx.nearbyLoot !== false ? [] : ['dfo_loot_rules.js']), 'dfo_pack_data.js', 'dfo_pack_rules.js', 'dfo_pack.js'].map(f => `<script src="${prefix}dfo-mod/${f}"></script>`));
+  if (ctx.inventory === true) tags.push(...['dfo_inventory_trace.js', ...(ctx.nearbyLoot !== false ? [] : ['dfo_loot_rules.js']), 'dfo_pack_data.js', 'dfo_pack_rules.js', 'dfo_pack.js'].map(f => `<script src="${prefix}dfo-mod/${f}"></script>`));
   const at = html.indexOf('<script type="module"');
   const out=at<0?html.replace('</head>', `${tags.join('\n  ')}\n</head>`):`${html.slice(0, at)}${tags.join('\n  ')}\n  ${html.slice(at)}`;
   return ctx.fonts===true?preparePage(out):out;

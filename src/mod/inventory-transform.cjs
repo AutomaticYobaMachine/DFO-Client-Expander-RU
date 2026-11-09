@@ -159,7 +159,7 @@ function cleanSameHostRemount(out) {
   if (out.includes('__dfoPreviousHost$')) throw new Error('inventory remount helper name collision');
   const [whole, prefix, currentHost, incomingHost, previousHost, view] = hits[0];
   const replacement = 'if(' + prefix + currentHost + '){const __dfoPreviousHost$=' + currentHost +
-    ';' + view + '?.unmount();if(__dfoPreviousHost$!==' + incomingHost + ')__dfoPreviousHost$.remove?.()}';
+    ';try{globalThis.__dfoInventoryTrace?.record?.("view.remount",{sameHost:__dfoPreviousHost$===' + incomingHost + '},__dfoPreviousHost$)}catch{};' + view + '?.unmount();if(__dfoPreviousHost$!==' + incomingHost + ')__dfoPreviousHost$.remove?.()}';
   return put(out, whole, replacement);
 }
 
@@ -167,9 +167,9 @@ function sessionHandle(out) {
   const view = once(out, /([\w$]+)=\{repaint\(\)\{[^{}]*\},dropped:\(\)=>([\w$]+),unmount\(\)\{/, 'inventory per-session view handle');
   const [whole, current, dropped] = view;
   const patched = whole
-    .replace('repaint(){', 'repaint(){if(' + current + '!==this)return;')
+    .replace('repaint(){', 'repaint(){try{globalThis.__dfoInventoryTrace?.record?.("view.handle.repaint",{stale:' + current + '!==this})}catch{};if(' + current + '!==this)return;')
     .replace('dropped:()=>'+dropped, 'dropped:__dfoDroppedForSession$('+dropped+')')
-    .replace('unmount(){', 'unmount(){if(' + current + '!==this)return;');
+    .replace('unmount(){', 'unmount(){try{globalThis.__dfoInventoryTrace?.record?.("view.handle.unmount",{stale:' + current + '!==this})}catch{};if(' + current + '!==this)return;');
   return put(out, whole, patched) + '\n;function __dfoDroppedForSession$(items){return ()=>items}\n';
 }
 
@@ -211,18 +211,19 @@ function doorOwnership(out) {
   // as soon as B claims ownership; let a pending chest save finish safely.
   const activation='alive:(()=>{'+
     'const previous=globalThis.__dfoInventoryDoorActive$;'+
-    'if(previous&&previous.host!=='+host+'){try{previous.retire()}catch(e){console.warn("[dfo-mod inventory] old overlay cleanup failed",e)}}'+
+    '__dfoTraceDoor$("overlay.claim",'+host+',{previousGeneration:previous?.host?.__dfoGeneration$??null});'+
+    'if(previous&&previous.host!=='+host+'){try{__dfoTraceDoor$("overlay.handoff",previous.host,{nextGeneration:'+host+'.__dfoGeneration$});previous.retire()}catch(e){__dfoTraceDoor$("overlay.handoff.error",previous.host,{message:String(e?.message||e)});console.warn("[dfo-mod inventory] old overlay cleanup failed",e)}}'+
     'globalThis.__dfoInventoryDoorActive$={host:'+host+',retire:()=>{'+
-    'const wasRetired=!!'+host+'.__dfoRetired$;'+host+'.__dfoRetired$=true;'+
+    'const wasRetired=!!'+host+'.__dfoRetired$;__dfoTraceDoor$("overlay.retire",'+host+',{alreadyRetired:wasRetired});'+host+'.__dfoRetired$=true;'+
     'if('+host+'.style){'+host+'.style.visibility="hidden";'+host+'.style.pointerEvents="none"}'+
-    'if(!wasRetired)'+close+'()}};'+
+    'if(!wasRetired){__dfoTraceDoor$("overlay.close.call",'+host+',{source:"retire"});'+close+'();__dfoTraceDoor$("overlay.close.return",'+host+',{source:"retire"})}}};'+
     'return ()=>!'+fired+'&&'+host+'.isConnected&&!'+host+
     '.__dfoRetired$&&'+host+'.__dfoGeneration$===globalThis.__dfoInventoryDoorGeneration$})()';
   t=put(t,alive[0],alive[0].replace('alive:()=>!'+fired,()=>activation));
   t=put(t,original,original.replace('dispose(){'+close+'()}',
-    'dispose(){'+host+'.__dfoRetired$=true;'+close+'()}'));
-  t=put(t,dismiss[0][0],'onDismiss:'+close);
-  return t;
+    'dispose(){__dfoTraceDoor$("overlay.dispose",'+host+',{});'+host+'.__dfoRetired$=true;'+close+'();__dfoTraceDoor$("overlay.dispose.return",'+host+',{}}'));
+  t=put(t,dismiss[0][0],'onDismiss:()=>{__dfoTraceDoor$("overlay.dismiss",'+host+',{});const result='+close+'();__dfoTraceDoor$("overlay.dismiss.return",'+host+',{});return result}');
+  return t + '\n;function __dfoTraceDoor$(type,host,info){try{globalThis.__dfoInventoryTrace?.record?.(type,info,host)}catch{}}\n';
 }
 
 // equip-*.js: ItemCollection.AddItem (systems/inventory.js addItem). A quest item lands at the FRONT exactly when the

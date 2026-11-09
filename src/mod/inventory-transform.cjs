@@ -121,16 +121,22 @@ function lifecycle(out, render, deps = null, requireFigure = false) {
 // virtual-list listeners, figure subscription, key handler and hotbar scope.
 // Retire that live view first, but do not remove the host being reused.
 function cleanSameHostRemount(out) {
-  const pattern = /if\(([\w$]+)&&\1!==([\w$]+)\)\{(let|const|var) ([\w$]+)=\1;([\w$]+)\?\.unmount\(\)[;,]\4\.remove\?\.\(\)\}/g;
+  // esbuild folds leading calls into the condition: if(Pr(),Fr(),host&&host!==incoming).
+  // Its block-local "let e=host" may shadow the incoming parameter also named "e".
+  // Never compare against that shadow, and preserve the leading side effects.
+  const pattern = /if\(((?:[\w$]+\(\),)*)([\w$]+)&&\2!==([\w$]+)\)\{(?:let|const|var) ([\w$]+)=\2;([\w$]+)\?\.unmount\(\)[;,]\4\.remove\?\.\(\)\}/g;
   const hits = [...out.matchAll(pattern)];
   if (hits.length !== 1) {
     const clues = [...out.matchAll(/\.unmount\(\)/g)]
-      .map(m => out.slice(Math.max(0, m.index - 180), m.index + 180))
-      .filter(span => span.includes('.remove')).slice(0, 4);
-    throw new Error('inventory same-host cleanup: ' + hits.length + ' places; near native unmount: ' + clues.join(' | ').slice(0, 1500));
+      .map(m => out.slice(Math.max(0, m.index - 105), m.index + 115))
+      .filter(span => span.includes('.remove')).slice(0, 2);
+    throw new Error('inventory same-host cleanup: ' + hits.length + ' places; native context: ' + clues.join(' | ').slice(0, 450));
   }
-  const [whole, currentHost, incomingHost, declaration, previousHost, view] = hits[0];
-  return put(out, whole, 'if(' + currentHost + '){' + declaration + ' ' + previousHost + '=' + currentHost + ';' + view + '?.unmount();if(' + previousHost + '!==' + incomingHost + ')' + previousHost + '.remove?.()}');
+  if (out.includes('__dfoPreviousHost$')) throw new Error('inventory remount helper name collision');
+  const [whole, prefix, currentHost, incomingHost, previousHost, view] = hits[0];
+  const replacement = 'if(' + prefix + currentHost + '){const __dfoPreviousHost$=' + currentHost +
+    ';' + view + '?.unmount();if(__dfoPreviousHost$!==' + incomingHost + ')__dfoPreviousHost$.remove?.()}';
+  return put(out, whole, replacement);
 }
 
 function sessionHandle(out) {

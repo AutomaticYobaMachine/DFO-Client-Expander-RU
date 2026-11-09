@@ -380,3 +380,27 @@ test('same-host lazy retry retires the previous view but retains its host', () =
 test('same-host native cleanup signature is a strict compatibility gate', () => {
   assert.throws(() => cleanSameHostRemount('function mount(){}'), /same-host cleanup: 0 places/);
 });
+
+test('published-style comma-prelude and shadowed incoming name preserve cleanup', () => {
+  const raw = [
+    'let k=null,us=null,prelude=0,disposals=0;',
+    'function Pr(){prelude++}function Fr(){prelude++}',
+    'function hd(e,t={}){',
+    '  if(Pr(),Fr(),k&&k!==e){let e=k;us?.unmount(),e.remove?.()}',
+    '  k=e;us={unmount(){disposals++;k=null}};',
+    '}',
+    'function state(){return {prelude,disposals,host:k}}',
+  ].join('\n');
+  const patched=cleanSameHostRemount(raw);
+  const app=new Function(patched+'\nreturn {hd,state}')();
+  const a={removed:0,remove(){this.removed++}},b={removed:0,remove(){this.removed++}};
+  app.hd(a);
+  app.hd(a);
+  assert.equal(app.state().prelude,4,'original native prelude still runs exactly once per mount');
+  assert.equal(app.state().disposals,1,'same host must dispose the former view');
+  assert.equal(app.state().host,a);
+  assert.equal(a.removed,0,'same-host retry keeps the live element attached');
+  app.hd(b);
+  assert.deepEqual(app.state(),{prelude:6,disposals:2,host:b});
+  assert.equal(a.removed,1,'new incoming argument must not be shadowed by block-local variable');
+});

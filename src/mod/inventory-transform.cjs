@@ -53,7 +53,7 @@ function inventory(text) {
   out = put(out, close[0], `__dfoPackHead$(${close[4]},()=>{${refresh[1]}();${render}()});${close[0]}`);
   out = put(out, refresh[0], `${refresh[1]}=()=>{__dfoPackRefresh$(${deps},()=>!!${salvage}||!!${chestRefusal}(${deps}),()=>${sortInPlace}(${deps}.entity?.items,{nameOf:${nameOf}}));${refresh[2]}=${pm}(${refresh[3]}),`);
   out = sessionHandle(out);
-  out = lifecycle(out, render, deps);
+  out = lifecycle(out, render, deps, true);
   return out + '\n;function __dfoPackList$(t,p){try{return globalThis.__dfoPack?.list?.(t,p)??t}catch{return t}}'
     + 'function __dfoPackBuild$(f,e){const p=globalThis.__dfoPack;return typeof p?.build===\'function\'?p.build(f,e):f(e)}'
     + 'function __dfoPackMode$(){try{return globalThis.__dfoPack?.mode?.()??\'\'}catch{return\'\'}}'
@@ -66,7 +66,24 @@ function inventory(text) {
 // During render() it can enter render() recursively before host.append(shell), leaving all the
 // suspended local shells to append as siblings when the stack unwinds. The callback's cache
 // invalidation stays synchronous; only its full repaint is coalesced after the current stack.
-function lifecycle(out, render, deps = null) {
+
+// An old paperdoll compose may resolve after A has been replaced by B.
+// Only the session that scheduled the promise may repaint on its completion.
+function guardFigureAsync(out, owner, deps, render, required) {
+  if (!deps) return out;
+  const pattern = 'function ('+ID+')\\(\\)\\{Promise\\.resolve\\(('+ID+')\\('+esc(deps)+'\\.entity\\)\\)\\.then\\(\\(\\)=>\\{'+esc(owner)+'&&'+esc(render)+'\\(\\)\\}\\)';
+  const found = [...out.matchAll(new RegExp(pattern, 'g'))];
+  if (found.length !== 1) {
+    if (required) throw new Error('inventory paperdoll async owner: '+found.length+' places');
+    return out;
+  }
+  const whole = found[0][0];
+  const patched = whole
+    .replace('(){Promise.resolve(', '(){const __dfoFigureHost$='+owner+',__dfoFigureSession$='+deps+';Promise.resolve(')
+    .replace(owner+'&&'+render+'()',owner+'===__dfoFigureHost$&&'+deps+'===__dfoFigureSession$&&'+render+'()');
+  return put(out, whole, patched);
+}
+function lifecycle(out, render, deps = null, requireFigure = false) {
   const decl = `function ${render}(){`;
   once(out, rx(`function ${esc(render)}\\(\\)\\{`), 'inventory native render');
   const callbacks = [...out.matchAll(/\.subscribe\(\(\)=>\{((?:[^{}]|\{[^{}]*\}){0,400})\}\)/g)]
@@ -78,6 +95,7 @@ function lifecycle(out, render, deps = null) {
   const guard = /(?:if\(([\w$]+)\)|([\w$]+)&&)\s*$/.exec(body.slice(0, at));
   if (!guard) throw new Error('inventory figure callback has unsupported owner guard');
   const owner = guard[1] || guard[2];
+  out = guardFigureAsync(out, owner, deps, render, requireFigure);
   const session = deps ?? 'null';
   const nextBody = body.slice(0, at) + `__dfoFigureNotice$(${owner})` + body.slice(at + call.length);
   // Each mount receives a fresh generation even if enhancedChunk retries on the same host.
@@ -158,4 +176,4 @@ function transformInventory(rel, text, log) {
   return out;
 }
 
-module.exports = { transformInventory, pages, inventory, lifecycle, sessionHandle, doorOwnership, receipt };
+module.exports = { transformInventory, pages, inventory, lifecycle, guardFigureAsync, sessionHandle, doorOwnership, receipt };

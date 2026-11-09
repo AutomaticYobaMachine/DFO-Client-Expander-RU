@@ -280,3 +280,28 @@ test('disposed overlay rejects late A load during pending save even before fired
   app.finish();
   assert.equal(app.alive(),false);
 });
+
+test('asynchronous paperdoll completion from A cannot repaint B', async () => {
+  const src = [
+    'let h={id:1},d={entity:1},c={key:1,img:1},paints=[],finish=[];',
+    'const arm={subscribe(fn){this.fn=fn}};',
+    'function recompose(e){return new Promise(r=>finish.push(r))}',
+    'function figure(){Promise.resolve(recompose(d.entity)).then(()=>{h&&r()}).catch(()=>{})}',
+    'function r(){paints.push(d.entity)}',
+    'function mount(){arm.subscribe(()=>{c={key:null,img:null};if(h)r()})}',
+    'function next(){h={id:2};d={entity:2}}',
+  ].join('\n');
+  const patched = lifecycle(src, 'r', 'd', true);
+  const app = new Function(patched + '\nreturn {figure,next,finish,paints}')();
+  app.figure();
+  app.next();
+  app.finish.shift()();
+  await Promise.resolve();
+  await Promise.resolve();
+  assert.deepEqual(app.paints, [], 'A completion is stale');
+  app.figure();
+  app.finish.shift()();
+  await Promise.resolve();
+  await Promise.resolve();
+  assert.deepEqual(app.paints, [2], 'B completion repaints B');
+});

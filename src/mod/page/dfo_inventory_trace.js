@@ -13,7 +13,8 @@
   // and a stalled renderer from an Electron process that is still alive.
   let frameCount = 0, lastFrameAt = 0, maxFrameGap = 0, beatCount = 0;
   let lastBeatAt = Date.now(), lastInputAt = 0, lastInputKind = '', lastPointer = null;
-  let lastTarget = null, lastEventId = 0;
+  let lastTarget = null, lastEventId = 0, lastDoorSeenAt = 0;
+  const AFTER_CLOSE_MS = 60000; // Keep watching for ghost pixels after DOM teardown.
   const eventIds = new WeakMap();
   const clock = () => Date.now();
 
@@ -30,7 +31,8 @@
       }
       if (indicator) {
         indicator.textContent = 'DFO TRACE 1.29.9 | ' + indicatorState
-          + (snapshot().doors ? ' | LIVE ' + new Date().toLocaleTimeString() + ' F' + frameCount : '');
+          + (snapshot().doors || (lastDoorSeenAt && clock() - lastDoorSeenAt <= AFTER_CLOSE_MS)
+            ? ' | LIVE ' + new Date().toLocaleTimeString() + ' F' + frameCount : '');
         indicator.title = indicatorDetail;
       }
     } catch { /* status must not affect the game */ }
@@ -259,9 +261,12 @@
     try {
       const now = clock(), gapMs = now - lastBeatAt;
       lastBeatAt = now; beatCount++;
-      if (!snapshot().doors) return;
+      const doors = snapshot().doors;
+      if (doors) lastDoorSeenAt = now;
+      if (!doors && (!lastDoorSeenAt || now - lastDoorSeenAt > AFTER_CLOSE_MS)) return;
       renderIndicator();
       record('renderer.heartbeat', {
+        doorsPresent: doors > 0, msSinceDoor: doors ? 0 : now - lastDoorSeenAt,
         beatCount, frameCount, maxFrameGapMs: maxFrameGap,
         intervalGapMs: gapMs, lastInputAgeMs: lastInputAt ? now - lastInputAt : null,
         lastInputKind, ...uiState(),

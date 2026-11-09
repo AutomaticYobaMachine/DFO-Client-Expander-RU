@@ -27,7 +27,7 @@ function fixture(paired=false){
     __dfoInventoryRemeasure$(){this.count++}};
   const {applyGeometry}=new Function('root','doc','scaledShells','state',helpers+'\nreturn {applyGeometry};')
     (root,{documentElement:{}},new WeakMap(),{view:'rows'});
-  return {root,shell,win,header:{closest:()=>shell},applyGeometry};
+  return {root,shell,win,main,header:{closest:()=>shell},applyGeometry};
 }
 test('native baseline persists without cumulative enlargement when viewport changes',()=>{
   const h=fixture();
@@ -52,4 +52,24 @@ test('paired pack grows overall width but constrains itself beside remote pane',
   assert.equal(h.win.style.getPropertyValue('width'),'1171.2px');
   h.root.innerWidth=1350;h.applyGeometry(h.header);
   assert.equal(h.win.style.getPropertyValue('width'),'1040px');
+});
+
+test('changing a connected viewport remeasures native frame instead of reusing its old inline height',()=>{
+  const h=fixture();
+  const nativeFrame=()=>h.root.innerWidth>=1800?{width:1600,height:640}:{width:1300,height:560};
+  const nativeMain=()=>h.root.innerWidth>=1800?{width:656,height:600}:{width:500,height:500};
+  h.win.getBoundingClientRect=()=>({
+    width:nativeFrame().width,
+    height:Number.parseFloat(h.win.style.getPropertyValue('height'))||nativeFrame().height,
+  });
+  h.main.getBoundingClientRect=()=>nativeMain();
+  h.applyGeometry(h.header);
+  assert.equal(h.win.style.getPropertyValue('height'),'760px');
+  h.root.innerWidth=1400;
+  h.applyGeometry(h.header);
+  assert.equal(h.win.style.getPropertyValue('height'),'660px',
+    'resize must clear the previous 760px inline height before measuring the new native 560px frame');
+  assert.equal(h.root.count,2);
+  h.applyGeometry(h.header);
+  assert.equal(h.root.count,2,'same-viewport layout remains idempotent');
 });

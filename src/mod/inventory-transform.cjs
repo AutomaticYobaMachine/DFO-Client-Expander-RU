@@ -52,12 +52,61 @@ function inventory(text) {
   if (deps !== refresh[3]) throw new Error('pack refresh: another deps');
   out = put(out, close[0], `__dfoPackHead$(${close[4]},()=>{${refresh[1]}();${render}()});${close[0]}`);
   out = put(out, refresh[0], `${refresh[1]}=()=>{__dfoPackRefresh$(${deps},()=>!!${salvage}||!!${chestRefusal}(${deps}),()=>${sortInPlace}(${deps}.entity?.items,{nameOf:${nameOf}}));${refresh[2]}=${pm}(${refresh[3]}),`);
+  out = lifecycle(out, render);
   return out + '\n;function __dfoPackList$(t,p){try{return globalThis.__dfoPack?.list?.(t,p)??t}catch{return t}}'
     + 'function __dfoPackBuild$(f,e){const p=globalThis.__dfoPack;return typeof p?.build===\'function\'?p.build(f,e):f(e)}'
     + 'function __dfoPackMode$(){try{return globalThis.__dfoPack?.mode?.()??\'\'}catch{return\'\'}}'
     + 'function __dfoPackListRow$(){try{return globalThis.__dfoPack?.listRow?.()===!0}catch{return!1}}'
     + 'function __dfoPackHead$(h,r){try{globalThis.__dfoPack?.head?.(h,r)}catch{}}'
     + 'function __dfoPackRefresh$(d,b,s){try{globalThis.__dfoPack?.refresh?.(d,{busy:b,sort:s})}catch{}}\n';
+}
+
+// The original fpArm figure subscription is also notified by synchronous cold item-icon misses.
+// During render() it can enter render() recursively before host.append(shell), leaving all the
+// suspended local shells to append as siblings when the stack unwinds. The callback's cache
+// invalidation stays synchronous; only its full repaint is coalesced after the current stack.
+function lifecycle(out, render) {
+  const decl = `function ${render}(){`;
+  once(out, rx(`function ${esc(render)}\\(\\)\\{`), 'inventory native render');
+  const callbacks = [...out.matchAll(/\.subscribe\(\(\)=>\{((?:[^{}]|\{[^{}]*\}){0,400})\}\)/g)]
+    .filter(m => m[1].includes('key:null,img:null') && m[1].includes(`${render}()`));
+  if (callbacks.length !== 1) throw new Error(`inventory fpArm callback: ${callbacks.length} places`);
+  const whole = callbacks[0][0], body = callbacks[0][1];
+  const call = `${render}()`, at = body.indexOf(call);
+  if (at < 0 || body.indexOf(call, at + call.length) >= 0) throw new Error('inventory figure callback has ambiguous repaint');
+  const guard = /(?:if\(([\w$]+)\)|([\w$]+)&&)\s*$/.exec(body.slice(0, at));
+  if (!guard) throw new Error('inventory figure callback has unsupported owner guard');
+  const owner = guard[1] || guard[2];
+  const nextBody = body.slice(0, at) + `__dfoRequestRender$(${owner})` + body.slice(at + call.length);
+  out = put(out, whole, whole.replace(body, nextBody));
+  out = put(out, decl, 'function __dfoNativeRender$(){');
+  // Separate function declarations preserve all native render call sites, including
+  // user actions that must repaint synchronously. A stale microtask cannot paint another host.
+  return out + `
+;let __dfoRenderBusy$=false,__dfoRenderDirty$=false,__dfoRenderQueued$=false,__dfoRenderOwner$=null;
+function __dfoRequestRender$(owner){
+  if(!owner)return;
+  if(__dfoRenderQueued// equip-*.js: ItemCollection.AddItem&__dfoRenderOwner$===owner)return;
+  __dfoRenderQueued$=true;__dfoRenderOwner$=owner;
+  Promise.resolve().then(()=>{
+    if(__dfoRenderOwner$!==owner)return;
+    __dfoRenderQueued$=false;__dfoRenderOwner$=null;
+    if(${owner}===owner)${render}();
+  });
+}
+function ${render}(){
+  if(!${owner})return;
+  if(__dfoRenderBusy$){__dfoRenderDirty$=true;return;}
+  const liveOwner=${owner};let completed=false;
+  __dfoRenderBusy$=true;
+  try{__dfoNativeRender$();completed=true}
+  finally{
+    __dfoRenderBusy$=false;
+    const dirty=__dfoRenderDirty$;__dfoRenderDirty$=false;
+    if(completed&&dirty&&${owner}===liveOwner)__dfoRequestRender$(liveOwner);
+  }
+}
+`;
 }
 
 // equip-*.js: ItemCollection.AddItem (systems/inventory.js addItem). A quest item lands at the FRONT exactly when the
@@ -79,7 +128,7 @@ function transformInventory(rel, text, log) {
   let out = text;
   for (const [id, on, run] of JOBS) {
     if (!on(rel, out) || out.includes(`/*${id}*/`)) continue;
-    try { out = run(out) + `\n/*${id}*/\n`; log.push([id, 1]); } catch (e) { log.push([`${id}!error ${e.message}`, 0]); }
+    try { out = run(out) + `\n/*${id}*/\n`; log.push([id, 1]); if (id === 'inventory.view') log.push(['inventory.lifecycle', 1]); } catch (e) { log.push([`${id}!error ${e.message}`, 0]); }
   }
   return out;
 }

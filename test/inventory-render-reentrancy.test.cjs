@@ -292,6 +292,7 @@ test('asynchronous paperdoll completion from A cannot repaint B', async () => {
     'function next(){h={id:2};d={entity:2}}',
   ].join('\n');
   const patched = lifecycle(src, 'r', 'd', true);
+  assert.match(patched, /h===__dfoFigureHost\$&&d===__dfoFigureSession\$&&r\(\)/, 'do not expand $& replacement tokens');
   const app = new Function(patched + '\nreturn {figure,next,finish,paints}')();
   app.figure();
   app.next();
@@ -304,4 +305,50 @@ test('asynchronous paperdoll completion from A cannot repaint B', async () => {
   await Promise.resolve();
   await Promise.resolve();
   assert.deepEqual(app.paints, [2], 'B completion repaints B');
+});
+
+test('overlapping lazy openings reject A after B becomes the current inventory host', () => {
+  const raw = [
+    'let closed=0,unregistered=0;',
+    'function create(){',
+    '  let fired=false,host={isConnected:true,remove(){this.isConnected=false}};',
+    '  host.id="enhanced-inventory";',
+    '  function close(){if(fired)return;unregistered++;host.remove();fired=true;closed++}',
+    '  const overlay={get done(){return fired},dispose(){close()}};',
+    '  const request={alive:()=>!fired,host,onDismiss:()=>{host.remove();fired=true},label:"inventory"};',
+    '  return {overlay,request}',
+    '}',
+    'function stats(){return {closed,unregistered}}',
+  ].join('\n');
+  const code = doorOwnership(raw);
+  const app = new Function(code+'\nreturn {create,stats}')();
+  const a=app.create(),b=app.create();
+  assert.equal(a.request.alive(),false,'A must be cancelled without requiring dispose()');
+  assert.equal(b.request.alive(),true,'B must retain permission to mount');
+  a.overlay.dispose();
+  assert.equal(b.request.alive(),true,'an old close cannot retire B');
+  b.request.onDismiss();
+  assert.deepEqual(app.stats(),{closed:2,unregistered:2},'error dismissal runs the full close path');
+  assert.equal(b.request.host.isConnected,false);
+  assert.equal(b.request.alive(),false);
+});
+
+test('lazy load failure respects deferred chest save instead of bypassing closeSession', () => {
+  const raw = [
+    'let pendingSave=true,completed=0;',
+    'let fired=false,host={isConnected:true,remove(){this.isConnected=false}};',
+    'host.id="enhanced-inventory";',
+    'function close(){if(fired||pendingSave)return;host.remove();fired=true;completed++}',
+    'const overlay={get done(){return fired},dispose(){close()}};',
+    'const request={alive:()=>!fired,host,onDismiss:()=>{host.remove();fired=true},label:"inventory"};',
+    'function finish(){pendingSave=false;close()}',
+  ].join('\n');
+  const code=doorOwnership(raw);
+  const app=new Function(code+'\nreturn {request,finish,completed:()=>completed}')();
+  app.request.onDismiss();
+  assert.equal(app.request.host.isConnected,true,'do not bypass pending save');
+  assert.equal(app.completed(),0);
+  app.finish();
+  assert.equal(app.completed(),1);
+  assert.equal(app.request.host.isConnected,false);
 });

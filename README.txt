@@ -1,4 +1,4 @@
-DFO-Client-Expander-RU 1.29.8
+DFO-Client-Expander-RU 1.29.9
 ===========================
 Автор: AutomaticYobaMachine
 Создано специально для русского сообщества DFO Online.

@@ -196,6 +196,57 @@ test('freeze probe captures DOM input path, handler presence, owner status and f
   assert.ok(!batches.some(x => x.type === 'view.render.start'));
 });
 
+test('filter probe observes the native callback mutating the remote virtual list without invoking it', async () => {
+  let mutationObserver = null, timer = null, invokedNative = 0;
+  const handlers = new Map(), writes = [];
+  const remotelist = { isConnected: true, childElementCount: 2,
+    scrollHeight: 200, textContent: 'four', querySelectorAll() { return [1, 2]; } };
+  const host = { isConnected: true, childElementCount: 1,
+    querySelector(selector) { return selector === '.remotelist' ? remotelist : null; },
+    querySelectorAll() { return []; } };
+  const select = { isConnected: true, selectedIndex: 1, classList: ['storecat'],
+    onchange() { invokedNative++; remotelist.childElementCount = 3; remotelist.textContent = 'many rows'; mutationObserver.callback([
+      { type: 'childList', addedNodes: [1, 2], removedNodes: [3] }
+    ]); }, matches(query) { return query.includes('.storecat'); },
+    closest() { return host; }, tagName: 'SELECT', getAttribute() { return null; } };
+  const document = { readyState: 'complete', body: null,
+    querySelectorAll(sel) { return sel === '#enhanced-inventory' ? [host] : []; },
+    querySelector(sel) { return sel === '#enhanced-inventory' ? host : null; },
+    addEventListener(kind, fn, capture) { handlers.set(kind + ':' + !!capture, fn); } };
+  const context = {
+    document,
+    fetch: async (url, options) => { writes.push(...JSON.parse(options.body)); return { ok: true, status: 204 }; },
+    MutationObserver: class {
+      constructor(callback) { this.callback = callback; mutationObserver = this; }
+      observe() { this.observing = true; }
+      disconnect() { this.observing = false; }
+    },
+    setTimeout(fn, millis) { if (millis === 350) timer = fn; },
+    addEventListener() {}, console: { warn() {} }
+  };
+  vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../src/mod/page/dfo_inventory_trace.js'),'utf8'), context);
+  const api = context.__dfoInventoryTrace;
+  await new Promise(resolve => setImmediate(resolve));
+  const event = { type: 'change', target: select, defaultPrevented: false };
+  handlers.get('change:true')(event);
+  assert.equal(invokedNative, 0, 'probe must not call the real onchange');
+  assert.equal(mutationObserver?.observing, true, 'mutation observer attaches before native onchange');
+  select.onchange(); // simulate the browser's normal target listener
+  timer();
+  await api.flush();
+  const result = writes.find(x => x.type === 'filter.dom.result');
+  assert.ok(result, 'probe must write a result for native DOM changes');
+  assert.equal(result.data.mutationRecords, 1);
+  assert.equal(result.data.addedNodes, 2);
+  assert.equal(result.data.removedNodes, 1);
+  assert.equal(result.data.beforeNodes, 2);
+  assert.equal(result.data.afterNodes, 3);
+  assert.equal(result.data.beforeTextLength, 4);
+  assert.equal(result.data.afterTextLength, 9);
+  assert.equal(result.data.controlConnected, true);
+  assert.equal(invokedNative, 1);
+});
+
 test('normal render breadcrumbs do not bury the diagnostic input and liveness events', async () => {
   const batches = [];
   const document = { readyState: 'complete', querySelectorAll: () => [],

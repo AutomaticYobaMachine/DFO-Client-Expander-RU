@@ -128,8 +128,8 @@ test('passive client tracer observes and flushes events without intercepting cli
     stopPropagation() { throw Error('must not call'); } };
   handlers.get('click')(click);
   assert.ok(api.tail().some(x => x.type === 'ui.click'));
-  await Promise.resolve();
-  await Promise.resolve();
+  // Startup flush runs immediately; wait for its microtasks to settle before draining clicks.
+  await new Promise(resolve => setImmediate(resolve));
   await api.flush();
   const observed = posts.flatMap(p => JSON.parse(p.body));
   assert.ok(observed.some(x => x.type === 'trace.started'));

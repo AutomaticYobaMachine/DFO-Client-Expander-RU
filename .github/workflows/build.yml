@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - fix/inventory-window-single-row-2026-11-08
+      - fix/inventory-render-reentrancy-2026-11-09
   workflow_dispatch:
 
 permissions:
@@ -49,23 +50,25 @@ jobs:
           (cd src/gui && go test ./...)
           node --test test/font-assets.test.cjs test/fonts.test.cjs test/item-cards.test.cjs test/item-text.test.cjs test/packaging.test.cjs test/service-windows.test.cjs test/loot-input.test.cjs test/loot-access.test.cjs test/loot-hosts.test.cjs test/loot-physical.test.cjs test/loot-sources.test.cjs test/local-import.test.cjs test/dungeon-intel.test.cjs test/dungeon-live.test.cjs test/dungeon-navigation.test.cjs test/dungeon-quest-navigation.test.cjs test/dungeon-graph.test.cjs test/dungeon-complex.test.cjs test/dungeon-shafts.test.cjs test/ui-text.test.cjs test/pack.test.cjs test/inventory-layout.test.cjs
           node --test test/inventory-layout-browser.test.cjs
-          (cd dist && sha256sum --check "DFO-Client-Expander-RU-$BUILD_VERSION.exe.sha256")
+          node --test test/inventory-render-reentrancy.test.cjs test/inventory-geometry.test.cjs
+          (cd dist && sha256sum --check "DFO-Client-Expander-RU-$BUILD_VERSION.exe.sha256" "DFO-Client-Expander-RU-$BUILD_VERSION.zip.sha256")
 
-      - name: Keep the EXE and checksum without publishing a release
+      - name: Keep the standalone EXE, ZIP and checksums without publishing a release
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: DFO-Client-Expander-RU-${{ env.BUILD_VERSION }}-windows-x64
           path: |
             dist/DFO-Client-Expander-RU-${{ env.BUILD_VERSION }}.exe
             dist/DFO-Client-Expander-RU-${{ env.BUILD_VERSION }}.exe.sha256
+            dist/DFO-Client-Expander-RU-${{ env.BUILD_VERSION }}.zip
+            dist/DFO-Client-Expander-RU-${{ env.BUILD_VERSION }}.zip.sha256
           if-no-files-found: error
           compression-level: 9
           retention-days: 30
 
-      # The user explicitly requested a committed EXE in this branch (not just a 30-day Actions artifact).
-      # This step is never executed for main or any other branch.
-      - name: Commit checked Windows EXE and SHA-256 into the fix branch
-        if: ${{ github.ref == 'refs/heads/fix/inventory-window-single-row-2026-11-08' }}
+      # Keep test installers in both fix branches; never commit build binaries to main.
+      - name: Commit checked Windows EXE, ZIP and SHA-256 to the fix branch
+        if: ${{ github.ref == 'refs/heads/fix/inventory-window-single-row-2026-11-08' || github.ref == 'refs/heads/fix/inventory-render-reentrancy-2026-11-09' }}
         shell: bash
         run: |
           set -euo pipefail
@@ -73,8 +76,10 @@ jobs:
           mkdir -p "$target"
           cp "dist/DFO-Client-Expander-RU-$BUILD_VERSION.exe" "$target/"
           cp "dist/DFO-Client-Expander-RU-$BUILD_VERSION.exe.sha256" "$target/"
-          (cd "$target" && sha256sum --check "DFO-Client-Expander-RU-$BUILD_VERSION.exe.sha256")
-          git add "$target/DFO-Client-Expander-RU-$BUILD_VERSION.exe" "$target/DFO-Client-Expander-RU-$BUILD_VERSION.exe.sha256"
+          cp "dist/DFO-Client-Expander-RU-$BUILD_VERSION.zip" "$target/"
+          cp "dist/DFO-Client-Expander-RU-$BUILD_VERSION.zip.sha256" "$target/"
+          (cd "$target" && sha256sum --check "DFO-Client-Expander-RU-$BUILD_VERSION.exe.sha256" "DFO-Client-Expander-RU-$BUILD_VERSION.zip.sha256")
+          git add "$target/DFO-Client-Expander-RU-$BUILD_VERSION.exe" "$target/DFO-Client-Expander-RU-$BUILD_VERSION.exe.sha256" "$target/DFO-Client-Expander-RU-$BUILD_VERSION.zip" "$target/DFO-Client-Expander-RU-$BUILD_VERSION.zip.sha256"
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git diff --cached --quiet || git commit -m "build: include verified DFO installer $BUILD_VERSION in fix branch"

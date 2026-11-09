@@ -9,7 +9,7 @@ import (
 
 const (
 	appName    = "DFO-Client-Expander-RU"
-	appVersion = "1.29.6"
+	appVersion = "1.29.7"
 	appAuthor  = "AutomaticYobaMachine"
 )
 

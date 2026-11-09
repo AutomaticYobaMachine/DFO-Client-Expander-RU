@@ -103,6 +103,40 @@ test('main process creates a trace without any inventory renderer, and serves fa
   } finally { fs.rmSync(dir, { recursive: true, force: true }); }
 });
 
+test('renderer startup survives blocked POST and reaches real Electron GET fallback, with visible status', async () => {
+  const { wrap } = require('../src/mod/hook.cjs');
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'dfo-trace-e2e-'));
+  try {
+    const handler = wrap(async () => new Response('native'), { app: { getPath: () => dir } });
+    const file = path.join(dir, 'DFO-Client-Expander-RU', 'dfo-mod-inventory-trace.ndjson');
+    const labels = [];
+    const doc = {
+      readyState: 'complete',
+      querySelectorAll() { return []; },
+      addEventListener() {},
+      body: { append(node) { labels.push(node); } },
+      createElement() { return { style: {}, textContent: '', title: '' }; },
+    };
+    const sandbox = {
+      document: doc,
+      fetch: (url, init = {}) => {
+        if (init.method === 'POST') return Promise.reject(new Error('POST unsupported by custom scheme'));
+        return handler(new Request(new URL(url, 'dagger://game/play/index.html')));
+      },
+      setTimeout() {},
+      addEventListener() {},
+      console: { warn() {} },
+    };
+    vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../src/mod/page/dfo_inventory_trace.js'),'utf8'), sandbox);
+    await new Promise(resolve => setImmediate(resolve));
+    const records = fs.readFileSync(file, 'utf8').trim().split('\n').map(JSON.parse);
+    assert.ok(records.some(x => x.type === 'bridge.ready'), 'the Electron bootstrap must persist');
+    assert.ok(records.some(x => x.type === 'trace.started'), 'GET fallback must deliver the renderer handshake');
+    assert.equal(labels.length, 1, 'a visible diagnostic badge must be created');
+    assert.match(labels[0].textContent, /GET OK/);
+  } finally { fs.rmSync(dir, { recursive: true, force: true }); }
+});
+
 test('passive client tracer observes and flushes events without intercepting clicks', async () => {
   const handlers = new Map(), timers = [], posts = [];
   const document = {

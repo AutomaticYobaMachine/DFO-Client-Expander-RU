@@ -78,20 +78,28 @@ function lifecycle(out, render) {
   if (!guard) throw new Error('inventory figure callback has unsupported owner guard');
   const owner = guard[1] || guard[2];
   const nextBody = body.slice(0, at) + `__dfoRequestRender$(${owner})` + body.slice(at + call.length);
-  out = put(out, whole, whole.replace(body, nextBody));
+  // Each mount receives a fresh generation even if enhancedChunk retries on the same host.
+  const subscription = whole.replace(body, nextBody).replace('.subscribe(', '.subscribe(__dfoOwnFigure$(').replace(/\)$/, '))');
+  out = put(out, whole, subscription);
   out = put(out, decl, 'function __dfoNativeRender$(){');
   // Separate function declarations preserve all native render call sites, including
   // user actions that must repaint synchronously. A stale microtask cannot paint another host.
   return out + `
 ;let __dfoRenderBusy$=false,__dfoRenderDirty$=false,__dfoRenderQueued$=false,__dfoRenderOwner$=null;
+let __dfoFigureGen$=0,__dfoRenderGeneration$=-1;
+function __dfoOwnFigure$(callback){
+  const generation=++__dfoFigureGen$;
+  return (...args)=>{if(generation===__dfoFigureGen$)callback(...args)};
+}
 function __dfoRequestRender$(owner){
   if(!owner)return;
-  if(__dfoRenderQueued$&&__dfoRenderOwner$===owner)return;
-  __dfoRenderQueued$=true;__dfoRenderOwner$=owner;
+  const generation=__dfoFigureGen$;
+  if(__dfoRenderQueued$&&__dfoRenderOwner$===owner&&__dfoRenderGeneration$===generation)return;
+  __dfoRenderQueued$=true;__dfoRenderOwner$=owner;__dfoRenderGeneration$=generation;
   Promise.resolve().then(()=>{
-    if(__dfoRenderOwner$!==owner)return;
-    __dfoRenderQueued$=false;__dfoRenderOwner$=null;
-    if(${owner}===owner)${render}();
+    if(__dfoRenderOwner$!==owner||__dfoRenderGeneration$!==generation)return;
+    __dfoRenderQueued$=false;__dfoRenderOwner$=null;__dfoRenderGeneration$=-1;
+    if(${owner}===owner&&__dfoFigureGen$===generation)${render}();
   });
 }
 function ${render}(){

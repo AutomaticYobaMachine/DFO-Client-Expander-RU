@@ -40,6 +40,7 @@ const OWN = Object.freeze({   // served at dagger://game/dfo-mod/<name>
   'dfo_dungeon_live_model.js': 'page/dfo_dungeon_live_model.js',
   'dfo_dungeon_graph.js': 'page/dfo_dungeon_graph.js',
   'dfo_dungeon_nav_model.js': 'page/dfo_dungeon_nav_model.js', 'dfo_dungeon_nav.js': 'page/dfo_dungeon_nav.js', 'dfo_dungeon_live.js': 'page/dfo_dungeon_live.js',
+  'dfo_inventory_trace.js': 'page/dfo_inventory_trace.js',
   'dfo_pack_data.js': 'page/dfo_pack_data.js', 'dfo_pack_rules.js': 'page/dfo_pack_rules.js', 'dfo_pack.js': 'page/dfo_pack.js',
   'dfo_loot_rules.js': 'page/dfo_loot_rules.js', 'dfo_loot_ui.js': 'page/dfo_loot_ui.js', 'dfo_loot.js': 'page/dfo_loot.js', 'dfo_marks.js': 'page/dfo_marks.js', 'dfo_town.js': 'page/dfo_town.js', 'ru_dict.js': 'page/ru_dict.js', 'ru_i18n.js': 'page/ru_i18n.js',
   'ru_locale.js': 'page/ru_locale.js', 'ru_items.js': 'page/ru_items.js',

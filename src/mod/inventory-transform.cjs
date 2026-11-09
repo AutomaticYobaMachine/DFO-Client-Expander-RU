@@ -114,7 +114,7 @@ function lifecycle(out, render, deps = null, requireFigure = false) {
     .replace('  ++__dfoNoticeSeq$;\n  __dfoRequestRender$(owner,@@SESSION@@);',
       '  ++__dfoNoticeSeq$;\n  if(__dfoNoticeSeq$===1||__dfoNoticeSeq$%32===0)__dfoTraceRender$("view.figure.notice",{seq:__dfoNoticeSeq$,busy:__dfoRenderBusy$});\n  __dfoRequestRender$(owner,@@SESSION@@);')
     .replace('  if(!owner||@@OWNER@@!==owner||@@SESSION@@!==session)return;',
-      '  if(!owner||@@OWNER@@!==owner||@@SESSION@@!==session){__dfoTraceRender$("view.request.stale",{generation});return;}')
+      '  if(!owner||@@OWNER@@!==owner||@@SESSION@@!==session){__dfoTraceRender$("view.request.stale",{reason:"owner-change"});return;}')
     .replace('  __dfoRenderPending$=pending;\n  Promise.resolve().then(()=>{',
       '  __dfoRenderPending$=pending;\n  __dfoTraceRender$("view.render.queued",{generation,seq,force});\n  Promise.resolve().then(()=>{')
     .replace('    if(@@OWNER@@!==owner||@@SESSION@@!==session||__dfoFigureGen$!==generation)return;',

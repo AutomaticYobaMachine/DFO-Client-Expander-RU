@@ -144,10 +144,26 @@ function doorOwnership(out) {
   const handles=[...out.slice(mark,alive.index).matchAll(owner)];
   if(handles.length!==1)throw new Error('inventory overlay dispose ownership: '+handles.length+' places');
   const original=handles[0][0],close=handles[0][1];
-  let t=put(out,alive[0],alive[0].replace('alive:()=>!'+fired,
-    'alive:()=>!'+fired+'&&'+host+'.isConnected&&!'+host+'.__dfoRetired$'));
+
+  // Each host claims the most recent opening before asynchronous chunk loading.
+  const ids=[...out.matchAll(new RegExp('('+esc(host)+'\\.id=(.)enhanced-inventory\\2)','g'))]
+    .filter(m=>m[2]==='"'||m[2]==="'"||m[2]==='\u0060');
+  if(ids.length!==1)throw new Error('inventory host generation assignment: '+ids.length+' places');
+  // A failed lazy chunk must invoke the same close path as the native button:
+  // unregister, save/close the loot session, then dispose its DOM.
+  const dismiss=[...out.matchAll(new RegExp(
+    'onDismiss:\\(\\)=>\\{'+esc(host)+'\\.remove\\(\\)[;,]'+esc(fired)+'=(?:!0|true)\\}','g'))]
+    .filter(m=>m.index>=alive.index&&m.index<alive.index+500);
+  if(dismiss.length!==1)throw new Error('inventory lazy dismiss cleanup: '+dismiss.length+' places');
+
+  let t=put(out,ids[0][0],ids[0][0]+','+host+
+    '.__dfoGeneration$=(globalThis.__dfoInventoryDoorGeneration$=(globalThis.__dfoInventoryDoorGeneration$||0)+1)');
+  t=put(t,alive[0],alive[0].replace('alive:()=>!'+fired,
+    ()=>'alive:()=>!'+fired+'&&'+host+'.isConnected&&!'+host+
+    '.__dfoRetired$&&'+host+'.__dfoGeneration$===globalThis.__dfoInventoryDoorGeneration$'));
   t=put(t,original,original.replace('dispose(){'+close+'()}',
     'dispose(){'+host+'.__dfoRetired$=true;'+close+'()}'));
+  t=put(t,dismiss[0][0],'onDismiss:'+close);
   return t;
 }
 

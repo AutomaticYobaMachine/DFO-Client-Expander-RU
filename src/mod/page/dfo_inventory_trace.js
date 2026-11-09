@@ -79,6 +79,13 @@
   function record(type, info, host) {
     try {
       if (typeof type !== 'string' || !/^[a-z][a-z0-9.-]{0,63}$/.test(type)) return;
+      // The incident is a frozen but partly interactive window, not high render
+      // frequency. Do not bury dispatch/owner failures under normal repaint noise.
+      if (type === 'view.render.start' || type === 'view.render.queued' ||
+          type === 'view.render.skip' || type === 'view.figure.notice' ||
+          type === 'pack.head' || type === 'pack.geometry.begin' ||
+          type === 'pack.geometry.end') return;
+      if (type === 'view.render.end' && info?.completed !== false && info?.stillOwns !== false) return;
       const event = { session, seq: ++seq, at: Date.now(), type,
         data: { ...snapshot(host), ...cleanData(info) } };
       tail.push(event);
@@ -315,6 +322,7 @@
   }, true);
   doc.addEventListener('keydown', e => {
     if (e.ctrlKey && e.altKey && e.shiftKey && e.code === 'F10') {
+      status('MANUAL MARK', 'Current window health and input-path snapshot captured');
       record('trace.manual', { key: 'Ctrl+Alt+Shift+F10',
         ...uiState(), ...snapshot(), ...lastTarget,
         frameCount, maxFrameGapMs: maxFrameGap, beatCount,

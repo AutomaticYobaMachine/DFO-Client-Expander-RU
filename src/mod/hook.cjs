@@ -14,6 +14,7 @@ const path = require('node:path');
 const { transformAsset, injectPage, expectedHooks } = require('./transforms.cjs');
 const { createLootStore } = require('./loot-store.cjs');
 const { createInventoryTraceStore } = require('./inventory-trace-store.cjs');
+const { createPresentationMonitor } = require('./inventory-frame-monitor.cjs');
 const {replacement,stripFaces}=require('./font-assets.cjs');
 const itemText = require('./item-text.cjs');
 
@@ -55,6 +56,7 @@ function wrap(handleDagger, { app = null } = {}) {
   const logFile = userData && path.join(userData, 'dfo-mod.log');
   const lootStore = createLootStore(userData);
   const inventoryTrace = createInventoryTraceStore(userData);
+  const frameMonitor = createPresentationMonitor(inventoryTrace);
   let cfg = { ...DEFAULTS };
   try { if (cfgFile && fs.existsSync(cfgFile)) cfg = { ...DEFAULTS, ...JSON.parse(fs.readFileSync(cfgFile, 'utf8')) }; } catch (e) { cfg = { ...DEFAULTS }; }
   cfg.marksOptions = { ...DEFAULTS.marksOptions, ...(cfg.marksOptions ?? {}) };
@@ -102,6 +104,7 @@ function wrap(handleDagger, { app = null } = {}) {
       const bindContents = (contents) => {
         if (!contents || typeof contents.on !== 'function' || watchedContents.has(contents)) return;
         watchedContents.add(contents);
+        frameMonitor.track(contents);
         let webContentsId = -1;
         try { if (Number.isInteger(contents.id)) webContentsId = contents.id; } catch {}
         contents.on('unresponsive', () => {
@@ -269,7 +272,10 @@ function wrap(handleDagger, { app = null } = {}) {
       const input = url.searchParams.get('event') || '';
       if (input.length > 3900) return new Response(null, { status: 413 });
       const result = inventoryTrace.write('[' + input + ']');
-      if (result === 204) lastRendererBatch = Date.now();
+      if (result === 204) {
+        lastRendererBatch = Date.now();
+        try { frameMonitor.feed([JSON.parse(input)]); } catch {}
+      }
       const gif = Buffer.from('R0lGODlhAQABAAD/ACwAAAAAAQABAAACAUwAOw==', 'base64');
       return new Response(gif, { status: result === 204 ? 200 : result,
         headers: { 'Content-Type': 'image/gif', 'Cache-Control': 'no-store' } });
@@ -277,8 +283,12 @@ function wrap(handleDagger, { app = null } = {}) {
     if (rel === 'dfo-mod/inventory-trace') {
       if (cfg.inventory === false) return new Response(null, { status: 404 });
       if (req.method !== 'POST') return new Response(null, { status: 405 });
-      const written = inventoryTrace.write(await req.text());
-      if (written === 204) lastRendererBatch = Date.now();
+      const body = await req.text();
+      const written = inventoryTrace.write(body);
+      if (written === 204) {
+        lastRendererBatch = Date.now();
+        try { frameMonitor.feed(JSON.parse(body)); } catch {}
+      }
       return new Response(null, { status: written });
     }
     if (rel === 'dfo-mod/report' && req.method === 'POST') { writeReport(await req.text()); return new Response(null, { status: 204 }); }

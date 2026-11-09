@@ -334,3 +334,64 @@ test('main Electron process persists renderer-unresponsive and GPU-failure signa
     assert.equal(events.find(x => x.type === 'browser.child.gone').data.kind, 'GPU');
   } finally { fs.rmSync(dir, { recursive: true, force: true }); }
 });
+
+
+test('Electron frame presentation probe identifies no new frames despite a live native monitor', () => {
+  const { createPresentationMonitor } = require('../src/mod/inventory-frame-monitor.cjs');
+  const { EventEmitter } = require('node:events');
+  let time = 5000, timer = null, captured = null, unsubscribed = 0;
+  const recorded = [], tracer = { serverEvent(type, data) { recorded.push({ type, data }); } };
+  const monitor = createPresentationMonitor(tracer, {
+    now: () => time,
+    setInterval(fn, milliseconds) { assert.equal(milliseconds, 2000); timer = fn; return { unref() {} }; },
+    clearInterval() { timer = null; },
+  });
+  const contents = new EventEmitter();
+  contents.id = 25;
+  contents.getURL = () => 'dagger://game/play/index.html';
+  contents.beginFrameSubscription = (onlyDirty, callback) => {
+    assert.equal(onlyDirty, true);
+    captured = callback;
+  };
+  contents.endFrameSubscription = () => { unsubscribed++; };
+  contents.getOwnerBrowserWindow = () => ({ isVisible: () => true, isMinimized: () => false });
+  monitor.track(contents);
+  monitor.feed([{ type: 'renderer.heartbeat', data: { doorsPresent: true } }]);
+  assert.equal(typeof captured, 'function', 'probe must subscribe to frame presentation');
+  assert.ok(recorded.some(x => x.type === 'frame.present.start'));
+  const image = { toBitmap: () => Buffer.from('pixel-data') };
+  captured(image, { x: 0, y: 0, width: 4, height: 6 });
+  time += 2000; timer();
+  let summaries = recorded.filter(x => x.type === 'frame.present.summary');
+  assert.equal(summaries.length, 1);
+  assert.equal(summaries[0].data.newFrames, 1);
+  assert.equal(summaries[0].data.dirtyPixelArea, 24);
+  assert.equal(summaries[0].data.sampledFrames, 1);
+  assert.equal(summaries[0].data.lastSampleHash.length, 16);
+  time += 2000; timer(); // the browser main thread still ticks; no new presented frames
+  summaries = recorded.filter(x => x.type === 'frame.present.summary');
+  assert.equal(summaries[1].data.newFrames, 0);
+  assert.equal(summaries[1].data.lastFrameAgeMs, 4000);
+  monitor.feed([{ type: 'renderer.heartbeat', data: { doorsPresent: true } }]);
+  time += 66000; monitor.pulse();
+  assert.equal(unsubscribed, 1);
+  assert.ok(recorded.some(x => x.type === 'frame.present.stop'));
+});
+
+test('frame presentation probe never subscribes to the launcher and fails open if Electron lacks the API', () => {
+  const { createPresentationMonitor } = require('../src/mod/inventory-frame-monitor.cjs');
+  const { EventEmitter } = require('node:events');
+  const recorded = [], monitor = createPresentationMonitor({
+    serverEvent(type, data) { recorded.push({ type, data }); },
+  }, { setInterval() { return { unref() {} }; } });
+  const launcher = new EventEmitter();
+  launcher.getURL = () => 'dagger://launcher/main.html';
+  launcher.beginFrameSubscription = () => { throw new Error('unexpected launcher capture'); };
+  monitor.track(launcher);
+  const unsupported = new EventEmitter();
+  unsupported.getURL = () => 'dagger://game/play/index.html';
+  monitor.track(unsupported);
+  monitor.feed([{ type: 'overlay.claim', data: {} }]);
+  assert.ok(recorded.some(x => x.type === 'frame.present.unavailable'));
+  assert.ok(!recorded.some(x => x.type === 'frame.present.start'));
+});

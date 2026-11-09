@@ -213,7 +213,7 @@ function doorOwnership(out) {
     'const previous=globalThis.__dfoInventoryDoorActive$;'+
     '__dfoTraceDoor$("overlay.claim",'+host+',{previousGeneration:previous?.host?.__dfoGeneration$??null});'+
     'if(previous&&previous.host!=='+host+'){try{__dfoTraceDoor$("overlay.handoff",previous.host,{nextGeneration:'+host+'.__dfoGeneration$});previous.retire()}catch(e){__dfoTraceDoor$("overlay.handoff.error",previous.host,{message:String(e?.message||e)});console.warn("[dfo-mod inventory] old overlay cleanup failed",e)}}'+
-    'globalThis.__dfoInventoryDoorActive$={host:'+host+',retire:()=>{'+
+    'globalThis.__dfoInventoryDoorActive$={host:'+host+',state:()=>({done:!!'+fired+',connected:!!'+host+'.isConnected,retired:!!'+host+'.__dfoRetired$}),retire:()=>{'+
     'const wasRetired=!!'+host+'.__dfoRetired$;__dfoTraceDoor$("overlay.retire",'+host+',{alreadyRetired:wasRetired});'+host+'.__dfoRetired$=true;'+
     'if('+host+'.style){'+host+'.style.visibility="hidden";'+host+'.style.pointerEvents="none"}'+
     'if(!wasRetired){__dfoTraceDoor$("overlay.close.call",'+host+',{source:"retire"});'+close+'();__dfoTraceDoor$("overlay.close.return",'+host+',{source:"retire"})}}};'+

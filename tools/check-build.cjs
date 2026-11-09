@@ -6,7 +6,7 @@ const { execFileSync } = require('node:child_process');
 const { transformAsset, expectedHooks } = require('../src/mod/transforms.cjs');
 const { buildQuests } = require('../src/ru-build.cjs');
 const dir = path.join(process.argv[2] ?? '.', 'assets');
-const ctx = { marks: true, ru: true, nearbyLoot: true, itemCards: true, fonts: true, fontB64: fs.readFileSync(path.join(__dirname, '..', 'data', 'ru', 'tiny5_cyrillic.woff2')).toString('base64'), quests: buildQuests(path.join(__dirname, '..', 'data', 'ru')), ql: JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data', 'ru', 'ql_ru.json'), 'utf8')) };
+const ctx = { marks: true, ru: true, nearbyLoot: true, itemCards: true, inventory: true, fonts: true, fontB64: fs.readFileSync(path.join(__dirname, '..', 'data', 'ru', 'tiny5_cyrillic.woff2')).toString('base64'), quests: buildQuests(path.join(__dirname, '..', 'data', 'ru')), ql: JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data', 'ru', 'ql_ru.json'), 'utf8')) };
 const total = new Map(); let changed = 0, bad = 0;
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'dfo-check-'));
 for (const f of fs.readdirSync(dir).filter((x) => x.endsWith('.js'))) {

@@ -229,3 +229,16 @@ test('incompatible view fails closed, without partially publishing the inventory
   assert.throws(() => transformInventory('assets/enhancedInventory-test.js', invalid, log), /inventory lifecycle compatibility failure/);
   assert.ok(log.some(([id]) => id.startsWith('inventory.view!error ')));
 });
+
+test('published-style var sync binding with for(let ...) exposes the same remeasure callback', () => {
+  const src = [
+    'let h={contains(){return true}},d={},c={key:1,img:1},calls=0,zs=[{sync(o){if(o.remeasure)calls++}}];',
+    'const arm={subscribe(fn){this.fn=fn}};',
+    'var Ws=e=>{for(let t of zs)t.sync(e)};',
+    'function r(){}',
+    'function mount(){arm.subscribe(()=>{c={key:null,img:null};if(h)r()});r()}',
+  ].join('\n');
+  const app = new Function(lifecycle(src, 'r', 'd') + '\nreturn {calls:()=>calls,fn:globalThis.__dfoInventoryRemeasure$}')();
+  assert.equal(app.fn({isConnected:true}), true);
+  assert.equal(app.calls(), 1);
+});

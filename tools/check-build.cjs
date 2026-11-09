@@ -15,16 +15,7 @@ for (const f of fs.readdirSync(dir).filter((x) => x.endsWith('.js'))) {
   for (const [id, n] of log) total.set(id, (total.get(id) ?? 0) + n);
   if (log.some(([id, n]) => id === 'inventory.lifecycle' && n > 0)) {
     if (text.includes('globalThis.__dfoInventoryRemeasure$=')) remeasureHooks++;
-    else {
-      bad++;
-      const samples = [...src.matchAll(/\.sync\(/g)].slice(0, 18)
-        .map(m => src.slice(Math.max(0, m.index - 190), Math.min(src.length, m.index + 90)));
-      console.log('INVENTORY SYNC DIAG ' + f + ': ' + JSON.stringify(samples));
-      for (const needle of ['remeasure:', 'draw:!1', 'sync({', 'for(const', 'packFitSig']) {
-        const i = src.indexOf(needle);
-        if (i >= 0) console.log('INVENTORY NEAR ' + needle + ': ' + src.slice(Math.max(0, i - 190), i + 150));
-      }
-    }
+    else bad++;
   }
   if (log.some(([id]) => id.startsWith('inventory.view!error ') || id.startsWith('inventory.lifecycle!error '))) bad++;
 

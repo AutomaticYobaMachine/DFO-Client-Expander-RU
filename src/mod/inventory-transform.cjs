@@ -99,7 +99,9 @@ function __dfoRequestRender$(owner){
   Promise.resolve().then(()=>{
     if(__dfoRenderOwner$!==owner||__dfoRenderGeneration$!==generation)return;
     __dfoRenderQueued$=false;__dfoRenderOwner$=null;__dfoRenderGeneration$=-1;
-    if(${owner}===owner&&__dfoFigureGen$===generation)${render}();
+    if(${owner}===owner&&__dfoFigureGen$===generation){
+      try{${render}()}catch(e){console.warn('[dfo-mod inventory] deferred repaint failed',e)}
+    }
   });
 }
 function ${render}(){

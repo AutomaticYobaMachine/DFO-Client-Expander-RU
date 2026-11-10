@@ -26,7 +26,7 @@ function fixture(){
     'function state(){return {paints,draws,src:h.current.src,connected:h.current.isConnected}}',
   ].join('\n');
   const result=lifecycle(source,'r','d',true,true);
-  const app=new Function(result+'\nreturn {arm,mount,changeCategory,state,model,icons,refreshFigure}')();
+  const app=new Function(result+'\nreturn {arm,mount,changeCategory,state,model,icons,refreshFigure,liveTiles:()=>__dfoLiveTiles$.size}')();
   return {app,result};
 }
 
@@ -57,6 +57,14 @@ test('late callback from old category cannot replace the new category tile',asyn
   await Promise.resolve();
   assert.equal(app.state().src,'new-model');
   assert.equal(app.state().paints,1,'filter-only changes cannot trigger full shell rebuild');
+});
+
+test('repeated warm-cache category refills release detached tile registry entries',async()=>{
+  const {app}=fixture();
+  app.mount();
+  for(let i=0;i<40;i++)app.changeCategory();
+  await Promise.resolve();
+  assert.equal(app.liveTiles(),1,'only the current connected category may remain tracked');
 });
 
 test('real rig structural change can still request one owner-scoped full repaint',async()=>{

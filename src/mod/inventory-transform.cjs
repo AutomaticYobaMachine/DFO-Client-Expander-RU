@@ -140,9 +140,9 @@ function lifecycle(out, render, deps = null, requireFigure = false, trackIcons =
   // Clear this registry only when the structural renderer really begins.
   let generated = tracedRuntime;
   if (trackIcons) {
-    const nativeStart = '  let completed=false;\n  __dfoRenderBusy$=true;';
+    const nativeStart = '  __dfoRenderBusy$=true;__dfoRenderActive$=live;';
     if (!generated.includes(nativeStart)) throw new Error('inventory icon tracking native render start changed');
-    generated = generated.replace(nativeStart, '  let completed=false;\n  __dfoLiveTiles$.clear();\n  __dfoRenderBusy$=true;');
+    generated = generated.replace(nativeStart, '  __dfoLiveTiles$.clear();\n' + nativeStart);
     const genMark = 'const generation=++__dfoFigureGen$,ownedHost=@@OWNER@@,ownedSession=@@SESSION@@;';
     if (!generated.includes(genMark)) throw new Error('inventory icon tracking figure owner changed');
     generated = generated.replace(genMark, genMark +

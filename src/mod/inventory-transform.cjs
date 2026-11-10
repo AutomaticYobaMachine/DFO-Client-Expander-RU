@@ -54,7 +54,7 @@ function inventory(text) {
   out = put(out, refresh[0], `${refresh[1]}=()=>{__dfoPackRefresh$(${deps},()=>!!${salvage}||!!${chestRefusal}(${deps}),()=>${sortInPlace}(${deps}.entity?.items,{nameOf:${nameOf}}));${refresh[2]}=${pm}(${refresh[3]}),`);
   out = cleanSameHostRemount(out);
   out = sessionHandle(out);
-  out = lifecycle(out, render, deps, true);
+  out = lifecycle(out, render, deps, true, true);
   return out + '\n;function __dfoPackList$(t,p){try{return globalThis.__dfoPack?.list?.(t,p)??t}catch{return t}}'
     + 'function __dfoPackBuild$(f,e){const p=globalThis.__dfoPack;return typeof p?.build===\'function\'?p.build(f,e):f(e)}'
     + 'function __dfoPackMode$(){try{return globalThis.__dfoPack?.mode?.()??\'\'}catch{return\'\'}}'
@@ -84,7 +84,7 @@ function guardFigureAsync(out, owner, deps, render, required) {
     .replace(owner+'&&'+render+'()', () => owner+'===__dfoFigureHost$&&'+deps+'===__dfoFigureSession$&&__dfoFigureGen$===__dfoFigureGeneration$&&'+render+'()');
   return put(out, whole, patched);
 }
-function lifecycle(out, render, deps = null, requireFigure = false) {
+function lifecycle(out, render, deps = null, requireFigure = false, trackIcons = false) {
   const decl = `function ${render}(){`;
   once(out, rx(`function ${esc(render)}\\(\\)\\{`), 'inventory native render');
   const callbacks = [...out.matchAll(/\.subscribe\(\(\)=>\{((?:[^{}]|\{[^{}]*\}){0,400})\}\)/g)]
@@ -97,8 +97,10 @@ function lifecycle(out, render, deps = null, requireFigure = false) {
   if (!guard) throw new Error('inventory figure callback has unsupported owner guard');
   const owner = guard[1] || guard[2];
   out = guardFigureAsync(out, owner, deps, render, requireFigure);
+  const iconTracking = trackIcons ? trackNativeIconTiles(out, owner) : null;
+  if (iconTracking) out = iconTracking.text;
   const session = deps ?? 'null';
-  const nextBody = body.slice(0, at) + `__dfoFigureNotice$(${owner})` + body.slice(at + call.length);
+  const nextBody = body.slice(0, at) + (trackIcons ? `__dfoVisualNotice$(${owner})` : `__dfoFigureNotice$(${owner})`) + body.slice(at + call.length);
   // Each mount receives a fresh generation even if enhancedChunk retries on the same host.
   const subscription = whole.replace(body, nextBody).replace('.subscribe(', '.subscribe(__dfoOwnFigure$(').replace(/\)$/, '))');
   out = put(out, whole, subscription);
@@ -133,9 +135,40 @@ function lifecycle(out, render, deps = null, requireFigure = false) {
       '    __dfoTraceRender$("view.render.end",{completed,elapsedMs:Date.now()-startedAt,dirty,stillOwns,noticeAtStart});\n    if(completed){\n      if(stillOwns){');
   const traceCode = "\n;function __dfoTraceRender$(type,info){try{globalThis.__dfoInventoryTrace?.record?.(type,info,@@OWNER@@)}catch{}}\n";
   const syncCode = "\n;globalThis.__dfoInventoryRemeasure$=(shell)=>{\n  if(!shell?.isConnected||!@@OWNER@@?.contains?.(shell))return false;\n  try{@@SYNC@@({remeasure:true});return true}\n  catch(e){console.warn('[dfo-mod inventory] list remeasure failed',e);return false}\n};\n";
-  return out + tracedRuntime.replaceAll('@@OWNER@@',owner).replaceAll('@@SESSION@@',session).replaceAll('@@RENDER@@',render) +
+  // Clear this registry only when the structural renderer really begins.
+  let generated = tracedRuntime;
+  if (trackIcons) {
+    const nativeStart = '  let completed=false;\n  __dfoRenderBusy$=true;';
+    if (!generated.includes(nativeStart)) throw new Error('inventory icon tracking native render start changed');
+    generated = generated.replace(nativeStart, '  let completed=false;\n  __dfoLiveTiles$.clear();\n  __dfoRenderBusy$=true;');
+    const genMark = 'const generation=++__dfoFigureGen$,ownedHost=@@OWNER@@,ownedSession=@@SESSION@@;';
+    if (!generated.includes(genMark)) throw new Error('inventory icon tracking figure owner changed');
+    generated = generated.replace(genMark, genMark +
+      '\n  __dfoLiveTiles$.clear();__dfoFigureSignature$=__dfoReadFigureSignature$();');
+  }
+  const iconRuntime = trackIcons ? "\n// An icon is a picture, not a reason to replace .pack-shell/.storefilter.\nconst __dfoLiveTiles$=new Map();\nlet __dfoVisualPending$=null,__dfoFigureSignature$=null;\nfunction __dfoTrackVisual$(tile,spec){\n  if(tile&&spec&&@@OWNER@@) __dfoLiveTiles$.set(tile,{\n    line:spec.line,box:spec.box,snap:spec.snap,\n    host:@@OWNER@@,session:@@SESSION@@,generation:__dfoFigureGen$\n  });\n  return tile;\n}\nfunction __dfoReadFigureSignature$(){\n  try{\n    const st=@@SESSION@@?.fpArm?.status?.();\n    if(!st)return null;\n    // The icon cache does not change these structural rig descriptors.\n    // Deliberately omit motion clocks and current combat pose.\n    return JSON.stringify([st.active,st.reason,st.skeletonPath,st.pieces,\n      st.rows,st.binding,st.weapon,st.worn,st.face,st.esm]);\n  }catch(e){\n    __dfoTraceRender$(\"view.figure.signature.error\",{message:String(e?.message||e)});\n    return null;\n  }\n}\nfunction __dfoVisualNotice$(owner){\n  const signature=__dfoReadFigureSignature$();\n  if(signature===null||signature!==__dfoFigureSignature$){\n    __dfoFigureSignature$=signature;\n    ++__dfoNoticeSeq$;\n    __dfoRequestRender$(owner,@@SESSION@@);\n    return;\n  }\n  // Late icon notices only refresh the tiles currently in the live host.\n  const session=@@SESSION@@,generation=__dfoFigureGen$;\n  if(!owner||@@OWNER@@!==owner)return;\n  if(__dfoVisualPending  return out + tracedRuntime.replaceAll('@@OWNER@@',owner).replaceAll('@@SESSION@@',session).replaceAll('@@RENDER@@',render) +
     traceCode.replaceAll('@@OWNER@@',owner) +
-    (syncName ? syncCode.replaceAll('@@OWNER@@',owner).replaceAll('@@SYNC@@',syncName) : '');
+    (syncName ? syncCode.replaceAll('@@OWNER@@',owner).replaceAll('@@SYNC@@',syncName) : '');&__dfoVisualPending$.owner===owner&&\n     __dfoVisualPending$.session===session&&__dfoVisualPending$.generation===generation)return;\n  const pending={owner,session,generation};\n  __dfoVisualPending$=pending;\n  Promise.resolve().then(()=>{\n    if(__dfoVisualPending$!==pending)return;\n    __dfoVisualPending$=null;\n    if(@@OWNER@@!==owner||@@SESSION@@!==session||__dfoFigureGen$!==generation)return;\n    const current=Array.from(__dfoLiveTiles$);\n    let updated=0;\n    for(const [tile,spec] of current){\n      if(spec.host!==owner||spec.session!==session||spec.generation!==generation||\n         !tile.isConnected||!owner.contains(tile)){\n        __dfoLiveTiles$.delete(tile);continue;\n      }\n      let fresh;\n      try{fresh=@@ITEM_TILE@@(spec.line,spec.box,()=>__dfoVisualNotice$(owner),spec.snap)}\n      catch(e){__dfoTraceRender$(\"view.icon.error\",{message:String(e?.message||e)});continue}\n      if(!fresh?.classList?.contains(\"has-icon\"))continue;\n      const next=fresh.querySelector(\":scope > img\")?.getAttribute(\"src\");\n      const before=tile.querySelector(\":scope > img\")?.getAttribute(\"src\");\n      if(!next||next===before)continue;\n      const wear=tile.querySelector(\".wear\");\n      if(wear)fresh.append(wear);\n      tile.replaceWith(fresh);\n      __dfoLiveTiles$.delete(tile);\n      __dfoLiveTiles$.set(fresh,spec);\n      updated++;\n    }\n    if(updated)__dfoTraceRender$(\"view.icon.updated\",{updated});\n  });\n}\n".replaceAll('@@OWNER@@',owner).replaceAll('@@SESSION@@',session)
+    .replaceAll('@@ITEM_TILE@@',iconTracking.itemTile) : '';
+  return out + generated.replaceAll('@@OWNER@@',owner).replaceAll('@@SESSION@@',session).replaceAll('@@RENDER@@',render) +
+    traceCode.replaceAll('@@OWNER@@',owner) +
+    (syncName ? syncCode.replaceAll('@@OWNER@@',owner).replaceAll('@@SYNC@@',syncName) : '') + iconRuntime;
+}
+
+
+// Model icons notify fpArm rather than landingTiles. Track the native
+// landingTiles factory's actual output so we can update visible picture
+// nodes without invalidating a container filter or recreating its DOM.
+// Fail closed if the target bundle has changed the verified shape.
+function trackNativeIconTiles(out, owner) {
+  const pattern = rx(`\\b(${ID})=(${ID})\\(\\((${ID}),(${ID})\\)=>(${ID})\\(\\3\\.line,\\3\\.box,\\4,\\3\\.snap\\),\\{alive:\\(\\)=>!!${esc(owner)}\\}\\)`, 'g');
+  const found = [...out.matchAll(pattern)];
+  if (found.length !== 1) throw new Error('inventory native landingTiles icon factory: ' + found.length + ' places');
+  const [whole, tiles, factory, spec, landed, itemTile] = found[0];
+  const needle = `${itemTile}(${spec}.line,${spec}.box,${landed},${spec}.snap)`;
+  if (!whole.includes(needle)) throw new Error('inventory native icon factory arguments changed');
+  const patched = whole.replace(needle, `__dfoTrackVisual$(${needle},${spec})`);
+  return { text: put(out, whole, patched), itemTile };
 }
 
 // The view is an ESM singleton; an old A handle may close after a B mount.

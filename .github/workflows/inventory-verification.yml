@@ -19,7 +19,7 @@ jobs:
       - name: Verify local lifecycle and geometry regressions
         run: |
           node --version
-          node --test test/inventory-render-reentrancy.test.cjs test/inventory-geometry.test.cjs test/inventory-trace.test.cjs test/inventory-layout.test.cjs test/pack.test.cjs
+          node --test test/inventory-render-reentrancy.test.cjs test/inventory-icon-landing.test.cjs test/inventory-geometry.test.cjs test/inventory-trace.test.cjs test/inventory-layout.test.cjs test/pack.test.cjs
       - name: Fetch the published 0.1.14602 game assets
         env:
           DFO_FETCH_CONCURRENCY: '8'

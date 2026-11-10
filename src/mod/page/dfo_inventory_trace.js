@@ -30,7 +30,7 @@
         doc.body.append(indicator);
       }
       if (indicator) {
-        indicator.textContent = 'DFO TRACE 1.29.13 | ' + indicatorState
+        indicator.textContent = 'DFO TRACE 1.29.14 | ' + indicatorState
           + (snapshot().doors || (lastDoorSeenAt && clock() - lastDoorSeenAt <= AFTER_CLOSE_MS)
             ? ' | LIVE ' + new Date().toLocaleTimeString() + ' F' + frameCount : '');
         indicator.title = indicatorDetail;
@@ -420,6 +420,6 @@
     // For local console troubleshooting only; nothing beyond the bounded tail is held in memory.
     tail: () => tail.slice(),
   });
-  record('trace.started', { diagnostic: true, build: '1.29.13', probes: 'input-failure-and-renderer-liveness' });
+  record('trace.started', { diagnostic: true, build: '1.29.14', probes: 'input-failure-and-renderer-liveness' });
   void flush(); // a startup acknowledgement must not depend on the player clicking inventory
 })(globalThis);

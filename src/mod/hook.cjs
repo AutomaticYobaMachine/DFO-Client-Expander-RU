@@ -13,9 +13,6 @@ const fs = require('node:fs');          // Electron's: reads inside app.asar, wh
 const path = require('node:path');
 const { transformAsset, injectPage, expectedHooks } = require('./transforms.cjs');
 const { createLootStore } = require('./loot-store.cjs');
-const { createInventoryTraceStore } = require('./inventory-trace-store.cjs');
-const { createPresentationMonitor } = require('./inventory-frame-monitor.cjs');
-const { createDesktopMonitor } = require('./inventory-desktop-monitor.cjs');
 const {replacement,stripFaces}=require('./font-assets.cjs');
 const itemText = require('./item-text.cjs');
 
@@ -42,7 +39,6 @@ const OWN = Object.freeze({   // served at dagger://game/dfo-mod/<name>
   'dfo_dungeon_live_model.js': 'page/dfo_dungeon_live_model.js',
   'dfo_dungeon_graph.js': 'page/dfo_dungeon_graph.js',
   'dfo_dungeon_nav_model.js': 'page/dfo_dungeon_nav_model.js', 'dfo_dungeon_nav.js': 'page/dfo_dungeon_nav.js', 'dfo_dungeon_live.js': 'page/dfo_dungeon_live.js',
-  'dfo_inventory_trace.js': 'page/dfo_inventory_trace.js',
   'dfo_pack_data.js': 'page/dfo_pack_data.js', 'dfo_pack_rules.js': 'page/dfo_pack_rules.js', 'dfo_pack.js': 'page/dfo_pack.js',
   'dfo_loot_rules.js': 'page/dfo_loot_rules.js', 'dfo_loot_ui.js': 'page/dfo_loot_ui.js', 'dfo_loot.js': 'page/dfo_loot.js', 'dfo_marks.js': 'page/dfo_marks.js', 'dfo_town.js': 'page/dfo_town.js', 'ru_dict.js': 'page/ru_dict.js', 'ru_i18n.js': 'page/ru_i18n.js',
   'ru_locale.js': 'page/ru_locale.js', 'ru_items.js': 'page/ru_items.js',
@@ -56,9 +52,6 @@ function wrap(handleDagger, { app = null } = {}) {
   const cfgFile = userData && path.join(userData, 'dfo-mod.json');
   const logFile = userData && path.join(userData, 'dfo-mod.log');
   const lootStore = createLootStore(userData);
-  const inventoryTrace = createInventoryTraceStore(userData);
-  const frameMonitor = createPresentationMonitor(inventoryTrace);
-  const desktopMonitor = createDesktopMonitor(inventoryTrace);
   let cfg = { ...DEFAULTS };
   try { if (cfgFile && fs.existsSync(cfgFile)) cfg = { ...DEFAULTS, ...JSON.parse(fs.readFileSync(cfgFile, 'utf8')) }; } catch (e) { cfg = { ...DEFAULTS }; }
   cfg.marksOptions = { ...DEFAULTS.marksOptions, ...(cfg.marksOptions ?? {}) };
@@ -78,75 +71,6 @@ function wrap(handleDagger, { app = null } = {}) {
     try { fs.writeFileSync(logFile, `${lines.join('\n')}\n`); } catch { /* a log we cannot write is no reason to stop */ }
   };
   log(`DFO Mod ${VERSION}: ${cfg.enabled ? 'on' : 'off'} - ru ${ru ? 'on' : 'off'}, marks ${cfg.marks ? 'on' : 'off'}`);
-  // Record the bridge before any webview loads: this diagnoses a missing renderer.
-  const traceStartup = inventoryTrace.serverEvent('bridge.ready',
-    { version: VERSION, inventoryEnabled: cfg.inventory !== false, modEnabled: !!cfg.enabled });
-  log(`inventory trace bootstrap: ${inventoryTrace.file}; status=${traceStartup}`);
-  // Main-process liveness is independent from browser JS/rAF and remains
-  // observable if the renderer or the inventory event handlers stall.
-  const traceStart = Date.now();
-  let lastRendererBatch = null;
-  if (cfg.enabled && cfg.inventory !== false) {
-    const monitor = setInterval(() => {
-      inventoryTrace.serverEvent('bridge.heartbeat', {
-        uptimeMs: Date.now() - traceStart,
-        rendererBatchAgeMs: lastRendererBatch === null ? null : Date.now() - lastRendererBatch,
-      });
-    }, 10000);
-    monitor.unref?.();
-  }
-
-
-  // Independent Electron-side process signals: JS/rAF may continue while pixels stop
-  // updating, so renderer event capture alone cannot establish GPU/process health.
-  // Listeners are observational and never invoke game rendering or DOM operations.
-  if (cfg.enabled && cfg.inventory !== false) {
-    try {
-      const watchedContents = new WeakSet();
-      const bindContents = (contents) => {
-        if (!contents || typeof contents.on !== 'function' || watchedContents.has(contents)) return;
-        watchedContents.add(contents);
-        frameMonitor.track(contents);
-        desktopMonitor.track(contents);
-        let webContentsId = -1;
-        try { if (Number.isInteger(contents.id)) webContentsId = contents.id; } catch {}
-        contents.on('unresponsive', () => {
-          inventoryTrace.serverEvent('browser.unresponsive', { webContentsId });
-        });
-        contents.on('responsive', () => {
-          inventoryTrace.serverEvent('browser.responsive', { webContentsId });
-        });
-        contents.on('render-process-gone', (_event, details) => {
-          inventoryTrace.serverEvent('browser.renderer.gone', {
-            webContentsId, reason: String(details?.reason ?? 'unknown').slice(0, 80),
-            exitCode: Number.isFinite(details?.exitCode) ? details.exitCode : -1,
-          });
-        });
-        contents.on('destroyed', () => {
-          inventoryTrace.serverEvent('browser.contents.destroyed', { webContentsId });
-        });
-      };
-      app?.on?.('web-contents-created', (_event, contents) => bindContents(contents));
-      app?.on?.('child-process-gone', (_event, details) => {
-        inventoryTrace.serverEvent('browser.child.gone', {
-          kind: String(details?.type ?? 'unknown').slice(0, 80),
-          reason: String(details?.reason ?? 'unknown').slice(0, 80),
-          exitCode: Number.isFinite(details?.exitCode) ? details.exitCode : -1,
-        });
-      });
-      // A contents instance can predate installation of the dagger:// wrapper.
-      // Enumerate it when the real Electron module is available; tests run in Node.
-      try {
-        const electron = require('electron');
-        for (const contents of electron.webContents?.getAllWebContents?.() || []) bindContents(contents);
-      } catch { /* not running in Electron or API unavailable */ }
-    } catch (error) {
-      inventoryTrace.serverEvent('browser.monitor.error', {
-        message: String(error?.message ?? error).slice(0, 120),
-      });
-    }
-  }
-
   let ctx = null;
   const context = () => {
     if (ctx) return ctx;
@@ -264,36 +188,6 @@ function wrap(handleDagger, { app = null } = {}) {
     if (!cfg.enabled) return handleDagger(req);
     if (url.host !== 'game') return handleDagger(req);
     let rel;try{rel=decodeURIComponent(url.pathname).replace(/^\/+/, '')}catch{return new Response('bad request',{status:400})}
-    if (rel === 'dfo-mod/inventory-trace-status') {
-      if (req.method !== 'GET') return new Response(null, { status: 405 });
-      return new Response(JSON.stringify(inventoryTrace.status()), { status: 200,
-        headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' } });
-    }
-    if (rel === 'dfo-mod/inventory-trace-fallback') {
-      if (cfg.inventory === false) return new Response(null, { status: 404 });
-      if (req.method !== 'GET') return new Response(null, { status: 405 });
-      const input = url.searchParams.get('event') || '';
-      if (input.length > 3900) return new Response(null, { status: 413 });
-      const result = inventoryTrace.write('[' + input + ']');
-      if (result === 204) {
-        lastRendererBatch = Date.now();
-        try { const events = [JSON.parse(input)]; frameMonitor.feed(events); desktopMonitor.feed(events); } catch {}
-      }
-      const gif = Buffer.from('R0lGODlhAQABAAD/ACwAAAAAAQABAAACAUwAOw==', 'base64');
-      return new Response(gif, { status: result === 204 ? 200 : result,
-        headers: { 'Content-Type': 'image/gif', 'Cache-Control': 'no-store' } });
-    }
-    if (rel === 'dfo-mod/inventory-trace') {
-      if (cfg.inventory === false) return new Response(null, { status: 404 });
-      if (req.method !== 'POST') return new Response(null, { status: 405 });
-      const body = await req.text();
-      const written = inventoryTrace.write(body);
-      if (written === 204) {
-        lastRendererBatch = Date.now();
-        try { const events = JSON.parse(body); frameMonitor.feed(events); desktopMonitor.feed(events); } catch {}
-      }
-      return new Response(null, { status: written });
-    }
     if (rel === 'dfo-mod/report' && req.method === 'POST') { writeReport(await req.text()); return new Response(null, { status: 204 }); }
     if (rel === 'dfo-mod/cache') {
       if (req.method === 'POST') return new Response(null, { status: writeCache(await req.text()) });
@@ -332,7 +226,6 @@ function wrap(handleDagger, { app = null } = {}) {
     }
     const own1 = /^(?:play\/)?dfo-mod\/(?:fonts\/)?([\w.-]+)$/.exec(rel);
     if (own1) { try {
-      if (own1[1] === 'dfo_inventory_trace.js') inventoryTrace.serverEvent('bridge.script.served', { asset: rel });
       return serveOwn(own1[1],url.searchParams.get('dfo')===VERSION);
     } catch (e) { log(`own ${rel}: ${e?.message}`); return new Response('not found', { status: 404 }); } }
     if(cfg.fonts!==false){
@@ -352,9 +245,7 @@ function wrap(handleDagger, { app = null } = {}) {
       let out;
       if (page) {
          out = injectPage(text, '../'.repeat(Math.max(0,rel.split('/').length-1))||'./', context());
-         if (cfg.inventory !== false) inventoryTrace.serverEvent('bridge.page', {
-           asset: rel.slice(0, 120), scriptInjected: out.includes('dfo_inventory_trace.js'),
-         });
+
        }
       else {
         const key = `${text.length}:${text.slice(0, 64)}:${text.slice(-64)}`;

@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - fix/inventory-render-reentrancy-2026-11-09
+      - main
   workflow_dispatch:
 
 permissions:
@@ -14,12 +15,12 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 40
     steps:
-      - name: Check out experimental branch
+      - name: Check out inventory source
         uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
       - name: Verify local lifecycle and geometry regressions
         run: |
           node --version
-          node --test test/inventory-render-reentrancy.test.cjs test/inventory-icon-landing.test.cjs test/inventory-geometry.test.cjs test/inventory-trace.test.cjs test/inventory-layout.test.cjs test/pack.test.cjs
+          node --test test/inventory-render-reentrancy.test.cjs test/inventory-icon-landing.test.cjs test/inventory-geometry.test.cjs test/inventory-layout.test.cjs test/pack.test.cjs
       - name: Fetch the published 0.1.14602 game assets
         env:
           DFO_FETCH_CONCURRENCY: '8'

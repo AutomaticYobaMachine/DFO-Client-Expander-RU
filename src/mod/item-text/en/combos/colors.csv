@@ -1,0 +1,11 @@
+key,s,p,note
+dye.0,blue,,item.dye = 0
+dye.1,grey,,item.dye = 1
+dye.2,red,,item.dye = 2
+dye.3,dark brown,,item.dye = 3
+dye.4,purple,,item.dye = 4
+dye.5,light brown,,item.dye = 5
+dye.6,white,,item.dye = 6
+dye.7,sea-green,,item.dye = 7
+dye.8,yellow,,item.dye = 8
+dye.9,green,,item.dye = 9

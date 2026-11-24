@@ -1,0 +1,95 @@
+key,variant,text,note
+102,chain,"Кольчужная рубаха {material}, прикрывающая грудь и спину.",Cuirass / chain
+102,leather,"Кожаная кираса из вываренной кожи, прикрывающая грудь и спину.",Cuirass / leather
+102,plate,Латная кираса {material}: выкованные нагрудник и наспинник.,Cuirass / plate
+103,chain,"Кольчужные рукавицы {material}, гибкие и прочные.",Gauntlets / chain
+103,leather,"Кожаные перчатки с толстыми крагами, защищающие кисти.",Gauntlets / leather
+103,plate,Латные перчатки {material} с подвижными пальцами.,Gauntlets / plate
+104,chain,"Кольчужные поножи {material}, защищающие ноги.",Greaves / chain
+104,leather,"Кожаные поножи, затянутые ремнями от бедра до щиколотки.",Greaves / leather
+104,plate,"Латные поножи {material}, пристёгнутые от бедра до щиколотки.",Greaves / plate
+105,chain,"Кольчужное наплечье {material}, прикрывающее левое плечо.",Left Pauldron / chain
+105,leather,"Кожаное наплечье, прикрывающее левое плечо от ударов.",Left Pauldron / leather
+105,plate,"Латное наплечье {material}, изогнутое по левому плечу.",Left Pauldron / plate
+106,chain,"Кольчужное наплечье {material}, прикрывающее правое плечо.",Right Pauldron / chain
+106,leather,"Кожаное наплечье, прикрывающее правое плечо от ударов.",Right Pauldron / leather
+106,plate,"Латное наплечье {material}, изогнутое по правому плечу.",Right Pauldron / plate
+107,chain,"Кольчужный капюшон {material}, закрывающий голову и шею.",Helm / chain
+107,leather,"Кожаный шлем, плотно облегающий голову и затылок.",Helm / leather
+107,plate,"Латный шлем {material}, закрывающий голову и лицо.",Helm / plate
+108,chain,"Сапоги, обшитые кольчугой {material}, защищающие голени.",Boots / chain
+108,leather,Кожаные сапоги с толстой подошвой и ремнями.,Boots / leather
+108,plate,"Латные сапоги {material}, защищающие ступни и голени.",Boots / plate
+109,chain,"Небольшой баклер, обтянутый кольчужной сеткой {material}.",Buckler / chain
+109,leather,Небольшой кожаный баклер на деревянной основе.,Buckler / leather
+109,plate,"Небольшой круглый баклер {material}, удобный для отвода клинка.",Buckler / plate
+110,chain,Круглый щит с кольчужной обтяжкой {material}.,Round Shield / chain
+110,leather,"Круглый деревянный щит, обтянутый толстой кожей.",Round Shield / leather
+110,plate,Круглый щит с оковкой {material} — спутник солдата.,Round Shield / plate
+111,chain,"Каплевидный щит, обтянутый кольчугой {material}.",Kite Shield / chain
+111,leather,Каплевидный щит из дерева и кожи для всадника.,Kite Shield / leather
+111,plate,"Каплевидный щит {material}, закрывающий от плеча до колена.",Kite Shield / plate
+112,chain,"Ростовой щит, обтянутый кольчужной сеткой {material}.",Tower Shield / chain
+112,leather,"Огромный деревянный щит, обтянутый кожей в несколько слоёв.",Tower Shield / leather
+112,plate,"Ростовой щит {material}, за которым скрывается весь воин.",Tower Shield / plate
+113,,"Короткий обоюдоострый кинжал {material}, быстрый в ближнем бою.",Dagger
+114,,"Акавирское танто {material} с гранёным остриём, пробивающее доспех.",Tanto
+115,,Длинный посох с оковкой {material} — опора и оружие.,Staff
+116,,"Короткий солдатский меч {material}, крепкий и надёжный.",Shortsword
+117,,"Изогнутое акавирское вакидзаси {material}, младший спутник катаны.",Wakizashi
+118,,"Широкий рубящий клинок {material}, любимый бретонскими рыцарями.",Broadsword
+119,,"Изогнутая кавалерийская сабля {material}, рубящая с седла.",Saber
+120,,Прямой длинный клинок {material} для одной или двух рук.,Longsword
+121,,"Однолезвийная акавирская катана {material}, отполированная до зеркала.",Katana
+122,,"Огромный двуручный меч {material}, способный разрубить щит.",Claymore
+123,,"Длинная двуручная акавирская дай-катана {material}, изящная и смертоносная.",Dai-katana
+124,,"Булава с ребристым навершием {material} на короткой рукояти, мнущая латы.",Mace
+125,,"Шипастый шар {material} на цепи, огибающий любой щит.",Flail
+126,,Тяжёлый боевой молот {material} с клювом на обухе.,Warhammer
+127,,"Широкий двуручный топор {material}, тяжёлый и беспощадный.",Battle Axe
+128,,"Одноручная секира с бородовидным лезвием {material}, жестокая в ударе.",War Axe
+129,,"Короткий лук с накладками {material}, удобный в тесноте.",Short Bow
+130,,"Высокий тисовый лук с накладками {material}, бьющий далеко.",Long Bow
+131,,Оперённая стрела с острым наконечником {material}.,Arrow
+513,,Лёгкий топор лучника {material} для ближнего боя.,Archer's Axe
+514,,"Облегчённый цеп {material}, быстро возвращающийся после замаха.",Light Flail
+515,chain,"Длинный кольчужный хауберк {material}, спускающийся до колен.",Hauberk / chain
+515,leather,"Длинный стёганый кожаный хауберк, спускающийся до колен.",Hauberk / leather
+515,mail,"Длинный хауберк мелкого плетения {material}, до самых колен.",Hauberk / mail
+516,chain,"Кольчужные чулки {material}, подвязанные к поясу.",Chausses / chain
+516,leather,"Стёганые кожаные чулки, подвязанные к поясу под туникой.",Chausses / leather
+516,mail,Шоссы мелкого кольчужного плетения {material}.,Chausses / mail
+517,chain,Кольчужный наплечник {material} для левого плеча.,Left Spaulder / chain
+517,leather,"Кожаный наплечник, прикрывающий левое плечо и руку.",Left Spaulder / leather
+517,mail,Наплечник мелкого плетения {material} на левом плече.,Left Spaulder / mail
+518,chain,Кольчужный наплечник {material} для правого плеча.,Right Spaulder / chain
+518,leather,"Кожаный наплечник, прикрывающий правое плечо и руку.",Right Spaulder / leather
+518,mail,Наплечник мелкого плетения {material} на правом плече.,Right Spaulder / mail
+519,chain,"Кольчужные башмаки {material}, защищающие ступни.",Sollerets / chain
+519,leather,Кожаные башмаки с жёсткими носками для защиты ступней.,Sollerets / leather
+519,mail,Сабатоны мелкого кольчужного плетения {material}.,Sollerets / mail
+520,brigandine,Колет-бригантина с пластинами {material} под тканью.,Jerkin / brigandine
+520,fur,"Меховой колет, тёплый и мягкий, для холодных краёв.",Jerkin / fur
+520,leather,Облегающий колет из толстой кожи — лёгкий доспех.,Jerkin / leather
+521,brigandine,Набедренник-бригантина с пластинами {material} под тканью.,Cuisse / brigandine
+521,fur,"Меховой набедренник, греющий ногу в мороз.",Cuisse / fur
+521,leather,"Кожаный набедренник, пристёгнутый поверх бедра.",Cuisse / leather
+522,brigandine,Шлем-бригантина с пластинами {material} под тканью.,Helmet / brigandine
+522,fur,"Меховой шлем, тёплый и мягкий, от ветра и стужи.",Helmet / fur
+522,leather,"Простой кожаный шлем, берегущий голову от ударов.",Helmet / leather
+523,brigandine,"Сапоги с пластинами {material}, вшитыми под кожу.",Boots / brigandine
+523,fur,"Меховые сапоги, в которых не страшен глубокий снег.",Boots / fur
+523,leather,Крепкие кожаные сапоги для дороги и боя.,Boots / leather
+524,brigandine,"Перчатки с пластинами {material}, вшитыми под кожу.",Gloves / brigandine
+524,fur,"Меховые перчатки, греющие пальцы в мороз.",Gloves / fur
+524,leather,"Кожаные перчатки, достаточно гибкие для крепкого хвата.",Gloves / leather
+525,brigandine,Наруч-бригантина с пластинами {material} на левом предплечье.,Left Vambrace / brigandine
+525,fur,"Меховой наруч, греющий левое предплечье в мороз.",Left Vambrace / fur
+525,leather,"Кожаный наруч, защищающий левое предплечье.",Left Vambrace / leather
+526,brigandine,Наруч-бригантина с пластинами {material} на правом предплечье.,Right Vambrace / brigandine
+526,fur,"Меховой наруч, греющий правое предплечье в мороз.",Right Vambrace / fur
+526,leather,"Кожаный наруч, защищающий правое предплечье.",Right Vambrace / leather
+560,,"Двемерский громострел {material}, стреляющий с громом и паром.",Dwarven Thunderlock
+561,,"Латунная пуля, отлитая для двемерского огнестрельного оружия.",Dwemer Pellet
+562,,"Короткий двемерский пистолет {material}, стреляющий с оглушительным грохотом.",Dwarven Pistolet
+563,,"Полосы ткани, туго намотанные на костяшки для кулачного боя.",Hand Wraps

@@ -1,0 +1,34 @@
+key,text,note
+marks.price.base,+{pct}% Общее,src/mod/page/dfo_marks.js
+marks.price.mine,+{pct}% лично мне,src/mod/page/dfo_marks.js
+marks.kind.0,Алхимик,a building named by its kind
+marks.type.0,Алхимик,the label's [bracket] word
+marks.kind.2,Бронник,a building named by its kind
+marks.type.2,Бронник,the label's [bracket] word
+marks.kind.3,Банк,a building named by its kind
+marks.type.3,Банк,the label's [bracket] word
+marks.kind.5,Книжная лавка,a building named by its kind
+marks.type.5,Книжный,the label's [bracket] word
+marks.kind.6,Портной,a building named by its kind
+marks.type.6,Одежда,the label's [bracket] word
+marks.kind.7,Мебельщик,a building named by its kind
+marks.type.7,Мебель,the label's [bracket] word
+marks.kind.8,Ювелир,a building named by its kind
+marks.type.8,Ювелир,the label's [bracket] word
+marks.kind.9,Лавка,a building named by its kind
+marks.type.9,Общий,the label's [bracket] word
+marks.kind.10,Библиотека,a building named by its kind
+marks.type.10,Библиотека,the label's [bracket] word
+marks.kind.12,Ломбард,a building named by its kind
+marks.type.12,Ломбард,the label's [bracket] word
+marks.kind.13,Оружейник,a building named by its kind
+marks.type.13,Оружейник,the label's [bracket] word
+marks.kind.11,Гильдия,a building named by its kind
+marks.type.11,Гильдия,the label's [bracket] word
+marks.kind.14,Храм,a building named by its kind
+marks.type.14,Храм,the label's [bracket] word
+marks.kind.15,Таверна,a building named by its kind
+marks.type.15,Таверна,the label's [bracket] word
+marks.group.taverns,Таверны,Overworld filter group
+marks.group.shops,Магазины,Overworld filter group
+marks.group.orgs,Организации,Overworld filter group

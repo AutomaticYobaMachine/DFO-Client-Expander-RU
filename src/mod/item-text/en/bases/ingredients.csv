@@ -1,0 +1,75 @@
+key,group,name,number,text
+8,PlantIngredients1/PlantIngredients2,Twigs,p,"A bundle of thin dry twigs, gathered for the alchemist's mortar."
+9,PlantIngredients1/PlantIngredients2,Green Leaves,p,Fresh green leaves that still smell of the forest.
+10,PlantIngredients1/PlantIngredients2,Red Flowers,p,Bright red blossoms picked by the roadside.
+11,PlantIngredients1/PlantIngredients2,Yellow Flowers,p,"Yellow blossoms with a sharp, sweet scent."
+12,PlantIngredients1/PlantIngredients2,Root Tendrils,p,Thin pale roots pulled from damp earth.
+13,PlantIngredients1/PlantIngredients2,Root Bulb,s,"A swollen root bulb, starchy and bitter."
+14,PlantIngredients1,Pine Branch,s,"A resinous pine branch, sticky with sap."
+15,PlantIngredients1/PlantIngredients2,Green Berries,p,"Hard unripe berries, sour enough to make the eyes water."
+16,PlantIngredients1/PlantIngredients2,Red Berries,p,Ripe red berries that stain the fingers.
+17,PlantIngredients1/PlantIngredients2,Yellow Berries,p,Small yellow berries with a bitter skin.
+18,PlantIngredients1,Clover,s,A sprig of clover with three round leaves.
+19,PlantIngredients1,Red Rose,s,"A red rose, its thorns still sharp."
+20,PlantIngredients1,Yellow Rose,s,"A yellow rose, pale as winter sunlight."
+21,PlantIngredients2,Black Rose,s,"A rare black rose, said to grow best on graves."
+22,PlantIngredients2,White Rose,s,"A white rose, the sign of purity in Breton songs."
+23,PlantIngredients1,Red Poppy,s,A red poppy with petals as thin as paper.
+24,PlantIngredients2,Black Poppy,s,A black poppy whose seeds bring heavy dreams.
+25,PlantIngredients1,Golden Poppy,s,A golden poppy that closes its petals at dusk.
+26,PlantIngredients2,White Poppy,s,"A white poppy, pale and drowsy."
+27,PlantIngredients2,Ginkgo Leaves,p,"Fan-shaped ginkgo leaves, said to sharpen the memory."
+28,PlantIngredients2,Bamboo,s,A hollow length of bamboo from the southern jungles.
+29,PlantIngredients2,Palm,s,A palm frond from the warm coasts.
+30,PlantIngredients2,Aloe,s,A fleshy aloe leaf full of cooling sap.
+31,PlantIngredients2,Fig,s,"A soft purple fig, sweet and full of seeds."
+32,PlantIngredients2,Cactus,s,A spiny desert cactus full of bitter water.
+33,CreatureIngredients1,Werewolf's Blood,s,"Dark blood drawn from a werewolf, still smelling of the hunt."
+34,CreatureIngredients3,Wereboar's Tusk,s,A curved tusk torn from a wereboar.
+35,CreatureIngredients1,Fairy Dragon's Scales,p,Iridescent scales shed by a tiny fairy dragon.
+36,CreatureIngredients3,Nymph Hair,s,A lock of nymph hair that shimmers like running water.
+37,CreatureIngredients3,Unicorn Horn,s,"A spiral horn of pearly white, the rarest of trophies."
+38,CreatureIngredients1,Wraith Essence,s,A cold grey vapour bottled from a slain wraith.
+39,CreatureIngredients1,Ectoplasm,s,A pale slime left behind by restless spirits.
+40,CreatureIngredients1,Ghoul's Tongue,s,"The black tongue of a ghoul, foul even when dried."
+41,CreatureIngredients1,Spider's Venom,s,A vial of venom milked from a giant spider.
+42,CreatureIngredients1,Troll's Blood,s,Thick green troll blood that seems to knit itself back together.
+43,CreatureIngredients1,Snake Venom,s,A few drops of snake venom in a corked vial.
+44,CreatureIngredients1,Gorgon Snake,s,"A small snake from a gorgon's crown, dead but still unsettling."
+45,CreatureIngredients1,Lich Dust,s,"Grey dust that once was a lich, still faintly cold."
+46,CreatureIngredients2,Dragon's Scales,p,"Dragon scales the size of plates, harder than steel."
+47,CreatureIngredients2,Giant Scorpion Stinger,s,"The curved stinger of a giant scorpion, its venom sac still full."
+48,CreatureIngredients2,Small Scorpion Stinger,s,"A small scorpion's stinger, sharp as a needle."
+49,CreatureIngredients2,Mummy Wrappings,p,Brittle linen wrappings that smell of ancient spices.
+50,CreatureIngredients1,Giant's Blood,s,"Giant's blood, thick and warm even in a cold vial."
+51,CreatureIngredients1,Basilisk's Eye,s,"A basilisk's eye, its gaze dulled but not quite gone."
+52,CreatureIngredients2,Gryphon's Feather,s,A great flight feather from a gryphon's wing.
+53,CreatureIngredients1,Daedra's Heart,s,"The heart of a slain daedra, still faintly warm."
+54,CreatureIngredients1,Saint's Hair,s,A lock of hair said to come from a saint.
+55,MiscellaneousIngredients1,Holy Relic,s,"A fragment of something holy, wrapped with reverence."
+56,MiscellaneousIngredients1,Big Tooth,s,A great tooth pulled from some large beast.
+57,MiscellaneousIngredients1,Medium Tooth,s,A tooth from a beast of middling size.
+58,MiscellaneousIngredients1,Small Tooth,s,A small sharp tooth from a little beast.
+59,MiscellaneousIngredients1,Pure Water,s,Water drawn from a clean spring and kept sealed.
+60,MiscellaneousIngredients1,Rain Water,s,Rain water caught before it touched the ground.
+61,CreatureIngredients1,Orc's Blood,s,"Dark orcish blood, thick and strong-smelling."
+62,MiscellaneousIngredients1,Elixir Vitae,s,A golden distillate that alchemists call the water of life.
+63,MiscellaneousIngredients1,Nectar,s,Sweet nectar gathered from countless flowers.
+64,MiscellaneousIngredients1,Ichor,s,A golden fluid said to run in the veins of the divine.
+65,MetalIngredients,Mercury,s,Quicksilver that runs like water and never wets the hand.
+66,MetalIngredients,Tin,s,A lump of soft grey tin.
+67,MetalIngredients,Brass,s,A lump of yellow brass that shines when polished.
+68,MetalIngredients,Lodestone,s,A dark stone that pulls iron toward it.
+69,MetalIngredients,Sulphur,s,Yellow sulphur that reeks of the volcano.
+70,MetalIngredients,Lead,s,"A heavy, dull lump of lead."
+71,MetalIngredients,Iron,s,"A lump of raw iron ore, red with rust."
+72,MetalIngredients,Copper,s,Copper ore streaked with green.
+73,MetalIngredients,Silver,s,Silver ore that gleams where it is broken.
+74,MetalIngredients,Gold,s,Gold ore with bright flecks in the stone.
+75,MetalIngredients,Platinum,s,"A rare lump of platinum ore, heavier than it looks."
+76,MiscellaneousIngredients2,Ivory,s,"A piece of polished ivory, smooth and creamy white."
+77,MiscellaneousIngredients2,Pearl,s,A lustrous pearl from the depths of the sea.
+78,Drugs,Indulcet,s,"A sweet-smelling narcotic resin, banned in most of the Empire."
+79,Drugs,Sursum,s,A stimulant powder that lifts the spirits for a while.
+80,Drugs,Quaesto Vil,s,A dark powder that sharpens the senses until they hurt.
+81,Drugs,Aegrotat,s,A sickly-sweet drug that dulls pain and will alike.

@@ -1,0 +1,111 @@
+key,text,note
+container.title.container,Loot,page/dfo_container.js default container title
+container.title.storage,Storage,page/dfo_container.js storage title
+container.title.wagon,Wagon,page/dfo_container.js wagon title
+container.title.bag,Materials Bag,page/dfo_container.js materials bag title
+container.title.ground,Ground,page/dfo_container.js ground title
+container.title.reward,Choose one,page/dfo_container.js reward title
+container.title.fate,Fate,page/dfo_container.js fate title
+container.action.wagon,Wagon,page/dfo_container.js wagon toggle button tooltip
+container.action.leaveWagon,Leave wagon,page/dfo_container.js wagon close button tooltip
+container.action.bag,Materials Bag,page/dfo_container.js bag toggle button tooltip
+container.action.closeBag,Close bag,page/dfo_container.js bag close button tooltip
+container.action.fromVault,From the vault,page/dfo_container.js vault pour button
+container.action.takeAll,Take all,page/dfo_container.js footer take all button
+container.action.close,Close,page/dfo_container.js footer close button
+container.action.all,All,page/dfo_container.js quantity modal all button
+container.action.cancel,Cancel,page/dfo_container.js modal and fate cancel button
+container.action.take,Take,page/dfo_container.js context menu take single item
+container.action.takeOne,Take 1,page/dfo_container.js context menu take one from stack
+container.action.takeStack,Take stack (×{n}),page/dfo_container.js context menu take full stack
+container.action.takeCustom,Take amount…,page/dfo_container.js context menu take custom amount
+container.action.stow,Stow,page/dfo_container.js context menu stow single item
+container.action.stowOne,Stow 1,page/dfo_container.js context menu stow one from stack
+container.action.stowStack,Stow stack (×{n}),page/dfo_container.js context menu stow full stack
+container.action.stowCustom,Stow amount…,page/dfo_container.js context menu stow custom amount
+container.action.inspect,Inspect,page/dfo_container.js context menu inspect item card
+container.sort.default,Sort,page/dfo_container.js sort button default
+container.sort.rarity,Sort: Rarity,page/dfo_container.js sort button rarity
+container.sort.name,Sort: Name,page/dfo_container.js sort button name
+container.sort.weight,Sort: Weight,page/dfo_container.js sort button weight
+container.sort.value,Sort: Worth,page/dfo_container.js sort button value
+container.search.placeholder,Search,page/dfo_container.js search bar placeholder
+container.search.aria,Search items by card properties,page/dfo_container.js search bar aria label
+container.search.clear,Clear search,page/dfo_container.js search bar clear button
+container.cat.all,All,page/dfo_container.js category dropdown all
+container.cat.weapons,Weapons,page/dfo_container.js category dropdown weapons
+container.cat.armor,Armor,page/dfo_container.js category dropdown armor
+container.cat.clothing,Clothing,page/dfo_container.js category dropdown clothing
+container.cat.potions,Potions,page/dfo_container.js category dropdown potions
+container.cat.ingredients,Ingredients,page/dfo_container.js category dropdown ingredients
+container.cat.books,Books,page/dfo_container.js category dropdown books
+container.cat.valuables,Valuables,page/dfo_container.js category dropdown valuables
+container.cat.misc,Misc,page/dfo_container.js category dropdown misc
+container.cat.junk,Junk,page/dfo_container.js category dropdown junk
+container.rarity.all,Rarity,page/dfo_container.js rarity dropdown all
+container.rarity.common,Common,page/dfo_container.js rarity common
+container.rarity.magic,Magic,page/dfo_container.js rarity magic
+container.rarity.rare,Rare,page/dfo_container.js rarity rare
+container.rarity.legendary,Legendary,page/dfo_container.js rarity legendary
+container.rarity.aetheric,Aetheric,page/dfo_container.js rarity aetheric
+container.rarity.artifact,Artifact,page/dfo_container.js rarity artifact
+container.rarity.gilded,Gilded,page/dfo_container.js rarity gilded
+container.rarity.exalted,Exalted,page/dfo_container.js rarity exalted prefix
+container.mat.all,Material,page/dfo_container.js material dropdown all
+container.mat.Leather,Leather,page/dfo_container.js material leather
+container.mat.Chain,Chain,page/dfo_container.js material chain
+container.mat.Iron,Iron,page/dfo_container.js material iron
+container.mat.Steel,Steel,page/dfo_container.js material steel
+container.mat.Silver,Silver,page/dfo_container.js material silver
+container.mat.Elven,Elven,page/dfo_container.js material elven
+container.mat.Dwarven,Dwarven,page/dfo_container.js material dwarven
+container.mat.Mithril,Mithril,page/dfo_container.js material mithril
+container.mat.Adamantium,Adamantium,page/dfo_container.js material adamantium
+container.mat.Orcish,Orcish,page/dfo_container.js material orcish
+container.mat.Ebony,Ebony,page/dfo_container.js material ebony
+container.mat.Daedric,Daedric,page/dfo_container.js material daedric
+container.unit.kg,kg,page/dfo_container.js kilogram unit
+container.unit.gold,gold,page/dfo_container.js gold unit
+container.gold.tip,Gold coins in pocket: {g},page/dfo_container.js pocket gold widget tooltip
+container.carry.tipFree,Carry weight: {cur} / {max} {u} · Can still carry: {free} {u},page/dfo_container.js carry widget tooltip free
+container.carry.tipOver,Carry weight: {cur} / {max} {u} · Overweight by: {over} {u},page/dfo_container.js carry widget tooltip overweight
+container.meta.count,{n} {n:item|items},page/dfo_container.js footer item count
+container.meta.line,{count} · {wt},page/dfo_container.js footer count and weight
+container.hint.transfer,LMB — 1 unit · Shift+LMB — full stack · Ctrl+Shift+LMB — custom amount · RMB — inspect,page/dfo_container.js footer transfer hint
+container.empty.default,Empty.,page/dfo_container.js empty container message
+container.empty.ground,Nothing dropped here yet.,page/dfo_container.js empty ground message
+container.empty.filtered,Nothing here matches.,page/dfo_container.js empty filtered message
+container.modal.sub,Available: {max}. Enter amount:,page/dfo_container.js quantity prompt subtitle
+container.modal.take,Take,page/dfo_container.js quantity prompt take confirm
+container.modal.stow,Stow,page/dfo_container.js quantity prompt stow confirm
+container.reward.sub,Select 1 trophy from the offered rewards,page/dfo_container.js reward header subtitle
+container.reward.badge,PICK 1,page/dfo_container.js reward header status chip
+container.reward.banner,"Click a reward below to select it, then press ""Claim Reward"" (or double-click an item). Hover any row to inspect its full card.",page/dfo_container.js reward instruction banner
+container.reward.claim,Claim Reward,page/dfo_container.js reward primary claim button
+container.reward.selected,Selected:,page/dfo_container.js reward preview prefix
+container.reward.none,No reward selected — click an item above,page/dfo_container.js reward preview none
+container.reward.count,{n} {n:reward|rewards} offered,page/dfo_container.js reward footer count
+container.reward.hint,LMB — select reward · Double LMB or button — claim · Hover — full item card,page/dfo_container.js reward footer hint
+container.fate.promptIdle,Select a decision above (or press key 1 / 2) to seal the fallen rival's fate.,page/dfo_container.js fate idle confirm prompt
+container.fate.trophyTag,TROPHY,page/dfo_container.js fate kill card chip
+container.fate.mercyTag,MERCY,page/dfo_container.js fate spare card chip
+container.fate.leaveKey,Esc — close,page/dfo_container.js fate footer escape legend
+container.fate.hint,1 — Execute (trophy) · 2 — Spare · Hover option 1 — trophy card · Esc — close,page/dfo_container.js fate footer default hint
+container.search.word.damage,Damage,page/dfo_container.js search card word
+container.search.word.armor,Armour,page/dfo_container.js search card word
+container.search.word.condition,Condition,page/dfo_container.js search card word
+container.search.word.socket,socket sockets,page/dfo_container.js search card word
+container.search.word.emptySocket,Empty socket,page/dfo_container.js search card word
+container.search.word.unidentified,Unidentified,page/dfo_container.js search card word
+container.search.word.locked,Locked,page/dfo_container.js search card word
+container.search.word.quest,Quest,page/dfo_container.js search card word
+container.search.word.stolen,Stolen,page/dfo_container.js search card word
+container.search.word.cursed,Cursed,page/dfo_container.js search card word
+container.search.word.junk,Junk,page/dfo_container.js search card word
+container.search.word.lit,Lit,page/dfo_container.js search card word
+container.search.word.letter,Letter of Credit,page/dfo_container.js search card word
+container.search.word.armorLeather,Leather,page/dfo_container.js search card word
+container.search.word.armorChain,Chain,page/dfo_container.js search card word
+container.search.word.armorPlate,Plate,page/dfo_container.js search card word
+container.search.word.material,Material,page/dfo_container.js search card word
+container.search.word.set,set,page/dfo_container.js search card word

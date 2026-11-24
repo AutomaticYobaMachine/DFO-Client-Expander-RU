@@ -1,0 +1,19 @@
+key,s,p,note
+tier.magic.sigil,A faint enchantment and a sigil that grows with renown cling to it.,A faint enchantment and a sigil that grows with renown cling to them.,tier magic + sigil
+tier.magic.set,"Lightly enchanted, it bears the sigil of {set}.","Lightly enchanted, they bear the sigil of {set}.",tier magic + set
+tier.magic.sigil.set,"Lightly enchanted, it bears a growing sigil of {set}.","Lightly enchanted, they bear a growing sigil of {set}.",tier magic + sigil + set
+tier.rare.sigil,Strong magic and a sigil that grows with renown are worked into it.,Strong magic and a sigil that grows with renown are worked into them.,tier rare + sigil
+tier.rare.set,"Richly enchanted, it bears the sigil of {set}.","Richly enchanted, they bear the sigil of {set}.",tier rare + set
+tier.rare.sigil.set,"Richly enchanted, it bears a growing sigil of {set}.","Richly enchanted, they bear a growing sigil of {set}.",tier rare + sigil + set
+tier.perfect.sigil,"Every enchantment on it is at its peak, and a sigil grows within.","Every enchantment on them is at its peak, and a sigil grows within.",tier perfect + sigil
+tier.perfect.set,"Flawlessly enchanted, it bears the sigil of {set}.","Flawlessly enchanted, they bear the sigil of {set}.",tier perfect + set
+tier.perfect.sigil.set,"Flawlessly enchanted, it bears a growing sigil of {set}.","Flawlessly enchanted, they bear a growing sigil of {set}.",tier perfect + sigil + set
+tier.legendary.sigil,"It is the stuff of legend, with a sigil that grows with renown.","They are the stuff of legend, with a sigil that grows with renown.",tier legendary + sigil
+tier.legendary.set,"A true legend, it bears the sigil of {set}.","A true legend, they bear the sigil of {set}.",tier legendary + set
+tier.legendary.sigil.set,"A true legend, it bears a growing sigil of {set}.","A true legend, they bear a growing sigil of {set}.",tier legendary + sigil + set
+tier.exalted.sigil,An Exalted legend with one gift more and a sigil that grows with renown.,,tier exalted + sigil
+tier.exalted.set,"An Exalted legend, it bears the sigil of {set}.","An Exalted legend, they bear the sigil of {set}.",tier exalted + set
+tier.exalted.sigil.set,"An Exalted legend, it bears a growing sigil of {set}.","An Exalted legend, they bear a growing sigil of {set}.",tier exalted + sigil + set
+tier.aetheric.sigil,"It shimmers with Aetherius, and a sigil grows within it.","They shimmer with Aetherius, and a sigil grows within them.",tier aetheric + sigil
+tier.aetheric.set,"Shimmering with Aetherius, it bears the sigil of {set}.","Shimmering with Aetherius, they bear the sigil of {set}.",tier aetheric + set
+tier.aetheric.sigil.set,"Shimmering with Aetherius, it bears a growing sigil of {set}.","Shimmering with Aetherius, they bear a growing sigil of {set}.",tier aetheric + sigil + set

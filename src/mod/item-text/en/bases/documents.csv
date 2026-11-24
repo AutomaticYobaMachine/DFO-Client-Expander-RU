@@ -1,0 +1,22 @@
+key,group,name,number,text
+99,,Deed to Townhouse,s,A sealed deed granting a townhouse to its holder.
+100,,Deed to House,s,A sealed deed granting a house to its holder.
+101,,Deed to Manor,s,A sealed deed granting a manor and its lands.
+132,MiscItems,Spellbook,s,"A mage's book of spells, annotated in a cramped hand."
+275,MiscItems,Letter of Credit,s,A banker's letter promising gold to whoever presents it.
+276,MiscItems/Currency,Gold Pieces,p,"Septims of the Empire, good in any market."
+277,Books,Book,s,"A bound book in a worn leather cover, worth a read."
+278,MiscItems,Potion Recipe,s,An alchemist's recipe for brewing a potion.
+279,UselessItems2,Parchment,s,"A blank sheet of scraped and treated skin, ready for ink."
+284,Paintings,Painting,s,A painting in a wooden frame.
+285,MiscItems,House Deed,s,A deed proving ownership of a house.
+286,MiscItems,Ship Deed,s,A deed proving ownership of a ship.
+287,Maps/MiscItems,Map,s,A map of some place worth finding.
+577,UselessItems2,Portal Book,s,A book of portal sigils; each page is a way across the world.
+581,UselessItems2,Card,s,A collectible card from an Iliac deck.
+582,UselessItems2,Card Binder,s,A binder for keeping a collection of cards safe.
+583,UselessItems2,Card Pack,s,A sealed pack of collectible cards.
+1320,UselessItems2,Parts of,p,"Timbers and fittings for a boat, waiting to be put together."
+1321,UselessItems2,Deed to,s,A deed naming the owner of a boat.
+1342,UselessItems2,Treasure Chart,s,A sea chart with a cross where something was buried.
+1830,UselessItems2,Sheet music,s,"Sheet music for an instrument, its staves inked by hand."

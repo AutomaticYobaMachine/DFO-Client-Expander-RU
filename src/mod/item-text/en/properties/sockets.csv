@@ -1,0 +1,10 @@
+key,s,p,note
+socket.empty,An empty socket on it waits for a gem.,An empty socket on them waits for a gem.,at least one empty socket
+socket.gem.ruby,A ruby set into it glows like an ember.,A ruby set into them glows like an ember.,socketed gem: ruby
+socket.gem.emerald,An emerald set into it glitters green.,An emerald set into them glitters green.,socketed gem: emerald
+socket.gem.sapphire,A sapphire set into it shines cold and blue.,A sapphire set into them shines cold and blue.,socketed gem: sapphire
+socket.gem.diamond,A diamond set into it scatters the light.,A diamond set into them scatters the light.,socketed gem: diamond
+socket.gem.jade,Jade set into it gleams softly.,Jade set into them gleams softly.,socketed gem: jade
+socket.gem.turquoise,Turquoise set into it shows the blue of a summer sky.,Turquoise set into them shows the blue of a summer sky.,socketed gem: turquoise
+socket.gem.malachite,Malachite set into it shows its green bands.,Malachite set into them shows its green bands.,socketed gem: malachite
+socket.gem.amber,Amber set into it glows like honey in the sun.,Amber set into them glows like honey in the sun.,socketed gem: amber

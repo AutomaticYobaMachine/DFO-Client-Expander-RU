@@ -1,0 +1,176 @@
+key,text,note
+spellbook.title,Книга заклинаний,page/dfo_spellbook.js main window title
+spellbook.close,Закрыть,page/dfo_spellbook.js close window button
+spellbook.pvpDefault,PvP заклинания,page/dfo_spellbook.js fallback PvP spells button label
+spellbook.levelShort,УР. {n},page/dfo_spellbook.js header level badge
+spellbook.spellsCount,{n} {n:заклинание|заклинания|заклинаний},page/dfo_spellbook.js header total spell count badge
+spellbook.mana.label,ЗАПАС МАНЫ,page/dfo_spellbook.js mana bar header label
+spellbook.mana.regenUnit,%/РНД,page/dfo_spellbook.js magicka regeneration unit suffix
+spellbook.mana.tipTitle,Запас и регенерация маны,page/dfo_spellbook.js mana tooltip header
+spellbook.mana.tipCurrent,Текущая мана,page/dfo_spellbook.js mana tooltip current MP card
+spellbook.mana.tipRegen,Скорость регенерации,page/dfo_spellbook.js mana tooltip regen speed card
+spellbook.mana.tipSources,Восстановление за раунд,page/dfo_spellbook.js mana tooltip regen breakdown label
+spellbook.mana.tipPerRound,Восстанавливает +{pts} маны каждый раунд боя,page/dfo_spellbook.js mana tooltip MP per round summary
+spellbook.mana.tipNoRegen,Нет активных источников пассивного восстановления маны,page/dfo_spellbook.js mana tooltip when regen is 0
+spellbook.mana.tipNoRegenCareer,Недостаток «Неспособность восстанавливать ману» блокирует регенерацию от предметов,page/dfo_spellbook.js mana tooltip when career blocks attune regen
+spellbook.mana.srcFirmament,Небосвод (бонусы созвездий),page/dfo_spellbook.js firmament magicka regen source label
+spellbook.mana.srcAttuneLow,{name} (<50% маны — усилено),page/dfo_spellbook.js low-MP boosted attune regen source label
+spellbook.search.placeholder,"Поиск по названию, эффекту, школе или стихии…",page/dfo_spellbook.js search input placeholder
+spellbook.search.clear,Очистить поиск,page/dfo_spellbook.js search clear button tooltip
+spellbook.school.all,Все,page/dfo_spellbook.js school filter dropdown default option
+spellbook.school.filterAria,Фильтр заклинаний по школе магии,page/dfo_spellbook.js school dropdown aria label
+spellbook.school.22.abbr,РАЗ,page/dfo_spellbook.js Destruction abbreviation
+spellbook.school.22.name,Разрушение,page/dfo_spellbook.js Destruction full name
+spellbook.school.22.tip,Навык школы Разрушение. Снижает расход маны боевых и проклинающих заклинаний этой школы; выше 100 усиливает урон (Мастер-навыки).,page/dfo_spellbook.js Destruction tooltip description
+spellbook.school.23.abbr,ВСТ,page/dfo_spellbook.js Restoration abbreviation
+spellbook.school.23.name,Восстановление,page/dfo_spellbook.js Restoration full name
+spellbook.school.23.tip,"Навык школы Восстановление. Снижает расход маны заклинаний исцеления, усиления, регенерации и поглощения магии; выше 100 усиливает лечение.",page/dfo_spellbook.js Restoration tooltip description
+spellbook.school.24.abbr,ИЛЛ,page/dfo_spellbook.js Illusion abbreviation
+spellbook.school.24.name,Иллюзия,page/dfo_spellbook.js Illusion full name
+spellbook.school.24.tip,"Навык школы Иллюзия. Снижает расход маны Невидимости, Хамелеона, Тени и Света; выше 100 продлевает длительность маскировки.",page/dfo_spellbook.js Illusion tooltip description
+spellbook.school.25.abbr,ИЗМ,page/dfo_spellbook.js Alteration abbreviation
+spellbook.school.25.name,Изменение,page/dfo_spellbook.js Alteration full name
+spellbook.school.25.tip,"Навык школы Изменение. Снижает расход маны Щита, Паралича, сопротивлений стихиям и заклинаний передвижения; выше 100 усиливает Щит.",page/dfo_spellbook.js Alteration tooltip description
+spellbook.school.26.abbr,ТМТ,page/dfo_spellbook.js Thaumaturgy abbreviation
+spellbook.school.26.name,Тауматургия,page/dfo_spellbook.js Thaumaturgy full name
+spellbook.school.26.tip,"Навык школы Тауматургия. Снижает расход маны Отражения/Сопротивления магии, Левитации, Очарования, Усмирения и Обнаружения.",page/dfo_spellbook.js Thaumaturgy tooltip description
+spellbook.school.27.abbr,МТЦ,page/dfo_spellbook.js Mysticism abbreviation
+spellbook.school.27.name,Мистицизм,page/dfo_spellbook.js Mysticism full name
+spellbook.school.27.tip,"Навык школы Мистицизм. Снижает расход маны Ловушки душ, Безмолвия, Изгнания, Рассеивания, Отпирания и Телепортации.",page/dfo_spellbook.js Mysticism tooltip description
+spellbook.skill.tipCurrent,Текущее значение,page/dfo_spellbook.js skill tooltip effective value card
+spellbook.skill.tipBase,Базовый навык,page/dfo_spellbook.js skill tooltip base value row
+spellbook.skill.tipNoMods,Нет активных модификаций,page/dfo_spellbook.js skill tooltip no modifiers row
+spellbook.skill.state.base,Базовое значение (без модификаторов),page/dfo_spellbook.js skill tooltip state base
+spellbook.skill.state.buff,Усилено положительными эффектами,page/dfo_spellbook.js skill tooltip state buff
+spellbook.skill.state.debuff,Снижено отрицательными эффектами,page/dfo_spellbook.js skill tooltip state debuff
+spellbook.skill.state.mixed,Смешанное влияние (бонусы и штрафы),page/dfo_spellbook.js skill tooltip state mixed
+spellbook.mod.firmament,Небосвод,page/dfo_spellbook.js skill modifier source: firmament
+spellbook.mod.lootRarity,Свойство экипировки,page/dfo_spellbook.js skill modifier source: generic affix
+spellbook.mod.enchant,{item} (зачарование),page/dfo_spellbook.js skill modifier source: classic EnhancesSkill enchantment
+spellbook.mod.affix,{item} (аффикс),page/dfo_spellbook.js skill modifier source: equipped item affix
+spellbook.mod.sigilSets,Бонус комплекта печатей,page/dfo_spellbook.js skill modifier source: sigil set
+spellbook.mod.lootPowers,Легендарная сила,page/dfo_spellbook.js skill modifier source: legendary power
+spellbook.mod.arcanePowers,Путь Мастерства Магии,page/dfo_spellbook.js skill modifier source: arcane mastery
+spellbook.mod.martialPowers,Путь Боевого Мастерства,page/dfo_spellbook.js skill modifier source: martial mastery
+spellbook.mod.vampire,Вампиризм (дар клана),page/dfo_spellbook.js skill modifier source: vampire racial bonus
+spellbook.mod.lycanthrope,Ликантропия (облик зверя),page/dfo_spellbook.js skill modifier source: lycanthrope racial bonus
+spellbook.mod.revenant,Проклятие ревенанта,page/dfo_spellbook.js skill modifier source: revenant debuff
+spellbook.mod.heirloom,Резонанс реликвии,page/dfo_spellbook.js skill modifier source: heirloom
+spellbook.mod.softcap,Масштабирование порога навыка,page/dfo_spellbook.js skill modifier source: softcap scaling
+spellbook.mod.mentor,Масштабирование наставничества,page/dfo_spellbook.js skill modifier source: mentoring
+spellbook.mod.other,Прочий активный эффект ({id}),page/dfo_spellbook.js skill modifier source: fallback fold id
+spellbook.sort.custom,Сортировка: Пользовательский,page/dfo_spellbook.js sort mode custom
+spellbook.sort.default,Сортировка: По книге,page/dfo_spellbook.js sort mode default
+spellbook.sort.name,Сортировка: По имени,page/dfo_spellbook.js sort mode name
+spellbook.sort.costAsc,Сортировка: Цена ↑,page/dfo_spellbook.js sort mode cost asc
+spellbook.sort.costDesc,Сортировка: Цена ↓,page/dfo_spellbook.js sort mode cost desc
+spellbook.sort.school,Сортировка: По школе,page/dfo_spellbook.js sort mode school
+spellbook.sort.tipTitle,Режим сортировки заклинаний,page/dfo_spellbook.js sort button tooltip header
+spellbook.sort.tipHint,ЛКМ — следующий режим · ПКМ — предыдущий. В режиме «Пользовательский» перетаскивайте незакреплённые строки мышью.,page/dfo_spellbook.js sort button tooltip body
+spellbook.customBanner,Пользовательский порядок — зажмите и перетащите строку незакреплённого заклинания (сохраняется в кеш мода) · Наведите и нажмите 1–0 для привязки,page/dfo_spellbook.js custom sort mode banner
+spellbook.mainDivider,Остальные заклинания,page/dfo_spellbook.js divider separating pinned hotbar spells from main spells
+spellbook.empty.book,В вашей книге пока нет изученных заклинаний.,page/dfo_spellbook.js empty spellbook message
+spellbook.empty.filtered,По заданному фильтру или поиску заклинания не найдены.,page/dfo_spellbook.js empty filtered spell list message
+spellbook.empty.reset,Сбросить фильтры,page/dfo_spellbook.js reset filters button
+spellbook.target.0.short,На себя,page/dfo_spellbook.js target 0 short
+spellbook.target.0.full,Только заклинатель,page/dfo_spellbook.js target 0 full
+spellbook.target.0.desc,Применяется мгновенно на самого заклинателя.,page/dfo_spellbook.js target 0 description
+spellbook.target.1.short,Касание,page/dfo_spellbook.js target 1 short
+spellbook.target.1.full,Касанием,page/dfo_spellbook.js target 1 full
+spellbook.target.1.desc,Действует на цель вплотную (дистанция касания).,page/dfo_spellbook.js target 1 description
+spellbook.target.2.short,Цель вдали,page/dfo_spellbook.js target 2 short
+spellbook.target.2.full,Одиночная цель на расстоянии,page/dfo_spellbook.js target 2 full
+spellbook.target.2.desc,Выпускает снаряд по одиночной цели на расстоянии.,page/dfo_spellbook.js target 2 description
+spellbook.target.3.short,Область вокруг,page/dfo_spellbook.js target 3 short
+spellbook.target.3.full,Область вокруг заклинателя,page/dfo_spellbook.js target 3 full
+spellbook.target.3.desc,"Волна вокруг заклинателя, задевающая ближайшие цели.",page/dfo_spellbook.js target 3 description
+spellbook.target.4.short,Область вдали,page/dfo_spellbook.js target 4 short
+spellbook.target.4.full,Область на расстоянии,page/dfo_spellbook.js target 4 full
+spellbook.target.4.desc,"Снаряд, взрывающийся по области в точке попадания.",page/dfo_spellbook.js target 4 description
+spellbook.element.0,Огонь,page/dfo_spellbook.js element 0 Fire
+spellbook.element.1,Холод,page/dfo_spellbook.js element 1 Cold
+spellbook.element.2,Яд,page/dfo_spellbook.js element 2 Poison
+spellbook.element.3,Молния,page/dfo_spellbook.js element 3 Shock
+spellbook.element.4,Магия,page/dfo_spellbook.js element 4 Magic
+spellbook.card.dblClickHint,Двойной щелчок — раскрыть или свернуть карточку заклинания,page/dfo_spellbook.js spell strip double-click hint
+spellbook.card.readyTag,ГОТОВО,page/dfo_spellbook.js readied pill badge
+spellbook.card.headReady,Подготовить,page/dfo_spellbook.js strip ready button
+spellbook.card.headReadied,Готово,page/dfo_spellbook.js strip readied button
+spellbook.card.headUnbind,Снять [{k}],page/dfo_spellbook.js strip unbind hotkey button
+spellbook.card.headUnbindNone,Снять,page/dfo_spellbook.js strip unbind disabled label
+spellbook.card.headUnbindNoneTip,Заклинание не закреплено на панели,page/dfo_spellbook.js strip unbind disabled tooltip
+spellbook.card.headDelete,Удалить заклинание,page/dfo_spellbook.js strip delete button aria and tooltip
+spellbook.card.renameInlineTip,Переименовать заклинание,page/dfo_spellbook.js strip inline rename pencil tooltip
+spellbook.card.renameSaveTip,Сохранить название (Enter),page/dfo_spellbook.js strip inline rename confirm button
+spellbook.card.renameCancelTip,Отмена (Esc),page/dfo_spellbook.js strip inline rename cancel button
+spellbook.card.renamePlaceholder,Название заклинания…,page/dfo_spellbook.js strip inline rename placeholder
+spellbook.card.bulletTip,Заклинание не закреплено на панели (наведите и нажмите 1–0 для привязки),page/dfo_spellbook.js unbound bullet marker tooltip
+spellbook.card.hotbarKeyTip,Закреплено на панели быстрого доступа — клавиша [{k}],page/dfo_spellbook.js bound hotbar keycap tooltip
+spellbook.card.quickslotKeyTip,Закреплено в быстром слоте [Q],page/dfo_spellbook.js bound quickslot keycap tooltip
+spellbook.card.effectSlotLabel,Эффект #{n},page/dfo_spellbook.js school slot tooltip effect index label
+spellbook.card.emptyEffect,Слот {n} — пусто,page/dfo_spellbook.js empty effect slot label
+spellbook.card.vizPauseTip,Пауза / продолжить визуализацию (клик — импульс),page/dfo_spellbook.js viz canvas tooltip
+spellbook.card.vizSynthesis,Синтез · {n} шк.,page/dfo_spellbook.js multi-school viz tag
+spellbook.fx.durChip,Длит.: {n} рнд.,page/dfo_spellbook.js effect duration chip
+spellbook.fx.chanceChip,Шанс: {n}%,page/dfo_spellbook.js effect chance chip
+spellbook.fx.magChip,Сила: {val},page/dfo_spellbook.js effect magnitude chip
+spellbook.fx.tipMag,Сила эффекта,page/dfo_spellbook.js effect tooltip magnitude card
+spellbook.fx.tipDur,Длительность,page/dfo_spellbook.js effect tooltip duration card
+spellbook.fx.tipChance,Шанс срабатывания,page/dfo_spellbook.js effect tooltip chance card
+spellbook.fx.durVal,{n} рнд.,page/dfo_spellbook.js effect tooltip duration value
+spellbook.fx.durFmt,Длит.: {b} + {p} / {per} ур. ({rounds} рнд.),page/dfo_spellbook.js effect duration formula line
+spellbook.fx.chanceFmt,Шанс: {b}% + {p}% / {per} ур. ({pct}%),page/dfo_spellbook.js effect chance formula line
+spellbook.fx.magFmt,Сила: {bLo}–{bHi} + {pLo}–{pHi} / {per} ур. ({lo}–{hi}),page/dfo_spellbook.js effect magnitude formula line
+spellbook.fx.fixedFmt,Фиксированный эффект активации,page/dfo_spellbook.js fixed effect formula fallback
+spellbook.fx.masteryBoost,Усиливается навыком {abbr} > 100,page/dfo_spellbook.js master skills scaling note
+spellbook.icon.barTitle,Значок заклинания,page/dfo_spellbook.js icon settings bar title
+spellbook.icon.modeSigil,Режим сигила: {sigil},page/dfo_spellbook.js icon bar sigil mode subtitle
+spellbook.icon.metaLine,Значок № {order} из {total} · {pack},page/dfo_spellbook.js icon bar subtitle
+spellbook.icon.replaceBtn,Заменить,page/dfo_spellbook.js icon replace button
+spellbook.icon.noIconBtn,Без значка,page/dfo_spellbook.js switch to sigil button
+spellbook.icon.useIconBtn,Со значком,page/dfo_spellbook.js restore icon button
+spellbook.icon.modalTitle,Выбор значка заклинания,page/dfo_spellbook.js icon picker modal title
+spellbook.icon.modalCount,Значок № {order} из {total},page/dfo_spellbook.js icon picker modal badge
+spellbook.icon.modalAll,Все,page/dfo_spellbook.js icon picker all tab
+spellbook.icon.modalCustom,Особый,page/dfo_spellbook.js icon picker custom pack badge
+spellbook.info.title,Параметры заклинания,page/dfo_spellbook.js right column info header
+spellbook.info.element,Стихия,page/dfo_spellbook.js info row element
+spellbook.info.target,Применение,page/dfo_spellbook.js info row target
+spellbook.info.leadSchool,Ведущая школа,page/dfo_spellbook.js info row lead school
+spellbook.info.manaCost,Расход маны,page/dfo_spellbook.js info row mana cost
+spellbook.info.manaFree,Бесплатно (0 маны),page/dfo_spellbook.js info row free cost
+spellbook.info.manaShort,не хватает {n} маны,page/dfo_spellbook.js info row insufficient magicka
+spellbook.info.manaCasts,{n} {n:применение|применения|применений} ({pct}% макс.),page/dfo_spellbook.js info row casts remaining
+spellbook.info.source,Источник,page/dfo_spellbook.js info row spell origin
+spellbook.info.binding,Назначение,page/dfo_spellbook.js info row hotbar binding
+spellbook.info.srcVampire,Дар клана вампиров (неудаляемое),page/dfo_spellbook.js origin vampire
+spellbook.info.srcLycan,Дар ликантропии (неудаляемое),page/dfo_spellbook.js origin lycanthrope
+spellbook.info.srcCustom,Созданное / изменённое,page/dfo_spellbook.js origin custom
+spellbook.info.srcStandard,Стандартное (#{idx}),page/dfo_spellbook.js origin standard with index
+spellbook.info.bindNone,Не закреплено,page/dfo_spellbook.js binding none
+spellbook.info.bindHotbar,Панель · слот {slot},page/dfo_spellbook.js binding hotbar slot
+spellbook.info.bindQuick,Быстрый слот [Q],page/dfo_spellbook.js binding quickslot
+spellbook.act.ready,Подготовить,page/dfo_spellbook.js expanded card ready button
+spellbook.act.readied,Готово,page/dfo_spellbook.js expanded card readied button
+spellbook.act.addHotbar,На панель,page/dfo_spellbook.js expanded card add to hotbar button
+spellbook.act.offHotbar,Снять с панели [{slot}],page/dfo_spellbook.js expanded card remove from hotbar button
+spellbook.act.quickslot,В быстрый слот,page/dfo_spellbook.js expanded card bind quickslot button
+spellbook.act.unslot,Убрать из слота,page/dfo_spellbook.js expanded card unslot quickslot button
+spellbook.del.title,Удаление заклинания,page/dfo_spellbook.js delete modal title
+spellbook.del.ask,Удалить заклинание «{name}» из книги? Это действие нельзя отменить.,page/dfo_spellbook.js delete modal message
+spellbook.del.confirm,Удалить (Y),page/dfo_spellbook.js delete modal confirm button
+spellbook.del.cancel,Отмена (N),page/dfo_spellbook.js delete modal cancel button
+spellbook.notice.readied,Заклинание «{name}» подготовлено ({cost} маны).,page/dfo_spellbook.js notice spell readied
+spellbook.notice.unreadied,Подготовка «{name}» отменена.,page/dfo_spellbook.js notice spell unreadied
+spellbook.notice.notEnoughMp,Недостаточно маны для «{name}» ({cost} маны).,page/dfo_spellbook.js notice insufficient magicka
+spellbook.notice.hotbarOn,«{name}» помещено на панель (слот {slot}).,page/dfo_spellbook.js notice bound to hotbar
+spellbook.notice.hotbarOff,«{name}» снято с панели быстрого доступа.,page/dfo_spellbook.js notice removed from hotbar
+spellbook.notice.hotbarFull,Панель быстрого доступа заполнена — освободите слот или нажмите 1–0 при наведении.,page/dfo_spellbook.js notice hotbar full
+spellbook.notice.quickOn,«{name}» назначено в быстрый слот [Q].,page/dfo_spellbook.js notice quickslot bound
+spellbook.notice.quickOff,«{name}» снято с быстрого слота.,page/dfo_spellbook.js notice quickslot cleared
+spellbook.notice.renamed,Переименовано в «{name}».,page/dfo_spellbook.js notice spell renamed
+spellbook.notice.iconChanged,Значок заклинания обновлён.,page/dfo_spellbook.js notice spell icon changed
+spellbook.notice.iconRestored,Значок заклинания восстановлен.,page/dfo_spellbook.js notice icon restored
+spellbook.notice.sigilOn,Теперь отображается сигил «{sigil}».,page/dfo_spellbook.js notice sigil enabled
+spellbook.notice.cantDelVamp,Нельзя удалить особые заклинания вампиров.,page/dfo_spellbook.js notice protected vampire spell
+spellbook.notice.cantDelLycan,Нельзя удалить особое заклинание ликантропии.,page/dfo_spellbook.js notice protected lycanthrope spell

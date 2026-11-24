@@ -1,0 +1,5 @@
+key,text,note
+uiStyle.name,Enhanced Plus (Слейт),src/mod/ui-style-lock-transform.cjs
+uiStyle.by,Daggerfall Online · DFO Client Expander,src/mod/ui-style-lock-transform.cjs
+uiStyle.blurb,"Базовый тёмно-синий интерфейс Enhanced Plus (Слейт) с доработками DFO Client Expander. Прочие стили и цветовые темы отключены на время работы мода; курсор, подсказки при наведении и настройки геймпада по-прежнему доступны ниже.",src/mod/ui-style-lock-transform.cjs
+uiStyle.themeSlate,Слейт,src/mod/ui-style-lock-transform.cjs

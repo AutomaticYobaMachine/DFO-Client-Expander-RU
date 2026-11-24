@@ -1,0 +1,224 @@
+key,text,note
+pack.page.junk,Хлам,the inventory page of the player's junk (page/dfo_pack_rules.js)
+pack.aria.bag,Рюкзак,page/dfo_pack.js window aria-label
+pack.view.label,Как показывать вещи рюкзака,page/dfo_pack.js header
+pack.view.rows,Список,page/dfo_pack.js header
+pack.view.rows.how,"Вещи строками: материал, вес и цена",page/dfo_pack.js header
+pack.view.grid,Значки,page/dfo_pack.js header
+pack.view.grid.how,Вещи квадратными значками,page/dfo_pack.js header
+pack.sort.button,Настройки сортировки,page/dfo_pack.js header
+pack.sort.how,Выберите профиль автоматической сортировки инвентаря,page/dfo_pack.js header
+pack.sort.title,Настройки сортировки,page/dfo_pack.js sort window
+pack.sort.close,Закрыть настройки сортировки,page/dfo_pack.js sort window
+pack.sort.intro,"Предметы сортируются автоматически при открытии рюкзака и после каждого действия по выбранному профилю. Закреплённые предметы всегда идут первыми.",page/dfo_pack.js sort window
+pack.sort.done,Готово,page/dfo_pack.js sort window
+pack.sort.mode.rarity,По редкости,page/dfo_pack.js sort option
+pack.sort.mode.rarity.how,"Сначала закреплённые и квестовые предметы, затем от мифических до обычных",page/dfo_pack.js sort option
+pack.sort.mode.type,По типу предмета,page/dfo_pack.js sort option
+pack.sort.mode.type.how,"По использованию и назначению: оружие, броня, зелья, реагенты, книги и ценное",page/dfo_pack.js sort option
+pack.sort.mode.material,По материалу,page/dfo_pack.js sort option
+pack.sort.mode.material.how,"По материалу изготовления: от даэдрика до железа, кожи, дерева и трав",page/dfo_pack.js sort option
+pack.sort.mode.name,По алфавиту,page/dfo_pack.js sort option
+pack.sort.mode.name.how,По названию предмета в алфавитном порядке,page/dfo_pack.js sort option
+pack.sort.mode.count,По количеству в стопке,page/dfo_pack.js sort option
+pack.sort.mode.count.how,Сначала самые большие стопки и группы одинаковых предметов,page/dfo_pack.js sort option
+pack.junk.button,Хлам…,page/dfo_pack.js header
+pack.junk.how,"Выбрать, что попадает в раздел «Хлам»",page/dfo_pack.js header
+pack.find.button,Найти...,page/dfo_pack.js header
+pack.find.how,Поиск по всем предметам инвентаря по содержанию карточки,page/dfo_pack.js header
+pack.find.placeholder,Поиск по карточке предмета...,page/dfo_pack.js find omnibox
+pack.find.aria,Поиск предметов по содержанию карточки,page/dfo_pack.js find omnibox
+pack.find.clear,Очистить поиск,page/dfo_pack.js find omnibox
+pack.find.empty,Ничего не найдено по запросу «{query}».,page/dfo_pack.js find empty list
+pack.find.count,{shown} / {total},page/dfo_pack.js find omnibox count
+pack.junk.title,Хлам,page/dfo_pack.js junk window
+pack.junk.close,Закрыть окно «Хлам»,page/dfo_pack.js junk window
+pack.junk.intro,"Вещь, подходящая под любую отмеченную метку, лежит в разделе «Хлам». Квестовые предметы туда не попадают.",page/dfo_pack.js junk window
+pack.junk.axis,Назначение,page/dfo_pack.js junk window
+pack.junk.sale,"На продажу: безделушки, храмовые вещи, ненужные реагенты",page/dfo_pack.js junk window
+pack.junk.defaults,По умолчанию,page/dfo_pack.js junk window
+pack.junk.done,Готово,page/dfo_pack.js junk window
+pack.saveFailed,Не удалось сохранить настройки инвентаря.,page/dfo_pack.js
+pack.bar.gold,Золото,page/dfo_pack.js footer currency
+pack.bar.gold.how,Золотых монет с собой,page/dfo_pack.js footer currency
+pack.bar.silver,Серебро,page/dfo_pack.js footer currency
+pack.bar.silver.how,Серебряные марки на счёте,page/dfo_pack.js footer currency
+pack.bar.aurum,Аурум,page/dfo_pack.js footer currency
+pack.bar.aurum.how,Баланс аурума,page/dfo_pack.js footer currency
+pack.bar.unavailable,—,page/dfo_pack.js footer unavailable value
+pack.bar.rep.region,Регион,page/dfo_pack.js footer reputation
+pack.bar.rep.region.fmt,{region}: {rank} ({val}),page/dfo_pack.js footer region rep
+pack.bar.rep.group.fmt,{group}: {rank} ({val}),page/dfo_pack.js footer local rep
+pack.bar.rep.group.fmtNoVal,{group}: {rank},page/dfo_pack.js footer local rep without number
+pack.bar.rep.unknown,Неизвестно,page/dfo_pack.js footer unknown value
+pack.rep.rank.revered,Почитаемый,page/dfo_pack.js reputation rank
+pack.rep.rank.honored,Уважаемый,page/dfo_pack.js reputation rank
+pack.rep.rank.liked,Доброжелательно,page/dfo_pack.js reputation rank
+pack.rep.rank.trusted,Свой человек,page/dfo_pack.js reputation rank
+pack.rep.rank.neutral,Нейтрально,page/dfo_pack.js reputation rank
+pack.rep.rank.suspicious,Подозрительный,page/dfo_pack.js reputation rank
+pack.rep.rank.scorned,Презираемый,page/dfo_pack.js reputation rank
+pack.rep.rank.outlaw,Вне закона,page/dfo_pack.js reputation rank
+pack.rep.rank.hated,Ненавистный,page/dfo_pack.js reputation rank
+pack.rep.group.commoners,Чернь,page/dfo_pack.js social group
+pack.rep.group.merchants,Торговцы,page/dfo_pack.js social group
+pack.rep.group.scholars,Учёные,page/dfo_pack.js social group
+pack.rep.group.nobility,Знать,page/dfo_pack.js social group
+pack.rep.group.underworld,Преступный мир,page/dfo_pack.js social group
+pack.rep.group.guild,Гильдия,page/dfo_pack.js social group
+pack.rep.group.temple,Храм,page/dfo_pack.js social group
+pack.rep.group.order,Рыцарский орден,page/dfo_pack.js social group
+pack.date.fmt,"{day} {month}, 3Э {year} · {time}",page/dfo_pack.js footer date
+pack.date.line1,{day} {weekday} · {time},page/dfo_pack.js footer date line 1
+pack.date.line2,"{month}, 3Э {year}",page/dfo_pack.js footer date line 2
+pack.date.w0,Сандас,page/dfo_pack.js weekday 0
+pack.date.w1,Морндас,page/dfo_pack.js weekday 1
+pack.date.w2,Тирдас,page/dfo_pack.js weekday 2
+pack.date.w3,Миддас,page/dfo_pack.js weekday 3
+pack.date.w4,Турдас,page/dfo_pack.js weekday 4
+pack.date.w5,Фредас,page/dfo_pack.js weekday 5
+pack.date.w6,Лоредас,page/dfo_pack.js weekday 6
+pack.date.m0,Утренней Звезды,page/dfo_pack.js month 0
+pack.date.m1,Восхода Солнца,page/dfo_pack.js month 1
+pack.date.m2,Первого Зерна,page/dfo_pack.js month 2
+pack.date.m3,Руки Дождя,page/dfo_pack.js month 3
+pack.date.m4,Второго Зерна,page/dfo_pack.js month 4
+pack.date.m5,Середины Года,page/dfo_pack.js month 5
+pack.date.m6,Высокого Солнца,page/dfo_pack.js month 6
+pack.date.m7,Последнего Зерна,page/dfo_pack.js month 7
+pack.date.m8,Огня Очага,page/dfo_pack.js month 8
+pack.date.m9,Начала Морозов,page/dfo_pack.js month 9
+pack.date.m10,Заката Солнца,page/dfo_pack.js month 10
+pack.date.m11,Вечерней Звезды,page/dfo_pack.js month 11
+pack.state.healthy,Здоров,page/dfo_pack.js player state
+pack.state.unwell,Нездоров,page/dfo_pack.js player state
+pack.state.diseased,Болен,page/dfo_pack.js player state
+pack.state.diseased.named,Болен: {list},page/dfo_pack.js player state
+pack.state.poisoned,Отравлен,page/dfo_pack.js player state
+pack.state.bleeding,Кровотечение,page/dfo_pack.js player state
+pack.state.vampire,Вампиризм,page/dfo_pack.js player state
+pack.state.werewolf,Ликантропия,page/dfo_pack.js player state
+pack.state.need.hunger.1,Лёгкий голод,page/dfo_pack.js player need
+pack.state.need.hunger.2,Голоден,page/dfo_pack.js player need
+pack.state.need.hunger.3,Истощён,page/dfo_pack.js player need
+pack.state.need.thirst.1,Жажда,page/dfo_pack.js player need
+pack.state.need.thirst.2,Сильная жажда,page/dfo_pack.js player need
+pack.state.need.thirst.3,Обезвожен,page/dfo_pack.js player need
+pack.state.need.sleep.1,Устал,page/dfo_pack.js player need
+pack.state.need.sleep.2,Сонливость,page/dfo_pack.js player need
+pack.state.need.sleep.3,Измотан,page/dfo_pack.js player need
+pack.state.need.wet.1,Сыро,page/dfo_pack.js player need
+pack.state.need.wet.2,Промок,page/dfo_pack.js player need
+pack.state.need.wet.3,Насквозь промок,page/dfo_pack.js player need
+pack.state.need.temp.cold1,Зябко,page/dfo_pack.js player need
+pack.state.need.temp.cold2,Холодно,page/dfo_pack.js player need
+pack.state.need.temp.cold3,Обморожение,page/dfo_pack.js player need
+pack.state.need.temp.warm1,Тепло,page/dfo_pack.js player need
+pack.state.need.temp.warm2,Жарко,page/dfo_pack.js player need
+pack.state.need.temp.warm3,Перегрев,page/dfo_pack.js player need
+pack.state.need.stiff,Скованность,page/dfo_pack.js player need
+pack.state.need.drunk1,Хмельной,page/dfo_pack.js player need
+pack.state.need.drunk2,Пьян,page/dfo_pack.js player need
+pack.sort.active,Сортировка: {mode},page/dfo_pack.js sort button tooltip
+pack.bar.bag.open,Сумка материалов,page/dfo_pack.js footer materials bag button
+pack.bar.bag.close,Закрыть сумку,page/dfo_pack.js footer materials bag close
+pack.bar.stowGold,Положить золото,page/dfo_pack.js footer wagon stow gold button
+pack.bar.stowGold.how,Положить золото в повозку или хранилище,page/dfo_pack.js footer stow gold tooltip
+pack.bar.dropGold,Выбросить золото,page/dfo_pack.js footer drop gold button
+pack.bar.dropGold.how,Выбросить золото из кошелька,page/dfo_pack.js footer drop gold tooltip
+pack.bar.weight,Вес,page/dfo_pack.js footer carry weight label
+pack.bar.date.label,Дата,page/dfo_pack.js footer date label
+pack.bar.state.label,Состояние,page/dfo_pack.js footer status label
+pack.bar.rep.label,Репутация,page/dfo_pack.js footer reputation label
+pack.bar.noDate,3Э 405,page/dfo_pack.js footer fallback date
+pack.rep.rank.esteemed,Почтенный,page/dfo_pack.js reputation rank
+pack.rep.rank.respected,Уважаемый,page/dfo_pack.js reputation rank
+pack.rep.rank.dependable,Надёжный,page/dfo_pack.js reputation rank
+pack.rep.rank.criminal,Преступник,page/dfo_pack.js reputation rank
+pack.rep.rank.villain,Негодяй,page/dfo_pack.js reputation rank
+pack.rep.rank.pondScum,Подонок,page/dfo_pack.js reputation rank
+pack.state.boon.meal,Сыт,page/dfo_pack.js survival boon
+pack.state.boon.fed,Сыт,page/dfo_pack.js survival boon
+pack.state.boon.quenched,Напоен,page/dfo_pack.js survival boon
+pack.state.boon.rested,Отдохнувший,page/dfo_pack.js survival boon
+pack.state.boon.thriving,Бодр,page/dfo_pack.js survival boon
+pack.state.boon.hearth,У очага,page/dfo_pack.js survival boon
+pack.disease.0,Ведьмина оспа,page/dfo_pack.js disease 0
+pack.disease.1,Чума,page/dfo_pack.js disease 1
+pack.disease.2,Жёлтая лихорадка,page/dfo_pack.js disease 2
+pack.disease.3,Желудочная гниль,page/dfo_pack.js disease 3
+pack.disease.4,Чахотка,page/dfo_pack.js disease 4
+pack.disease.5,Мозговая горячка,page/dfo_pack.js disease 5
+pack.disease.6,Болотная гниль,page/dfo_pack.js disease 6
+pack.disease.7,Проклятие Калирона,page/dfo_pack.js disease 7
+pack.disease.8,Холера,page/dfo_pack.js disease 8
+pack.disease.9,Проказа,page/dfo_pack.js disease 9
+pack.disease.10,Раневая гниль,page/dfo_pack.js disease 10
+pack.disease.11,Красная смерть,page/dfo_pack.js disease 11
+pack.disease.12,Заражение крови,page/dfo_pack.js disease 12
+pack.disease.13,Тиф,page/dfo_pack.js disease 13
+pack.disease.14,Безумие,page/dfo_pack.js disease 14
+pack.disease.15,Хрондиаз,page/dfo_pack.js disease 15
+pack.disease.16,Лихорадка магов,page/dfo_pack.js disease 16
+pack.statusTip.title,Состояние персонажа,page/dfo_pack.js status hover header
+pack.statusTip.where,Место: {place} ({region}),page/dfo_pack.js status hover location
+pack.statusTip.time,Дата и время: {date},page/dfo_pack.js status hover time
+pack.statusTip.law,Законная репутация: {rank} ({val}),page/dfo_pack.js status hover legal rep
+pack.statusTip.health,Здоровье: {hp} / {max} ({state}),page/dfo_pack.js status hover health
+pack.statusTip.needs,Потребности и эффекты: {list},page/dfo_pack.js status hover needs
+pack.bar.shards,Осколки велкинда,page/dfo_pack.js footer currency
+pack.bar.shards.how,Осколки велкинда с собой,page/dfo_pack.js footer currency
+pack.bar.embers,Угольки Мёртвых Земель,page/dfo_pack.js footer currency
+pack.bar.embers.how,Угольки Мёртвых Земель с собой,page/dfo_pack.js footer currency
+pack.currTip.held,В наличии: {val},page/dfo_pack.js currency hover balance
+pack.currTip.what,Что это:,page/dfo_pack.js currency hover label
+pack.currTip.use,Зачем нужна:,page/dfo_pack.js currency hover label
+pack.currTip.where,Где найти:,page/dfo_pack.js currency hover label
+pack.currTip.gold.what,"Основная звонкая монета мира, которую персонаж носит в рюкзаке (добавляет вес).",page/dfo_pack.js currency hover gold
+pack.currTip.gold.use,"Покупка снаряжения и припасов у торговцев, ночлег в тавернах, услуги гильдий, оплата штрафов, перековки и банковских вкладов.",page/dfo_pack.js currency hover gold
+pack.currTip.gold.where,"Награды за задания, добыча с врагов и из сундуков, продажа вещей торговцам или снятие со счёта в банке.",page/dfo_pack.js currency hover gold
+pack.currTip.shards.what,"Связанные с персонажем магические осколки древнего велкинда, хранящиеся в кошельке.",page/dfo_pack.js currency hover shards
+pack.currTip.shards.use,"Тратятся в Кузне перековки при Гильдии магов (вместе с золотом) на ролл и улучшение свойств вещей, извлечение камней и покупку камней портала.",page/dfo_pack.js currency hover shards
+pack.currTip.shards.where,"Добываются разборкой ненужного магического и редкого снаряжения в перековке, а также выпадают в подземельях и прорывах.",page/dfo_pack.js currency hover shards
+pack.currTip.embers.what,"Связанные с персонажем пылающие угольки плана Мерунеса Дагона, хранящиеся в кошельке.",page/dfo_pack.js currency hover embers
+pack.currTip.embers.use,"Обмениваются у Торговца сигилами на вещи комплектов и редкие награды, а также нужны для высшего крафта (например, даэдрических слитков).",page/dfo_pack.js currency hover embers
+pack.currTip.embers.where,"Выпадают за закрытие порталов и прорывов Дагона, убийство морских змеев и зачистку элитных редутов прорыва.",page/dfo_pack.js currency hover embers
+pack.currTip.silver.what,"Онлайн-валюта учётной записи, общая для всех ваших персонажей в сети.",page/dfo_pack.js currency hover silver
+pack.currTip.silver.use,"Используется в банках и онлайн-аукционах для торговли с игроками, заказов, оплаты комиссий и обмена.",page/dfo_pack.js currency hover silver
+pack.currTip.silver.where,"Зарабатывается в онлайне за прохождение подземелий, награды, заказы и продажу товаров другим игрокам.",page/dfo_pack.js currency hover silver
+pack.currTip.aurum.what,"Премиальная валюта учётной записи, учитываемая глобально на сервере мира.",page/dfo_pack.js currency hover aurum
+pack.currTip.aurum.use,"Тратится в Лавке аурума и особых сервисах мира на аккаунтные удобства и редкие косметические награды.",page/dfo_pack.js currency hover aurum
+pack.currTip.aurum.where,"Начисляется в онлайне за еженедельные цели подземелий и мировых событий или через наборы поддержки.",page/dfo_pack.js currency hover aurum
+pack.bar.rep.villainy,Злодеяние,page/dfo_pack.js footer villainy bar
+pack.bar.rep.villainy.fmt,{val} / {max},page/dfo_pack.js footer villainy bar value
+pack.repTip.title,Отношения и репутация,page/dfo_pack.js rep hover title
+pack.repTip.sec.current,Текущее положение,page/dfo_pack.js rep hover section
+pack.repTip.sec.villainy,PvP и злодеяние,page/dfo_pack.js rep hover section
+pack.repTip.villainy.ok,"Злодеяние: {val} / {red} (агро стражи и красный череп с {red})",page/dfo_pack.js rep hover villainy ok
+pack.repTip.villainy.red,"Злодеяние: {val} / {max} — Вы злодей! Красный череп активен, стража в городах атакует, PvP закреплён.",page/dfo_pack.js rep hover villainy red
+pack.repTip.sec.groups,Социальные группы,page/dfo_pack.js rep hover section
+pack.repTip.groupLine,{group}: {rank} ({val}),page/dfo_pack.js rep hover group line
+pack.repTip.dress,Модификатор одеяния: {list},page/dfo_pack.js rep hover dress
+pack.repTip.temples,Храмы {val},page/dfo_pack.js rep hover temples
+pack.repTip.sec.law,Закон и розыск,page/dfo_pack.js rep hover section
+pack.repTip.law.clean,"Судимостей, розыска и изгнаний в отслеживаемых регионах нет",page/dfo_pack.js rep hover clean
+pack.repTip.law.line,{region}: {rank} ({val}),page/dfo_pack.js rep hover law line
+pack.repTip.law.banned,{region}: {rank} ({val}) — Изгнание,page/dfo_pack.js rep hover law banned
+pack.repTip.law.wanted,{region}: {rank} ({val}) — Известен страже,page/dfo_pack.js rep hover law wanted
+pack.repTip.sec.factions,Гильдии и фракции,page/dfo_pack.js rep hover section
+pack.repTip.factions.none,Нет членства в гильдиях и отмеченных отношений с фракциями,page/dfo_pack.js rep hover no factions
+pack.repTip.guildLine,[Состоит] {name}: {rep},page/dfo_pack.js rep hover guild
+pack.repTip.factionLine,{name}: {rep},page/dfo_pack.js rep hover faction
+pack.curr.fmt.mln,{v} МЛН,page/dfo_pack.js currency compact million suffix
+pack.curr.fmt.k,{v}К,page/dfo_pack.js currency compact thousand suffix
+pack.currTip.exact,Точный баланс,page/dfo_pack.js currency hover exact panel label
+pack.currTip.gold.coins,Монеты в кармане,page/dfo_pack.js currency hover gold coins panel
+pack.currTip.gold.loc,В аккредитивах,page/dfo_pack.js currency hover gold letters panel
+pack.statusTip.clock.local,Локальное время (игрок),page/dfo_pack.js status hover local player clock
+pack.statusTip.clock.server,Серверное время (мир),page/dfo_pack.js status hover server world clock
+pack.statusTip.clock.why,Разделение времени (клиент и сервер),page/dfo_pack.js status hover clock explanation title
+pack.statusTip.clock.note,"В онлайне игра ведёт два отдельных счётчика времени. Локальное время хранится в вашем сохранении: оно идёт во время игры, останавливается при выходе и прокручивается отдыхом, путешествиями, тюрьмой и тренировками (по нему работают ваши квесты, эффекты, голод, болезни, аренда и гильдии). Серверное время течёт непрерывно в реальном времени для всего мира (1 игровой день = 1 реальный час) и не зависит от сна или поездок — по нему считаются небо, время суток, фазы лун и мировые события. В офлайне оба времени совпадают.",page/dfo_pack.js status hover clock explanation body
+pack.charcol.label,Макет панели экипировки,page/dfo_pack.js header charcol switcher
+pack.charcol.v2,Action-RPG Стиль,page/dfo_pack.js header charcol Action-RPG mode
+pack.charcol.v1,Ванильный Инвентарь,page/dfo_pack.js header charcol vanilla mode
+pack.charcol.how,"Переключить оформление панели экипировки (Action-RPG Стиль / Ванильный Инвентарь)",page/dfo_pack.js header charcol switcher tooltip

@@ -1,0 +1,18 @@
+key,group,name,number,text
+254,QuestItems,Telescope,s,A brass spyglass that brings the far horizon near.
+255,QuestItems,Scales,p,A merchant's balance with a pair of brass pans.
+256,QuestItems,Globe,s,A painted globe of Nirn on a turning stand.
+257,QuestItems,Skeleton,s,"A complete human skeleton, wired together for study."
+274,MiscItems,Soul Trap,s,A gem prepared to catch and hold a departing soul.
+280,QuestItems,Totem,s,A carved totem bearing the marks of an old spirit.
+281,MiscItems/QuestItems,Dead Body,s,A corpse that someone will surely want to hear about.
+282,QuestItems,Mantella,s,"The Mantella: a gem of impossible power, sought by kings and gods alike."
+283,QuestItems,Finger,s,"A severed finger wrapped in a rag, a grim piece of evidence."
+572,UselessItems2,Portal Stone,s,"A stone attuned to a portal, humming faintly when held."
+573,UselessItems2,Welkynd Stone,s,"An Ayleid welkynd stone, full of captured starlight."
+574,UselessItems2,Varla Stone,s,"A varla stone, an Ayleid relic brimming with magicka."
+575,UselessItems2,Weir Key,s,A heavy key cut for the gates of the Weir.
+576,UselessItems2,Starfall Glass,s,"Glass fused where a star fell, still warm in the palm."
+601,UselessItems2,Trophy,s,A hunter's trophy taken from a notable kill.
+1800,UselessItems2,Keepsake,s,A small keepsake that meant something to someone.
+1810,UselessItems2,Remains,p,What is left of a fallen adventurer.

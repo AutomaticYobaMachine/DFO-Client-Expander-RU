@@ -1,0 +1,176 @@
+key,text,note
+spellbook.title,Spellbook,page/dfo_spellbook.js main window title
+spellbook.close,Close,page/dfo_spellbook.js close window button
+spellbook.pvpDefault,PvP Spells,page/dfo_spellbook.js fallback PvP spells button label
+spellbook.levelShort,LVL {n},page/dfo_spellbook.js header level badge
+spellbook.spellsCount,{n} {n:spell|spells},page/dfo_spellbook.js header total spell count badge
+spellbook.mana.label,MAGICKA POOL,page/dfo_spellbook.js mana bar header label
+spellbook.mana.regenUnit,%/RND,page/dfo_spellbook.js magicka regeneration unit suffix
+spellbook.mana.tipTitle,Magicka Pool & Regeneration,page/dfo_spellbook.js mana tooltip header
+spellbook.mana.tipCurrent,Current Magicka,page/dfo_spellbook.js mana tooltip current MP card
+spellbook.mana.tipRegen,Regen Speed,page/dfo_spellbook.js mana tooltip regen speed card
+spellbook.mana.tipSources,Regeneration per round,page/dfo_spellbook.js mana tooltip regen breakdown label
+spellbook.mana.tipPerRound,Restores +{pts} MP every combat round,page/dfo_spellbook.js mana tooltip MP per round summary
+spellbook.mana.tipNoRegen,No active passive magicka regeneration sources,page/dfo_spellbook.js mana tooltip when regen is 0
+spellbook.mana.tipNoRegenCareer,Inability to Regenerate Spell Points blocks item attunement regeneration,page/dfo_spellbook.js mana tooltip when career blocks attune regen
+spellbook.mana.srcFirmament,Firmament (constellation bonuses),page/dfo_spellbook.js firmament magicka regen source label
+spellbook.mana.srcAttuneLow,{name} (<50% MP — boosted),page/dfo_spellbook.js low-MP boosted attune regen source label
+spellbook.search.placeholder,"Search by name, effect, school or element…",page/dfo_spellbook.js search input placeholder
+spellbook.search.clear,Clear search,page/dfo_spellbook.js search clear button tooltip
+spellbook.school.all,All,page/dfo_spellbook.js school filter dropdown default option
+spellbook.school.filterAria,Filter spells by magic school,page/dfo_spellbook.js school dropdown aria label
+spellbook.school.22.abbr,DES,page/dfo_spellbook.js Destruction abbreviation
+spellbook.school.22.name,Destruction,page/dfo_spellbook.js Destruction full name
+spellbook.school.22.tip,Destruction school skill. Reduces magicka cost of offensive and draining spells; above 100 boosts direct/DoT damage (Master Skills).,page/dfo_spellbook.js Destruction tooltip description
+spellbook.school.23.abbr,RES,page/dfo_spellbook.js Restoration abbreviation
+spellbook.school.23.name,Restoration,page/dfo_spellbook.js Restoration full name
+spellbook.school.23.tip,"Restoration school skill. Reduces magicka cost of healing, fortify, regeneration, and Spell Absorption spells; above 100 boosts healing.",page/dfo_spellbook.js Restoration tooltip description
+spellbook.school.24.abbr,ILL,page/dfo_spellbook.js Illusion abbreviation
+spellbook.school.24.name,Illusion,page/dfo_spellbook.js Illusion full name
+spellbook.school.24.tip,"Illusion school skill. Reduces magicka cost of Invisibility, Chameleon, Shadow, and Light; above 100 extends concealment duration.",page/dfo_spellbook.js Illusion tooltip description
+spellbook.school.25.abbr,ALT,page/dfo_spellbook.js Alteration abbreviation
+spellbook.school.25.name,Alteration,page/dfo_spellbook.js Alteration full name
+spellbook.school.25.tip,"Alteration school skill. Reduces magicka cost of Shield, Paralyze, elemental resistances, and mobility; above 100 strengthens Shield.",page/dfo_spellbook.js Alteration tooltip description
+spellbook.school.26.abbr,THM,page/dfo_spellbook.js Thaumaturgy abbreviation
+spellbook.school.26.name,Thaumaturgy,page/dfo_spellbook.js Thaumaturgy full name
+spellbook.school.26.tip,"Thaumaturgy school skill. Reduces magicka cost of Spell Reflection/Resistance, Levitate, Charm, Pacify, and Detection.",page/dfo_spellbook.js Thaumaturgy tooltip description
+spellbook.school.27.abbr,MYS,page/dfo_spellbook.js Mysticism abbreviation
+spellbook.school.27.name,Mysticism,page/dfo_spellbook.js Mysticism full name
+spellbook.school.27.tip,"Mysticism school skill. Reduces magicka cost of Soul Trap, Silence, Banish/Dispel, Open/Lock, and Teleport.",page/dfo_spellbook.js Mysticism tooltip description
+spellbook.skill.tipCurrent,Effective skill,page/dfo_spellbook.js skill tooltip effective value card
+spellbook.skill.tipBase,Base skill,page/dfo_spellbook.js skill tooltip base value row
+spellbook.skill.tipNoMods,No active modifiers,page/dfo_spellbook.js skill tooltip no modifiers row
+spellbook.skill.state.base,Base value (no active modifiers),page/dfo_spellbook.js skill tooltip state base
+spellbook.skill.state.buff,Enhanced by positive modifiers,page/dfo_spellbook.js skill tooltip state buff
+spellbook.skill.state.debuff,Reduced by negative modifiers,page/dfo_spellbook.js skill tooltip state debuff
+spellbook.skill.state.mixed,Mixed effect (both positive & negative modifiers),page/dfo_spellbook.js skill tooltip state mixed
+spellbook.mod.firmament,Firmament,page/dfo_spellbook.js skill modifier source: firmament
+spellbook.mod.lootRarity,Equipped item affix,page/dfo_spellbook.js skill modifier source: generic affix
+spellbook.mod.enchant,{item} (enchantment),page/dfo_spellbook.js skill modifier source: classic EnhancesSkill enchantment
+spellbook.mod.affix,{item} (affix),page/dfo_spellbook.js skill modifier source: equipped item affix
+spellbook.mod.sigilSets,Sigil Set bonus,page/dfo_spellbook.js skill modifier source: sigil set
+spellbook.mod.lootPowers,Legendary power,page/dfo_spellbook.js skill modifier source: legendary power
+spellbook.mod.arcanePowers,Arcane Mastery path,page/dfo_spellbook.js skill modifier source: arcane mastery
+spellbook.mod.martialPowers,Martial Mastery path,page/dfo_spellbook.js skill modifier source: martial mastery
+spellbook.mod.vampire,Vampirism (racial),page/dfo_spellbook.js skill modifier source: vampire racial bonus
+spellbook.mod.lycanthrope,Lycanthropy (beast form),page/dfo_spellbook.js skill modifier source: lycanthrope racial bonus
+spellbook.mod.revenant,Revenant affliction,page/dfo_spellbook.js skill modifier source: revenant debuff
+spellbook.mod.heirloom,Heirloom resonance,page/dfo_spellbook.js skill modifier source: heirloom
+spellbook.mod.softcap,Mastery softcap scaling,page/dfo_spellbook.js skill modifier source: softcap scaling
+spellbook.mod.mentor,Mentoring scaling,page/dfo_spellbook.js skill modifier source: mentoring
+spellbook.mod.other,Other active effect ({id}),page/dfo_spellbook.js skill modifier source: fallback fold id
+spellbook.sort.custom,Sort: Custom,page/dfo_spellbook.js sort mode custom
+spellbook.sort.default,Sort: By book,page/dfo_spellbook.js sort mode default
+spellbook.sort.name,Sort: By name,page/dfo_spellbook.js sort mode name
+spellbook.sort.costAsc,Sort: Cost ↑,page/dfo_spellbook.js sort mode cost asc
+spellbook.sort.costDesc,Sort: Cost ↓,page/dfo_spellbook.js sort mode cost desc
+spellbook.sort.school,Sort: By school,page/dfo_spellbook.js sort mode school
+spellbook.sort.tipTitle,Spell Sorting Mode,page/dfo_spellbook.js sort button tooltip header
+spellbook.sort.tipHint,LMB — next mode · RMB — previous. In Custom mode drag any unpinned spell strip directly to reorder.,page/dfo_spellbook.js sort button tooltip body
+spellbook.customBanner,Custom order — hold and drag any unpinned spell strip up or down (saved in mod cache) · Press 1–0 while hovering to bind hotbar,page/dfo_spellbook.js custom sort mode banner
+spellbook.mainDivider,Other Spells,page/dfo_spellbook.js divider separating pinned hotbar spells from main spells
+spellbook.empty.book,You have no spells in your spellbook yet.,page/dfo_spellbook.js empty spellbook message
+spellbook.empty.filtered,No spells match the current search or school filter.,page/dfo_spellbook.js empty filtered spell list message
+spellbook.empty.reset,Reset filters,page/dfo_spellbook.js reset filters button
+spellbook.target.0.short,Self,page/dfo_spellbook.js target 0 short
+spellbook.target.0.full,Caster only,page/dfo_spellbook.js target 0 full
+spellbook.target.0.desc,Applied instantly to the caster.,page/dfo_spellbook.js target 0 description
+spellbook.target.1.short,Touch,page/dfo_spellbook.js target 1 short
+spellbook.target.1.full,By touch,page/dfo_spellbook.js target 1 full
+spellbook.target.1.desc,Affects a target at melee touch range.,page/dfo_spellbook.js target 1 description
+spellbook.target.2.short,Single target,page/dfo_spellbook.js target 2 short
+spellbook.target.2.full,Single target at range,page/dfo_spellbook.js target 2 full
+spellbook.target.2.desc,Fires a projectile at a single ranged target.,page/dfo_spellbook.js target 2 description
+spellbook.target.3.short,Area self,page/dfo_spellbook.js target 3 short
+spellbook.target.3.full,Area around caster,page/dfo_spellbook.js target 3 full
+spellbook.target.3.desc,Burst centered on the caster hitting nearby targets.,page/dfo_spellbook.js target 3 description
+spellbook.target.4.short,Area range,page/dfo_spellbook.js target 4 short
+spellbook.target.4.full,Area at range,page/dfo_spellbook.js target 4 full
+spellbook.target.4.desc,Projectile detonating in an area upon impact.,page/dfo_spellbook.js target 4 description
+spellbook.element.0,Fire,page/dfo_spellbook.js element 0 Fire
+spellbook.element.1,Cold,page/dfo_spellbook.js element 1 Cold
+spellbook.element.2,Poison,page/dfo_spellbook.js element 2 Poison
+spellbook.element.3,Shock,page/dfo_spellbook.js element 3 Shock
+spellbook.element.4,Magic,page/dfo_spellbook.js element 4 Magic
+spellbook.card.dblClickHint,Double-click to expand or collapse spell details,page/dfo_spellbook.js spell strip double-click hint
+spellbook.card.readyTag,READIED,page/dfo_spellbook.js readied pill badge
+spellbook.card.headReady,Ready,page/dfo_spellbook.js strip ready button
+spellbook.card.headReadied,Readied,page/dfo_spellbook.js strip readied button
+spellbook.card.headUnbind,Unbind [{k}],page/dfo_spellbook.js strip unbind hotkey button
+spellbook.card.headUnbindNone,Unbind,page/dfo_spellbook.js strip unbind disabled label
+spellbook.card.headUnbindNoneTip,Spell is not bound to any hotkey,page/dfo_spellbook.js strip unbind disabled tooltip
+spellbook.card.headDelete,Delete spell,page/dfo_spellbook.js strip delete button aria and tooltip
+spellbook.card.renameInlineTip,Rename spell,page/dfo_spellbook.js strip inline rename pencil tooltip
+spellbook.card.renameSaveTip,Save name (Enter),page/dfo_spellbook.js strip inline rename confirm button
+spellbook.card.renameCancelTip,Cancel (Esc),page/dfo_spellbook.js strip inline rename cancel button
+spellbook.card.renamePlaceholder,Spell name…,page/dfo_spellbook.js strip inline rename placeholder
+spellbook.card.bulletTip,Not bound to hotbar (hover and press 1–0 to bind),page/dfo_spellbook.js unbound bullet marker tooltip
+spellbook.card.hotbarKeyTip,Bound to hotbar key [{k}],page/dfo_spellbook.js bound hotbar keycap tooltip
+spellbook.card.quickslotKeyTip,Bound to Quickslot [Q],page/dfo_spellbook.js bound quickslot keycap tooltip
+spellbook.card.effectSlotLabel,Effect #{n},page/dfo_spellbook.js school slot tooltip effect index label
+spellbook.card.emptyEffect,Slot {n} — empty,page/dfo_spellbook.js empty effect slot label
+spellbook.card.vizPauseTip,Pause / resume visualization (click canvas to burst),page/dfo_spellbook.js viz canvas tooltip
+spellbook.card.vizSynthesis,Synthesis · {n},page/dfo_spellbook.js multi-school viz tag
+spellbook.fx.durChip,Dur.: {n} rnd,page/dfo_spellbook.js effect duration chip
+spellbook.fx.chanceChip,Chance: {n}%,page/dfo_spellbook.js effect chance chip
+spellbook.fx.magChip,Mag.: {val},page/dfo_spellbook.js effect magnitude chip
+spellbook.fx.tipMag,Magnitude,page/dfo_spellbook.js effect tooltip magnitude card
+spellbook.fx.tipDur,Duration,page/dfo_spellbook.js effect tooltip duration card
+spellbook.fx.tipChance,Chance,page/dfo_spellbook.js effect tooltip chance card
+spellbook.fx.durVal,{n} rnd,page/dfo_spellbook.js effect tooltip duration value
+spellbook.fx.durFmt,Duration: {b} + {p} / {per} lvl ({rounds} rnd),page/dfo_spellbook.js effect duration formula line
+spellbook.fx.chanceFmt,Chance: {b}% + {p}% / {per} lvl ({pct}%),page/dfo_spellbook.js effect chance formula line
+spellbook.fx.magFmt,Magnitude: {bLo}–{bHi} + {pLo}–{pHi} / {per} lvl ({lo}–{hi}),page/dfo_spellbook.js effect magnitude formula line
+spellbook.fx.fixedFmt,Fixed activation effect,page/dfo_spellbook.js fixed effect formula fallback
+spellbook.fx.masteryBoost,Scaled by {abbr} > 100 mastery,page/dfo_spellbook.js master skills scaling note
+spellbook.icon.barTitle,Spell Icon,page/dfo_spellbook.js icon settings bar title
+spellbook.icon.modeSigil,Sigil mode: {sigil},page/dfo_spellbook.js icon bar sigil mode subtitle
+spellbook.icon.metaLine,Icon #{order} of {total} · {pack},page/dfo_spellbook.js icon bar subtitle
+spellbook.icon.replaceBtn,Change,page/dfo_spellbook.js icon replace button
+spellbook.icon.noIconBtn,No icon,page/dfo_spellbook.js switch to sigil button
+spellbook.icon.useIconBtn,Use icon,page/dfo_spellbook.js restore icon button
+spellbook.icon.modalTitle,Choose Spell Icon,page/dfo_spellbook.js icon picker modal title
+spellbook.icon.modalCount,Icon #{order} of {total},page/dfo_spellbook.js icon picker modal badge
+spellbook.icon.modalAll,All,page/dfo_spellbook.js icon picker all tab
+spellbook.icon.modalCustom,Custom,page/dfo_spellbook.js icon picker custom pack badge
+spellbook.info.title,Spell Details,page/dfo_spellbook.js right column info header
+spellbook.info.element,Element,page/dfo_spellbook.js info row element
+spellbook.info.target,Delivery,page/dfo_spellbook.js info row target
+spellbook.info.leadSchool,Lead school,page/dfo_spellbook.js info row lead school
+spellbook.info.manaCost,Mana cost,page/dfo_spellbook.js info row mana cost
+spellbook.info.manaFree,Free (0 MP),page/dfo_spellbook.js info row free cost
+spellbook.info.manaShort,short by {n} MP,page/dfo_spellbook.js info row insufficient magicka
+spellbook.info.manaCasts,{n} {n:cast|casts} ({pct}% max MP),page/dfo_spellbook.js info row casts remaining
+spellbook.info.source,Origin,page/dfo_spellbook.js info row spell origin
+spellbook.info.binding,Binding,page/dfo_spellbook.js info row hotbar binding
+spellbook.info.srcVampire,Vampire clan gift (protected),page/dfo_spellbook.js origin vampire
+spellbook.info.srcLycan,Lycanthropy gift (protected),page/dfo_spellbook.js origin lycanthrope
+spellbook.info.srcCustom,Custom / modified spell,page/dfo_spellbook.js origin custom
+spellbook.info.srcStandard,Standard (#{idx}),page/dfo_spellbook.js origin standard with index
+spellbook.info.bindNone,Not bound,page/dfo_spellbook.js binding none
+spellbook.info.bindHotbar,Hotbar · slot {slot},page/dfo_spellbook.js binding hotbar slot
+spellbook.info.bindQuick,Quickslot [Q],page/dfo_spellbook.js binding quickslot
+spellbook.act.ready,Ready,page/dfo_spellbook.js expanded card ready button
+spellbook.act.readied,Readied,page/dfo_spellbook.js expanded card readied button
+spellbook.act.addHotbar,Add to hotbar,page/dfo_spellbook.js expanded card add to hotbar button
+spellbook.act.offHotbar,Off hotbar [{slot}],page/dfo_spellbook.js expanded card remove from hotbar button
+spellbook.act.quickslot,Quickslot,page/dfo_spellbook.js expanded card bind quickslot button
+spellbook.act.unslot,Unslot,page/dfo_spellbook.js expanded card unslot quickslot button
+spellbook.del.title,Delete Spell,page/dfo_spellbook.js delete modal title
+spellbook.del.ask,Remove «{name}» from your spellbook? This action cannot be undone.,page/dfo_spellbook.js delete modal message
+spellbook.del.confirm,Delete (Y),page/dfo_spellbook.js delete modal confirm button
+spellbook.del.cancel,Cancel (N),page/dfo_spellbook.js delete modal cancel button
+spellbook.notice.readied,Spell «{name}» readied ({cost} MP).,page/dfo_spellbook.js notice spell readied
+spellbook.notice.unreadied,Spell «{name}» unreadied.,page/dfo_spellbook.js notice spell unreadied
+spellbook.notice.notEnoughMp,Not enough magicka to cast «{name}» ({cost} MP).,page/dfo_spellbook.js notice insufficient magicka
+spellbook.notice.hotbarOn,«{name}» placed in hotbar slot {slot}.,page/dfo_spellbook.js notice bound to hotbar
+spellbook.notice.hotbarOff,«{name}» removed from hotbar.,page/dfo_spellbook.js notice removed from hotbar
+spellbook.notice.hotbarFull,Hotbar is full — unbind a slot or press 1–0 while hovering a spell.,page/dfo_spellbook.js notice hotbar full
+spellbook.notice.quickOn,«{name}» assigned to Quickslot [Q].,page/dfo_spellbook.js notice quickslot bound
+spellbook.notice.quickOff,«{name}» removed from Quickslot.,page/dfo_spellbook.js notice quickslot cleared
+spellbook.notice.renamed,Renamed to «{name}».,page/dfo_spellbook.js notice spell renamed
+spellbook.notice.iconChanged,Spell icon updated.,page/dfo_spellbook.js notice spell icon changed
+spellbook.notice.iconRestored,Spell icon restored.,page/dfo_spellbook.js notice icon restored
+spellbook.notice.sigilOn,Now displayed as sigil «{sigil}».,page/dfo_spellbook.js notice sigil enabled
+spellbook.notice.cantDelVamp,Cannot delete special vampire spells.,page/dfo_spellbook.js notice protected vampire spell
+spellbook.notice.cantDelLycan,Cannot delete special lycanthropy spell.,page/dfo_spellbook.js notice protected lycanthrope spell

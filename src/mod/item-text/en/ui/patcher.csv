@@ -1,0 +1,46 @@
+key,text,note
+patcher.err.noAsar,No resources\app.asar next to the game. Start the installation from the mod folder with Установить.cmd.,src/patcher.cjs
+patcher.err.busyFile,Could not replace {target} (the file is busy in another process). Close the game and try again.,src/patcher.cjs
+patcher.err.saveSettings,Could not save the settings and the assigned keys: {error},src/patcher.cjs
+patcher.err.dungeonKey,Invalid dungeon intel key. Assign the key again in the installer.,src/patcher.cjs
+patcher.err.lootKey,Invalid loot key. Assign the key again in the installer.,src/patcher.cjs
+patcher.install.title,DFO-Client-Expander-RU {version} — install,src/patcher.cjs
+patcher.author,Author: AutomaticYobaMachine. Made especially for the Russian-speaking DFO Online community.,src/patcher.cjs
+patcher.game,Game:   {path},src/patcher.cjs
+patcher.err.runningInstall,DFO Online is running now. Close the game completely and start the installation again.,src/patcher.cjs
+patcher.err.cacheRead,Could not read the settings cache; the client files are unchanged: {error},src/patcher.cjs
+patcher.err.noBackup,"app.asar is already changed by this mod, but there is no clean copy ({file}). Reinstall the game and start the installation again.",src/patcher.cjs
+patcher.reinstall,The mod is already in - reinstalling over the clean copy.,src/patcher.cjs
+patcher.oldRu,Found the old DFO_RU translation - taking its clean copy: {file},src/patcher.cjs
+patcher.oldRuOther,Warning: the DFO_RU copy ({copy}) is from another shell version ({current}) - installing over the current file.,src/patcher.cjs
+patcher.oldRuNoCopy,Warning: the old DFO_RU translation is in without a clean copy - installing over it.,src/patcher.cjs
+patcher.backup,Saving a clean copy of app.asar...,src/patcher.cjs
+patcher.err.noMain,app.asar has no main.cjs - an unknown shell version.,src/patcher.cjs
+patcher.err.noHookPlace,"No place for the hook in main.cjs (protocol.handle('dagger', ...)). This shell version is not supported.",src/patcher.cjs
+patcher.buildRu,"Building the translation (dictionary, rules, quests)...",src/patcher.cjs
+patcher.report.quests,quests: {n},src/patcher.cjs
+patcher.report.pack,pack: {n} {n:file|files},src/patcher.cjs
+patcher.repack,Rebuilding app.asar...,src/patcher.cjs
+patcher.autoUpdate,The game's auto-update is on again (the old translation turned it off): the mod survives updates by itself.,src/patcher.cjs
+patcher.report,Translation: {report},src/patcher.cjs
+patcher.settings,Settings: {file},src/patcher.cjs
+patcher.hookLog,Hooks' log (after the game starts): {file},src/patcher.cjs
+patcher.uninstall.title,DFO-Client-Expander-RU {version} — uninstall,src/patcher.cjs
+patcher.err.runningUninstall,DFO Online is running now. Close the game completely and start the removal again.,src/patcher.cjs
+patcher.notInstalled,The mod is not installed - app.asar is clean already.,src/patcher.cjs
+patcher.restored,Done: the clean app.asar is back in place.,src/patcher.cjs
+patcher.restoredFiles,"Done: the shell's original files are back, the mod is removed.",src/patcher.cjs
+patcher.status.asar,app.asar: {path} (shell {shell}),src/patcher.cjs
+patcher.status.lootKey,Loot key (in the cache): {key},src/patcher.cjs
+patcher.status.lastLog,The last start's log:,src/patcher.cjs
+patcher.err.command,Unknown command: {cmd},src/patcher.cjs
+patcher.error,Error: {error},src/patcher.cjs
+patcher.crash,Failure: {error},src/patcher.cjs
+patcher.done.installed,Done. Mod {version} is installed.,src/patcher.cjs
+patcher.done.installedRu,Done. Mod {version} is installed together with the translation.,src/patcher.cjs
+patcher.status.installed,Mod: installed {version},src/patcher.cjs
+patcher.status.installedRu,"Mod: installed {version}, with the translation",src/patcher.cjs
+patcher.status.notInstalled,Mod: not installed,src/patcher.cjs
+patcher.status.notInstalledRu,"Mod: not installed, with the translation",src/patcher.cjs
+patcher.status.cleanYes,Clean copy: yes,src/patcher.cjs
+patcher.status.cleanNo,Clean copy: no,src/patcher.cjs

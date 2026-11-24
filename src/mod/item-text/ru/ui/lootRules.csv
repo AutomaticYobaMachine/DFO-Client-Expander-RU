@@ -1,0 +1,117 @@
+key,text,note
+lootRules.tag.weapons,Оружие,loot filter tag
+lootRules.tag.armor,Броня,loot filter tag
+lootRules.tag.clothing,Одежда,loot filter tag
+lootRules.tag.potions,Зелья,loot filter tag
+lootRules.tag.ingredients,Ингредиенты,loot filter tag
+lootRules.tag.books,Книги и карты,loot filter tag
+lootRules.tag.valuables,Ценности,loot filter tag
+lootRules.tag.misc,Прочее,loot filter tag
+lootRules.tag.materials,Материалы для ремесла,loot filter tag
+lootRules.tag.Magic,Магические предметы,loot filter tag
+lootRules.tag.Valuables,Ценности,loot filter tag
+lootRules.tag.Misc,Прочее,loot filter tag
+lootRules.tag.Weapons,Оружие,loot filter tag
+lootRules.tag.Arrows,Стрелы,loot filter tag
+lootRules.tag.Armor,Броня,loot filter tag
+lootRules.tag.Clothing,Одежда,loot filter tag
+lootRules.tag.Ingredients,Ингредиенты,loot filter tag
+lootRules.tag.Gold,Золото,loot filter tag
+lootRules.tag.Potions,Зелья,loot filter tag
+lootRules.tag.Books,Книги,loot filter tag
+lootRules.tag.Gems,Драгоценные камни,loot filter tag
+lootRules.tag.Jewellery,Украшения,loot filter tag
+lootRules.tag.Maps,Карты,loot filter tag
+lootRules.tag.Magic-Items,Магические предметы,loot filter tag
+lootRules.tag.Religious-Items,Религиозные предметы,loot filter tag
+lootRules.tag.Quest-Items,Квестовые предметы,loot filter tag
+lootRules.tag.Transportation,Транспорт,loot filter tag
+lootRules.tag.Other-Items,Прочие предметы,loot filter tag
+lootRules.tag.Drugs,Наркотические вещества,loot filter tag
+lootRules.tag.UselessItems1,Прочее I,loot filter tag
+lootRules.tag.UselessItems2,Прочее II,loot filter tag
+lootRules.tag.MiscItems,Разные предметы,loot filter tag
+lootRules.tag.MensClothing,Мужская одежда,loot filter tag
+lootRules.tag.WomensClothing,Женская одежда,loot filter tag
+lootRules.tag.Furniture,Мебель,loot filter tag
+lootRules.tag.ReligiousItems,Религиозные предметы,loot filter tag
+lootRules.tag.MagicItems,Магические предметы,loot filter tag
+lootRules.tag.Artifacts,Артефакты,loot filter tag
+lootRules.tag.QuestItems,Квестовые предметы,loot filter tag
+lootRules.tag.Currency,Валюты,loot filter tag
+lootRules.tag.Paintings,Картины,loot filter tag
+lootRules.tag.Deeds,Документы на собственность,loot filter tag
+lootRules.tag.PlantIngredients1,Растительные ингредиенты I,loot filter tag
+lootRules.tag.PlantIngredients2,Растительные ингредиенты II,loot filter tag
+lootRules.tag.CreatureIngredients1,Животные ингредиенты I,loot filter tag
+lootRules.tag.CreatureIngredients2,Животные ингредиенты II,loot filter tag
+lootRules.tag.CreatureIngredients3,Животные ингредиенты III,loot filter tag
+lootRules.tag.MiscellaneousIngredients1,Разные ингредиенты I,loot filter tag
+lootRules.tag.MiscellaneousIngredients2,Разные ингредиенты II,loot filter tag
+lootRules.tag.MetalIngredients,Металлические ингредиенты,loot filter tag
+lootRules.tag.common,Обычные,loot filter tag
+lootRules.tag.superior,Превосходные,loot filter tag
+lootRules.tag.magic,Магические,loot filter tag
+lootRules.tag.rare,Редкие,loot filter tag
+lootRules.tag.legendary,Легендарные,loot filter tag
+lootRules.tag.artifact,Артефакты,loot filter tag
+lootRules.tag.aetheric,Эфирные,loot filter tag
+lootRules.tag.gilded,Позолоченные,loot filter tag
+lootRules.tag.Leather,Кожа,loot filter tag
+lootRules.tag.Chain,Кольчуга,loot filter tag
+lootRules.tag.Iron,Железо,loot filter tag
+lootRules.tag.Steel,Сталь,loot filter tag
+lootRules.tag.Silver,Серебро,loot filter tag
+lootRules.tag.Elven,Эльфийский,loot filter tag
+lootRules.tag.Dwarven,Двемерский,loot filter tag
+lootRules.tag.Mithril,Мифрил,loot filter tag
+lootRules.tag.Adamantium,Адамантий,loot filter tag
+lootRules.tag.Ebony,Эбонит,loot filter tag
+lootRules.tag.Orcish,Орочий,loot filter tag
+lootRules.tag.Daedric,Даэдрический,loot filter tag
+lootRules.state.quest,Квестовые,loot filter tag
+lootRules.state.enchanted,Зачарованные,loot filter tag
+lootRules.state.artifact,Артефакты,loot filter tag
+lootRules.state.identified,Опознанные,loot filter tag
+lootRules.state.unidentified,Неопознанные,loot filter tag
+lootRules.state.stolen,Краденые,loot filter tag
+lootRules.state.bound,Привязанные,loot filter tag
+lootRules.state.locked,Защищённые от удаления,loot filter tag
+lootRules.state.junk,Отмеченные как хлам,loot filter tag
+lootRules.state.broken,Сломанные,loot filter tag
+lootRules.state.exalted,Возвышенные,loot filter tag
+lootRules.state.cursed,Проклятые,loot filter tag
+lootRules.state.socket-empty,С пустым гнездом,loot filter tag
+lootRules.state.socket-set,С камнем в гнезде,loot filter tag
+lootRules.state.imprint,С отпечатком,loot filter tag
+lootRules.state.imbued,Усиленные,loot filter tag
+lootRules.state.honed,Заточенные,loot filter tag
+lootRules.state.masterwork,Мастерская работа,loot filter tag
+lootRules.state.heirloom,Фамильные,loot filter tag
+lootRules.state.poisoned,Отравленные,loot filter tag
+lootRules.affix.damage,Урон,loot filter tag
+lootRules.affix.armor,Защита,loot filter tag
+lootRules.affix.weight,Грузоподъёмность,loot filter tag
+lootRules.affix.stat,Характеристика,loot filter tag
+lootRules.affix.resist,Сопротивление,loot filter tag
+lootRules.affix.skill,Навык,loot filter tag
+lootRules.affix.elemental,Стихийный урон,loot filter tag
+lootRules.affix.leech,Похищение здоровья,loot filter tag
+lootRules.affix.thorns,Ответный урон,loot filter tag
+lootRules.affix.focus,Стоимость заклинаний,loot filter tag
+lootRules.affix.slayer,Урон по существам,loot filter tag
+lootRules.affix.standing,Положение,loot filter tag
+lootRules.affix.warmth,Тепло,loot filter tag
+lootRules.affix.dry,Защита от погоды,loot filter tag
+lootRules.affix.castSpeed,Скорость заклинаний,loot filter tag
+lootRules.affix.potency,Сила заклинаний,loot filter tag
+lootRules.affix.wellspring,Мана за убийство,loot filter tag
+lootRules.affix.technique,Техника,loot filter tag
+lootRules.axis.page,Категории,loot filter tag
+lootRules.axis.group,Игровые группы,loot filter tag
+lootRules.axis.kind,Типы наземных предметов,loot filter tag
+lootRules.axis.rarity,Редкость,loot filter tag
+lootRules.axis.material,Материал,loot filter tag
+lootRules.axis.state,Свойства,loot filter tag
+lootRules.axis.affix,Аффиксы,loot filter tag
+lootRules.axis.type,Виды предметов,loot filter tag

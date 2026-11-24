@@ -1,0 +1,23 @@
+key,text,note
+nav.target.exit,Dungeon exit,src/mod/page/dfo_dungeon_nav_model.js
+nav.target.aurum,Aurum chest,src/mod/page/dfo_dungeon_nav_model.js
+nav.target.elite,Nearest elite enemy,src/mod/page/dfo_dungeon_nav.js
+nav.target.quest,Quest target,src/mod/page/dfo_dungeon_nav_model.js
+nav.none.exit,No exit was found in this location.,src/mod/page/dfo_dungeon_nav.js
+nav.none.aurum,The Aurum chest is unavailable or already open.,src/mod/page/dfo_dungeon_nav.js
+nav.none.elite,No elite enemies are alive here.,src/mod/page/dfo_dungeon_nav.js
+nav.none.quest,This quest has no active targets in the dungeon.,src/mod/page/dfo_dungeon_nav.js
+nav.routing,Finding the way…,src/mod/page/dfo_dungeon_nav.js
+nav.noPath,No way was found in the loaded geometry.,src/mod/page/dfo_dungeon_nav.js
+nav.failed,Could not find the way.,src/mod/page/dfo_dungeon_nav.js
+nav.building,Preparing the dungeon profiles…,src/mod/page/dfo_dungeon_nav.js
+nav.arrived,The target is near.,src/mod/page/dfo_dungeon_nav.js
+nav.model.elite,Elite enemy,src/mod/page/dfo_dungeon_nav_model.js
+nav.model.questItem,Quest item,src/mod/page/dfo_dungeon_nav_model.js
+nav.model.carrier,carrier,src/mod/page/dfo_dungeon_nav_model.js
+nav.graph.noGeometry,The dungeon's geometry is not available.,src/mod/page/dfo_dungeon_graph.js
+nav.graph.noSurfaces,The dungeon has no loaded surfaces for a route.,src/mod/page/dfo_dungeon_graph.js
+nav.graph.tooLarge,The dungeon's geometry is too large for the current route builder.,src/mod/page/dfo_dungeon_graph.js
+nav.graph.cancelled,The background route search was stopped.,src/mod/page/dfo_dungeon_graph.js
+nav.graph.notReady,The dungeon profiles are not ready yet.,src/mod/page/dfo_dungeon_graph.js
+nav.graph.badRequest,Unknown navigation request.,src/mod/page/dfo_dungeon_graph.js

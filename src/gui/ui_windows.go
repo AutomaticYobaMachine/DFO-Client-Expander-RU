@@ -1,0 +1,1379 @@
+// Native Win32 installer. Embedded data; no separately installed runtime.
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	"path/filepath"
+	"runtime"
+	"sync"
+	"sync/atomic"
+	"syscall"
+	"time"
+	"unsafe"
+)
+
+type app struct {
+	mu                                               sync.Mutex
+	wg                                               sync.WaitGroup
+	ctx                                              context.Context
+	cancel                                           context.CancelFunc
+	hwnd, pane, fontsPane                            uintptr
+	dpi                                              int32
+	modDir, payloadDir, prefsDir                     string
+	exe                                              string
+	status                                           *gameStatus
+	fontPreset                                       *fontPreset
+	lastFontDir                                      string
+	busy, querying, searching                        bool
+	lootKey, dungeonKey                              string
+	lootKeyDirty, dungeonKeyDirty, capturingKey      bool
+	captureTarget                                    int
+	recordedKey, recordedMouse                       uint32
+	generation, choiceRevision                       uint64
+	searchFound                                      []string
+	searchHow                                        string
+	searchReady                                      bool
+	note                                             say
+	stage, operation                                 string
+	noteCol                                          uintptr
+	progress                                         int
+	page                                             int
+	logbook                                          *sessionJournal
+	logPosted                                        atomic.Bool
+	startupError                                     error
+	toggles                                          map[int]bool
+	ctl, descriptions                                map[int]uintptr
+	fontDescs                                        map[string]uintptr
+	fonts                                            map[string]uintptr
+	brushBg, brushCard, brushField, brushLog         uintptr
+	rows                                             map[int]rect
+	fontRows                                         map[string]rect
+	scroll, contentHeight, wheel                     int32
+	fontScroll, fontContentH, fontWheel              int32
+	anim                                             int32
+	updateChecking, updateDownloading, updateHandoff bool
+	handedOff, resumeCommitted, updateAccepted       bool
+	updatesDisabled                                  bool
+	updateText                                       say
+	resumePath, pathHint                             string
+	updateProgress                                   int
+	updateReady                                      *downloadedUpdate
+	updateAvailable                                  *updateRelease
+	updateResume                                     *updateResume
+	lastUserInput                                    time.Time
+	modalDepth                                       int
+	updateWaitOthers                                 bool
+	savedChoiceRevision, resumeRevision              uint64
+	webMode                                          bool
+	webSrv                                           *webUIServer
+	wv2                                              *webView2Host
+	webQueue                                         []webAction
+	dragging                                         bool
+	dragStartPt                                      point
+	dragStartWin                                     rect
+}
+
+var A = &app{dpi: 96, page: idComponents, lootKey: defaultLootKey, dungeonKey: defaultDungeonKey, toggles: defaults(), fontPreset: defaultFontPreset(), ctl: map[int]uintptr{}, descriptions: map[int]uintptr{}, fontDescs: map[string]uintptr{}, fonts: map[string]uintptr{}, rows: map[int]rect{}, fontRows: map[string]rect{}}
+
+func (a *app) px(v int32) int32 { return v * a.dpi / 96 }
+func (a *app) font(name string, size, weight int32) uintptr {
+	key := fmt.Sprintf("%s:%d:%d", name, size, weight)
+	if f, ok := a.fonts[key]; ok {
+		return f
+	}
+	f, _, _ := pCreateFontW.Call(uintptr(uint32(-a.px(size))), 0, 0, 0, uintptr(weight), 0, 0, 0, 1, 0, 0, 5, 0, uintptr(unsafe.Pointer(u16("Segoe UI"))))
+	a.fonts[key] = f
+	return f
+}
+func (a *app) child(parent uintptr, id int, kind, label string, style uintptr) uintptr {
+	h, _, _ := pCreateWindowExW.Call(0, uintptr(unsafe.Pointer(u16(kind))), uintptr(unsafe.Pointer(u16(label))), wsChild|style, 0, 0, 10, 10, parent, uintptr(id), 0, 0)
+	a.ctl[id] = h
+	return h
+}
+func (a *app) button(id int, label string) {
+	a.child(a.hwnd, id, "BUTTON", label, wsVisible|wsTabStop|bsOwnerDraw)
+}
+
+// The buttons' words: installer.button.<name>; the language switch names the language it switches to.
+var buttonKeys = map[int]string{idBrowse: "browse", idRefresh: "refresh", idComponents: "components", idFontsTab: "fonts", idJournal: "journal",
+	idSaveLog: "saveLog", idOpenLog: "openLog", idOpenReport: "openReport", idInstallerLog: "installerLog",
+	idCheckUpdates: "updates", idReadme: "readme", idUninstall: "uninstall", idInstall: "install", idLang: "lang",
+	idConfigureFonts: "configureFonts", idFontsApplyAll: "fontsApplyAll", idFontsResetAll: "fontsResetAll",
+	idFontsImport: "fontsImport", idFontsExport: "fontsExport", idFontsOpenDir: "fontsOpenDir"}
+
+func buttonLabel(id int) string { return T("installer.button." + buttonKeys[id]) }
+
+// retext gives every control its words again after the RU/EN switch; painted text is read anew on the next paint.
+func (a *app) retext() {
+	if a.webMode {
+		a.pushWebState()
+		return
+	}
+	for id := range buttonKeys {
+		if id != idInstall && a.ctl[id] != 0 { // syncControls words the install button by the client's state
+			caption(a.ctl[id], buttonLabel(id))
+		}
+	}
+	for _, f := range features {
+		caption(a.ctl[f.ID], f.Title())
+		caption(a.descriptions[f.ID], f.Description())
+	}
+	caption(a.ctl[idVisited], T("installer.visited"))
+	a.mu.Lock()
+	hint := a.pathHint
+	a.mu.Unlock()
+	if hint != "" && a.ctl[idPath] != 0 {
+		caption(a.ctl[idPath], T(hint))
+	}
+	a.retextFontControls()
+	a.syncControls()
+	invalidate(a.pane)
+}
+
+// switchLang flips the window between Russian and English and remembers the choice for the next start.
+func (a *app) switchLang() {
+	l := otherLang(lang())
+	setLang(l)
+	if err := saveLang(a.prefsDir, l); err != nil {
+		a.appendLog(T("installer.log.langSave", "error", err.Error()))
+	}
+	a.retext()
+}
+
+func (a *app) createControls() {
+	a.pathHint = "installer.path.searching"
+	a.child(a.hwnd, idPath, "EDIT", T(a.pathHint), wsVisible|wsTabStop|esReadOnly|esAutoHScroll)
+	for _, id := range []int{idBrowse, idRefresh, idComponents, idFontsTab, idJournal, idLang} {
+		a.button(id, buttonLabel(id))
+	}
+	pane, _, _ := pCreateWindowExW.Call(wsExControlParent, uintptr(unsafe.Pointer(u16("DFOExpanderComponents"))), 0, wsChild|wsVisible|wsVScroll|wsClipChild, 0, 0, 10, 10, a.hwnd, idPane, 0, 0)
+	a.pane = pane
+	a.ctl[idPane] = pane
+	for _, f := range features {
+		h := a.child(pane, f.ID, "BUTTON", f.Title(), wsVisible|wsTabStop|bsAutoCheckbox|bsMultiline|bsNotify)
+		if pSetWindowTheme.Find() == nil {
+			pSetWindowTheme.Call(h, uintptr(unsafe.Pointer(u16(""))), uintptr(unsafe.Pointer(u16(""))))
+		}
+		a.descriptions[f.ID] = a.child(pane, 1000+f.ID, "STATIC", f.Description(), wsVisible|0x80)
+		if f.ID == idMarks {
+			a.child(pane, idVisited, "BUTTON", T("installer.visited"), wsVisible|wsTabStop|bsAutoCheckbox|bsNotify)
+			if pSetWindowTheme.Find() == nil {
+				pSetWindowTheme.Call(a.ctl[idVisited], uintptr(unsafe.Pointer(u16(""))), uintptr(unsafe.Pointer(u16(""))))
+			}
+		}
+		if f.ID == idLoot {
+			a.child(pane, idLootKey, "BUTTON", T("installer.key.label", "key", "J"), wsVisible|wsTabStop|bsOwnerDraw|bsNotify)
+		}
+		if f.ID == idDungeons {
+			a.child(pane, idDungeonKey, "BUTTON", T("installer.key.label", "key", "K"), wsVisible|wsTabStop|bsOwnerDraw|bsNotify)
+		}
+		if f.ID == idEnhancedUi {
+			a.child(pane, idConfigureFonts, "BUTTON", buttonLabel(idConfigureFonts), wsVisible|wsTabStop|bsOwnerDraw|bsNotify)
+		}
+	}
+	a.createFontControls()
+	a.child(a.hwnd, idLog, "EDIT", "", wsVScroll|wsTabStop|esMultiline|esAutoVScroll|esReadOnly)
+	for _, id := range []int{idSaveLog, idOpenLog, idOpenReport, idInstallerLog, idCheckUpdates, idUninstall, idInstall} {
+		a.button(id, buttonLabel(id))
+	}
+	pSendMessageW.Call(a.ctl[idLog], emSetLimit, 1024*1024, 0)
+	a.applyFonts()
+	a.layout()
+	a.syncControls()
+}
+func (a *app) applyFonts() {
+	for _, f := range features {
+		pSendMessageW.Call(a.ctl[f.ID], wmSetFont, a.font("feature", 16, 600), 1)
+		pSendMessageW.Call(a.descriptions[f.ID], wmSetFont, a.font("body", 14, 400), 1)
+	}
+	a.applyFontTabFonts()
+	pSendMessageW.Call(a.ctl[idVisited], wmSetFont, a.font("small", 12, 400), 1)
+	pSendMessageW.Call(a.ctl[idPath], wmSetFont, a.font("path", 15, 400), 1)
+	pSendMessageW.Call(a.ctl[idLog], wmSetFont, a.font("body", 14, 400), 1)
+}
+func (a *app) syncControls() {
+	if a.webMode {
+		a.pushWebState()
+		return
+	}
+	a.mu.Lock()
+	choices := make(map[int]bool, len(a.toggles))
+	for id, on := range a.toggles {
+		choices[id] = on
+	}
+	busy, querying, searching, st, page, operation := a.busy || a.updateDownloading || a.updateHandoff || a.handedOff, a.querying, a.searching, a.status, a.page, a.operation
+	checking, updatesDisabled := a.updateChecking, a.updatesDisabled
+	updating, updatePending := a.updateDownloading || a.updateHandoff || a.handedOff, a.updateReady != nil
+	resumePending := a.resumePath != "" && !a.resumeCommitted
+	key, dungeonKey, recording, target := a.lootKey, a.dungeonKey, a.capturingKey, a.captureTarget
+	preset := a.fontPreset
+	a.mu.Unlock()
+	if preset == nil {
+		preset = defaultFontPreset()
+	}
+	for _, f := range features {
+		checked := f.Locked || choices[f.ID]
+		pSendMessageW.Call(a.ctl[f.ID], bmSetCheck, uintptrBool(checked), 0)
+		enable(a.ctl[f.ID], !busy && !f.Locked)
+		invalidate(a.ctl[f.ID])
+	}
+	enable(a.ctl[idConfigureFonts], !busy)
+	invalidate(a.ctl[idConfigureFonts])
+	pSendMessageW.Call(a.ctl[idVisited], bmSetCheck, uintptrBool(choices[idVisited]), 0)
+	enable(a.ctl[idVisited], !busy && choices[idMarks])
+	ready := !busy && !resumePending && !querying && st != nil && !st.Running && !recording
+	enable(a.ctl[idLootKey], !busy && !querying && st != nil && choices[idLoot])
+	keyLabel := T("installer.key.label", "key", lootKeyLabel(key))
+	if recording && target == idLootKey {
+		keyLabel = T("installer.key.press")
+	}
+	caption(a.ctl[idLootKey], keyLabel)
+	invalidate(a.ctl[idLootKey])
+	enable(a.ctl[idDungeonKey], !busy && !querying && st != nil && choices[idDungeons])
+	dungeonLabel := T("installer.key.label", "key", lootKeyLabel(dungeonKey))
+	if recording && target == idDungeonKey {
+		dungeonLabel = T("installer.key.press")
+	}
+	caption(a.ctl[idDungeonKey], dungeonLabel)
+	invalidate(a.ctl[idDungeonKey])
+	enable(a.ctl[idInstall], ready && selectedCount(choices) > 0)
+	enable(a.ctl[idUninstall], ready && st.Installed)
+	enable(a.ctl[idBrowse], !busy)
+	enable(a.ctl[idRefresh], !busy && !querying && !searching)
+	enable(a.ctl[idCheckUpdates], !busy && !checking && !updatePending && !resumePending && !updatesDisabled)
+	focused, _, _ := pGetFocus.Call()
+	for i, s := range fontSlots {
+		isCustom := preset.Slots[s.ID].Mode == "custom"
+		pickH := a.ctl[idFontPickBase+i]
+		resetH := a.ctl[idFontResetBase+i]
+		enable(pickH, !busy)
+		if (busy || !isCustom) && focused == resetH && !busy {
+			pSetFocus.Call(pickH)
+		}
+		enable(resetH, !busy && isCustom)
+		invalidate(pickH)
+		invalidate(resetH)
+	}
+	enable(a.ctl[idFontsApplyAll], !busy)
+	resetAllOn := !busy && customFontCount(preset) > 0
+	if !resetAllOn && focused == a.ctl[idFontsResetAll] && !busy {
+		pSetFocus.Call(a.ctl[idFontsApplyAll])
+	}
+	enable(a.ctl[idFontsResetAll], resetAllOn)
+	enable(a.ctl[idFontsImport], !busy)
+	enable(a.ctl[idFontsExport], !busy)
+	enable(a.ctl[idFontsOpenDir], !busy)
+	label := T("installer.button.install")
+	if st != nil && st.Installed {
+		label = T("installer.button.update")
+		if st.ModVersion != nil && *st.ModVersion == appVersion {
+			label = T("installer.button.apply")
+		}
+	}
+	if busy {
+		if updating {
+			label = T("installer.busy.selfUpdate")
+		} else if operation == "uninstall" {
+			label = T("installer.busy.uninstall")
+		} else {
+			label = T("installer.busy.install")
+		}
+	}
+	caption(a.ctl[idInstall], label)
+	show(a.pane, page == idComponents)
+	show(a.fontsPane, page == idFontsTab)
+	show(a.ctl[idLog], page == idJournal)
+	for _, id := range []int{idSaveLog, idOpenLog, idOpenReport, idInstallerLog} {
+		show(a.ctl[id], page == idJournal)
+	}
+	for _, id := range []int{idFontsApplyAll, idFontsResetAll, idFontsImport, idFontsExport, idFontsOpenDir} {
+		show(a.ctl[id], page == idFontsTab)
+	}
+	for _, id := range []int{idComponents, idFontsTab, idJournal, idInstall, idUninstall, idBrowse, idRefresh, idFontsApplyAll, idFontsResetAll, idFontsImport, idFontsExport, idFontsOpenDir} {
+		invalidate(a.ctl[id])
+	}
+	invalidate(a.pane)
+	invalidate(a.fontsPane)
+	invalidate(a.hwnd)
+	a.layout()
+}
+func uintptrBool(v bool) uintptr {
+	if v {
+		return 1
+	}
+	return 0
+}
+
+func (a *app) layout() {
+	if a.hwnd == 0 {
+		return
+	}
+	r := bounds(a.hwnd)
+	P := a.px
+	compact := r.bottom < P(710)
+	gameTop, paneTop, foot := int32(120), int32(290), int32(136)
+	if compact {
+		gameTop = 92
+		paneTop = 254
+	}
+	move(a.ctl[idBrowse], rect{r.right - P(168), P(gameTop + 22), r.right - P(40), P(gameTop + 54)})
+	move(a.ctl[idRefresh], rect{r.right - P(168), P(gameTop + 60), r.right - P(40), P(gameTop + 88)})
+	move(a.ctl[idPath], rect{P(40), P(gameTop + 36), r.right - P(190), P(gameTop + 62)})
+	tabTop := P(paneTop - 44)
+	move(a.ctl[idComponents], rect{P(24), tabTop, P(164), tabTop + P(32)})
+	move(a.ctl[idFontsTab], rect{P(172), tabTop, P(274), tabTop + P(32)})
+	move(a.ctl[idJournal], rect{P(282), tabTop, P(382), tabTop + P(32)})
+	move(a.ctl[idCheckUpdates], rect{P(390), tabTop, P(536), tabTop + P(32)})
+	move(a.ctl[idLang], rect{r.right - P(222), P(24), r.right - P(128), P(52)})
+	bottom := r.bottom - P(foot) - P(10)
+	if bottom < P(paneTop+40) {
+		bottom = P(paneTop + 40)
+	}
+	move(a.pane, rect{P(24), P(paneTop), r.right - P(24), bottom})
+	move(a.fontsPane, rect{P(24), P(paneTop), r.right - P(24), bottom - P(44)})
+	{
+		gap := P(8)
+		x := P(24)
+		avail := (r.right - P(24)) - x - gap*4
+		if avail < P(480) {
+			avail = P(480)
+		}
+		wAll := avail * 26 / 100
+		wReset := avail * 20 / 100
+		wImp := avail * 16 / 100
+		wExp := avail * 16 / 100
+		wDir := avail - wAll - wReset - wImp - wExp
+		move(a.ctl[idFontsApplyAll], rect{x, bottom - P(36), x + wAll, bottom - P(4)})
+		x += wAll + gap
+		move(a.ctl[idFontsResetAll], rect{x, bottom - P(36), x + wReset, bottom - P(4)})
+		x += wReset + gap
+		move(a.ctl[idFontsImport], rect{x, bottom - P(36), x + wImp, bottom - P(4)})
+		x += wImp + gap
+		move(a.ctl[idFontsExport], rect{x, bottom - P(36), x + wExp, bottom - P(4)})
+		x += wExp + gap
+		move(a.ctl[idFontsOpenDir], rect{x, bottom - P(36), x + wDir, bottom - P(4)})
+	}
+	move(a.ctl[idLog], rect{P(36), P(paneTop + 12), r.right - P(36), bottom - P(48)})
+	move(a.ctl[idSaveLog], rect{P(32), bottom - P(38), P(224), bottom - P(8)})
+	move(a.ctl[idOpenLog], rect{P(232), bottom - P(38), P(372), bottom - P(8)})
+	move(a.ctl[idOpenReport], rect{P(380), bottom - P(38), P(514), bottom - P(8)})
+	move(a.ctl[idInstallerLog], rect{P(522), bottom - P(38), P(680), bottom - P(8)})
+	base := r.bottom - P(60)
+	move(a.ctl[idInstall], rect{r.right - P(276), base, r.right - P(24), base + P(42)})
+	move(a.ctl[idUninstall], rect{r.right - P(470), base, r.right - P(288), base + P(42)})
+	a.layoutRows()
+	a.layoutFontRows()
+	invalidate(a.hwnd)
+}
+func (a *app) layoutRows() {
+	if a.pane == 0 {
+		return
+	}
+	P := a.px
+	r := bounds(a.pane)
+	w := r.right - P(2)
+	hdc, _, _ := pGetDC.Call(a.pane)
+	defer pReleaseDC.Call(a.pane, hdc)
+	y := int32(0)
+	type measure struct {
+		f feature
+		h int32
+	}
+	measured := []measure{}
+	for _, f := range features {
+		t := rect{0, 0, w - P(284), 0}
+		of, _, _ := pSelectObject.Call(hdc, a.font("body", 14, 400))
+		s := syscall.StringToUTF16(f.Description())
+		pDrawTextW.Call(hdc, uintptr(unsafe.Pointer(&s[0])), uintptr(len(s)-1), uintptr(unsafe.Pointer(&t)), dtWordBreak|dtCalcRect|dtNoPrefix)
+		pSelectObject.Call(hdc, of)
+		h := t.bottom + P(32)
+		if h < P(98) {
+			h = P(98)
+		}
+		if f.ID == idMarks && h < P(116) {
+			h = P(116)
+		}
+		if (f.ID == idLoot || f.ID == idDungeons || f.ID == idEnhancedUi) && h < P(130) {
+			h = P(130)
+		}
+		a.rows[f.ID] = rect{0, y, w, y + h}
+		measured = append(measured, measure{f, t.bottom + P(4)})
+		y += h + P(10)
+	}
+	a.contentHeight = y - P(10)
+	limit := a.contentHeight - r.bottom
+	if limit < 0 {
+		limit = 0
+	}
+	if a.scroll > limit {
+		a.scroll = limit
+	}
+	if a.scroll < 0 {
+		a.scroll = 0
+	}
+	si := scrollInfo{fMask: 0x17, nMin: 0, nMax: a.contentHeight - 1, nPage: uint32(r.bottom), nPos: a.scroll}
+	si.cbSize = uint32(unsafe.Sizeof(si))
+	pSetScrollInfo.Call(a.pane, sibVert, uintptr(unsafe.Pointer(&si)), 1)
+	for _, m := range measured {
+		row := a.rows[m.f.ID]
+		top := row.top - a.scroll
+		move(a.ctl[m.f.ID], rect{P(20), top + P(17), P(244), top + P(49)})
+		move(a.descriptions[m.f.ID], rect{P(270), top + P(16), w - P(16), top + P(16) + m.h})
+		if m.f.ID == idMarks {
+			move(a.ctl[idVisited], rect{P(40), top + P(80), P(244), top + P(104)})
+		}
+		if m.f.ID == idLoot {
+			move(a.ctl[idLootKey], rect{P(40), top + P(80), P(244), top + P(114)})
+		}
+		if m.f.ID == idDungeons {
+			move(a.ctl[idDungeonKey], rect{P(40), top + P(80), P(244), top + P(114)})
+		}
+		if m.f.ID == idEnhancedUi {
+			move(a.ctl[idConfigureFonts], rect{P(40), top + P(80), P(244), top + P(114)})
+		}
+	}
+	invalidate(a.pane)
+}
+func (a *app) scrollTo(y int32) { a.scroll = y; a.layoutRows() }
+func (a *app) focusRow(id int) {
+	rowID := id
+	offset := a.px(16)
+	if id == idVisited {
+		rowID = idMarks
+		offset = a.px(80)
+	}
+	if id == idLootKey {
+		rowID = idLoot
+		offset = a.px(80)
+	}
+	if id == idDungeonKey {
+		rowID = idDungeons
+		offset = a.px(80)
+	}
+	if id == idConfigureFonts {
+		rowID = idEnhancedUi
+		offset = a.px(80)
+	}
+	r, ok := a.rows[rowID]
+	if !ok {
+		return
+	}
+	top := r.top + offset
+	bottom := top + a.px(32)
+	viewH := bounds(a.pane).bottom
+	if r.bottom-r.top <= viewH {
+		if r.top < a.scroll {
+			a.scrollTo(r.top)
+		} else if r.bottom > a.scroll+viewH {
+			a.scrollTo(r.bottom - viewH)
+		}
+		return
+	}
+	if top < a.scroll {
+		a.scrollTo(top - a.px(8))
+	} else if bottom > a.scroll+viewH {
+		a.scrollTo(bottom - viewH + a.px(8))
+	}
+}
+
+func (a *app) paint(hdc uintptr, r rect) {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	P := a.px
+	fill(hdc, r, colBg)
+	compact := r.bottom < P(710)
+	titleSize, gameTop, foot := int32(29), int32(120), int32(136)
+	if compact {
+		titleSize = 25
+		gameTop = 92
+	}
+	fill(hdc, rect{P(24), P(24), P(28), P(66)}, colBrass)
+	titleBottom, authorTop := int32(59), int32(60)
+	if compact {
+		titleBottom = 48
+		authorTop = 49
+	}
+	text(hdc, appName, rect{P(42), P(17), r.right - P(232), P(titleBottom)}, a.font(fmt.Sprintf("title-%d", titleSize), titleSize, 700), colBone, dtSingleLine|dtVCenter|dtEndEllipsis)
+	roundBox(hdc, rect{r.right - P(120), P(24), r.right - P(24), P(52)}, P(10), colField, colEdge)
+	text(hdc, "v"+appVersion, rect{r.right - P(116), P(24), r.right - P(28), P(52)}, a.font("small", 12, 600), colBrass, dtCenter|dtVCenter|dtSingleLine)
+	text(hdc, T("installer.author", "name", appAuthor), rect{P(42), P(authorTop), r.right - P(24), P(authorTop + 20)}, a.font("body", 14, 400), colBrass, dtSingleLine|dtVCenter)
+	communityTop := int32(84)
+	if compact {
+		communityTop = 70
+	}
+	text(hdc, T("installer.community"), rect{P(42), P(communityTop), r.right - P(24), P(communityTop + 22)}, a.font("small", 12, 400), colDim, dtSingleLine|dtVCenter|dtEndEllipsis)
+	roundBox(hdc, rect{P(24), P(gameTop), r.right - P(24), P(gameTop + 100)}, P(14), colCard, colEdge)
+	text(hdc, T("installer.game.head"), rect{P(40), P(gameTop + 10), P(480), P(gameTop + 30)}, a.font("label", 11, 600), colBrass, dtSingleLine|dtVCenter)
+	line, col := T("installer.game.pick"), colDim
+	if a.searching {
+		line = T("installer.game.searching")
+	} else if a.querying {
+		line = T("installer.game.querying")
+	} else if st := a.status; st != nil {
+		line = T("installer.game.notInstalled")
+		if st.Installed {
+			line = T("installer.game.installed")
+			if st.ModVersion != nil {
+				line += " " + *st.ModVersion
+			}
+		}
+		if st.Running {
+			line += " · " + T("installer.game.running")
+			col = colRed
+		} else {
+			line += " · " + T("installer.game.ready")
+		}
+	}
+	text(hdc, line, rect{P(40), P(gameTop + 66), r.right - P(190), P(gameTop + 90)}, a.font("small", 12, 400), col, dtSingleLine|dtVCenter|dtEndEllipsis)
+	paneTop := int32(290)
+	if compact {
+		paneTop = 254
+	}
+	rightSummary := selectionLabel(a.toggles)
+	if a.page == idFontsTab {
+		rightSummary = fontsSummaryLabel(a.fontPreset)
+	}
+	text(hdc, rightSummary, rect{P(542), P(paneTop - 43), r.right - P(28), P(paneTop - 12)}, a.font("small", 12, 400), colDim, dtRight|dtSingleLine|dtVCenter|dtEndEllipsis)
+	if a.page == idJournal {
+		roundBox(hdc, rect{P(24), P(paneTop), r.right - P(24), r.bottom - P(foot) - P(10)}, P(10), colLog, colEdge)
+	}
+	footer := r.bottom - P(foot)
+	fill(hdc, rect{P(24), footer, r.right - P(24), footer + P(1)}, colEdge)
+	note, ncol := a.note.String(), a.noteCol
+	if a.capturingKey {
+		note = T("installer.note.capture")
+		ncol = colBrass
+	} else if a.busy {
+		if note == "" {
+			note = T("installer.busy.install")
+			if a.operation == "uninstall" {
+				note = T("installer.busy.uninstall")
+			}
+		}
+		ncol = colBrass
+	} else if a.toggles[idLoot] && a.toggles[idDungeons] && a.lootKey == a.dungeonKey {
+		note = T("installer.note.sameKeys")
+		ncol = colRed
+	} else if !a.updateText.empty() {
+		note = a.updateText.String()
+		ncol = colDim
+	} else if note == "" {
+		note = T("installer.note.choose")
+		ncol = colDim
+		if selectedCount(a.toggles) == 0 {
+			note = T("installer.note.chooseNone")
+		}
+	}
+	text(hdc, note, rect{P(24), footer + P(9), r.right - P(24), footer + P(33)}, a.font("body", 14, 400), ncol, dtSingleLine|dtVCenter|dtEndEllipsis)
+	if a.busy {
+		text(hdc, a.stage, rect{P(24), footer + P(34), r.right - P(70), footer + P(54)}, a.font("small", 12, 400), colDim, dtSingleLine|dtVCenter|dtEndEllipsis)
+	}
+	barY := footer + P(61)
+	bar := rect{P(24), barY, r.right - P(24), barY + P(3)}
+	fill(hdc, bar, colEdge)
+	progress := a.progress
+	if !a.busy && (a.updateChecking || a.updateDownloading) {
+		progress = a.updateProgress
+	}
+	if progress > 0 {
+		bar.right = bar.left + (bar.right-bar.left)*int32(progress)/100
+		fill(hdc, bar, colBrass)
+	} else if a.busy || a.updateChecking || a.updateDownloading || a.updateHandoff {
+		width := bar.right - bar.left
+		start := (a.anim*a.px(14))%(width+a.px(130)) - a.px(130)
+		seg := rect{bar.left + start, bar.top, bar.left + start + a.px(130), bar.bottom}
+		if seg.left < bar.left {
+			seg.left = bar.left
+		}
+		if seg.right > bar.right {
+			seg.right = bar.right
+		}
+		if seg.right > seg.left {
+			fill(hdc, seg, colBrass)
+		}
+	}
+}
+func (a *app) paintRows(hdc uintptr, r rect) {
+	fill(hdc, r, colBg)
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	P := a.px
+	for _, f := range features {
+		row := a.rows[f.ID]
+		row.top -= a.scroll
+		row.bottom -= a.scroll
+		if row.bottom < 0 || row.top > r.bottom {
+			continue
+		}
+		edge := colEdge
+		if f.Locked || a.toggles[f.ID] {
+			edge = rgb(105, 91, 65)
+		}
+		roundBox(hdc, row, P(12), colCard, edge)
+		field := rect{P(256), row.top + P(8), row.right - P(8), row.bottom - P(8)}
+		roundBox(hdc, field, P(8), colField, colField)
+		badge, badgeCol := f.Badge(), colDim
+		if f.ID == idLoot {
+			badge = lootBindingBadge(a.lootKey)
+		}
+		if f.ID == idDungeons {
+			badge = T("installer.badge.dungeon", "key", lootKeyLabel(a.dungeonKey))
+		}
+		if f.ID == idEnhancedUi {
+			badge = fontsFeatureBadge(a.fontPreset)
+			if customFontCount(a.fontPreset) > 0 {
+				badgeCol = colGreen
+			}
+		}
+		text(hdc, badge, rect{P(40), row.top + P(53), P(246), row.top + P(73)}, a.font("badge", 10, 600), badgeCol, dtSingleLine|dtVCenter|dtEndEllipsis)
+	}
+}
+func (a *app) drawButton(d *drawItemStruct) {
+	hdc, r, id := d.hDC, d.rcItem, int(d.ctlID)
+	a.mu.Lock()
+	page := a.page
+	recording := a.capturingKey && a.captureTarget == id
+	a.mu.Unlock()
+	bg, edge, fg := colCard, colEdge, colBone
+	if id == idInstall {
+		bg, edge, fg = colBrass, colBrass, colInk
+	} else if (id == idLootKey || id == idDungeonKey) && recording {
+		bg, edge, fg = colField, colBrass, colBrass
+	} else if id == idComponents || id == idFontsTab || id == idJournal {
+		if id == page {
+			bg, edge, fg = colField, colBrass, colBrass
+		} else {
+			bg, edge, fg = colBg, colBg, colDim
+		}
+	}
+	if d.itemState&odsSelected != 0 {
+		if id == idInstall {
+			bg = colBrassHi
+		} else {
+			bg = colField
+		}
+	}
+	if d.itemState&odsDisabled != 0 {
+		bg, edge, fg = colCard, colEdge, colDim
+	}
+	fill(hdc, r, colBg)
+	roundBox(hdc, rect{r.left + 1, r.top + 1, r.right - 1, r.bottom - 1}, a.px(8), bg, edge)
+	n, _, _ := pGetWindowTextLengthW.Call(d.hwndItem)
+	buf := make([]uint16, int(n)+1)
+	pGetWindowTextW.Call(d.hwndItem, uintptr(unsafe.Pointer(&buf[0])), uintptr(len(buf)))
+	text(hdc, syscall.UTF16ToString(buf), r, a.font("button", 14, 600), fg, dtCenter|dtVCenter|dtSingleLine)
+	if d.itemState&odsFocus != 0 {
+		focus := rect{r.left + a.px(4), r.top + a.px(4), r.right - a.px(4), r.bottom - a.px(4)}
+		pDrawFocusRect.Call(hdc, uintptr(unsafe.Pointer(&focus)))
+	}
+}
+func colorControl(a *app, m uint32, hdc, control uintptr) uintptr {
+	brush, bg := a.brushCard, colCard
+	if control == a.ctl[idLog] {
+		brush, bg = a.brushLog, colLog
+	} else if control == a.ctl[idPath] {
+		brush, bg = a.brushCard, colCard
+	} else if m == wmCtlColorStat {
+		id, _, _ := pGetDlgCtrlID.Call(control)
+		if id >= 1000 {
+			brush, bg = a.brushField, colField
+		}
+	}
+	pSetTextColor.Call(hdc, colBone)
+	pSetBkColor.Call(hdc, bg)
+	return brush
+}
+func paintWindow(hwnd uintptr, paint func(uintptr, rect)) {
+	var ps paintStruct
+	hdc, _, _ := pBeginPaint.Call(hwnd, uintptr(unsafe.Pointer(&ps)))
+	r := bounds(hwnd)
+	if r.right > 0 && r.bottom > 0 {
+		mem, _, _ := pCreateCompatibleDC.Call(hdc)
+		bmp, _, _ := pCreateCompatibleBitmap.Call(hdc, uintptr(r.right), uintptr(r.bottom))
+		old, _, _ := pSelectObject.Call(mem, bmp)
+		paint(mem, r)
+		pBitBlt.Call(hdc, 0, 0, uintptr(r.right), uintptr(r.bottom), mem, 0, 0, 0x00cc0020)
+		pSelectObject.Call(mem, old)
+		pDeleteObject.Call(bmp)
+		pDeleteDC.Call(mem)
+	}
+	pEndPaint.Call(hwnd, uintptr(unsafe.Pointer(&ps)))
+}
+
+func paneProc(hwnd uintptr, m uint32, wp, lp uintptr) uintptr {
+	a := A
+	switch m {
+	case wmDrawItem:
+		a.drawButton((*drawItemStruct)(unsafe.Pointer(lp)))
+		return 1
+	case wmEraseBkgnd:
+		return 1
+	case wmPaint:
+		paintWindow(hwnd, a.paintRows)
+		return 0
+	case wmCommand:
+		a.mu.Lock()
+		a.lastUserInput = time.Now()
+		a.mu.Unlock()
+		if wp>>16 == 6 {
+			a.focusRow(int(wp & 0xffff))
+			return 0
+		}
+		r, _, _ := pSendMessageW.Call(a.hwnd, wmCommand, wp, lp)
+		return r
+	case wmCtlColorBtn, wmCtlColorStat, wmCtlColorEdit:
+		return colorControl(a, m, wp, lp)
+	case wmMouseWheel:
+		a.wheel += int32(int16(wp >> 16))
+		steps := a.wheel / 120
+		a.wheel %= 120
+		if steps != 0 {
+			a.scrollTo(a.scroll - steps*a.px(54))
+		}
+		return 0
+	case wmVScroll:
+		pos := a.scroll
+		switch wp & 0xffff {
+		case 0:
+			pos -= a.px(36)
+		case 1:
+			pos += a.px(36)
+		case 2:
+			pos -= bounds(a.pane).bottom
+		case 3:
+			pos += bounds(a.pane).bottom
+		case 4, 5:
+			si := scrollInfo{fMask: 0x10}
+			si.cbSize = uint32(unsafe.Sizeof(si))
+			pGetScrollInfo.Call(hwnd, sibVert, uintptr(unsafe.Pointer(&si)))
+			pos = si.nTrackPos
+		case 6:
+			pos = 0
+		case 7:
+			pos = a.contentHeight
+		}
+		a.scrollTo(pos)
+		return 0
+	}
+	r, _, _ := pDefWindowProcW.Call(hwnd, uintptr(m), wp, lp)
+	return r
+}
+func wndProc(hwnd uintptr, m uint32, wp, lp uintptr) uintptr {
+	a := A
+	switch m {
+	case wmActivateApp:
+		if wp == 0 {
+			a.recordedKey, a.recordedMouse = 0, 0
+			if a.capturingKey {
+				a.finishLootKeyCapture("")
+			}
+		}
+	case wmCreate:
+		a.hwnd = hwnd
+		if !a.webMode {
+			a.createControls()
+		}
+		pSetTimer.Call(hwnd, 1, 90, 0)
+		return 0
+	case wmEraseBkgnd:
+		return 1
+	case wmPaint:
+		if a.webMode {
+			paintWindow(hwnd, func(hdc uintptr, r rect) { fill(hdc, r, rgb(8, 11, 18)) })
+			return 0
+		}
+		paintWindow(hwnd, a.paint)
+		return 0
+	case wmSize:
+		if wp != 1 {
+			if a.webMode {
+				if a.wv2 != nil {
+					a.wv2.resize()
+				}
+			} else {
+				a.layout()
+			}
+		}
+		return 0
+	case wmMove, wmMoving:
+		if a.webMode && a.wv2 != nil {
+			a.wv2.notifyMoved()
+		}
+	case wmWebAction:
+		a.drainWebActions()
+		return 0
+	case wmGetMinMaxInfo:
+		mm := (*minMaxInfo)(unsafe.Pointer(lp))
+		if a.webMode {
+			mm.minTrackSize = point{a.px(960), a.px(640)}
+		} else {
+			mm.minTrackSize = point{a.px(760), a.px(540)}
+		}
+		return 0
+	case wmDpiChanged:
+		a.dpi = int32(wp & 0xffff)
+		r := (*rect)(unsafe.Pointer(lp))
+		if a.webMode {
+			pSetWindowPos.Call(hwnd, 0, signed(r.left), signed(r.top), signed(r.right-r.left), signed(r.bottom-r.top), 0x14)
+			if a.wv2 != nil {
+				a.wv2.resize()
+			}
+			return 0
+		}
+		old := a.fonts
+		a.fonts = map[string]uintptr{}
+		a.applyFonts()
+		pSetWindowPos.Call(hwnd, 0, signed(r.left), signed(r.top), signed(r.right-r.left), signed(r.bottom-r.top), 0x14)
+		for _, f := range old {
+			pDeleteObject.Call(f)
+		}
+		a.layout()
+		return 0
+	case wmDrawItem:
+		a.drawButton((*drawItemStruct)(unsafe.Pointer(lp)))
+		return 1
+	case wmCtlColorBtn, wmCtlColorEdit, wmCtlColorStat:
+		return colorControl(a, m, wp, lp)
+	case wmMouseWheel:
+		if !a.webMode {
+			a.mu.Lock()
+			page := a.page
+			a.mu.Unlock()
+			if page == idComponents {
+				r, _, _ := pSendMessageW.Call(a.pane, uintptr(m), wp, lp)
+				return r
+			}
+			if page == idFontsTab {
+				r, _, _ := pSendMessageW.Call(a.fontsPane, uintptr(m), wp, lp)
+				return r
+			}
+		}
+	case wmTimer:
+		if wp == timerDrag {
+			a.stepWebDrag()
+			return 0
+		}
+		a.mu.Lock()
+		busy := a.busy || a.updateChecking || a.updateDownloading || a.updateHandoff
+		a.mu.Unlock()
+		if busy && !a.webMode {
+			a.anim++
+			r := bounds(hwnd)
+			r.top = r.bottom - a.px(136)
+			pInvalidateRect.Call(hwnd, uintptr(unsafe.Pointer(&r)), 0)
+		}
+		a.maybeUpdate()
+		return 0
+	case wmCommand:
+		id := int(wp & 0xffff)
+		if (id == idLootKey || id == idDungeonKey) && wp>>16 == 5 { // BS_NOTIFY: the second click can be BN_DOUBLECLICKED.
+			a.startLootKeyCapture(id)
+			return 0
+		}
+		if wp>>16 != 0 {
+			return 0
+		}
+		if a.capturingKey && id != a.captureTarget {
+			a.finishLootKeyCapture("")
+		}
+		switch id {
+		case idLootKey, idDungeonKey:
+			a.startLootKeyCapture(id)
+		case idBrowse:
+			a.browse()
+		case idRefresh:
+			a.mu.Lock()
+			have := a.exe != ""
+			a.mu.Unlock()
+			if have {
+				a.requestStatus(false)
+			} else {
+				a.startSearch()
+			}
+		case idRu, idMarks, idLoot, idDungeons, idDungeonNav, idVisited:
+			on, _, _ := pSendMessageW.Call(a.ctl[id], bmGetCheck, 0, 0)
+			a.mu.Lock()
+			a.toggles[id] = on == 1
+			a.choiceRevision++
+			a.mu.Unlock()
+			a.syncControls()
+		case idEnhancedUi:
+			// Core UI module is always active; keep checked and jump to the Fonts tab.
+			pSendMessageW.Call(a.ctl[idEnhancedUi], bmSetCheck, 1, 0)
+			a.reloadFontPreset()
+			a.mu.Lock()
+			a.page = idFontsTab
+			a.mu.Unlock()
+			a.syncControls()
+		case idConfigureFonts:
+			a.reloadFontPreset()
+			a.mu.Lock()
+			a.page = idFontsTab
+			a.mu.Unlock()
+			a.syncControls()
+		case idComponents, idFontsTab, idJournal:
+			if id == idFontsTab {
+				a.reloadFontPreset()
+			}
+			a.mu.Lock()
+			a.page = id
+			a.mu.Unlock()
+			a.syncControls()
+		case idFontsApplyAll:
+			a.applyFontToAllSlots()
+		case idFontsResetAll:
+			a.resetAllFonts()
+		case idFontsImport:
+			a.importFontsDialog()
+		case idFontsExport:
+			a.exportFontsDialog()
+		case idFontsOpenDir:
+			a.openFontsFolder()
+		case idInstall:
+			a.run("install")
+		case idUninstall:
+			a.run("uninstall")
+		case idSaveLog:
+			a.saveLog()
+		case idOpenLog:
+			a.openFile("dfo-mod.log")
+		case idOpenReport:
+			a.openFile("dfo-mod-marks.txt")
+		case idInstallerLog:
+			a.openInstallerLog()
+		case idCheckUpdates:
+			a.startSelfUpdate()
+		case idLang:
+			a.switchLang()
+		case 2:
+			pPostMessageW.Call(hwnd, wmClose, 0, 0)
+		default:
+			if id >= idFontPickBase && id < idFontPickBase+len(fontSlots) {
+				a.pickFontForSlot(id - idFontPickBase)
+			} else if id >= idFontResetBase && id < idFontResetBase+len(fontSlots) {
+				a.resetSingleFontSlot(id - idFontResetBase)
+			}
+		}
+		return 0
+	case wmLog:
+		a.logPosted.Store(false)
+		if a.webMode {
+			a.pushWebState()
+			return 0
+		}
+		caption(a.ctl[idLog], a.logbook.snapshot(64<<10))
+		pSendMessageW.Call(a.ctl[idLog], emSetSel, 0x7fffffff, 0x7fffffff)
+		pSendMessageW.Call(a.ctl[idLog], 0xB7, 0, 0) // EM_SCROLLCARET
+		invalidate(hwnd)
+		return 0
+	case wmStatus, wmDone:
+		a.syncControls()
+		a.maybeUpdate()
+		return 0
+	case wmUpdater:
+		a.mu.Lock()
+		exit := a.handedOff
+		a.mu.Unlock()
+		if exit {
+			pPostMessageW.Call(hwnd, wmClose, 0, 0)
+		} else {
+			a.syncControls()
+			a.maybeUpdate()
+		}
+		return 0
+	case wmSearch:
+		a.mu.Lock()
+		found, how, apply := a.searchFound, a.searchHow, a.searchReady
+		a.searchReady = false
+		a.mu.Unlock()
+		if apply {
+			if len(found) > 0 {
+				a.setGame(found[0], how)
+				if len(found) > 1 {
+					a.appendLog(T("installer.log.copies", "n", len(found)) + "\r\n")
+				}
+			} else {
+				a.mu.Lock()
+				have := a.exe != ""
+				if !have {
+					a.note = sayKey("installer.note.notFound")
+					a.noteCol = colDim
+				}
+				a.mu.Unlock()
+				if !have {
+					a.mu.Lock()
+					a.pathHint = "installer.path.pick"
+					a.mu.Unlock()
+					if a.ctl[idPath] != 0 {
+						caption(a.ctl[idPath], T("installer.path.pick"))
+					}
+				}
+			}
+		}
+		a.syncControls()
+		return 0
+	case wmClose:
+		a.mu.Lock()
+		busy := a.busy || a.updateHandoff
+		if busy {
+			a.note = sayKey("installer.note.waitClose")
+			a.noteCol = colBrass
+		}
+		a.mu.Unlock()
+		if busy {
+			if a.webMode {
+				a.pushWebState()
+			} else {
+				invalidate(hwnd)
+			}
+			return 0
+		}
+	case wmDestroy:
+		a.stopWebDrag()
+		if a.wv2 != nil {
+			a.wv2.close()
+			a.wv2 = nil
+		}
+		if a.webSrv != nil {
+			a.webSrv.close()
+			a.webSrv = nil
+		}
+		a.cancel()
+		pKillTimer.Call(hwnd, 1)
+		pPostQuitMessage.Call(0)
+		return 0
+	case 0x0231: // WM_ENTERSIZEMOVE: defer restart during the native drag loop.
+		a.mu.Lock()
+		a.modalDepth++
+		a.mu.Unlock()
+		return 0
+	case 0x0232:
+		a.mu.Lock()
+		if a.modalDepth > 0 {
+			a.modalDepth--
+		}
+		a.lastUserInput = time.Now()
+		a.mu.Unlock()
+		return 0
+	}
+	r, _, _ := pDefWindowProcW.Call(hwnd, uintptr(m), wp, lp)
+	return r
+}
+
+func (a *app) fallbackToClassic(reason error) {
+	if !a.webMode {
+		return
+	}
+	a.stopWebDrag()
+	if reason != nil {
+		a.appendLog("WebView2 fallback: " + reason.Error() + "\r\n")
+	}
+	if a.wv2 != nil {
+		a.wv2.close()
+		a.wv2 = nil
+	}
+	if a.webSrv != nil {
+		a.webSrv.close()
+		a.webSrv = nil
+	}
+	a.webMode = false
+	if a.hwnd == 0 {
+		return
+	}
+	style := uintptr(wsCaption | wsSysMenu | wsThickFrame | wsMinimizeBox | wsMaximizeBox | wsClipChild | wsVisible)
+	pSetWindowLongPtrW.Call(a.hwnd, ^uintptr(15), style) // GWL_STYLE = -16
+	if pDwmExtendFrame.Find() == nil {
+		zero := dwmMargins{}
+		pDwmExtendFrame.Call(a.hwnd, uintptr(unsafe.Pointer(&zero)))
+	}
+	var work rect
+	pSystemParametersInfoW.Call(0x30, 0, uintptr(unsafe.Pointer(&work)), 0)
+	if work.right == 0 {
+		work = rect{0, 0, a.px(1280), a.px(900)}
+	}
+	r := rect{0, 0, a.px(1000), a.px(900)}
+	pAdjustWindowRect.Call(uintptr(unsafe.Pointer(&r)), style, 0)
+	w, h := r.right-r.left, r.bottom-r.top
+	if w > work.right-work.left-a.px(40) {
+		w = work.right - work.left - a.px(40)
+	}
+	if h > work.bottom-work.top-a.px(40) {
+		h = work.bottom - work.top - a.px(40)
+	}
+	pSetWindowPos.Call(a.hwnd, 0, signed(work.left+(work.right-work.left-w)/2), signed(work.top+(work.bottom-work.top-h)/2), signed(w), signed(h), 0x24)
+	a.createControls()
+	a.mu.Lock()
+	exe := a.exe
+	a.mu.Unlock()
+	if exe != "" && a.ctl[idPath] != 0 {
+		caption(a.ctl[idPath], exe)
+	}
+	a.syncControls()
+	invalidate(a.hwnd)
+}
+
+func main() {
+	if handled, code := earlyUpdateMode(os.Args[1:]); handled {
+		if code != 0 {
+			os.Exit(code)
+		}
+		return
+	}
+	runtime.LockOSThread()
+	pCoInitializeEx.Call(0, coinitApartmentThreaded)
+	defer pCoUninitialize.Call()
+	a := A
+	a.ctx, a.cancel = context.WithCancel(context.Background())
+	defer a.cancel()
+	if pSetProcessDpiAwarenessContext.Find() == nil {
+		pSetProcessDpiAwarenessContext.Call(^uintptr(3))
+	} else {
+		pSetProcessDPIAware.Call()
+	}
+	self, _ := os.Executable()
+	a.modDir = filepath.Dir(self)
+	a.prefsDir = filepath.Join(os.Getenv("LOCALAPPDATA"), appName)
+	opts := parseStartup(os.Args[1:])
+	// The window's language: --lang, else the remembered switch, else Windows' own. The Russian translation is
+	// offered checked on a Russian Windows only; a saved choice of an install still wins (loadChoices).
+	system := systemLang()
+	setLang(chooseLang(opts.lang, a.prefsDir, system))
+	if system != "ru" {
+		a.toggles[idRu] = false
+	}
+	gameArg, resumeArg, noUpdate := opts.game, opts.resume, opts.noUpdate
+	a.updatesDisabled = noUpdate
+	a.logbook = newSessionJournal(filepath.Join(os.Getenv("APPDATA"), "DFO Online"), filepath.Join(a.prefsDir, "logs"))
+	defer a.logbook.close()
+	_ = a.logbook.captureCrashes()
+	a.appendLog(versionTitle() + "\r\n" + T("installer.author", "name", appAuthor) + "\r\n" + T("installer.community"))
+	a.appendLog(T("installer.log.start", "pid", os.Getpid(), "os", runtime.GOOS+"/"+runtime.GOARCH, "exe", self))
+	if path, err := a.logbook.location(); err != nil || path == "" {
+		a.appendLog(T("installer.log.journalOff", "error", fmt.Sprint(err)))
+	} else {
+		a.appendLog(T("installer.log.journal", "path", path))
+	}
+	if opts.legacyAuto {
+		a.appendLog(T("installer.log.legacyAuto"))
+	}
+	if resumeArg != "" {
+		plan, rolledBack, e := loadResumeUpdate(resumeArg, self)
+		if e == nil {
+			if plan.Resume.LogDir != "" {
+				if err := a.logbook.move(plan.Resume.LogDir); err != nil {
+					a.appendLog(T("installer.log.journalRestore", "error", err.Error()))
+				}
+				_ = a.logbook.captureCrashes()
+			}
+			a.resumePath = resumeArg
+			a.resumeCommitted = rolledBack
+			a.updateResume = &plan.Resume
+			if plan.Resume.Dirty {
+				a.toggles = resumeChoices(plan.Resume.Choices, a.toggles)
+				a.choiceRevision++
+				if validLootKey(plan.Resume.LootKey) {
+					a.lootKey = plan.Resume.LootKey
+					a.lootKeyDirty = true
+				}
+				if validLootKey(plan.Resume.DungeonKey) {
+					a.dungeonKey = plan.Resume.DungeonKey
+					a.dungeonKeyDirty = true
+				}
+			}
+			a.resumeRevision = a.choiceRevision
+			if rolledBack {
+				a.updateText = sayKey("installer.update.rolledBack")
+				var result updateResult
+				if readUpdateJSON(filepath.Join(filepath.Dir(resumeArg), "result.json"), &result) == nil {
+					a.appendLog(T("installer.log.rollback", "error", result.Error))
+				}
+			}
+		} else {
+			a.appendLog(T("installer.log.resume", "error", e.Error()))
+			a.updateText = sayKey("installer.update.resumeFailed")
+		}
+	}
+	var err error
+	a.payloadDir, err = unpackPayload()
+	if err != nil {
+		a.startupError = err
+		a.note = sayKey("installer.note.payloadFailed")
+		a.noteCol, a.page = colRed, idJournal
+		a.appendLog(T("installer.log.unpack", "error", err.Error()))
+	} else {
+		defer os.RemoveAll(a.payloadDir)
+	}
+	hdc, _, _ := pGetDC.Call(0)
+	dpi, _, _ := pGetDeviceCaps.Call(hdc, 90)
+	pReleaseDC.Call(0, hdc)
+	if dpi >= 96 {
+		a.dpi = int32(dpi)
+	}
+	a.brushBg, _, _ = pCreateSolidBrush.Call(colBg)
+	a.brushCard, _, _ = pCreateSolidBrush.Call(colCard)
+	a.brushField, _, _ = pCreateSolidBrush.Call(colField)
+	a.brushLog, _, _ = pCreateSolidBrush.Call(colLog)
+	inst, _, _ := pGetModuleHandleW.Call(0)
+	cursor, _, _ := pLoadCursorW.Call(0, 32512)
+	icon, _, _ := pLoadIconW.Call(inst, 1)
+	if icon == 0 {
+		icon, _, _ = pLoadIconW.Call(0, 32512)
+	}
+	for _, c := range []struct {
+		name string
+		proc uintptr
+	}{{"DFOExpanderComponents", syscall.NewCallback(paneProc)}, {"DFOExpanderFonts", syscall.NewCallback(fontsPaneProc)}, {"DFOClientExpanderInstaller", syscall.NewCallback(wndProc)}} {
+		wc := wndClassEx{lpfnWndProc: c.proc, hInstance: inst, hCursor: cursor, hIcon: icon, hIconSm: icon, hbrBackground: a.brushBg, lpszClassName: u16(c.name)}
+		wc.cbSize = uint32(unsafe.Sizeof(wc))
+		pRegisterClassExW.Call(uintptr(unsafe.Pointer(&wc)))
+	}
+
+	useWeb := os.Getenv("DFO_CLASSIC_UI") != "1" && os.Getenv("DFO_TEST_UPDATE_EXE") == "" && findEdgeWebViewDLL() != ""
+	if useWeb {
+		if srv, sErr := a.startWebServer(); sErr == nil {
+			a.webMode = true
+			a.webSrv = srv
+			a.pathHint = "installer.path.searching"
+		} else {
+			a.appendLog("WebUI server error: " + sErr.Error() + "\r\n")
+		}
+	}
+
+	var work rect
+	pSystemParametersInfoW.Call(0x30, 0, uintptr(unsafe.Pointer(&work)), 0)
+	if work.right == 0 {
+		work = rect{0, 0, a.px(1280), a.px(900)}
+	}
+	var style uintptr
+	var w, h int32
+	if a.webMode {
+		style = uintptr(wsPopup | wsMinimizeBox | wsSysMenu | wsClipChild)
+		w, h = a.px(1416), a.px(888)
+		maxW := work.right - work.left - a.px(24)
+		maxH := work.bottom - work.top - a.px(24)
+		if w > maxW {
+			w = maxW
+		}
+		if h > maxH {
+			h = maxH
+		}
+	} else {
+		style = uintptr(wsCaption | wsSysMenu | wsThickFrame | wsMinimizeBox | wsMaximizeBox | wsClipChild)
+		r := rect{0, 0, a.px(1000), a.px(1040)}
+		pAdjustWindowRect.Call(uintptr(unsafe.Pointer(&r)), style, 0)
+		w, h = r.right-r.left, r.bottom-r.top
+		if w > work.right-work.left-a.px(40) {
+			w = work.right - work.left - a.px(40)
+		}
+		if h > work.bottom-work.top-a.px(40) {
+			h = work.bottom - work.top - a.px(40)
+		}
+	}
+	hwnd, _, _ := pCreateWindowExW.Call(wsExControlParent, uintptr(unsafe.Pointer(u16("DFOClientExpanderInstaller"))), uintptr(unsafe.Pointer(u16(versionTitle()))), style, signed(work.left+(work.right-work.left-w)/2), signed(work.top+(work.bottom-work.top-h)/2), signed(w), signed(h), 0, 0, inst, 0)
+	if hwnd == 0 {
+		a.appendLog(T("installer.log.noWindow"))
+		a.message(T("installer.msg.noWindow", "path", func() string { p, _ := a.logbook.location(); return p }()), 0x10)
+		return
+	}
+	if pDwmSetWindowAttribute.Find() == nil {
+		dark := int32(1)
+		pDwmSetWindowAttribute.Call(hwnd, 20, uintptr(unsafe.Pointer(&dark)), 4)
+	}
+	if a.webMode {
+		if pDwmExtendFrame.Find() == nil {
+			shadow := dwmMargins{0, 0, 0, 1}
+			pDwmExtendFrame.Call(hwnd, uintptr(unsafe.Pointer(&shadow)))
+		}
+		wv, wvErr := startWebView2(hwnd, filepath.Join(a.prefsDir, "webview2"), a.webSrv.url, func(e error) {
+			a.fallbackToClassic(e)
+		})
+		if wvErr != nil {
+			a.fallbackToClassic(wvErr)
+		} else {
+			a.wv2 = wv
+		}
+	}
+	background := a.updateResume != nil && a.updateResume.Background
+	showMode := uintptr(1)
+	if background {
+		showMode = 4
+	}
+	a.reloadFontPreset()
+	a.syncControls()
+	pShowWindow.Call(hwnd, showMode)
+	pUpdateWindow.Call(hwnd)
+	if !background && !a.webMode && a.ctl[idRu] != 0 {
+		pSetFocus.Call(a.ctl[idRu])
+	}
+	a.appendLog(T("installer.log.ready"))
+	if a.startupError != nil {
+		// Keep the diagnostics window usable even if payload extraction failed.
+	} else if gameArg != "" {
+		if exe := gameIn(filepath.Dir(gameArg)); exe != "" {
+			a.setGame(exe, T("installer.how.arg"))
+		} else {
+			a.message(T("installer.msg.noClientThere"), 0x30)
+			a.startSearch()
+		}
+	} else {
+		a.startSearch()
+	}
+	if a.startupError == nil {
+		a.announceUpdateStartup()
+	}
+	if !noUpdate && resumeArg == "" {
+		a.startSelfUpdate()
+	}
+	var mm msg
+	for {
+		r, _, _ := pGetMessageW.Call(uintptr(unsafe.Pointer(&mm)), 0, 0, 0)
+		if r == 0 || int32(r) == -1 {
+			break
+		}
+		if mm.message == wmKeyDown || mm.message == wmSysKeyDown || mm.message == 0x201 || mm.message == 0x204 || mm.message == 0x207 || mm.message == 0x20b {
+			a.mu.Lock()
+			a.lastUserInput = time.Now()
+			a.mu.Unlock()
+		}
+		if !a.webMode {
+			if a.captureInput(&mm) {
+				continue
+			}
+			if mm.message == wmKeyDown && mm.wParam == 13 {
+				focus, _, _ := pGetFocus.Call()
+				id, _, _ := pGetDlgCtrlID.Call(focus)
+				if int(id) != idLog && int(id) != idPath && int(id) != idRu && int(id) != idMarks && int(id) != idLoot && int(id) != idDungeons && int(id) != idDungeonNav && int(id) != idEnhancedUi && int(id) != idVisited {
+					pSendMessageW.Call(focus, bmClick, 0, 0)
+					continue
+				}
+			}
+			handled, _, _ := pIsDialogMessageW.Call(hwnd, uintptr(unsafe.Pointer(&mm)))
+			if handled != 0 {
+				continue
+			}
+		}
+		pTranslateMessage.Call(uintptr(unsafe.Pointer(&mm)))
+		pDispatchMessageW.Call(uintptr(unsafe.Pointer(&mm)))
+	}
+	if a.wv2 != nil {
+		a.wv2.close()
+		a.wv2 = nil
+	}
+	if a.webSrv != nil {
+		a.webSrv.close()
+		a.webSrv = nil
+	}
+	a.wg.Wait()
+	a.appendLog(T("installer.log.closed"))
+	if !a.handedOff && a.updateReady != nil {
+		_ = os.RemoveAll(a.updateReady.Dir)
+	}
+	for _, f := range a.fonts {
+		pDeleteObject.Call(f)
+	}
+	for _, b := range []uintptr{a.brushBg, a.brushCard, a.brushField, a.brushLog} {
+		pDeleteObject.Call(b)
+	}
+}

@@ -1,0 +1,224 @@
+key,text,note
+pack.page.junk,Junk,the inventory page of the player's junk (page/dfo_pack_rules.js)
+pack.aria.bag,Bag,page/dfo_pack.js window aria-label
+pack.view.label,How the pack shows items,page/dfo_pack.js header
+pack.view.rows,List,page/dfo_pack.js header
+pack.view.rows.how,"Items as rows with their material, weight and price",page/dfo_pack.js header
+pack.view.grid,Icons,page/dfo_pack.js header
+pack.view.grid.how,Items as the square icons,page/dfo_pack.js header
+pack.sort.button,Sort Settings,page/dfo_pack.js header
+pack.sort.how,Choose how your inventory is sorted automatically,page/dfo_pack.js header
+pack.sort.title,Sort Settings,page/dfo_pack.js sort window
+pack.sort.close,Close Sort Settings,page/dfo_pack.js sort window
+pack.sort.intro,"Items are sorted automatically on opening and after every action using the selected profile. Locked items always stay first.",page/dfo_pack.js sort window
+pack.sort.done,Done,page/dfo_pack.js sort window
+pack.sort.mode.rarity,By rarity,page/dfo_pack.js sort option
+pack.sort.mode.rarity.how,"Locked and quest items first, then from Mythic down to Common",page/dfo_pack.js sort option
+pack.sort.mode.type,By item type,page/dfo_pack.js sort option
+pack.sort.mode.type.how,"Grouped by use and purpose: weapons, armor, potions, ingredients, books, valuables",page/dfo_pack.js sort option
+pack.sort.mode.material,By material,page/dfo_pack.js sort option
+pack.sort.mode.material.how,"Grouped by material tier and substance (Daedric to Iron, Leather, Wood, Herbs)",page/dfo_pack.js sort option
+pack.sort.mode.name,Alphabetically,page/dfo_pack.js sort option
+pack.sort.mode.name.how,Sorted alphabetically by item title,page/dfo_pack.js sort option
+pack.sort.mode.count,By stack count,page/dfo_pack.js sort option
+pack.sort.mode.count.how,Largest stacks and grouped identical items first,page/dfo_pack.js sort option
+pack.junk.button,Junk…,page/dfo_pack.js header
+pack.junk.how,Choose what goes to the Junk page,page/dfo_pack.js header
+pack.find.button,Find...,page/dfo_pack.js header
+pack.find.how,Search all inventory items by tooltip card text,page/dfo_pack.js header
+pack.find.placeholder,Search items by card text...,page/dfo_pack.js find omnibox
+pack.find.aria,Search inventory items by card text,page/dfo_pack.js find omnibox
+pack.find.clear,Clear search,page/dfo_pack.js find omnibox
+pack.find.empty,"No items match ""{query}"".",page/dfo_pack.js find empty list
+pack.find.count,{shown} / {total},page/dfo_pack.js find omnibox count
+pack.junk.title,Junk,page/dfo_pack.js junk window
+pack.junk.close,Close the Junk window,page/dfo_pack.js junk window
+pack.junk.intro,An item matching any ticked mark lies on the Junk page. Quest items never go there.,page/dfo_pack.js junk window
+pack.junk.axis,Purpose,page/dfo_pack.js junk window
+pack.junk.sale,"For sale: trinkets, temple goods, unused reagents",page/dfo_pack.js junk window
+pack.junk.defaults,Defaults,page/dfo_pack.js junk window
+pack.junk.done,Done,page/dfo_pack.js junk window
+pack.saveFailed,Could not save the inventory settings.,page/dfo_pack.js
+pack.bar.gold,Gold,page/dfo_pack.js footer currency
+pack.bar.gold.how,Gold pieces carried,page/dfo_pack.js footer currency
+pack.bar.silver,Silver,page/dfo_pack.js footer currency
+pack.bar.silver.how,Silver marks on your account,page/dfo_pack.js footer currency
+pack.bar.aurum,Aurum,page/dfo_pack.js footer currency
+pack.bar.aurum.how,Aurum balance,page/dfo_pack.js footer currency
+pack.bar.unavailable,—,page/dfo_pack.js footer unavailable value
+pack.bar.rep.region,Region,page/dfo_pack.js footer reputation
+pack.bar.rep.region.fmt,{region}: {rank} ({val}),page/dfo_pack.js footer region rep
+pack.bar.rep.group.fmt,{group}: {rank} ({val}),page/dfo_pack.js footer local rep
+pack.bar.rep.group.fmtNoVal,{group}: {rank},page/dfo_pack.js footer local rep without number
+pack.bar.rep.unknown,Unknown,page/dfo_pack.js footer unknown value
+pack.rep.rank.revered,Revered,page/dfo_pack.js reputation rank
+pack.rep.rank.honored,Honored,page/dfo_pack.js reputation rank
+pack.rep.rank.liked,Admired,page/dfo_pack.js reputation rank
+pack.rep.rank.trusted,Trusted,page/dfo_pack.js reputation rank
+pack.rep.rank.neutral,Common Citizen,page/dfo_pack.js reputation rank
+pack.rep.rank.suspicious,Suspicious,page/dfo_pack.js reputation rank
+pack.rep.rank.scorned,Scorned,page/dfo_pack.js reputation rank
+pack.rep.rank.outlaw,Notorious,page/dfo_pack.js reputation rank
+pack.rep.rank.hated,Hated,page/dfo_pack.js reputation rank
+pack.rep.group.commoners,Commoners,page/dfo_pack.js social group
+pack.rep.group.merchants,Merchants,page/dfo_pack.js social group
+pack.rep.group.scholars,Scholars,page/dfo_pack.js social group
+pack.rep.group.nobility,Nobility,page/dfo_pack.js social group
+pack.rep.group.underworld,Underworld,page/dfo_pack.js social group
+pack.rep.group.guild,Guild,page/dfo_pack.js social group
+pack.rep.group.temple,Temple,page/dfo_pack.js social group
+pack.rep.group.order,Knightly Order,page/dfo_pack.js social group
+pack.date.fmt,"{day} {month}, 3E {year} · {time}",page/dfo_pack.js footer date
+pack.date.line1,{day} {weekday} · {time},page/dfo_pack.js footer date line 1
+pack.date.line2,"{month}, 3E {year}",page/dfo_pack.js footer date line 2
+pack.date.w0,Sundas,page/dfo_pack.js weekday 0
+pack.date.w1,Morndas,page/dfo_pack.js weekday 1
+pack.date.w2,Tirdas,page/dfo_pack.js weekday 2
+pack.date.w3,Middas,page/dfo_pack.js weekday 3
+pack.date.w4,Turdas,page/dfo_pack.js weekday 4
+pack.date.w5,Fredas,page/dfo_pack.js weekday 5
+pack.date.w6,Loredas,page/dfo_pack.js weekday 6
+pack.date.m0,Morning Star,page/dfo_pack.js month 0
+pack.date.m1,Sun's Dawn,page/dfo_pack.js month 1
+pack.date.m2,First Seed,page/dfo_pack.js month 2
+pack.date.m3,Rain's Hand,page/dfo_pack.js month 3
+pack.date.m4,Second Seed,page/dfo_pack.js month 4
+pack.date.m5,Midyear,page/dfo_pack.js month 5
+pack.date.m6,Sun's Height,page/dfo_pack.js month 6
+pack.date.m7,Last Seed,page/dfo_pack.js month 7
+pack.date.m8,Hearthfire,page/dfo_pack.js month 8
+pack.date.m9,Frostfall,page/dfo_pack.js month 9
+pack.date.m10,Sun's Dusk,page/dfo_pack.js month 10
+pack.date.m11,Evening Star,page/dfo_pack.js month 11
+pack.state.healthy,Healthy,page/dfo_pack.js player state
+pack.state.unwell,Unwell,page/dfo_pack.js player state
+pack.state.diseased,Diseased,page/dfo_pack.js player state
+pack.state.diseased.named,Diseased: {list},page/dfo_pack.js player state
+pack.state.poisoned,Poisoned,page/dfo_pack.js player state
+pack.state.bleeding,Bleeding,page/dfo_pack.js player state
+pack.state.vampire,Vampirism,page/dfo_pack.js player state
+pack.state.werewolf,Lycanthropy,page/dfo_pack.js player state
+pack.state.need.hunger.1,Peckish,page/dfo_pack.js player need
+pack.state.need.hunger.2,Hungry,page/dfo_pack.js player need
+pack.state.need.hunger.3,Starving,page/dfo_pack.js player need
+pack.state.need.thirst.1,Thirsty,page/dfo_pack.js player need
+pack.state.need.thirst.2,Parched,page/dfo_pack.js player need
+pack.state.need.thirst.3,Dehydrated,page/dfo_pack.js player need
+pack.state.need.sleep.1,Tired,page/dfo_pack.js player need
+pack.state.need.sleep.2,Drowsy,page/dfo_pack.js player need
+pack.state.need.sleep.3,Exhausted,page/dfo_pack.js player need
+pack.state.need.wet.1,Damp,page/dfo_pack.js player need
+pack.state.need.wet.2,Wet,page/dfo_pack.js player need
+pack.state.need.wet.3,Soaked,page/dfo_pack.js player need
+pack.state.need.temp.cold1,Chilly,page/dfo_pack.js player need
+pack.state.need.temp.cold2,Cold,page/dfo_pack.js player need
+pack.state.need.temp.cold3,Freezing,page/dfo_pack.js player need
+pack.state.need.temp.warm1,Warm,page/dfo_pack.js player need
+pack.state.need.temp.warm2,Hot,page/dfo_pack.js player need
+pack.state.need.temp.warm3,Scorching,page/dfo_pack.js player need
+pack.state.need.stiff,Stiff,page/dfo_pack.js player need
+pack.state.need.drunk1,Tipsy,page/dfo_pack.js player need
+pack.state.need.drunk2,Drunk,page/dfo_pack.js player need
+pack.sort.active,Sort: {mode},page/dfo_pack.js sort button tooltip
+pack.bar.bag.open,Materials Bag,page/dfo_pack.js footer materials bag button
+pack.bar.bag.close,Close bag,page/dfo_pack.js footer materials bag close
+pack.bar.stowGold,Stow gold,page/dfo_pack.js footer wagon stow gold button
+pack.bar.stowGold.how,Place gold into the open wagon or storage,page/dfo_pack.js footer stow gold tooltip
+pack.bar.dropGold,Drop gold,page/dfo_pack.js footer drop gold button
+pack.bar.dropGold.how,Drop gold from your purse,page/dfo_pack.js footer drop gold tooltip
+pack.bar.weight,Weight,page/dfo_pack.js footer carry weight label
+pack.bar.date.label,Date,page/dfo_pack.js footer date label
+pack.bar.state.label,Status,page/dfo_pack.js footer status label
+pack.bar.rep.label,Reputation,page/dfo_pack.js footer reputation label
+pack.bar.noDate,3E 405,page/dfo_pack.js footer fallback date
+pack.rep.rank.esteemed,Esteemed,page/dfo_pack.js reputation rank
+pack.rep.rank.respected,Respected,page/dfo_pack.js reputation rank
+pack.rep.rank.dependable,Dependable,page/dfo_pack.js reputation rank
+pack.rep.rank.criminal,Criminal,page/dfo_pack.js reputation rank
+pack.rep.rank.villain,Villain,page/dfo_pack.js reputation rank
+pack.rep.rank.pondScum,Pond Scum,page/dfo_pack.js reputation rank
+pack.state.boon.meal,Well Fed,page/dfo_pack.js survival boon
+pack.state.boon.fed,Well Fed,page/dfo_pack.js survival boon
+pack.state.boon.quenched,Quenched,page/dfo_pack.js survival boon
+pack.state.boon.rested,Well Rested,page/dfo_pack.js survival boon
+pack.state.boon.thriving,Thriving,page/dfo_pack.js survival boon
+pack.state.boon.hearth,Hearth,page/dfo_pack.js survival boon
+pack.disease.0,Witches' Pox,page/dfo_pack.js disease 0
+pack.disease.1,Plague,page/dfo_pack.js disease 1
+pack.disease.2,Yellow Fever,page/dfo_pack.js disease 2
+pack.disease.3,Stomach Rot,page/dfo_pack.js disease 3
+pack.disease.4,Consumption,page/dfo_pack.js disease 4
+pack.disease.5,Brain Fever,page/dfo_pack.js disease 5
+pack.disease.6,Swamp Rot,page/dfo_pack.js disease 6
+pack.disease.7,Caliron's Curse,page/dfo_pack.js disease 7
+pack.disease.8,Cholera,page/dfo_pack.js disease 8
+pack.disease.9,Leprosy,page/dfo_pack.js disease 9
+pack.disease.10,Wound Rot,page/dfo_pack.js disease 10
+pack.disease.11,Red Death,page/dfo_pack.js disease 11
+pack.disease.12,Blood Rot,page/dfo_pack.js disease 12
+pack.disease.13,Typhoid Fever,page/dfo_pack.js disease 13
+pack.disease.14,Dementia,page/dfo_pack.js disease 14
+pack.disease.15,Chrondiasis,page/dfo_pack.js disease 15
+pack.disease.16,Wizard Fever,page/dfo_pack.js disease 16
+pack.statusTip.title,Character Status,page/dfo_pack.js status hover header
+pack.statusTip.where,Location: {place} ({region}),page/dfo_pack.js status hover location
+pack.statusTip.time,Date & Time: {date},page/dfo_pack.js status hover time
+pack.statusTip.law,Legal Reputation: {rank} ({val}),page/dfo_pack.js status hover legal rep
+pack.statusTip.health,Health: {hp} / {max} ({state}),page/dfo_pack.js status hover health
+pack.statusTip.needs,Needs & Effects: {list},page/dfo_pack.js status hover needs
+pack.bar.shards,Welkynd Shards,page/dfo_pack.js footer currency
+pack.bar.shards.how,Welkynd Shards held,page/dfo_pack.js footer currency
+pack.bar.embers,Deadlands Embers,page/dfo_pack.js footer currency
+pack.bar.embers.how,Deadlands Embers held,page/dfo_pack.js footer currency
+pack.currTip.held,Carried / Balance: {val},page/dfo_pack.js currency hover balance
+pack.currTip.what,What it is:,page/dfo_pack.js currency hover label
+pack.currTip.use,Used for:,page/dfo_pack.js currency hover label
+pack.currTip.where,Where to find:,page/dfo_pack.js currency hover label
+pack.currTip.gold.what,"The realm's main physical coin carried in your pack (adds carry weight).",page/dfo_pack.js currency hover gold
+pack.currTip.gold.use,"Buying gear, supplies and services in shops, tavern rooms, guild fees, fines, banking and enchanting.",page/dfo_pack.js currency hover gold
+pack.currTip.gold.where,"Earned from quest rewards, looting enemies and chests, selling items to merchants, or withdrawing from a bank.",page/dfo_pack.js currency hover gold
+pack.currTip.shards.what,"Bound Ayleid arcane crystal shards kept in your wallet for magical craftsmanship.",page/dfo_pack.js currency hover shards
+pack.currTip.shards.use,"Spent at the Mages Guild Reforge (with gold) to reroll or improve item properties, unslot gems, and buy Portal Stones.",page/dfo_pack.js currency hover shards
+pack.currTip.shards.where,"Obtained by salvaging spare Magic or Rare equipment at the Reforge, or found in dungeons and breaches.",page/dfo_pack.js currency hover shards
+pack.currTip.embers.what,"Bound fiery remnants of Mehrunes Dagon's Deadlands carried in your wallet.",page/dfo_pack.js currency hover embers
+pack.currTip.embers.use,"Spent at the Sigil Broker for set equipment and rare rewards, or used in endgame crafting like Daedric Ingots.",page/dfo_pack.js currency hover embers
+pack.currTip.embers.where,"Dropped from closing Dagon's portals and breaches, slaying Sea Serpents, and clearing Elite Breach Redoubts.",page/dfo_pack.js currency hover embers
+pack.currTip.silver.what,"Online account currency shared across all characters on your profile.",page/dfo_pack.js currency hover silver
+pack.currTip.silver.use,"Used at banks and realm auctions for player trading, marketplace orders, commissions and online exchange.",page/dfo_pack.js currency hover silver
+pack.currTip.silver.where,"Earned online via dungeons, bounties, realm activities and selling goods or gear to other players.",page/dfo_pack.js currency hover silver
+pack.currTip.aurum.what,"Premium account currency tracked globally on the realm server.",page/dfo_pack.js currency hover aurum
+pack.currTip.aurum.use,"Spent in the Aurum Market and special realm services for account conveniences and cosmetics.",page/dfo_pack.js currency hover aurum
+pack.currTip.aurum.where,"Claimed online from weekly dungeon and realm milestones or supporter offerings.",page/dfo_pack.js currency hover aurum
+pack.bar.rep.villainy,Villainy,page/dfo_pack.js footer villainy bar
+pack.bar.rep.villainy.fmt,{val} / {max},page/dfo_pack.js footer villainy bar value
+pack.repTip.title,Relations & Reputations,page/dfo_pack.js rep hover title
+pack.repTip.sec.current,Current Area,page/dfo_pack.js rep hover section
+pack.repTip.sec.villainy,PvP & Villainy,page/dfo_pack.js rep hover section
+pack.repTip.villainy.ok,"Villainy: {val} / {red} (guard agro and red skull at {red})",page/dfo_pack.js rep hover villainy ok
+pack.repTip.villainy.red,"Villainy: {val} / {max} — Villain! Red skull active, guards attack in towns, PvP locked.",page/dfo_pack.js rep hover villainy red
+pack.repTip.sec.groups,Social Groups,page/dfo_pack.js rep hover section
+pack.repTip.groupLine,{group}: {rank} ({val}),page/dfo_pack.js rep hover group line
+pack.repTip.dress,Dress Modifiers: {list},page/dfo_pack.js rep hover dress
+pack.repTip.temples,Temples {val},page/dfo_pack.js rep hover temples
+pack.repTip.sec.law,Law & Bounties,page/dfo_pack.js rep hover section
+pack.repTip.law.clean,No criminal record or banishment in tracked regions,page/dfo_pack.js rep hover clean
+pack.repTip.law.line,{region}: {rank} ({val}),page/dfo_pack.js rep hover law line
+pack.repTip.law.banned,{region}: {rank} ({val}) — Banished,page/dfo_pack.js rep hover law banned
+pack.repTip.law.wanted,{region}: {rank} ({val}) — Known to watch,page/dfo_pack.js rep hover law wanted
+pack.repTip.sec.factions,Guilds & Factions,page/dfo_pack.js rep hover section
+pack.repTip.factions.none,No guild memberships or recorded faction standings,page/dfo_pack.js rep hover no factions
+pack.repTip.guildLine,[Member] {name}: {rep},page/dfo_pack.js rep hover guild
+pack.repTip.factionLine,{name}: {rep},page/dfo_pack.js rep hover faction
+pack.curr.fmt.mln,{v}M,page/dfo_pack.js currency compact million suffix
+pack.curr.fmt.k,{v}K,page/dfo_pack.js currency compact thousand suffix
+pack.currTip.exact,Exact Balance,page/dfo_pack.js currency hover exact panel label
+pack.currTip.gold.coins,Gold in Purse (Coins),page/dfo_pack.js currency hover gold coins panel
+pack.currTip.gold.loc,In Letters of Credit,page/dfo_pack.js currency hover gold letters panel
+pack.statusTip.clock.local,Local Time (Player),page/dfo_pack.js status hover local player clock
+pack.statusTip.clock.server,Server Time (World),page/dfo_pack.js status hover server world clock
+pack.statusTip.clock.why,Client & Server Time Split,page/dfo_pack.js status hover clock explanation title
+pack.statusTip.clock.note,"Online, the game runs two separate clocks. Local time belongs to your save: it runs while you play, pauses offline and advances with resting, travel, jail and training (governing your quests, effects, hunger, diseases, leases and guilds). Server time runs continuously in real time across the realm (1 game day = 1 real hour) regardless of rest — governing the sky, time of day, moons and world events. Offline, both clocks stay synced.",page/dfo_pack.js status hover clock explanation body
+pack.charcol.label,Equipment panel layout,page/dfo_pack.js header charcol switcher
+pack.charcol.v2,Action-RPG Style,page/dfo_pack.js header charcol Action-RPG mode
+pack.charcol.v1,Vanilla Inventory,page/dfo_pack.js header charcol vanilla mode
+pack.charcol.how,"Switch equipment layout between Action-RPG Style and Vanilla Inventory",page/dfo_pack.js header charcol switcher tooltip

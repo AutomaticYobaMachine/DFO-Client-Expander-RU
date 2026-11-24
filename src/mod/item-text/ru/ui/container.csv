@@ -1,0 +1,111 @@
+key,text,note
+container.title.container,Добыча,page/dfo_container.js default container title
+container.title.storage,Хранилище,page/dfo_container.js storage title
+container.title.wagon,Повозка,page/dfo_container.js wagon title
+container.title.bag,Сумка материалов,page/dfo_container.js materials bag title
+container.title.ground,Земля,page/dfo_container.js ground title
+container.title.reward,Выберите награду,page/dfo_container.js reward title
+container.title.fate,Судьба,page/dfo_container.js fate title
+container.action.wagon,Повозка,page/dfo_container.js wagon toggle button tooltip
+container.action.leaveWagon,Закрыть повозку,page/dfo_container.js wagon close button tooltip
+container.action.bag,Сумка материалов,page/dfo_container.js bag toggle button tooltip
+container.action.closeBag,Закрыть сумку,page/dfo_container.js bag close button tooltip
+container.action.fromVault,Из сейфа,page/dfo_container.js vault pour button
+container.action.takeAll,Забрать всё,page/dfo_container.js footer take all button
+container.action.close,Закрыть,page/dfo_container.js footer close button
+container.action.all,Все,page/dfo_container.js quantity modal all button
+container.action.cancel,Отмена,page/dfo_container.js modal and fate cancel button
+container.action.take,Забрать,page/dfo_container.js context menu take single item
+container.action.takeOne,Забрать 1 шт.,page/dfo_container.js context menu take one from stack
+container.action.takeStack,Забрать стопку (×{n}),page/dfo_container.js context menu take full stack
+container.action.takeCustom,Указать количество…,page/dfo_container.js context menu take custom amount
+container.action.stow,Убрать,page/dfo_container.js context menu stow single item
+container.action.stowOne,Убрать 1 шт.,page/dfo_container.js context menu stow one from stack
+container.action.stowStack,Убрать стопку (×{n}),page/dfo_container.js context menu stow full stack
+container.action.stowCustom,Указать количество…,page/dfo_container.js context menu stow custom amount
+container.action.inspect,Подробнее,page/dfo_container.js context menu inspect item card
+container.sort.default,Сортировка,page/dfo_container.js sort button default
+container.sort.rarity,Сортировка: Редкость,page/dfo_container.js sort button rarity
+container.sort.name,Сортировка: Имя,page/dfo_container.js sort button name
+container.sort.weight,Сортировка: Вес,page/dfo_container.js sort button weight
+container.sort.value,Сортировка: Цена,page/dfo_container.js sort button value
+container.search.placeholder,Поиск,page/dfo_container.js search bar placeholder
+container.search.aria,Поиск предметов по свойствам карточки,page/dfo_container.js search bar aria label
+container.search.clear,Очистить поиск,page/dfo_container.js search bar clear button
+container.cat.all,Все,page/dfo_container.js category dropdown all
+container.cat.weapons,Оружие,page/dfo_container.js category dropdown weapons
+container.cat.armor,Броня,page/dfo_container.js category dropdown armor
+container.cat.clothing,Одежда,page/dfo_container.js category dropdown clothing
+container.cat.potions,Зелья,page/dfo_container.js category dropdown potions
+container.cat.ingredients,Ингредиенты,page/dfo_container.js category dropdown ingredients
+container.cat.books,Книги,page/dfo_container.js category dropdown books
+container.cat.valuables,Ценное,page/dfo_container.js category dropdown valuables
+container.cat.misc,Разное,page/dfo_container.js category dropdown misc
+container.cat.junk,Хлам,page/dfo_container.js category dropdown junk
+container.rarity.all,Редкость,page/dfo_container.js rarity dropdown all
+container.rarity.common,Обычный,page/dfo_container.js rarity common
+container.rarity.magic,Магический,page/dfo_container.js rarity magic
+container.rarity.rare,Редкий,page/dfo_container.js rarity rare
+container.rarity.legendary,Легендарный,page/dfo_container.js rarity legendary
+container.rarity.aetheric,Эфирный,page/dfo_container.js rarity aetheric
+container.rarity.artifact,Артефакт,page/dfo_container.js rarity artifact
+container.rarity.gilded,Позолоченный,page/dfo_container.js rarity gilded
+container.rarity.exalted,Возвышенный,page/dfo_container.js rarity exalted prefix
+container.mat.all,Материал,page/dfo_container.js material dropdown all
+container.mat.Leather,Кожа,page/dfo_container.js material leather
+container.mat.Chain,Кольчуга,page/dfo_container.js material chain
+container.mat.Iron,Железо,page/dfo_container.js material iron
+container.mat.Steel,Сталь,page/dfo_container.js material steel
+container.mat.Silver,Серебро,page/dfo_container.js material silver
+container.mat.Elven,Эльфийский,page/dfo_container.js material elven
+container.mat.Dwarven,Двемерский,page/dfo_container.js material dwarven
+container.mat.Mithril,Мифрил,page/dfo_container.js material mithril
+container.mat.Adamantium,Адамантий,page/dfo_container.js material adamantium
+container.mat.Orcish,Орочий,page/dfo_container.js material orcish
+container.mat.Ebony,Эбонит,page/dfo_container.js material ebony
+container.mat.Daedric,Даэдрик,page/dfo_container.js material daedric
+container.unit.kg,кг,page/dfo_container.js kilogram unit
+container.unit.gold,зол.,page/dfo_container.js gold unit
+container.gold.tip,Золотые монеты в кармане: {g},page/dfo_container.js pocket gold widget tooltip
+container.carry.tipFree,Вес инвентаря: {cur} / {max} {u} · Можно унести ещё: {free} {u},page/dfo_container.js carry widget tooltip free
+container.carry.tipOver,Вес инвентаря: {cur} / {max} {u} · Перегруз: {over} {u},page/dfo_container.js carry widget tooltip overweight
+container.meta.count,{n} {n:предмет|предмета|предметов},page/dfo_container.js footer item count
+container.meta.line,{count} · {wt},page/dfo_container.js footer count and weight
+container.hint.transfer,ЛКМ — 1 шт. · Shift+ЛКМ — вся стопка · Ctrl+Shift+ЛКМ — указать кол-во · ПКМ — осмотр,page/dfo_container.js footer transfer hint
+container.empty.default,Пусто.,page/dfo_container.js empty container message
+container.empty.ground,Здесь пока ничего не брошено.,page/dfo_container.js empty ground message
+container.empty.filtered,Нет подходящих предметов.,page/dfo_container.js empty filtered message
+container.modal.sub,В наличии: {max} ед. Введите количество:,page/dfo_container.js quantity prompt subtitle
+container.modal.take,Забрать,page/dfo_container.js quantity prompt take confirm
+container.modal.stow,Убрать,page/dfo_container.js quantity prompt stow confirm
+container.reward.sub,Выберите 1 трофей из предложенных наград,page/dfo_container.js reward header subtitle
+container.reward.badge,1 НА ВЫБОР,page/dfo_container.js reward header status chip
+container.reward.banner,"Кликните по предмету ниже, чтобы выбрать его, затем нажмите «Забрать награду» (или дважды кликните по строке). Наведите курсор для просмотра полной карточки.",page/dfo_container.js reward instruction banner
+container.reward.claim,Забрать награду,page/dfo_container.js reward primary claim button
+container.reward.selected,Выбрано:,page/dfo_container.js reward preview prefix
+container.reward.none,Награда не выбрана — кликните по предмету выше,page/dfo_container.js reward preview none
+container.reward.count,Наград на выбор: {n},page/dfo_container.js reward footer count
+container.reward.hint,ЛКМ — выбрать · Двойной ЛКМ или кнопка — забрать награду · Наведение — карточка предмета,page/dfo_container.js reward footer hint
+container.fate.promptIdle,Выберите решение выше (или нажмите клавишу 1 / 2),page/dfo_container.js fate idle confirm prompt
+container.fate.trophyTag,ТРОФЕЙ,page/dfo_container.js fate kill card chip
+container.fate.mercyTag,МИЛОСЕРДИЕ,page/dfo_container.js fate spare card chip
+container.fate.leaveKey,Esc — закрыть,page/dfo_container.js fate footer escape legend
+container.fate.hint,1 — Казнить (трофей) · 2 — Пощадить · Наведение на 1 — карточка трофея · Esc — закрыть,page/dfo_container.js fate footer default hint
+container.search.word.damage,Урон,page/dfo_container.js search card word
+container.search.word.armor,Броня,page/dfo_container.js search card word
+container.search.word.condition,Прочность,page/dfo_container.js search card word
+container.search.word.socket,гнездо гнёзда сокет,page/dfo_container.js search card word
+container.search.word.emptySocket,Пустое гнездо,page/dfo_container.js search card word
+container.search.word.unidentified,Неопознано неопознан,page/dfo_container.js search card word
+container.search.word.locked,Закреплено заблокировано замок,page/dfo_container.js search card word
+container.search.word.quest,Квестовый задание,page/dfo_container.js search card word
+container.search.word.stolen,Краденое,page/dfo_container.js search card word
+container.search.word.cursed,Проклято,page/dfo_container.js search card word
+container.search.word.junk,Хлам,page/dfo_container.js search card word
+container.search.word.lit,Горит,page/dfo_container.js search card word
+container.search.word.letter,Аккредитив,page/dfo_container.js search card word
+container.search.word.armorLeather,Кожа,page/dfo_container.js search card word
+container.search.word.armorChain,Кольчуга,page/dfo_container.js search card word
+container.search.word.armorPlate,Латы,page/dfo_container.js search card word
+container.search.word.material,Материал,page/dfo_container.js search card word
+container.search.word.set,комплект,page/dfo_container.js search card word

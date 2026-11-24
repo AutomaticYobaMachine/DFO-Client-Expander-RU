@@ -1,0 +1,251 @@
+key,text,note
+dungeon.type.crypt,Крипта,dungeon model table
+dungeon.type.orcStronghold,Орочья твердыня,dungeon model table
+dungeon.type.humanStronghold,Людская твердыня,dungeon model table
+dungeon.type.prison,Тюрьма,dungeon model table
+dungeon.type.desecratedTemple,Осквернённый храм,dungeon model table
+dungeon.type.mine,Шахта,dungeon model table
+dungeon.type.naturalCave,Природная пещера,dungeon model table
+dungeon.type.coven,Ковен,dungeon model table
+dungeon.type.vampireHaunt,Логово вампиров,dungeon model table
+dungeon.type.laboratory,Лаборатория,dungeon model table
+dungeon.type.harpyNest,Гнездо гарпий,dungeon model table
+dungeon.type.ruinedCastle,Разрушенный замок,dungeon model table
+dungeon.type.spiderNest,Паучье гнездо,dungeon model table
+dungeon.type.giantStronghold,Твердыня великанов,dungeon model table
+dungeon.type.dragonsDen,Логово дракона,dungeon model table
+dungeon.type.barbarianFortress,Крепость варваров,dungeon model table
+dungeon.type.volcanicCaves,Вулканические пещеры,dungeon model table
+dungeon.type.scorpionNest,Гнездо скорпионов,dungeon model table
+dungeon.type.cemetery,Кладбище,dungeon model table
+dungeon.family.undead,нежить,dungeon model table
+dungeon.family.daedra,даэдра и магические создания,dungeon model table
+dungeon.family.dragon,драконы,dungeon model table
+dungeon.family.beast,звери и природные создания,dungeon model table
+dungeon.family.brute,орки и великаны,dungeon model table
+dungeon.family.caster,маги,dungeon model table
+dungeon.family.rogue,разбойники,dungeon model table
+dungeon.family.warrior,воины,dungeon model table
+dungeon.metal.iron,Железо,dungeon model table
+dungeon.metal.steel,Сталь,dungeon model table
+dungeon.metal.silver,Серебро,dungeon model table
+dungeon.metal.elven,Эльфийский,dungeon model table
+dungeon.metal.dwarven,Двемерский,dungeon model table
+dungeon.metal.mithril,Мифрил,dungeon model table
+dungeon.metal.adamantium,Адамантий,dungeon model table
+dungeon.metal.ebony,Эбонит,dungeon model table
+dungeon.metal.orcish,Орочий,dungeon model table
+dungeon.metal.daedric,Даэдрический,dungeon model table
+dungeon.material.metal-silver,серебро,dungeon model table
+dungeon.material.metal-gold,золото,dungeon model table
+dungeon.material.ore-dwarven,двемерская руда,dungeon model table
+dungeon.material.metal-platinum,платина,dungeon model table
+dungeon.material.ore-adamantium,адамантиевая руда,dungeon model table
+dungeon.material.ore-moonstone,лунный камень,dungeon model table
+dungeon.unknown,неизвестно,src/mod/page/dfo_dungeons.js
+dungeon.expired,срок истёк,src/mod/page/dfo_dungeons.js
+dungeon.remaining,{h} ч. {m}м.,src/mod/page/dfo_dungeon_model.js
+dungeon.permanent,постоянный данж,src/mod/page/dfo_dungeon_model.js
+dungeon.spawnedUnknown,"порождённый, таймер неизвестен",src/mod/page/dfo_dungeon_model.js
+dungeon.vanishesIn,Исчезнет через: {time},src/mod/page/dfo_dungeon_model.js
+dungeon.spawnedTimer,"порождённый, {timer}",src/mod/page/dfo_dungeon_model.js
+dungeon.enemy,Враг {id},src/mod/page/dfo_dungeons.js
+dungeon.untitled,Без названия,src/mod/page/dfo_dungeon_model.js
+dungeon.title,[{type} - {rank} ранг] {size} {name},src/mod/page/dfo_dungeon_model.js
+dungeon.metadata,"{kind} данж, {life}",src/mod/page/dfo_dungeon_model.js
+dungeon.elite,Элитный,src/mod/page/dfo_dungeons.js
+dungeon.ordinary,Обычный,src/mod/page/dfo_dungeons.js
+dungeon.tip.click,ЛКМ — сведения о данже,src/mod/page/dfo_dungeons.js
+dungeon.tip.personal,Оценки персонализированы по вашему персонажу.,src/mod/page/dfo_dungeons.js
+dungeon.tip.travel,«Отправиться» — отдельной кнопкой в карточке.,src/mod/page/dfo_dungeons.js
+dungeon.guide.close,Закрыть мини-гайд,src/mod/page/dfo_dungeons.js
+dungeon.travel,→ Отправиться,src/mod/page/dfo_dungeons.js
+dungeon.card.close,Закрыть карточку данжа,src/mod/page/dfo_dungeons.js
+dungeon.card.title,Сведения о данже,src/mod/page/dfo_dungeons.js
+dungeon.guide.title,Как читать оценки данжа,src/mod/page/dfo_dungeons.js
+dungeon.guide.intro,"Это персональные индексы мода, а не вероятность победы или обещание конкретного дропа. Они пересчитываются по текущему персонажу.",src/mod/page/dfo_dungeons.js
+dungeon.guide.threat,☠ Угроза — от 1 до 5,src/mod/page/dfo_dungeons.js
+dungeon.guide.threatText,"Сравниваем средний уровень ожидаемых врагов с вашим эффективным уровнем, учитываем долю боссов, усиление здоровья и урона и долю врагов, которым не подходит базовый металл оружия. Усиление места, навыков, уровня и Славы читается из формул игры; элитный данж добавляет свои множители. Заклинания, тактика и мастерство игрока в индекс не входят.",src/mod/page/dfo_dungeons.js
+dungeon.guide.threatFormula,"Индекс до округления: 1 + 1,1 × (средний уровень / максимум из 5 и вашего уровня) + доля боссов + 0,55 × log₂(здоровье × урон) + доля неподходящего металла. Результат округляем и ограничиваем от 1 до 5. Множители здоровья и урона относительны базовому виду врага.",src/mod/page/dfo_dungeons.js
+dungeon.guide.loot,◆ Добыча — от 1 до 5,src/mod/page/dfo_dungeons.js
+dungeon.guide.lootText,"Оценивает качество источников: ранг сокровищ, долю боссов и элитный данж. Индекс: 1 + 2,5 × ранг / 18 + доля боссов + 0,5 за элитный данж, с округлением и ограничением 1–5. Это не число предметов за час: количество точек и длительность зачистки снаружи неизвестны. Точные пороги редкости для вашего уровня и Удачи показаны во вкладке «Добыча».",src/mod/page/dfo_dungeons.js
+dungeon.guide.growth,↑ Рост — от 1 до 5,src/mod/page/dfo_dungeons.js
+dungeon.guide.growthText,"До навыка 100 индекс равен 5: ограничение обучения от слабого противника ещё не действует. Выше 100 берём ваш самый высокий боевой/магический навык и средний вес обучения по прогнозу врагов. Игра сравнивает (5 × уровень вызова + 30) с навыком: ниже 75% обучение боевому навыку не идёт; от 75% до 100% вес растёт квадратично; далее доходит до 1,5. Индекс мода: 1 + 4 × вес / 1,5, округлённый в пределах 1–5. Магия также имеет обучение без боя, которое этот индекс не оценивает.",src/mod/page/dfo_dungeons.js
+dungeon.guide.renown,"★ Слава — от 0,0 до 5,0",src/mod/page/dfo_dungeons.js
+dungeon.guide.renownText,Средний опыт Славы за ожидаемое убийство делим на максимальную награду за одно убийство при вашей текущей Славе и умножаем на 5. Опыт и предел берём из игры; бонусы группы и лимиты сервиса могут изменить итог. В офлайне Слава не начисляется. Сырые XP показаны в карточке.,src/mod/page/dfo_dungeons.js
+dungeon.guide.known,Что известно до входа,src/mod/page/dfo_dungeons.js
+dungeon.guide.knownText,"Состав — прогноз по таблице и вашему уровню, без построения данжа. Если мод игры предлагает несколько таблиц, используется их равновесная смесь. Фиксированные и водные враги, серверная память предыдущего посетителя и квестовые подкрепления могут отличаться. Наблюдения после посещения показываются отдельно со временем; они не гарантируют текущее состояние комнаты.",src/mod/page/dfo_dungeons.js
+dungeon.guide.unknownText,"Число врагов и сундуков без чтения игровых блоков заранее неизвестно. Клиент снаружи не знает общий онлайн внутри, точное содержимое сундуков, состояние Aurum и выработку жил. Отсутствие записи в журнале исчезновения не доказывает, что никто не входил.",src/mod/page/dfo_dungeons.js
+dungeon.close,Закрыть,src/mod/page/dfo_dungeons.js
+dungeon.tab.rating,Оценка,src/mod/page/dfo_dungeons.js
+dungeon.tab.inhabitants,Обитатели,src/mod/page/dfo_dungeons.js
+dungeon.tab.loot,Добыча,src/mod/page/dfo_dungeons.js
+dungeon.tab.growth,Сила и рост,src/mod/page/dfo_dungeons.js
+dungeon.tab.details,Сведения,src/mod/page/dfo_dungeons.js
+dungeon.partialData,Часть данных игры ещё недоступна. Неизвестные оценки и вероятности не заменяются примерными числами.,src/mod/page/dfo_dungeons.js
+dungeon.score.threat,УГРОЗА,src/mod/page/dfo_dungeons.js
+dungeon.score.loot,ДОБЫЧА,src/mod/page/dfo_dungeons.js
+dungeon.score.growth,РОСТ,src/mod/page/dfo_dungeons.js
+dungeon.score.renown,СЛАВА,src/mod/page/dfo_dungeons.js
+dungeon.chip.blocked,ВАШЕ ОРУЖИЕ НЕ БЕРЁТ {pct} ВРАГОВ,src/mod/page/dfo_dungeons.js
+dungeon.chip.lootGreat,ОТЛИЧНАЯ ДОБЫЧА,src/mod/page/dfo_dungeons.js
+dungeon.chip.lootGood,ХОРОШАЯ ДОБЫЧА,src/mod/page/dfo_dungeons.js
+dungeon.chip.bosses,БОССОВ {pct},src/mod/page/dfo_dungeons.js
+dungeon.chip.legendaries,ЛЕГЕНДАРКИ: {family},src/mod/page/dfo_dungeons.js
+dungeon.chip.vein,ЖИЛА: {vein},src/mod/page/dfo_dungeons.js
+dungeon.chip.elites,ЭЛИТНЫЕ ВРАГИ,src/mod/page/dfo_dungeons.js
+dungeon.chip.expired,СРОК ИСТЁК,src/mod/page/dfo_dungeons.js
+dungeon.chip.vanishes,ИСЧЕЗНЕТ ЧЕРЕЗ: {time},src/mod/page/dfo_dungeons.js
+dungeon.chip.cleared,ЗАЧИЩЕН,src/mod/page/dfo_dungeons.js
+dungeon.sec.threat,☠ УГРОЗА — {score} ИЗ 5,src/mod/page/dfo_dungeons.js
+dungeon.mixedEnemies,смешанные враги,src/mod/page/dfo_dungeons.js
+dungeon.threat.summary,Для персонажа {level} уровня здесь в среднем враги {mean} уровня; кто именно — {family} {share}. Усиление места и ваших навыков делает сильных врагов в среднем {hp} по здоровью и {damage} по урону.,src/mod/page/dfo_dungeons.js
+dungeon.weapon.unknown,Оружие в руке не определено — проверьте пригодность металла во вкладке «Обитатели».,src/mod/page/dfo_dungeons.js
+dungeon.weapon.tablePartial,Таблица врагов ещё не полностью доступна; пригодность оружия пока неизвестна.,src/mod/page/dfo_dungeons.js
+dungeon.weapon.blocked,не наносит урона {pct} врагов,src/mod/page/dfo_dungeons.js
+dungeon.weapon.inHand,Оружие в руке ({weapon}) ,src/mod/page/dfo_dungeons.js
+dungeon.weapon.needsBetter, — им нужен металл получше (см. «Обитатели»).,src/mod/page/dfo_dungeons.js
+dungeon.weapon.allHurt,Оружие в руке ({weapon}) наносит урон всем ожидаемым врагам.,src/mod/page/dfo_dungeons.js
+dungeon.sec.loot,◆ ДОБЫЧА — {score} ИЗ 5,src/mod/page/dfo_dungeons.js
+dungeon.loot.off,Система особой добычи отключена; прогноз редкости не применяется.,src/mod/page/dfo_dungeons.js
+dungeon.loot.chances,"Сундуки {rank} ранга: каждая подходящая вещь (оружие, броня, украшения, одежда) для вас не ниже магической с шансом {magic}, редкой — {rare}, легендарной — {legendary}. Это вложенные пороги, а не шанс на весь сундук.",src/mod/page/dfo_dungeons.js
+dungeon.loot.chancesUnknown,Шансы редкости для этого персонажа пока неизвестны.,src/mod/page/dfo_dungeons.js
+dungeon.loot.bosses,Боссы (даэдра и враги 18+ уровня) — {pct} врагов: их тела дают добычу по усиленной таблице и без лимита «3 вещи с обычного врага».,src/mod/page/dfo_dungeons.js
+dungeon.loot.family,При уже состоявшемся легендарном выборе предметы семьи «{family}» имеют пятикратный вес (виды вещей — во вкладке «Добыча»).,src/mod/page/dfo_dungeons.js
+dungeon.sec.growth,↑ РОСТ — {score} ИЗ 5,src/mod/page/dfo_dungeons.js
+dungeon.growth.noData,Данных для персональной оценки роста навыков пока недостаточно.,src/mod/page/dfo_dungeons.js
+dungeon.growth.below100,"Ваши навыки ниже 100 — растут от любого врага, оценка показывает, сколько здесь боёв (размер {size}).",src/mod/page/dfo_dungeons.js
+dungeon.growth.above100,"Ваш лучший боевой/магический навык: {skill}; средний вес обучения: {weight} из 1,5. Оценка отражает долю врагов, дающих рост навыка выше 100 в этом данже.",src/mod/page/dfo_dungeons.js
+dungeon.sec.renown,★ СЛАВА — {score} ИЗ 5,src/mod/page/dfo_dungeons.js
+dungeon.renown.offline,В офлайне Слава не начисляется.,src/mod/page/dfo_dungeons.js
+dungeon.renown.unknown,Средняя награда Славы пока неизвестна.,src/mod/page/dfo_dungeons.js
+dungeon.renown.average,В среднем ≈{xp} XP Славы за убийство до бонуса группы и ограничений сервиса.,src/mod/page/dfo_dungeons.js
+dungeon.personalNote,"Оценки персональные: в расчёт идут ваш уровень, навыки, Удача, Слава и оружие в руках.",src/mod/page/dfo_dungeons.js
+dungeon.roster.forecast,"Прогноз для уровня {level}; {choice} выбор. {tables} Доли относятся к случайным сухопутным точкам, не ко всем врагам данжа.",src/mod/page/dfo_dungeons.js
+dungeon.col.enemy,Враг,src/mod/page/dfo_dungeons.js
+dungeon.col.share,Доля,src/mod/page/dfo_dungeons.js
+dungeon.col.level,Уровень,src/mod/page/dfo_dungeons.js
+dungeon.col.hpDamage,HP / Урон,src/mod/page/dfo_dungeons.js
+dungeon.col.challenge,Вызов,src/mod/page/dfo_dungeons.js
+dungeon.col.metal,Металл,src/mod/page/dfo_dungeons.js
+dungeon.anyMetal,любой,src/mod/page/dfo_dungeons.js
+dungeon.metalOrBetter,{metal} и лучше,src/mod/page/dfo_dungeons.js
+dungeon.roster.bossNote,"Босс для оценки добычи — даэдра по affinity либо враг уровня 18+. Это не обязательно отдельный босс с особым именем. Фиксированные, водные и квестовые враги сюда не входят.",src/mod/page/dfo_dungeons.js
+dungeon.roster.eliteNote,"В элитном данже обычных врагов ×3, их базовые здоровье и урон ×2. Особые элитные враги — отдельный механизм; точное число подходящих точек без раскладки блоков неизвестно.",src/mod/page/dfo_dungeons.js
+dungeon.roster.eliteSlots,"План элитных врагов для ID этого места: до {n}. Это штатный детерминированный бюджет, а не подтверждение присутствия: нужны подходящие враги, а сохранённая сервером комната может отличаться. Особые элитные черты в общий индекс угрозы не входят.",src/mod/page/dfo_dungeons.js
+dungeon.col.parameter,Параметр,src/mod/page/dfo_dungeons.js
+dungeon.col.value,Значение,src/mod/page/dfo_dungeons.js
+dungeon.loot.rank,Ранг сокровищ,src/mod/page/dfo_dungeons.js
+dungeon.loot.luck,Удача персонажа,src/mod/page/dfo_dungeons.js
+dungeon.loot.eliteQuality,Множитель качества элитного данжа,src/mod/page/dfo_dungeons.js
+dungeon.loot.bossShare,Доля боссов,src/mod/page/dfo_dungeons.js
+dungeon.loot.raritySystem,Система редкости,src/mod/page/dfo_dungeons.js
+dungeon.on,включена,src/mod/page/dfo_dungeons.js
+dungeon.off,выключена,src/mod/page/dfo_dungeons.js
+dungeon.loot.threshold,Порог подходящего предмета из сундука,src/mod/page/dfo_dungeons.js
+dungeon.col.chance,Вероятность,src/mod/page/dfo_dungeons.js
+dungeon.loot.atLeastMagic,Не ниже магического,src/mod/page/dfo_dungeons.js
+dungeon.loot.atLeastRare,Не ниже редкого,src/mod/page/dfo_dungeons.js
+dungeon.loot.atLeastLegendary,Не ниже легендарного,src/mod/page/dfo_dungeons.js
+dungeon.loot.thresholdNote,"Это вложенные пороги для предмета, пригодного для редкости, а не независимые события и не шанс на весь сундук. Уровень, Удача и доступные усиления поиска читаются из текущей игры. Количество предметов и точек снаружи неизвестно.",src/mod/page/dfo_dungeons.js
+dungeon.loot.preferred,Предпочтительные легендарные вещи,src/mod/page/dfo_dungeons.js
+dungeon.loot.preferredText,Семья «{family}»: при уже состоявшемся легендарном выборе её предметы имеют пятикратный вес. Ранг не гарантирует легендарный предмет.,src/mod/page/dfo_dungeons.js
+dungeon.loot.noFamily,У этого типа нет предпочтительной семьи.,src/mod/page/dfo_dungeons.js
+dungeon.col.item,Предмет,src/mod/page/dfo_dungeons.js
+dungeon.loot.sourcesNote,"Трупы используют собственные уровень и семью врага; босс имеет более щедрый источник. Сундуки используют тип данжа. Чемпионы, квесты и особые враги могут иметь собственные правила.",src/mod/page/dfo_dungeons.js
+dungeon.growth.scaling,Усиление монстров и доля места,src/mod/page/dfo_dungeons.js
+dungeon.growth.forecast,Персональный прогноз по формулам игры,src/mod/page/dfo_dungeons.js
+dungeon.growth.meanLevel,Средний уровень врага,src/mod/page/dfo_dungeons.js
+dungeon.growth.meanHp,Среднее усиление здоровья,src/mod/page/dfo_dungeons.js
+dungeon.growth.meanDamage,Среднее усиление урона,src/mod/page/dfo_dungeons.js
+dungeon.growth.bestSkill,Ваш лучший боевой/магический навык,src/mod/page/dfo_dungeons.js
+dungeon.growth.weight,"Средний вес обучения (до 1,5)",src/mod/page/dfo_dungeons.js
+dungeon.growth.share,"Доля усиления этого типа данжа («{type}»): {pct}. В данжах со 100% долей враги получают полную прибавку к здоровью и урону; при малой доле (например, Шахта или Пещера) прибавка составляет лишь десятую часть.",src/mod/page/dfo_dungeons.js
+dungeon.growth.above100Title,Прокачка навыков выше 100,src/mod/page/dfo_dungeons.js
+dungeon.growth.above100Text,Для навыка выше 100 игра сопоставляет уровень вызова конкретного врага с вашим навыком. Уровень вызова учитывает усиление; средний вес ниже рассчитан штатной функцией обучения.,src/mod/page/dfo_dungeons.js
+dungeon.growth.yours,"Ваш лучший боевой/магический навык: {skill}. Средний вес обучения в этом данже: {weight} из 1,5.",src/mod/page/dfo_dungeons.js
+dungeon.growth.note,"Усиление зависит от места, навыков персонажа, доли конкретного противника и действующих модификаторов игры. Высокая доля усиления сама по себе не гарантирует рост: состав — прогноз, фактическая комната может отличаться.",src/mod/page/dfo_dungeons.js
+dungeon.col.place,Место,src/mod/page/dfo_dungeons.js
+dungeon.col.data,Данные,src/mod/page/dfo_dungeons.js
+dungeon.details.type,Тип,src/mod/page/dfo_dungeons.js
+dungeon.details.size,Размер по правилам клиента,src/mod/page/dfo_dungeons.js
+dungeon.details.blocks,Блоков исходной локации,src/mod/page/dfo_dungeons.js
+dungeon.details.level,Уровень данжа,src/mod/page/dfo_dungeons.js
+dungeon.eliteLower,элитный,src/mod/page/dfo_dungeons.js
+dungeon.ordinaryLower,обычный,src/mod/page/dfo_dungeons.js
+dungeon.details.origin,Происхождение,src/mod/page/dfo_dungeons.js
+dungeon.details.region,Регион,src/mod/page/dfo_dungeons.js
+dungeon.details.mapId,ID карты,src/mod/page/dfo_dungeons.js
+dungeon.details.mapCoords,Координаты карты,src/mod/page/dfo_dungeons.js
+dungeon.details.respawn,Возрождение врагов и сундуков,src/mod/page/dfo_dungeons.js
+dungeon.minutes,{n} мин,src/mod/page/dfo_dungeons.js
+dungeon.life.deadline,Предельный срок по журналу: {when} ({timer}). {log} Нахождение игрока внутри может задерживать исчезновение; точную текущую занятость снаружи клиент не знает.,src/mod/page/dfo_dungeons.js
+dungeon.life.noRecord,"Нет актуальной записи о сроке исчезновения в доступном журнале. Это означает «неизвестно», а не «вечный» или «никто не входил».",src/mod/page/dfo_dungeons.js
+dungeon.aurum.title,Aurum и жилы руды,src/mod/page/dfo_dungeons.js
+dungeon.aurum.online,Сундук Aurum доступен только в онлайне.,src/mod/page/dfo_dungeons.js
+dungeon.aurum.unknown,Награда Aurum для этого места недоступна клиенту.,src/mod/page/dfo_dungeons.js
+dungeon.aurum.reward,Награда сундука: {n} Aurum. Перезаполнение — в понедельник по неделе сервиса.,src/mod/page/dfo_dungeons.js
+dungeon.aurum.taken, На этом устройстве есть отметка о получении на текущей неделе.,src/mod/page/dfo_dungeons.js
+dungeon.aurum.notTaken, Локальной отметки текущего аккаунта на этой неделе нет.,src/mod/page/dfo_dungeons.js
+dungeon.col.vein,Жила,src/mod/page/dfo_dungeons.js
+dungeon.col.material,Материал,src/mod/page/dfo_dungeons.js
+dungeon.veins.none,Список жил для этого места недоступен.,src/mod/page/dfo_dungeons.js
+dungeon.veins.note,"Состав рассчитан штатным законом профессий для текущего дня сервиса. Выработку знает сервис профессий; наличие строки не означает, что жила ещё не выкопана.",src/mod/page/dfo_dungeons.js
+dungeon.quests.title,Квесты и группа,src/mod/page/dfo_dungeons.js
+dungeon.quests.bounty,Награда на это место,src/mod/page/dfo_dungeons.js
+dungeon.quests.mark,На эти координаты указывает метка квеста: {quests}.,src/mod/page/dfo_dungeons.js
+dungeon.quests.none,Клиент не сообщает активной награды или метки квеста для этих координат.,src/mod/page/dfo_dungeons.js
+dungeon.party.member,Сопартиец,src/mod/page/dfo_dungeons.js
+dungeon.party.health,Здоровье,src/mod/page/dfo_dungeons.js
+dungeon.party.magicka,Магия,src/mod/page/dfo_dungeons.js
+dungeon.party.fatigue,Усталость,src/mod/page/dfo_dungeons.js
+dungeon.party.room,Комната / источник,src/mod/page/dfo_dungeons.js
+dungeon.party.pose,место в позе группы,src/mod/page/dfo_dungeons.js
+dungeon.party.none,Нет доступных подтверждённых данных о сопартийцах в этом данже. Общее число игроков внутри снаружи не известно.,src/mod/page/dfo_dungeons.js
+dungeon.visits.title,Журнал личных посещений,src/mod/page/dfo_dungeons.js
+dungeon.visits.none,Сохранённых наблюдений об этом данже нет.,src/mod/page/dfo_dungeons.js
+dungeon.visits.seen,Наблюдалось: {when} ({mode}).,src/mod/page/dfo_dungeons.js
+dungeon.visits.last,Последнее наблюдение,src/mod/page/dfo_dungeons.js
+dungeon.col.count,Количество,src/mod/page/dfo_dungeons.js
+dungeon.visits.alive,Живых врагов,src/mod/page/dfo_dungeons.js
+dungeon.visits.dead,Убитых врагов,src/mod/page/dfo_dungeons.js
+dungeon.visits.piles,Наземных куч,src/mod/page/dfo_dungeons.js
+dungeon.visits.bodies,Трупов в списке целей,src/mod/page/dfo_dungeons.js
+dungeon.visits.doors,"Дверей, состояние которых доступно",src/mod/page/dfo_dungeons.js
+dungeon.visits.open,Открытых из них,src/mod/page/dfo_dungeons.js
+dungeon.visits.kind,Наблюдавшийся вид,src/mod/page/dfo_dungeons.js
+dungeon.travel.markGone,Метка больше не доступна. Путешествие не запускается.,src/mod/page/dfo_dungeons.js
+dungeon.dungeon,Данж,src/mod/page/dfo_dungeons.js
+dungeon.tag,[{type} - {rank} ранг],src/mod/page/dfo_dungeons.js
+dungeon.spawnedShort,порождённый · {timer},src/mod/page/dfo_dungeons.js
+dungeon.permanentShort,постоянный,src/mod/page/dfo_dungeons.js
+dungeon.subtitle,  размер {size} · {kind} · {life}{distance},src/mod/page/dfo_dungeons.js
+dungeon.markGone,Метка больше не доступна.,src/mod/page/dfo_dungeons.js
+dungeon.travel.refused,Игра не начала путешествие. Проверьте сообщение игры и условия пути.,src/mod/page/dfo_dungeons.js
+dungeon.guide,Мини-гайд,src/mod/page/dfo_dungeons.js
+dungeon.visits.readFailed,Не удалось прочитать журнал посещений.,src/mod/page/dfo_dungeons.js
+dungeon.visits.saveFailed,Не удалось сохранить журнал посещений.,src/mod/page/dfo_dungeons.js
+dungeon.metalWord,металл,src/mod/page/dfo_dungeons.js
+dungeon.pick.alternate,вариативный,src/mod/page/dfo_dungeons.js
+dungeon.pick.classic,классический,src/mod/page/dfo_dungeons.js
+dungeon.roster.average,Усреднение {n} возможных таблиц; активный выбор мода не изменяется.,src/mod/page/dfo_dungeons.js
+dungeon.roster.oneTable,Одна таблица встреч.,src/mod/page/dfo_dungeons.js
+dungeon.notDetermined,не определён,src/mod/page/dfo_dungeons.js
+dungeon.life.clearedLog,Журнал отмечает зачистку.,src/mod/page/dfo_dungeons.js
+dungeon.life.firstEntry,Журнал содержит первый вход.,src/mod/page/dfo_dungeons.js
+dungeon.online,онлайн,src/mod/page/dfo_dungeons.js
+dungeon.offline,офлайн,src/mod/page/dfo_dungeons.js
+dungeon.familyShort.undead,нежить,chip: first word of the family
+dungeon.familyShort.daedra,даэдра,chip: first word of the family
+dungeon.familyShort.dragon,драконы,chip: first word of the family
+dungeon.familyShort.beast,звери,chip: first word of the family
+dungeon.familyShort.brute,орки,chip: first word of the family
+dungeon.familyShort.caster,маги,chip: first word of the family
+dungeon.familyShort.rogue,разбойники,chip: first word of the family
+dungeon.familyShort.warrior,воины,chip: first word of the family
+dungeon.veinShort.metal-silver,серебро,chip: the vein
+dungeon.veinShort.metal-gold,золото,chip: the vein
+dungeon.veinShort.ore-dwarven,двемерская,chip: the vein
+dungeon.veinShort.metal-platinum,платина,chip: the vein
+dungeon.veinShort.ore-adamantium,адамантиевая,chip: the vein
+dungeon.veinShort.ore-moonstone,лунный камень,chip: the vein

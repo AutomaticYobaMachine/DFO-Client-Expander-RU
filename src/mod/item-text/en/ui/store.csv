@@ -1,0 +1,14 @@
+key,text,note
+store.noUserData,No user data folder.,src/mod/loot-store.cjs
+store.badCacheFile,Malformed cache file.,src/mod/loot-store.cjs
+store.cacheTooLarge,The cache is too large.,src/mod/loot-store.cjs
+store.badCache,Malformed cache.,src/mod/loot-store.cjs
+store.badKeys,Malformed keys.,src/mod/loot-store.cjs
+store.badLootKey,Malformed loot key.,src/mod/loot-store.cjs
+store.badDungeonKey,Malformed dungeon details key.,src/mod/loot-store.cjs
+store.changedElsewhere,The settings changed in another window. Open them again.,src/mod/loot-store.cjs
+store.nameNeeded,Enter a filter name.,src/mod/loot-store.cjs
+store.tooMany,Too many filters are saved.,src/mod/loot-store.cjs
+store.nameTaken,A filter with this name already exists.,src/mod/loot-store.cjs
+store.badNote,Malformed dungeon observation.,src/mod/loot-store.cjs
+store.badNoteTime,Malformed observation time.,src/mod/loot-store.cjs

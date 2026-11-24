@@ -1,0 +1,5 @@
+key,text,note
+uiStyle.name,Enhanced Plus (Slate),src/mod/ui-style-lock-transform.cjs
+uiStyle.by,Daggerfall Online · DFO Client Expander,src/mod/ui-style-lock-transform.cjs
+uiStyle.blurb,"Base Enhanced Plus (Slate) interface enhanced by DFO Client Expander. Other interface styles and color themes are disabled while this mod is installed; cursor, hover info, and controller bindings remain configurable below.",src/mod/ui-style-lock-transform.cjs
+uiStyle.themeSlate,Slate,src/mod/ui-style-lock-transform.cjs

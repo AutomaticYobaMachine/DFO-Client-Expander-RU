@@ -1,0 +1,47 @@
+key,templates,s,p,note
+wyrmbane,113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 513 514,"This {base}, made for a dragon hunt, strikes dragonlings and giants hardest.","These {base}, made for a dragon hunt, strike dragonlings and giants hardest.",legendary power: Dragonsbane
+nightwhisper,113 114 116 117,"This {base} strikes silently, twice as deadly to a foe caught unawares.","These {base} strike silently, twice as deadly to a foe caught unawares.",legendary power: Silent Death
+graveward,124 125 126 127 128,"This {base} lays the dead to rest, and each one restores its bearer.","These {base} lay the dead to rest, and each one restores their bearer.",legendary power: Sanctified
+stormcaller,129 130,This {base} carries the storm: each arrow leaps to a second foe.,These {base} carry the storm: each arrow leaps to a second foe.,legendary power: Chain Lightning
+the-warden,102 103 104 105 106 107 108,This {base} guards hardest when its bearer is closest to death.,These {base} guard hardest when their bearer is closest to death.,legendary power: Last Stand
+titanheart,102 103 104 105 106 107 108,This {base} lets no single blow take too much of a life.,These {base} let no single blow take too much of a life.,legendary power: Unyielding
+aegis-of-dawn,109 110 111 112,"This {base}, raised against the Underking's host, sometimes turns a blow by itself.","These {base}, raised against the Underking's host, sometimes turn a blow by themselves.",legendary power: Dawnward
+foxglove,133 134 135 136 137 138 139 140,This {base} draws legendary finds into its bearer's path and brings luck.,These {base} draw legendary finds into their bearer's path and bring luck.,legendary power: Fortune's Favour
+kings-mark,133 134 135 136 137 138 139 140,"This {base}, a mark of royal power, pays its bearer gold for every kill.","These {base}, a mark of royal power, pay their bearer gold for every kill.",legendary power: Tribute
+archmages-loop,133 134 135 136 137 138 139 140,"This {base} of an archmage makes every spell cheaper, most of all in need.","These {base} of an archmage make every spell cheaper, most of all in need.",legendary power: Spell Mastery
+anseis-edge,118 119 120 121 122 123,"This {base} follows the Way of the Sword, deadlier with every hit.","These {base} follow the Way of the Sword, deadlier with every hit.",legendary power: Way of the Sword
+tsaesci-fang,114 117 121 123,"This {base} carries Tsaesci venom, cruellest to the weakened.","These {base} carry Tsaesci venom, cruellest to the weakened.",legendary power: Serpent's Kiss
+orsiniums-anvil,124 125 126,"This {base}, struck on Orsinium's anvil, shakes the ground with every blow.","These {base}, struck on Orsinium's anvil, shake the ground with every blow.",legendary power: Earthshaker
+glenmoril-bow,129 130,"This {base} of the Glenmoril witches strikes hardest at night, above all at beasts.","These {base} of the Glenmoril witches strike hardest at night, above all at beasts.",legendary power: Hunter's Moon
+direnni-staff,115,"This {base} of the Direnni makes spells cheaper, and every hit gives back some magicka.","These {base} of the Direnni make spells cheaper, and every hit gives back some magicka.",legendary power: Arcane Conduit
+gortwogs-cleaver,127 128,"This {base} carries Gortwog's rage: kills heal, and wounds only feed it.","These {base} carry Gortwog's rage: kills heal, and wounds only feed it.",legendary power: Orc Rage
+worms-tooth,113 114,"This {base}, once the Worm King's, drinks magicka from every life it ends.","These {base}, once the Worm King's, drink magicka from every life they end.",legendary power: Soul Siphon
+warp-edge,118 122 123,"This {base}, which outlived the Warp in the West, sometimes wounds twice with one swing.","These {base}, which outlived the Warp in the West, sometimes wound twice with one swing.",legendary power: Many Endings
+lysandus-visor,107,This {base} of King Lysandus keeps a ghostly vigil over its wearer.,These {base} of King Lysandus keep a ghostly vigil over their wearer.,legendary power: The Ghost-King's Vigil
+wayrest-treads,108,This {base} of a Wayrest courier quickens the step after every kill.,These {base} of a Wayrest courier quicken the step after every kill.,legendary power: Courier's Haste
+gauntlets-of-the-rose,103,This {base} of the Rose strikes a second time with every punch.,These {base} of the Rose strike a second time with every punch.,legendary power: Open Hand
+mountains-root,104,This {base} guards its wearer more surely with every blow taken.,These {base} guard their wearer more surely with every blow taken.,legendary power: Bedrock
+ravens-wings,105 106,This {base} lets its wearer slip aside from blows like a raven.,These {base} let their wearer slip aside from blows like a raven.,legendary power: Raven's Evasion
+night-mothers-embrace,102,This {base} of the Night Mother finishes the badly wounded without mercy.,These {base} of the Night Mother finish the badly wounded without mercy.,legendary power: Sweet Mother's Kiss
+wall-of-daggerfall,111 112,"This {base}, the Wall of Daggerfall, blunts every blow that reaches you.","These {base}, the Wall of Daggerfall, blunt every blow that reaches you.",legendary power: Bulwark
+amulet-of-the-nine,133 139,"This {base} holds the grace of the Nine, enough to cheat death once.","These {base} hold the grace of the Nine, enough to cheat death once.",legendary power: Divine Grace
+witch-sisters-ring,135,This {base} of the witch-sisters hexes anyone who dares to strike you.,These {base} of the witch-sisters hex anyone who dares to strike you.,legendary power: Hex
+duelists-vambrace,134 136,This {base} of a duelist strengthens the first blow against every new foe.,These {base} of a duelist strengthen the first blow against every new foe.,legendary power: First Blood
+mark-of-the-hist,137,This {base} of the Hist slowly renews its bearer's life.,These {base} of the Hist slowly renew their bearer's life.,legendary power: Hist-Sap
+reachmans-torc,138,"This {base}, token of a hagraven's pact, sometimes swallows hostile spells.","These {base}, token of a hagraven's pact, sometimes swallow hostile spells.",legendary power: Hagraven's Pact
+alikr-robes,163 200,This {base} of an Alik'r wayfarer keeps the desert heat at bay.,These {base} of an Alik'r wayfarer keep the desert heat at bay.,legendary power: Desert-Born
+wrothgar-mantle,155 192,This {base} from the Wrothgar pass keeps out the bitterest cold.,These {base} from the Wrothgar pass keep out the bitterest cold.,legendary power: Mountain-Born
+stendarr-vestments,164 201,This {base} of Stendarr makes healing magic come more cheaply.,These {base} of Stendarr make healing magic come more cheaply.,legendary power: Stendarr's Mercy
+pilgrims-sandals,150 189 147 186,This {base} of a pilgrim spares strength on the road and softens falls.,These {base} of a pilgrim spare strength on the road and soften falls.,legendary power: The Long Road
+barenziah-silks,195 196 194 159 160 143,This {base} of Queen Barenziah lends a royal bearing everyone respects.,These {base} of Queen Barenziah lend a royal bearing everyone respects.,legendary power: Royal Bearing
+shades-cowl,154 191,"This {base}, woven of shadow, hides its wearer whenever the hood is up.","These {base}, woven of shadow, hide their wearer whenever the hood is up.",legendary power: Unseen
+eye-of-magnus,133 139,"This {base}, the Eye of Magnus, lets spells pierce any resistance.","These {base}, the Eye of Magnus, let spells pierce any resistance.",legendary power: Magnus's Gaze
+ring-of-artaeum,135,This {base} from Artaeum slowly refills its bearer's magicka.,These {base} from Artaeum slowly refill their bearer's magicka.,legendary power: Wellspring of Artaeum
+shalidors-brand,118 119 120,"This {base}, Shalidor's Brand, sharpens spells while magicka runs high.","These {base}, Shalidor's Brand, sharpen spells while magicka runs high.",legendary power: Arcane Surge
+the-last-lock,560 562,"This {base}, the Dwemer's last defiance, strikes hardest at Daedra.","These {base}, the Dwemer's last defiance, strike hardest at Daedra.",legendary power: Dwemer Defiance
+resonant-maul,126,"This {base}, taken from the Colossus's wreck, strikes Dwemer constructs hardest.","These {base}, taken from the Colossus's wreck, strike Dwemer constructs hardest.",legendary power: Resonance
+the-hourlock,130 560,This {base} counts the Hour: every third shot strikes double.,These {base} count the Hour: every third shot strikes double.,legendary power: The Hour Tolls
+the-dragonfire-oath,123,This {base} of a Dragonguard burns Daedra with undying Dragonfire.,These {base} of a Dragonguard burn Daedra with undying Dragonfire.,legendary power: Dragonfire
+the-sunken-sovereign,119 562,This {base} of a drowned admiral strikes a foe harder with every blow.,These {base} of a drowned admiral strike a foe harder with every blow.,legendary power: Undertow
+volendrungs-echo,560,"This {base}, tuned to Volendrung's note, rings lightning around every target.","These {base}, tuned to Volendrung's note, ring lightning around every target.",legendary power: Hammerfall
+the-ketchmasters-word,562,"This {base}, the ketch-master's word, marks foes for the other hand.","These {base}, the ketch-master's word, mark foes for the other hand.",legendary power: Broadside

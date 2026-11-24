@@ -1,0 +1,9 @@
+{
+  "name": "DFO Online — русский текст квестов",
+  "authors": ["Mirazent"],
+  "source": "https://github.com/Lattymoy/daggerfall-js-source",
+  "license": "CC BY-SA 4.0",
+  "licenseFile": "LICENSE",
+  "terms": "Перевод сделан участником проекта добровольно; текст квестов — собственность Bethesda Game Studios, в пак включены только переведённые ключи локализации из locales/ru.pak, никаких изменений кода игры. Полностью совместим с любой версией игры.",
+  "version": "1.0.0"
+}

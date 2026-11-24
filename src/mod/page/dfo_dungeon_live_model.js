@@ -1,0 +1,108 @@
+(function (root) {
+  'use strict';
+  // The mod's own words, in the install's language (page/dfo_ui_text.js; English without the translation).
+  const T = (key, params) => (root.__dfoUi ? root.__dfoUi.t(key, params) : key);
+  const finite = n => typeof n === 'number' && Number.isFinite(n);
+  const names = new Intl.Collator(root.__dfoUi?.locale || 'en');
+  const read = (fn, fallback = null) => { try { return fn() ?? fallback; } catch { return fallback; } };
+  const values = x => x instanceof Map ? [...x.values()] : Array.isArray(x) ? x : x?.values ? [...x.values()] : [];
+  const alive = f => !!f?.entity && !f.dead && !f.corpse && !f._gone && !f._absentHere && !f.removed
+    && !f.src?.allied && f.companion == null && f.entity.team !== 'PlayerAlly' && f.entity.mobileTeam !== 'PlayerAlly'
+    && !(f.src?.reaction === 'passive' && !f.ai?.isHostile);
+  function enemyCounts(foes, visit = null) {
+    if (!Array.isArray(foes)) return { count: null, elites: null, syncing: true };
+    let count = 0, elites = 0, syncing = false;
+    const seen = new Set();
+    for (const f of foes) {
+      if (f?._pupMismatch) { syncing = true; continue; }
+      if (!alive(f) || seen.has(f)) continue;
+      seen.add(f);count++;
+      if (f.entity.eliteFoe === true) elites++;
+      visit?.(f);
+    }
+    return { count, elites, syncing };
+  }
+  function enemies(foes, tools = {}) {
+    const groups = new Map();
+    const counts = enemyCounts(foes, f => {
+      const e = f.entity, elite = e.eliteFoe === true;
+      const type = f.mobileType ?? f.src?.mobileType ?? e.mobileType;
+      const base = read(() => tools.enemyName?.(type), T('live.enemy',{id:type ?? '?'}));
+      const name = e.revenant?.name || e.champion?.name || e.properName || base;
+      const mods = [];
+      if (elite) mods.push(T('live.trait.elite'));
+      else if (e.elite || f.src?.elite) mods.push(T('live.trait.dungeonBoost'));
+      if (f.src?.superTier) mods.push(T('live.trait.topBoost'));
+      if (e.champion) mods.push(T('live.trait.named'));
+      if (e.revenant) mods.push(T('live.trait.revenant'));
+      if (f.questBehaviour || f._pupQuest) mods.push(T('live.trait.quest'));
+      if (f.yielded) mods.push(T('live.trait.surrendered'));
+      for (const word of read(() => tools.traits?.(e), [])) if (typeof word === 'string' && !mods.includes(word)) mods.push(word);
+      const key = JSON.stringify([type, name, mods]), level = finite(e.level) ? e.level : null;
+      let row = groups.get(key);
+      if (!row) { row = { key, type, name: String(name), count: 0, elite, mods, minLevel: level, maxLevel: level, health: 0, maxHealth: 0, healthKnown: true };groups.set(key, row); }
+      row.count++;
+      if (level != null) { row.minLevel = row.minLevel == null ? level : Math.min(row.minLevel, level);row.maxLevel = row.maxLevel == null ? level : Math.max(row.maxLevel, level); }
+      if (finite(e.health) && finite(e.maxHealth)) { row.health += Math.max(0, e.health);row.maxHealth += Math.max(0, e.maxHealth); } else row.healthKnown = false;
+    });
+    return { ...counts, rows: [...groups.values()].sort((a, b) => Number(b.elite) - Number(a.elite) || names.compare(a.name, b.name) || names.compare(a.key, b.key)) };
+  }
+  function players(session, mapId, online) {
+    if (!online) return { count: 1, complete: true, connected: false, note: T('live.players.solo') };
+    const room = session?.room, found = /^dungeon:m(\d+)(?:[.:]|$)/.exec(room || '');
+    if (session?.status !== 'open' || !found || Number(found[1]) !== Number(mapId)) return { count: null, complete: false, connected: false, note: T('live.players.connecting') };
+    const members = session._rooms?.get?.(room), others = members?.size ?? session.peers?.size;
+    if (!Number.isSafeInteger(others)) return { count: null, complete: false, connected: true, note: T('live.players.pending') };
+    const total = Number.isSafeInteger(session.roomCount) ? session.roomCount : others + (session.hidden ? 0 : 1);
+    const uncertain = [...values(session.peers)].some(p => p?.unconfirmed?.[room]);
+    const complete = !uncertain && (Number.isSafeInteger(session.roomCount) || others < 64);
+    return { count: total, complete, connected: true, note: complete ? T('live.players.room') : T('live.players.partial') };
+  }
+  function quests(bridge, loc, foes, ctx=null, stands=[]) {
+    const machine = bridge?.machine, mapId = loc?.mapTableData?.mapId;
+    if (!machine?.quests || !Number.isSafeInteger(mapId)) return [];
+    const active = read(() => bridge.questLog?.({ windows: false }), null);
+    const rows = active ? new Map([...(active.active || []), ...(active.unlogged || [])].map(q=>[String(q.id),q])) : null;
+    const activeIds = rows ? new Set(rows.keys()) : null;
+    const bound = new Set(), bind=b=>{const uid=b?.questUID||b?.targetQuest?.uid||b?.targetResource?.parentQuest?.uid;if(uid!=null)bound.add(String(uid));};
+    for(const f of foes||[]){
+      if(!f||f._gone||f._absentHere||f.removed)continue;
+      bind(read(()=>ctx?.questFoeBehaviour?.(f),f?.questBehaviour));
+      for(const item of f?.entity?.items||[])if(item?.questUID!=null&&item.questSymbol)bound.add(String(item.questUID));
+    }
+    for(const p of ctx?.people||[])bind(p?.questBehaviour);
+    for(const s of stands||[])if(s?.active&&!s.dead)bind(s.behaviour);
+    return values(machine.quests).filter(q => !q.questComplete && !q.questTombstoned && q.shelvedAt==null && (!activeIds || activeIds.has(String(q.uid)))
+      && (bound.has(String(q.uid)) || values(q.resources).some(r => r?.siteDetails?.siteType === 2 && r.siteDetails.mapId === mapId)))
+      .map(q => ({ uid: String(q.uid), name: String(q.displayName || q.questName || T('live.quest')), objectives: rows?.get(String(q.uid))?.ql?.objectives?.filter(o => o.state === 'open').map(o => o.text) || [] }));
+  }
+  function regen(native) {
+    if (!finite(native?.now) || !finite(native?.interval)) return { minutes: null, intervalMinutes: null, count: 0, state: 'offline' };
+    const stamps = (native.stamps || []).filter(finite), next = stamps.length ? Math.min(...stamps) + native.interval : null;
+    return { minutes: next == null ? null : Math.max(0, Math.ceil((next - native.now) / 60000)), intervalMinutes: Math.round(native.interval / 60000), count: stamps.length, state: next == null ? 'idle' : next <= native.now ? 'due' : 'waiting' };
+  }
+  function aurum(coffer, tools, loc, online) {
+    if (!online) return { state: 'offline', amount: null };
+    if (typeof tools.aurumKey !== 'function') return { state: 'unknown', amount: null };
+    if (!read(() => tools.aurumKey?.(loc))) return { state: 'absent', amount: null };
+    const amount = read(() => tools.aurumAmount?.(coffer?.id || tools.aurumKey(loc)));
+    if (!coffer) return { state: 'unknown', amount: finite(amount) ? amount : null };
+    return { state: coffer.open ? 'taken' : 'unconfirmed', amount: finite(amount) ? amount : null };
+  }
+  function snapshot(live, world, tools = {}, heading = null) {
+    if (!live?.location || !Array.isArray(live.foes)) return null;
+    const online = read(() => tools.online?.(), false), enemy = enemies(live.foes, tools);
+    return { title: heading?.title || live.location.name || T('live.dungeon'), subtitle: heading?.subtitle || '', rating: heading?.rating || '', forecast: heading?.model || null,
+      enemies: enemy, players: players(read(() => world.presence?.()), live.location.mapTableData?.mapId, online),
+      quests: quests(live.questBridge, live.location, live.foes,live.ctx,read(()=>world.modes?.()?.dfoDungeonQuestSources?.stands,[])), regen: regen(read(() => live.regen())), aurum: aurum(live.aurum, tools, live.location, online),
+      synced: !enemy.syncing, online };
+  }
+  // The always-visible HUD reads counts only: no quest scan, forecast, names,
+  // modifiers, regeneration timers or chest state while the big window is closed.
+  function counters(live, world, tools = {}) {
+    if (!live?.location) return null;
+    return { enemies: enemyCounts(live.foes), players: players(read(() => world.presence?.()), live.location.mapTableData?.mapId, read(() => tools.online?.(), false)) };
+  }
+  const api = { alive, enemies, players, quests, regen, aurum, snapshot, counters };
+  if (typeof module === 'object' && module.exports) module.exports = api; else root.__dfoDungeonLiveModel = api;
+})(globalThis);
